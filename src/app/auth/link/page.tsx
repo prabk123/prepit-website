@@ -6,7 +6,9 @@ export default function EmailLink() {
   const [currentUrl, setCurrentUrl] = useState("");
 
   useEffect(() => {
-    setCurrentUrl(window.location.href);
+    setCurrentUrl(
+      `prepit://email-signin?link=${encodeURIComponent(window.location.href)}`
+    );
   }, []);
 
   return (
