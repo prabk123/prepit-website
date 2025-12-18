@@ -228,7 +228,7 @@ export default function RootLayout({
                       Download the PrepIt app today
                     </h2>
                   </div>
-                  <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+                  <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center">
                     {/* iOS Download Button */}
                     <a
                       href="#"
