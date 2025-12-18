@@ -3,13 +3,34 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* PrepIt Design System Colors */
+  --lime-30: #e9f8b2;
+  --grey-5: #f4f4f5;
+  --grey-10: #e9e9ea;
+  --grey-40: #a6a6ac;
+  --grey-60: #7a7a82;
+  --grey-80: #4d4d59;
+  --coral-100: #ff644f;
+  --black-100: #000000;
+  --white-100: #ffffff;
+
+  /* Gradient colors for AI badge */
+  --gradient-blue: #809ff9;
+  --gradient-purple: #d093d9;
+  --gradient-orange: #f38c61;
+  --gradient-yellow: #f5cc77;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-brand);
+  --font-sans: var(--font-dm-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Font family utilities */
+  --font-family-dm-sans: var(--font-dm-sans);
+  --font-family-brand: var(--font-brand);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -19,8 +40,27 @@
   }
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-brand), Arial, Helvetica, sans-serif;
+  font-family: var(--font-dm-sans), Arial, Helvetica, sans-serif;
+}
+
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-fade-in-left {
+  animation: fadeInLeft 0.8s ease-out forwards;
 }
