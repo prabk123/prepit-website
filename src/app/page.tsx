@@ -100,7 +100,7 @@ export default function Home() {
           </h2>
 
           {/* First 6 Features - 3 column grid */}
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+          <div className="grid grid-cols-1 gap-x-6 gap-y-24 sm:grid-cols-2 lg:grid-cols-3 lg:gap-x-8 lg:gap-y-24">
             {/* Feature 1: Meal Plan */}
             <div className="flex flex-col items-center text-center">
               <div className="mb-6 w-full">
@@ -217,7 +217,7 @@ export default function Home() {
           </div>
 
           {/* Last 2 Features - 2 column grid with even spacing */}
-          <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:mt-8 lg:gap-8">
+          <div className="mt-24 mb-24 grid grid-cols-1 gap-x-6 gap-y-24 sm:grid-cols-2 lg:gap-x-8 lg:gap-y-24">
             {/* Feature 7: Discover Recipes */}
             <div className="flex flex-col items-center text-center">
               <div className="mb-6 w-full">
