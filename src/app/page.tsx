@@ -1,4 +1,32 @@
+import type { Metadata } from "next";
 import Image from "next/image";
+
+export const metadata: Metadata = {
+  title: "PrepIt - AI-Powered Meal Planning & Nutrition Tracking",
+  description:
+    "Plan smarter, eat better, stress less. Get personalized AI-powered meal plans, track nutrition, scan meals with your camera, and discover thousands of recipes tailored to your goals and lifestyle.",
+  openGraph: {
+    title: "PrepIt - AI-Powered Meal Planning & Nutrition Tracking",
+    description:
+      "Plan smarter, eat better, stress less. Get personalized AI-powered meal plans, track nutrition, and discover thousands of recipes.",
+    url: "/",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "PrepIt App - Meal Planning and Nutrition Tracking",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "PrepIt - AI-Powered Meal Planning & Nutrition Tracking",
+    description:
+      "Plan smarter, eat better, stress less. Get personalized AI-powered meal plans, track nutrition, and discover thousands of recipes.",
+    images: ["/og-image.png"],
+  },
+};
 
 export default function Home() {
   return (
