@@ -3,6 +3,7 @@
 import { Geist, Geist_Mono, DM_Sans } from "next/font/google";
 import localFont from "next/font/local";
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 import "./globals.css";
 
@@ -52,7 +53,7 @@ export default function RootLayout({
           <nav className="fixed left-0 right-0 top-0 z-50 bg-white lg:px-14">
             <div className="mx-auto flex w-full max-w-[1200px] items-center justify-between px-4 py-4 lg:px-0">
               {/* Logo */}
-              <div className="flex items-center gap-2.5">
+              <Link href="/" className="flex items-center gap-2.5">
                 <div className="relative h-10 w-10">
                   <Image
                     src="/logo.png"
@@ -67,22 +68,22 @@ export default function RootLayout({
                 >
                   PrepIt
                 </span>
-              </div>
+              </Link>
 
               {/* Desktop Navigation */}
               <div className="hidden items-center gap-10 lg:flex">
-                <a
-                  href="#features"
+                <Link
+                  href="/#features"
                   className="text-base font-bold leading-6 hover:opacity-70"
                 >
                   Features
-                </a>
-                <a
-                  href="#contact"
+                </Link>
+                <Link
+                  href="/contact"
                   className="text-base font-bold leading-6 hover:opacity-70"
                 >
                   Contact
-                </a>
+                </Link>
                 <button className="rounded-xl bg-black px-4 py-3 text-sm font-bold leading-[21px] text-white transition-opacity hover:opacity-80">
                   Get the app
                 </button>
@@ -137,7 +138,7 @@ export default function RootLayout({
               <div className="flex h-full flex-col gap-6">
                 {/* Menu Header */}
                 <div className="flex items-center justify-between py-4">
-                  <div className="flex items-center gap-2.5">
+                  <Link href="/" className="flex items-center gap-2.5">
                     <div className="relative h-10 w-10">
                       <Image
                         src="/logo.png"
@@ -152,7 +153,7 @@ export default function RootLayout({
                     >
                       PrepIt
                     </span>
-                  </div>
+                  </Link>
                   <button
                     onClick={() => setMobileMenuOpen(false)}
                     className="flex h-6 w-6 items-center justify-center"
@@ -180,20 +181,20 @@ export default function RootLayout({
                     Get the app
                   </button>
                   <div className="flex flex-col gap-4">
-                    <a
-                      href="#features"
+                    <Link
+                      href="/#features"
                       className="text-base font-bold"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       Features
-                    </a>
-                    <a
-                      href="#contact"
+                    </Link>
+                    <Link
+                      href="/contact"
                       className="text-base font-bold"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       Contact
-                    </a>
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -282,7 +283,7 @@ export default function RootLayout({
               <div className="mb-8 flex flex-col gap-6 lg:mb-10 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex flex-col gap-4">
                   {/* Logo */}
-                  <div className="flex items-center gap-2">
+                  <Link href="/" className="flex items-center gap-2">
                     <div className="relative h-8 w-8">
                       <Image
                         src="/logo.png"
@@ -297,7 +298,7 @@ export default function RootLayout({
                     >
                       PrepIt
                     </span>
-                  </div>
+                  </Link>
                   <p className="text-sm font-medium text-[var(--grey-60)]">
                     Made with ❤️ and late nights
                   </p>
@@ -315,12 +316,15 @@ export default function RootLayout({
                     Explore
                   </h3>
                   <div className="flex flex-col gap-4">
-                    <a href="#" className="text-base hover:opacity-70">
+                    <Link href="/" className="text-base hover:opacity-70">
                       Home
-                    </a>
-                    <a href="#features" className="text-base hover:opacity-70">
+                    </Link>
+                    <Link
+                      href="/#features"
+                      className="text-base hover:opacity-70"
+                    >
                       Features
-                    </a>
+                    </Link>
                     <a href="#" className="text-base hover:opacity-70">
                       Download App
                     </a>
@@ -342,13 +346,12 @@ export default function RootLayout({
                     <a href="#" className="text-base hover:opacity-70">
                       Privacy
                     </a>
-                    <a
-                      id="contact"
-                      href="#"
+                    <Link
+                      href="/contact"
                       className="text-base hover:opacity-70"
                     >
                       Contact
-                    </a>
+                    </Link>
                   </div>
                 </div>
               </div>
