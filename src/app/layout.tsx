@@ -1,6 +1,8 @@
 "use client";
 
 import { Geist, Geist_Mono, DM_Sans } from "next/font/google";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/next";
 import localFont from "next/font/local";
 import Image from "next/image";
 import Link from "next/link";
@@ -202,7 +204,10 @@ export default function RootLayout({
           )}
 
           {/* Main Content */}
-          <main className="w-full">{children}</main>
+          <main className="w-full">
+            {children}
+            <SpeedInsights />
+          </main>
 
           {/* Download CTA Section */}
           <section className="flex w-full flex-col items-center bg-white px-4 lg:px-20">
@@ -398,6 +403,8 @@ export default function RootLayout({
             </div>
           </footer>
         </div>
+        <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   );
