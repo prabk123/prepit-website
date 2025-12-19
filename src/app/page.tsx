@@ -4,7 +4,7 @@ export default function Home() {
   return (
     <>
       {/* Hero Section */}
-      <section className="mt-20 flex w-full flex-col items-center bg-white px-4 py-10 lg:mt-24 lg:px-20 lg:py-20">
+      <section className="mt-16 flex w-full flex-col items-center bg-white px-4 py-10 lg:mt-16 lg:px-14 lg:py-20">
         <div className="flex w-full max-w-[1200px] flex-col items-center gap-10 lg:flex-row lg:gap-14">
           {/* Left Content */}
           <div className="flex flex-1 flex-col gap-10">
@@ -43,7 +43,7 @@ export default function Home() {
             </p>
 
             {/* App Store Buttons */}
-            <div className="flex flex-col justify-start items-start gap-4 sm:flex-row sm:items-start">
+            <div className="flex flex-row justify-start items-start gap-4">
               <a
                 href="#"
                 className="transition-opacity hover:opacity-80"
