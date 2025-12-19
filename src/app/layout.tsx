@@ -205,7 +205,13 @@ export default function RootLayout({
 
           {/* Download CTA Section */}
           <section className="flex w-full flex-col items-center bg-white px-4 lg:px-20">
-            <div className="w-full max-w-[1200px] overflow-hidden rounded-[32px] bg-black">
+            <div
+              className="w-full max-w-[1200px] overflow-hidden rounded-[32px] bg-black pt-8"
+              style={{
+                background:
+                  "radial-gradient(75.04% 99.21% at 50% -39.86%, rgba(255, 255, 255, 0.70) 27.78%, rgba(0, 0, 0, 0.00) 100%), var(--Black-100, #000)",
+              }}
+            >
               <div className="flex flex-col items-center gap-8 lg:flex-row lg:gap-x-16">
                 {/* Left Content */}
                 <div className="flex flex-1 flex-col gap-10 p-8 lg:p-16">
@@ -261,7 +267,7 @@ export default function RootLayout({
                       src="/banner.png"
                       alt="PrepIt App Preview"
                       fill
-                      className="object-cover pt-6"
+                      className="object-cover"
                     />
                   </div>
                 </div>
