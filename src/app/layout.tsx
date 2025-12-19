@@ -309,7 +309,7 @@ export default function RootLayout({
               </div>
 
               {/* Footer Links */}
-              <div className="mb-8 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:mb-10 lg:grid-cols-2 lg:gap-6">
+              <div className="mb-8 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:mb-10 lg:grid-cols-3 lg:gap-6">
                 {/* Explore Column */}
                 <div className="flex flex-col gap-4">
                   <h3 className="text-base font-bold text-[var(--grey-40)]">
@@ -328,9 +328,6 @@ export default function RootLayout({
                     <a href="#" className="text-base hover:opacity-70">
                       Download App
                     </a>
-                    <a href="#" className="text-base hover:opacity-70">
-                      Feedback
-                    </a>
                   </div>
                 </div>
 
@@ -340,17 +337,53 @@ export default function RootLayout({
                     Support
                   </h3>
                   <div className="flex flex-col gap-4">
-                    <a href="#" className="text-base hover:opacity-70">
-                      Terms
-                    </a>
-                    <a href="#" className="text-base hover:opacity-70">
-                      Privacy
-                    </a>
                     <Link
                       href="/contact"
                       className="text-base hover:opacity-70"
                     >
                       Contact
+                    </Link>
+                    <a href="#" className="text-base hover:opacity-70">
+                      Feedback
+                    </a>
+                  </div>
+                </div>
+
+                {/* Legal Column */}
+                <div className="flex flex-col gap-4">
+                  <h3 className="text-base font-bold text-[var(--grey-40)]">
+                    Legal
+                  </h3>
+                  <div className="flex flex-col gap-4">
+                    <Link
+                      href="/terms-and-conditions"
+                      className="text-base hover:opacity-70"
+                    >
+                      Terms & Conditions
+                    </Link>
+                    <Link
+                      href="/privacy-policy"
+                      className="text-base hover:opacity-70"
+                    >
+                      Privacy Policy
+                    </Link>
+                    <Link
+                      href="/cookie-policy"
+                      className="text-base hover:opacity-70"
+                    >
+                      Cookie Policy
+                    </Link>
+                    <Link
+                      href="/refund-policy"
+                      className="text-base hover:opacity-70"
+                    >
+                      Refund Policy
+                    </Link>
+                    <Link
+                      href="/subscription-policy"
+                      className="text-base hover:opacity-70"
+                    >
+                      Subscription Policy
                     </Link>
                   </div>
                 </div>

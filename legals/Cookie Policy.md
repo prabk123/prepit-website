@@ -1,0 +1,59 @@
+# **COOKIE & TRACKING**
+
+**Last Updated:** December 17, 2025
+
+This Policy explains how **PrepIt** ("we," "us," or "our") uses cookies and similar tracking technologies (such as pixels, SDKs, and local storage) when you visit our website or use our mobile application.
+
+### **1\. WHAT ARE COOKIES AND TRACKERS?**
+
+* **Cookies:** Small text files stored in your browser when you visit a website.  
+* **Mobile Identifiers/SDKs:** Code blocks within the PrepIt app that act like cookies to help us recognize your device and remember your meal preferences.  
+* **Local Storage:** Data stored within your app or browser to keep you logged in and save your "offline" grocery lists.
+
+### **2\. WHY WE USE THEM**
+
+We use these technologies for three main reasons:
+
+1. **To Make the App Work:** Keeping you logged in and remembering your dietary profile.  
+2. **To Process Payments:** Ensuring your web-checkout session (via Stripe/Apple Pay) is secure and attributed to your account.  
+3. **To Improve our AI:** Understanding which recipes are popular so we can refine our AI meal suggestions.
+
+### **3\. CATEGORIES OF COOKIES WE USE**
+
+| Category | Purpose | Necessity |
+| :---- | :---- | :---- |
+| **Strictly Necessary** | Used for login, security, and web-checkout. The app cannot function without these. | **Required** |
+| **Functional** | Remembers your settings (e.g., Metric vs. Imperial units) and "Favorite" recipes. | **Optional** |
+| **Performance/Analytics** | Helps us see where users get stuck in the app so we can fix bugs. (e.g., Google Analytics). | **Optional** |
+| **Marketing** | Used to show you relevant PrepIt promotions or track the success of our ads. | **Optional** |
+
+### **4\. THIRD-PARTY TRACKERS**
+
+We work with trusted partners to provide our service. These include:
+
+* **Payment Processors (Stripe/Apple/Google):** Use cookies to prevent fraud during checkout.  
+* **AI Services (OpenAI/Google Cloud):** We use session tokens to manage your AI recipe requests.  
+* **Analytics (Google Analytics/Mixpanel):** Helps us track app performance.
+
+### **5\. YOUR CHOICES (OPTING OUT)**
+
+You have the right to decide whether to accept or reject optional cookies.
+
+* **In the App:** You can manage tracking permissions via your device settings (iOS: "Allow Apps to Request to Track"; Android: "Delete Advertising ID").  
+* **On the Web:** You can set your browser to refuse cookies. However, our web checkout may not function correctly if "Strictly Necessary" cookies are blocked.  
+* **Global Privacy Control (GPC):** Our website honors "Do Not Track" signals and GPC headers from your browser.
+
+### **6\. REGIONAL DISCLOSURES**
+
+* **EU/UK Users:** We will not fire any non-essential cookies until you click "Accept" on our cookie banner.  
+* **California Users:** We do not "sell" your cookie data. We only "share" it with service providers for the purpose of improving PrepIt.
+
+### **7\. CHANGES TO THIS POLICY**
+
+We may update this list as we add new features (like social sharing). Check back periodically for updates.
+
+### **CONTACT US**
+
+Questions about our use of cookies? Email us at **support@tryprepit.app**.
+
+### 
