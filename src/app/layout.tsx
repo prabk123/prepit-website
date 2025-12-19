@@ -356,7 +356,7 @@ export default function RootLayout({
               {/* Copyright */}
               <div className="border-t border-[#D3D3D5] pt-8">
                 <p className="text-base text-[var(--grey-60)]">
-                  © 2025 PrepIt App. All Rights Reserved
+                  © {new Date().getFullYear()} PrepIt App. All Rights Reserved
                 </p>
               </div>
             </div>
