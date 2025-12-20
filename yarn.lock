@@ -800,6 +800,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@notionhq/client@npm:^5.6.0":
+  version: 5.6.0
+  resolution: "@notionhq/client@npm:5.6.0"
+  checksum: 10c0/38562ae0ffa6da8a3faebd858f2003ec07826d28cdbd0a93e4ac5f1175be535cfa2c7e27d9a1f107a29202792f6a20a6c1de8aef53242fdd02596a7f2db8a4bf
+  languageName: node
+  linkType: hard
+
 "@rtsao/scc@npm:^1.1.0":
   version: 1.1.0
   resolution: "@rtsao/scc@npm:1.1.0"
@@ -2990,6 +2997,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"html-url-attributes@npm:^3.0.0":
+  version: 3.0.1
+  resolution: "html-url-attributes@npm:3.0.1"
+  checksum: 10c0/496e4908aa8b77665f348b4b03521901794f648b8ac34a581022cd6f2c97934d5c910cd91bc6593bbf2994687549037bc2520fcdc769b31484f29ffdd402acd0
+  languageName: node
+  linkType: hard
+
 "ignore@npm:^5.2.0":
   version: 5.3.2
   resolution: "ignore@npm:5.3.2"
@@ -4726,6 +4740,7 @@ __metadata:
   resolution: "prepit-website@workspace:."
   dependencies:
     "@eslint/eslintrc": "npm:^3"
+    "@notionhq/client": "npm:^5.6.0"
     "@tailwindcss/postcss": "npm:^4"
     "@types/node": "npm:^20"
     "@types/react": "npm:^19"
@@ -4738,6 +4753,7 @@ __metadata:
     next-mdx-remote: "npm:^5.0.0"
     react: "npm:19.1.0"
     react-dom: "npm:19.1.0"
+    react-markdown: "npm:^10.1.0"
     remark-gfm: "npm:^4.0.1"
     tailwindcss: "npm:^4"
     typescript: "npm:^5"
@@ -4791,6 +4807,28 @@ __metadata:
   version: 16.13.1
   resolution: "react-is@npm:16.13.1"
   checksum: 10c0/33977da7a5f1a287936a0c85639fec6ca74f4f15ef1e59a6bc20338fc73dc69555381e211f7a3529b8150a1f71e4225525b41b60b52965bda53ce7d47377ada1
+  languageName: node
+  linkType: hard
+
+"react-markdown@npm:^10.1.0":
+  version: 10.1.0
+  resolution: "react-markdown@npm:10.1.0"
+  dependencies:
+    "@types/hast": "npm:^3.0.0"
+    "@types/mdast": "npm:^4.0.0"
+    devlop: "npm:^1.0.0"
+    hast-util-to-jsx-runtime: "npm:^2.0.0"
+    html-url-attributes: "npm:^3.0.0"
+    mdast-util-to-hast: "npm:^13.0.0"
+    remark-parse: "npm:^11.0.0"
+    remark-rehype: "npm:^11.0.0"
+    unified: "npm:^11.0.0"
+    unist-util-visit: "npm:^5.0.0"
+    vfile: "npm:^6.0.0"
+  peerDependencies:
+    "@types/react": ">=18"
+    react: ">=18"
+  checksum: 10c0/4a5dc7d15ca6d05e9ee95318c1904f83b111a76f7588c44f50f1d54d4c97193b84e4f64c4b592057c989228238a2590306cedd0c4d398e75da49262b2b5ae1bf
   languageName: node
   linkType: hard
 

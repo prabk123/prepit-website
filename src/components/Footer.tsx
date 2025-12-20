@@ -48,6 +48,9 @@ export default function Footer() {
               <Link href="/#features" className="text-base hover:opacity-70">
                 Features
               </Link>
+              <Link href="/blog" className="text-base hover:opacity-70">
+                Blog
+              </Link>
               <a href="#" className="text-base hover:opacity-70">
                 Download App
               </a>

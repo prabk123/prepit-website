@@ -185,3 +185,80 @@ body {
 .legal-content table tbody tr:last-child td {
   border-bottom: none;
 }
+
+/* Blog content styling - extends legal-content patterns */
+.blog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  color: var(--black-100);
+}
+
+.blog-content h1,
+.blog-content h2,
+.blog-content h3,
+.blog-content h4 {
+  margin-top: 0;
+}
+
+.blog-content p {
+  margin-bottom: 0;
+}
+
+.blog-content a {
+  color: var(--black-100);
+  text-decoration: underline;
+  transition: opacity 0.2s;
+}
+
+.blog-content a:hover {
+  opacity: 0.7;
+}
+
+.blog-content ul,
+.blog-content ol {
+  margin-bottom: 0;
+}
+
+.blog-content li {
+  display: list-item;
+}
+
+.blog-content code {
+  font-family: var(--font-geist-mono), monospace;
+}
+
+.blog-content pre {
+  margin-bottom: 0;
+  overflow-x: auto;
+}
+
+.blog-content pre code {
+  display: block;
+  padding: 0;
+  background: transparent;
+}
+
+.blog-content blockquote {
+  margin-left: 0;
+  margin-bottom: 0;
+}
+
+.blog-content img {
+  display: block;
+  margin-bottom: 0;
+}
+
+.blog-content table {
+  margin-bottom: 0;
+}
+
+/* Blog card hover effects */
+.blog-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.blog-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+}

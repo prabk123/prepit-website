@@ -39,6 +39,12 @@ export default function NavigationWrapper() {
               Features
             </Link>
             <Link
+              href="/blog"
+              className="text-base font-bold leading-6 hover:opacity-70"
+            >
+              Blog
+            </Link>
+            <Link
               href="/contact"
               className="text-base font-bold leading-6 hover:opacity-70"
             >
@@ -147,6 +153,13 @@ export default function NavigationWrapper() {
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Features
+                </Link>
+                <Link
+                  href="/blog"
+                  className="text-base font-bold"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Blog
                 </Link>
                 <Link
                   href="/contact"
