@@ -1,12 +1,17 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 
 export default function ContactForm() {
+  const searchParams = useSearchParams();
+  const isFeedback = searchParams?.get("type") === "feedback";
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     message: "",
+    type: isFeedback ? "feedback" : "contact",
   });
   const [errors, setErrors] = useState({
     email: "",
@@ -18,6 +23,13 @@ export default function ContactForm() {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
+
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      type: isFeedback ? "feedback" : "contact",
+    }));
+  }, [isFeedback]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -54,7 +66,12 @@ export default function ContactForm() {
 
       if (response.ok) {
         setShowSuccess(true);
-        setFormData({ name: "", email: "", message: "" });
+        setFormData({
+          name: "",
+          email: "",
+          message: "",
+          type: isFeedback ? "feedback" : "contact",
+        });
         // Hide success message after 5 seconds
         setTimeout(() => setShowSuccess(false), 5000);
       } else {
@@ -76,7 +93,7 @@ export default function ContactForm() {
           className="text-[40px] font-semibold leading-normal text-black"
           style={{ fontFamily: "var(--font-brand)" }}
         >
-          Contact us
+          {isFeedback ? "Share your feedback" : "Contact us"}
         </h1>
 
         {/* Form Container */}
@@ -136,14 +153,18 @@ export default function ContactForm() {
                 htmlFor="message"
                 className="text-base font-bold leading-6 text-black"
               >
-                Message
+                {isFeedback ? "Feedback" : "Message"}
               </label>
               <textarea
                 id="message"
                 name="message"
                 value={formData.message}
                 onChange={handleChange}
-                placeholder="Your message"
+                placeholder={
+                  isFeedback
+                    ? "Share your thoughts, suggestions, or ideas..."
+                    : "Your message"
+                }
                 required
                 rows={6}
                 className="rounded-xl bg-white px-3 py-3 text-base leading-6 text-black placeholder-[#a6a6ac] focus:outline-none focus:ring-2 focus:ring-black"
@@ -182,7 +203,9 @@ export default function ContactForm() {
                     </svg>
                   </div>
                   <p className="text-sm font-medium leading-[21px] text-[#007d23]">
-                    Thank you! Your message has been sent.
+                    {isFeedback
+                      ? "Thank you! Your feedback has been received."
+                      : "Thank you! Your message has been sent."}
                   </p>
                 </div>
               )}

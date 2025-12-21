@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
-    const { name, email, message } = await request.json();
+    const { name, email, message, type = "contact" } = await request.json();
 
     // Validate required fields
     if (!name || !email || !message) {
@@ -33,13 +33,16 @@ export async function POST(request: NextRequest) {
     }
 
     // Format message for Slack
+    const isFeedback = type === "feedback";
     const slackMessage = {
       blocks: [
         {
           type: "header",
           text: {
             type: "plain_text",
-            text: "🍃 New Contact Form Submission",
+            text: isFeedback
+              ? "💬 New Feedback Submission"
+              : "🍃 New Contact Form Submission",
             emoji: true,
           },
         },

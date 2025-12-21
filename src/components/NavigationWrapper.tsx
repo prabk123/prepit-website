@@ -44,6 +44,14 @@ export default function NavigationWrapper() {
             >
               Contact
             </Link>
+            <a
+              href="https://prepit.userjot.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-base font-bold leading-6 hover:opacity-70"
+            >
+              Feedback
+            </a>
             <button className="rounded-xl bg-black px-4 py-3 text-sm font-bold leading-[21px] text-white transition-opacity hover:opacity-80">
               Get the app
             </button>
@@ -92,74 +100,54 @@ export default function NavigationWrapper() {
         </div>
       </nav>
 
-      {/* Mobile Menu Overlay */}
-      {mobileMenuOpen && (
-        <div className="fixed inset-0 z-40 bg-white p-4 lg:hidden">
-          <div className="flex h-full flex-col gap-6">
-            {/* Menu Header */}
-            <div className="flex items-center justify-between py-4">
-              <Link href="/" className="flex items-center gap-2.5">
-                <div className="relative h-10 w-10">
-                  <Image
-                    src="/logo.png"
-                    alt="PrepIt Mark"
-                    fill
-                    className="object-contain"
-                  />
-                </div>
-                <span
-                  className="text-2xl font-semibold"
-                  style={{ fontFamily: "var(--font-brand)" }}
-                >
-                  PrepIt
-                </span>
-              </Link>
-              <button
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex h-6 w-6 items-center justify-center"
-              >
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 14 14"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M1 1L13 13M1 13L13 1"
-                    stroke="#A6A6AC"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </button>
-            </div>
+      {/* Mobile Menu Backdrop */}
+      <div
+        className={`fixed inset-0 z-40 bg-black/20 transition-opacity duration-300 ease-in-out lg:hidden ${
+          mobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
+        onClick={() => setMobileMenuOpen(false)}
+      />
 
-            {/* Menu Content */}
-            <div className="flex flex-col gap-6">
-              <button className="rounded-xl bg-black px-4 py-3 text-sm font-bold text-white">
-                Get the app
-              </button>
-              <div className="flex flex-col gap-4">
-                <Link
-                  href="/#features"
-                  className="text-base font-bold"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Features
-                </Link>
-                <Link
-                  href="/contact"
-                  className="text-base font-bold"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Contact
-                </Link>
-              </div>
-            </div>
+      {/* Mobile Menu Drawer */}
+      <div
+        className={`fixed left-0 right-0 top-[72px] z-40 bg-white shadow-lg transition-all duration-300 ease-in-out lg:hidden ${
+          mobileMenuOpen
+            ? "translate-y-0 opacity-100"
+            : "-translate-y-full opacity-0 pointer-events-none"
+        }`}
+      >
+        <div className="flex flex-col gap-6 p-4 pb-6">
+          {/* Menu Content */}
+          <button className="rounded-xl bg-black px-4 py-3 text-sm font-bold text-white">
+            Get the app
+          </button>
+          <div className="flex flex-col gap-4">
+            <Link
+              href="/#features"
+              className="text-base font-bold"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Features
+            </Link>
+            <Link
+              href="/contact"
+              className="text-base font-bold"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Contact
+            </Link>
+            <a
+              href="https://prepit.userjot.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-base font-bold"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Feedback
+            </a>
           </div>
         </div>
-      )}
+      </div>
     </>
   );
 }
