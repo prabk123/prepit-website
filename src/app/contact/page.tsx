@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import ContactForm from "@/components/ContactForm";
 
 export const metadata: Metadata = {
@@ -20,5 +21,13 @@ export const metadata: Metadata = {
 };
 
 export default function ContactPage() {
-  return <ContactForm />;
+  return (
+    <Suspense
+      fallback={
+        <div className="mt-16 flex w-full justify-center p-10">Loading...</div>
+      }
+    >
+      <ContactForm />
+    </Suspense>
+  );
 }
