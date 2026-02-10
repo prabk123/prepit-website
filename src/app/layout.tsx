@@ -31,8 +31,8 @@ const brandFont = localFont({
   display: "swap",
 });
 
-// Base URL - Update this with your actual production URL
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://prepit.app";
+// Base URL - production URL
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.tryprepit.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
@@ -85,6 +85,9 @@ export const metadata: Metadata = {
     description:
       "Plan smarter, eat better, stress less. Personalized meal plans powered by AI.",
     images: ["/og-image.png"],
+  },
+  alternates: {
+    canonical: baseUrl,
   },
   robots: {
     index: true,

@@ -6,11 +6,14 @@ export const metadata: Metadata = {
   title: "Contact Us",
   description:
     "Get in touch with PrepIt. We're here to help with your questions about meal planning, nutrition tracking, and our AI-powered app features.",
+  alternates: {
+    canonical: "https://www.tryprepit.app/contact",
+  },
   openGraph: {
     title: "Contact Us | PrepIt",
     description:
       "Get in touch with PrepIt. We're here to help with your questions about meal planning and nutrition tracking.",
-    url: "/contact",
+    url: "https://www.tryprepit.app/contact",
   },
   twitter: {
     card: "summary",

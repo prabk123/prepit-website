@@ -6,6 +6,9 @@ export const metadata: Metadata = {
   title: "Refund Policy",
   description:
     "Learn about PrepIt's refund policy for in-app purchases and subscriptions. Understand your rights and how to request a refund if needed.",
+  alternates: {
+    canonical: "https://www.tryprepit.app/refund-policy",
+  },
   robots: {
     index: true,
     follow: true,

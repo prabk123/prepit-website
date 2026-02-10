@@ -6,6 +6,9 @@ export const metadata: Metadata = {
   title: "Cookie Policy",
   description:
     "Learn about how PrepIt uses cookies and similar technologies to improve your experience. Understand what data we collect and how you can manage your preferences.",
+  alternates: {
+    canonical: "https://www.tryprepit.app/cookie-policy",
+  },
   robots: {
     index: true,
     follow: true,

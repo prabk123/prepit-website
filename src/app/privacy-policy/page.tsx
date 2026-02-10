@@ -6,6 +6,9 @@ export const metadata: Metadata = {
   title: "Privacy Policy",
   description:
     "Learn how PrepIt collects, uses, and protects your personal information. Read our privacy policy to understand your data rights and our commitment to privacy.",
+  alternates: {
+    canonical: "https://www.tryprepit.app/privacy-policy",
+  },
   robots: {
     index: true,
     follow: true,

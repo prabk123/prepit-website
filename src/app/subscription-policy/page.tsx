@@ -6,6 +6,9 @@ export const metadata: Metadata = {
   title: "Subscription Policy",
   description:
     "Learn about PrepIt's subscription plans, billing, renewals, and cancellation. Understand how our subscription service works and manage your account.",
+  alternates: {
+    canonical: "https://www.tryprepit.app/subscription-policy",
+  },
   robots: {
     index: true,
     follow: true,

@@ -5,11 +5,14 @@ export const metadata: Metadata = {
   title: "PrepIt - AI-Powered Meal Planning & Nutrition Tracking",
   description:
     "Plan smarter, eat better, stress less. Get personalized AI-powered meal plans, track nutrition, scan meals with your camera, and discover thousands of recipes tailored to your goals and lifestyle.",
+  alternates: {
+    canonical: "https://www.tryprepit.app",
+  },
   openGraph: {
     title: "PrepIt - AI-Powered Meal Planning & Nutrition Tracking",
     description:
       "Plan smarter, eat better, stress less. Get personalized AI-powered meal plans, track nutrition, and discover thousands of recipes.",
-    url: "/",
+    url: "https://www.tryprepit.app",
     images: [
       {
         url: "/og-image.png",
