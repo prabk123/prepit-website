@@ -35,7 +35,7 @@ export default function DownloadCTA() {
             <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center">
               {/* iOS Download Button */}
               <a
-                href="#"
+                href="https://apps.apple.com/app/prepit-ai-nutritionist/id6751211023"
                 className="flex items-center justify-center gap-2 rounded-2xl bg-white px-4 py-4 transition-opacity hover:opacity-80"
                 aria-label="Download on iOS"
               >

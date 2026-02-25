@@ -52,9 +52,9 @@ export default function NavigationWrapper() {
             >
               Feedback
             </a>
-            <button className="rounded-xl bg-black px-4 py-3 text-sm font-bold leading-[21px] text-white transition-opacity hover:opacity-80">
+            <a href="https://apps.apple.com/app/prepit-ai-nutritionist/id6751211023" className="rounded-xl bg-black px-4 py-3 text-sm font-bold leading-[21px] text-white transition-opacity hover:opacity-80">
               Get the app
-            </button>
+            </a>
           </div>
 
           {/* Mobile Menu Button */}
@@ -118,9 +118,9 @@ export default function NavigationWrapper() {
       >
         <div className="flex flex-col gap-6 p-4 pb-6">
           {/* Menu Content */}
-          <button className="rounded-xl bg-black px-4 py-3 text-sm font-bold text-white">
+          <a href="https://apps.apple.com/app/prepit-ai-nutritionist/id6751211023" className="rounded-xl bg-black px-4 py-3 text-sm font-bold text-white">
             Get the app
-          </button>
+          </a>
           <div className="flex flex-col gap-4">
             <Link
               href="/#features"

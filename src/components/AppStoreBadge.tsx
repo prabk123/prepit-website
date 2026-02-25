@@ -3,7 +3,7 @@ import Image from "next/image";
 export default function AppStoreBadge() {
   return (
     <a
-      href="#"
+      href="https://apps.apple.com/app/prepit-ai-nutritionist/id6751211023"
       className="inline-block h-12 w-36 overflow-hidden rounded-lg bg-black"
     >
       <div className="relative flex h-full w-full items-center px-2.5">

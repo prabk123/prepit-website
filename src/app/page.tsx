@@ -76,7 +76,7 @@ export default function Home() {
             {/* App Store Buttons */}
             <div className="flex flex-row justify-start items-start gap-4">
               <a
-                href="#"
+                href="https://apps.apple.com/app/prepit-ai-nutritionist/id6751211023"
                 className="transition-opacity hover:opacity-80"
                 aria-label="Download on the App Store"
               >

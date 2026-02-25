@@ -29,9 +29,9 @@ export default function Footer() {
               Made with ❤️ and late nights
             </p>
           </div>
-          <button className="self-start rounded-xl bg-black px-4 py-3 text-sm font-bold text-white lg:self-auto">
+          <a href="https://apps.apple.com/app/prepit-ai-nutritionist/id6751211023" className="self-start rounded-xl bg-black px-4 py-3 text-sm font-bold text-white lg:self-auto">
             Get the app
-          </button>
+          </a>
         </div>
 
         {/* Footer Links */}
@@ -48,7 +48,7 @@ export default function Footer() {
               <Link href="/#features" className="text-base hover:opacity-70">
                 Features
               </Link>
-              <a href="#" className="text-base hover:opacity-70">
+              <a href="https://apps.apple.com/app/prepit-ai-nutritionist/id6751211023" className="text-base hover:opacity-70">
                 Download App
               </a>
             </div>
