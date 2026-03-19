@@ -118,6 +118,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <meta
+          name="facebook-domain-verification"
+          content="74mm9j52fbkke3xggwdjd5mutopg9v"
+        />
         {metaPixelId && (
           <>
             <Script id="meta-pixel" strategy="afterInteractive">
