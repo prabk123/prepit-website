@@ -1,7 +1,27 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  serverExternalPackages: ["mongodb"],
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "api.tryprepit.app",
+      },
+      {
+        protocol: "https",
+        hostname: "api.m1a.dev",
+      },
+      {
+        protocol: "https",
+        hostname: "images.m1a.dev",
+      },
+      {
+        protocol: "https",
+        hostname: "**.amazonaws.com",
+      },
+    ],
+  },
   async headers() {
     return [
       {
