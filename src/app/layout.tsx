@@ -32,6 +32,12 @@ const brandFont = localFont({
   display: "swap",
 });
 
+const prepitIcons = localFont({
+  src: "./fonts/PrepItIcons.ttf",
+  variable: "--font-prepit-icons",
+  display: "block",
+});
+
 // Base URL - production URL
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.tryprepit.app";
 
@@ -189,7 +195,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${dmSans.variable} ${brandFont.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${dmSans.variable} ${brandFont.variable} ${prepitIcons.variable} antialiased`}
       >
         <SmartBanner />
         <div className="flex min-h-screen flex-col items-center bg-white">
