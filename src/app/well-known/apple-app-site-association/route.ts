@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 
 /**
  * Apple App Site Association for Universal Links.
+ * Public URL: /.well-known/apple-app-site-association (see next.config rewrites).
+ * Kept under app/well-known (no dot prefix) so Vercel production registers the route.
  *
  * Set in .env / deployment:
  * - APPLE_TEAM_ID — 10-character Team ID (Apple Developer → Membership)
