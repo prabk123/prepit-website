@@ -4,15 +4,15 @@ export default function DownloadCTA() {
   return (
     <section className="flex w-full flex-col items-center bg-white px-4 lg:px-20 pt-16">
       <div
-        className="w-full max-w-[1200px] overflow-hidden rounded-[32px] bg-black pt-8"
+        className="w-full max-w-[1200px] overflow-hidden rounded-[32px] bg-black"
         style={{
           background:
             "radial-gradient(75.04% 99.21% at 50% -39.86%, rgba(255, 255, 255, 0.70) 27.78%, rgba(0, 0, 0, 0.00) 100%), var(--Black-100, #000)",
         }}
       >
-        <div className="flex flex-col items-center gap-8 lg:flex-row lg:gap-x-16">
+        <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:gap-x-10">
           {/* Left Content */}
-          <div className="flex flex-1 flex-col gap-10 p-8 lg:p-16">
+          <div className="flex flex-1 flex-col justify-center gap-10 p-8 lg:max-w-[520px] lg:flex-none lg:p-16">
             <div className="flex flex-col gap-4">
               <p
                 className="bg-clip-text text-[28px] font-semibold leading-normal text-transparent"
@@ -58,14 +58,15 @@ export default function DownloadCTA() {
             </div>
           </div>
 
-          {/* Right Phone Mockup */}
-          <div className="flex flex-1 items-end justify-center h-full">
-            <div className="relative aspect-[320/361] w-full max-w-[280px] lg:max-w-[320px]">
+          {/* Right Phone Mockup — full top visible, light bottom crop */}
+          <div className="flex w-full min-w-0 flex-1 justify-center lg:justify-end lg:pr-6 xl:pr-10">
+            <div className="relative h-[300px] w-full max-w-[360px] overflow-hidden sm:h-[340px] sm:max-w-[420px] lg:h-[460px] lg:max-w-[520px]">
               <Image
                 src="/banner.png"
                 alt="PrepIt App Preview"
                 fill
-                className="object-cover"
+                className="object-cover object-top"
+                sizes="(min-width: 1024px) 520px, (min-width: 640px) 420px, 360px"
               />
             </div>
           </div>
