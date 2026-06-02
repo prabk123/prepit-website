@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { HEADER_SECTION_LINKS } from "@/lib/homeSections";
 
 export default function NavigationWrapper() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -32,12 +33,15 @@ export default function NavigationWrapper() {
 
           {/* Desktop Navigation */}
           <div className="hidden items-center gap-10 lg:flex">
-            <Link
-              href="/#features"
-              className="text-base font-bold leading-6 hover:opacity-70"
-            >
-              Features
-            </Link>
+            {HEADER_SECTION_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="text-base font-bold leading-6 hover:opacity-70"
+              >
+                {link.label}
+              </Link>
+            ))}
             <Link
               href="/contact"
               className="text-base font-bold leading-6 hover:opacity-70"
@@ -57,12 +61,19 @@ export default function NavigationWrapper() {
             </a>
           </div>
 
-          {/* Mobile Menu Button */}
-          <button
-            className="flex h-6 w-6 items-center justify-center lg:hidden"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="Toggle menu"
-          >
+          {/* Mobile: Get the app + menu */}
+          <div className="flex items-center gap-3 lg:hidden">
+            <a
+              href="https://apps.apple.com/app/prepit-ai-nutritionist/id6751211023"
+              className="rounded-xl bg-black px-3 py-2 text-sm font-bold leading-[21px] text-white transition-opacity hover:opacity-80"
+            >
+              Get the app
+            </a>
+            <button
+              className="flex h-6 w-6 items-center justify-center"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle menu"
+            >
             <div className="flex h-3.5 w-3.5 flex-col items-center justify-center">
               {mobileMenuOpen ? (
                 <svg
@@ -96,7 +107,8 @@ export default function NavigationWrapper() {
                 </svg>
               )}
             </div>
-          </button>
+            </button>
+          </div>
         </div>
       </nav>
 
@@ -117,18 +129,17 @@ export default function NavigationWrapper() {
         }`}
       >
         <div className="flex flex-col gap-6 p-4 pb-6">
-          {/* Menu Content */}
-          <a href="https://apps.apple.com/app/prepit-ai-nutritionist/id6751211023" className="rounded-xl bg-black px-4 py-3 text-sm font-bold text-white">
-            Get the app
-          </a>
           <div className="flex flex-col gap-4">
-            <Link
-              href="/#features"
-              className="text-base font-bold"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Features
-            </Link>
+            {HEADER_SECTION_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="text-base font-bold"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {link.label}
+              </Link>
+            ))}
             <Link
               href="/contact"
               className="text-base font-bold"

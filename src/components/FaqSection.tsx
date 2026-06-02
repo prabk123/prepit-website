@@ -75,13 +75,16 @@ function FaqItem({
             {question}
           </span>
           <span
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--grey-5)]"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--grey-5)] transition-colors duration-300"
             aria-hidden
           >
             <PrepItIcon
-              name={isOpen ? "chevronUp" : "chevronDown"}
+              name="chevronDown"
               size={16}
               color="var(--black-100)"
+              className={`transition-transform duration-300 ease-out motion-reduce:transition-none ${
+                isOpen ? "rotate-180" : "rotate-0"
+              }`}
             />
           </span>
         </button>
@@ -90,12 +93,22 @@ function FaqItem({
         id={panelId}
         role="region"
         aria-labelledby={buttonId}
-        hidden={!isOpen}
-        className="pb-5 lg:pb-6"
+        aria-hidden={!isOpen}
+        className={`grid transition-[grid-template-rows] duration-300 ease-in-out motion-reduce:transition-none ${
+          isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+        }`}
       >
-        <p className="pr-12 text-sm leading-relaxed text-[var(--grey-60)] lg:text-base lg:leading-[27px]">
-          {answer}
-        </p>
+        <div className="min-h-0 overflow-hidden">
+          <div
+            className={`pb-5 transition-opacity duration-300 ease-in-out motion-reduce:transition-none lg:pb-6 ${
+              isOpen ? "opacity-100" : "opacity-0"
+            }`}
+          >
+            <p className="pr-12 text-sm leading-relaxed text-[var(--grey-60)] lg:text-base lg:leading-[27px]">
+              {answer}
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

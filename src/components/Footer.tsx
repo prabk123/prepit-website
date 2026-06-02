@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { HOME_SECTION_LINKS } from "@/lib/homeSections";
 
 export default function Footer() {
   return (
@@ -45,10 +46,19 @@ export default function Footer() {
               <Link href="/" className="text-base hover:opacity-70">
                 Home
               </Link>
-              <Link href="/#features" className="text-base hover:opacity-70">
-                Features
-              </Link>
-              <a href="https://apps.apple.com/app/prepit-ai-nutritionist/id6751211023" className="text-base hover:opacity-70">
+              {HOME_SECTION_LINKS.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="text-base hover:opacity-70"
+                >
+                  {link.label}
+                </Link>
+              ))}
+              <a
+                href="https://apps.apple.com/app/prepit-ai-nutritionist/id6751211023"
+                className="text-base hover:opacity-70"
+              >
                 Download App
               </a>
             </div>
@@ -63,7 +73,12 @@ export default function Footer() {
               <Link href="/contact" className="text-base hover:opacity-70">
                 Contact
               </Link>
-              <a href="#" className="text-base hover:opacity-70">
+              <a
+                href="https://prepit.userjot.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-base hover:opacity-70"
+              >
                 Feedback
               </a>
             </div>
