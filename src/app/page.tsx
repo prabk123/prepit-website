@@ -1,6 +1,14 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import LoggingSection from "@/components/LoggingSection";
 import NlLogBottomSheetDemo from "@/components/NlLogBottomSheetDemo";
+import NutritionLoopSection from "@/components/NutritionLoopSection";
+import AiCoachSection from "@/components/AiCoachSection";
+import GoalsSection from "@/components/GoalsSection";
+import FaqSection from "@/components/FaqSection";
+import NutritionSignalsSection from "@/components/NutritionSignalsSection";
+import ObjectionMirrorSection from "@/components/ObjectionMirrorSection";
+import TrustAccuracySection from "@/components/TrustAccuracySection";
 
 export const metadata: Metadata = {
   title: "PrepIt - AI-Powered Meal Planning & Nutrition Tracking",
@@ -124,179 +132,21 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section
-        id="features"
-        className="flex w-full flex-col items-center bg-white px-4 py-16 lg:px-20 lg:py-24"
-      >
-        <div className="w-full max-w-[1200px]">
-          {/* Section Title */}
-          <h2
-            className="mb-12 text-center text-[32px] font-semibold leading-tight lg:mb-16 lg:text-[40px]"
-            style={{ fontFamily: "var(--font-brand)" }}
-          >
-            Powerful features, simple to use
-          </h2>
+      <ObjectionMirrorSection />
 
-          {/* First 6 Features - 3 column grid */}
-          <div className="grid grid-cols-1 gap-x-6 gap-y-24 sm:grid-cols-2 lg:grid-cols-3 lg:gap-x-8 lg:gap-y-24">
-            {/* Feature 1: Meal Plan */}
-            <div className="flex flex-col items-center text-center">
-              <div className="mb-6 w-full">
-                <Image
-                  src="/feature_image_1.png"
-                  alt="Meal Plan"
-                  width={400}
-                  height={400}
-                  className="h-auto w-full"
-                />
-              </div>
-              <h3 className="mb-2 text-xl font-bold leading-[30px] lg:text-[20px]">
-                Meal Plan
-              </h3>
-              <p className="text-base font-normal leading-[27px] text-[var(--grey-60)] lg:text-lg">
-                Plan a full week of meals in seconds
-              </p>
-            </div>
+      <NutritionLoopSection />
 
-            {/* Feature 2: Meal & Barcode Scan */}
-            <div className="flex flex-col items-center text-center">
-              <div className="mb-6 w-full">
-                <Image
-                  src="/feature_image_2.png"
-                  alt="Meal & Barcode Scan"
-                  width={400}
-                  height={400}
-                  className="h-auto w-full"
-                />
-              </div>
-              <h3 className="mb-2 text-xl font-bold leading-[30px] lg:text-[20px]">
-                Meal & Barcode Scan
-              </h3>
-              <p className="text-base font-normal leading-[27px] text-[var(--grey-60)] lg:text-lg">
-                Scan meals instantly
-              </p>
-            </div>
+      <LoggingSection />
 
-            {/* Feature 3: Nutrition */}
-            <div className="flex flex-col items-center text-center">
-              <div className="mb-6 w-full">
-                <Image
-                  src="/feature_image_3.png"
-                  alt="Nutrition"
-                  width={400}
-                  height={400}
-                  className="h-auto w-full"
-                />
-              </div>
-              <h3 className="mb-2 text-xl font-bold leading-[30px] lg:text-[20px]">
-                Nutrition
-              </h3>
-              <p className="text-base font-normal leading-[27px] text-[var(--grey-60)] lg:text-lg">
-                Track calories & macros easily
-              </p>
-            </div>
+      <NutritionSignalsSection />
 
-            {/* Feature 4: Food Tracker */}
-            <div className="flex flex-col items-center text-center">
-              <div className="mb-6 w-full">
-                <Image
-                  src="/feature_image_4.png"
-                  alt="Food Tracker"
-                  width={400}
-                  height={400}
-                  className="h-auto w-full"
-                />
-              </div>
-              <h3 className="mb-2 text-xl font-bold leading-[30px] lg:text-[20px]">
-                Food Tracker
-              </h3>
-              <p className="text-base font-normal leading-[27px] text-[var(--grey-60)] lg:text-lg">
-                Track everything you eat
-              </p>
-            </div>
+      <AiCoachSection />
 
-            {/* Feature 5: Quick Import */}
-            <div className="flex flex-col items-center text-center">
-              <div className="mb-6 w-full">
-                <Image
-                  src="/feature_image_5.png"
-                  alt="Quick Import"
-                  width={400}
-                  height={400}
-                  className="h-auto w-full"
-                />
-              </div>
-              <h3 className="mb-2 text-xl font-bold leading-[30px] lg:text-[20px]">
-                Quick Import
-              </h3>
-              <p className="text-base font-normal leading-[27px] text-[var(--grey-60)] lg:text-lg">
-                Import recipes from anywhere
-              </p>
-            </div>
+      <TrustAccuracySection />
 
-            {/* Feature 6: Cookbooks */}
-            <div className="flex flex-col items-center text-center">
-              <div className="mb-6 w-full">
-                <Image
-                  src="/feature_image_6.png"
-                  alt="Cookbooks"
-                  width={400}
-                  height={400}
-                  className="h-auto w-full"
-                />
-              </div>
-              <h3 className="mb-2 text-xl font-bold leading-[30px] lg:text-[20px]">
-                Cookbooks
-              </h3>
-              <p className="text-base font-normal leading-[27px] text-[var(--grey-60)] lg:text-lg">
-                All your recipes, perfectly organized
-              </p>
-            </div>
-          </div>
+      <GoalsSection />
 
-          {/* Last 2 Features - 2 column grid with even spacing */}
-          <div className="mt-24 mb-24 grid grid-cols-1 gap-x-6 gap-y-24 sm:grid-cols-2 lg:gap-x-8 lg:gap-y-24">
-            {/* Feature 7: Discover Recipes */}
-            <div className="flex flex-col items-center text-center">
-              <div className="mb-6 w-full">
-                <Image
-                  src="/feature_image_7.png"
-                  alt="Discover Recipes"
-                  width={400}
-                  height={400}
-                  className="h-auto w-full"
-                />
-              </div>
-              <h3 className="mb-2 text-xl font-bold leading-[30px] lg:text-[20px]">
-                Discover Recipes
-              </h3>
-              <p className="text-base font-normal leading-[27px] text-[var(--grey-60)] lg:text-lg">
-                Thousands of meals tailored to your taste
-              </p>
-            </div>
-
-            {/* Feature 8: Grocery */}
-            <div className="flex flex-col items-center text-center">
-              <div className="mb-6 w-full">
-                <Image
-                  src="/feature_image_8.png"
-                  alt="Grocery"
-                  width={400}
-                  height={400}
-                  className="h-auto w-full"
-                />
-              </div>
-              <h3 className="mb-2 text-xl font-bold leading-[30px] lg:text-[20px]">
-                Grocery
-              </h3>
-              <p className="text-base font-normal leading-[27px] text-[var(--grey-60)] lg:text-lg">
-                Auto generated grocery list
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+      <FaqSection />
     </>
   );
 }

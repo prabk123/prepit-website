@@ -2,7 +2,7 @@ import Image from "next/image";
 
 export default function DownloadCTA() {
   return (
-    <section className="flex w-full flex-col items-center bg-white px-4 lg:px-20">
+    <section className="flex w-full flex-col items-center bg-white px-4 lg:px-20 pt-16">
       <div
         className="w-full max-w-[1200px] overflow-hidden rounded-[32px] bg-black pt-8"
         style={{
@@ -23,13 +23,13 @@ export default function DownloadCTA() {
                     "linear-gradient(90deg, rgba(128, 159, 249, 1) 0%, rgba(208, 147, 217, 1) 27.913%, rgba(243, 140, 97, 1) 55.826%, rgba(245, 204, 119, 1) 93.043%)",
                 }}
               >
-                AI nutritionist
+                Your AI nutritionist
               </p>
               <h2
                 className="text-[32px] font-semibold leading-tight text-white lg:text-[40px] lg:leading-[40px]"
                 style={{ fontFamily: "var(--font-brand)" }}
               >
-                Download the PrepIt app today
+                Stop tracking. Start understanding.
               </h2>
             </div>
             <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center">

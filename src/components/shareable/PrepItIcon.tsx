@@ -75,6 +75,7 @@ export const ICONS = {
   homeLeaf: "\uEA4A",
   starFilled: "\uEA4B",
   starEmpty: "\uEA4C",
+  microphone: "\uEA4F",
 } as const;
 
 export type PrepItIconName = keyof typeof ICONS;
