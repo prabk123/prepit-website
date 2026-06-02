@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import NlLogBottomSheetDemo from "@/components/NlLogBottomSheetDemo";
 
 export const metadata: Metadata = {
   title: "PrepIt - AI-Powered Meal Planning & Nutrition Tracking",
@@ -35,14 +36,14 @@ export default function Home() {
   return (
     <>
       {/* Hero Section */}
-      <section className="mt-16 flex w-full flex-col items-center bg-white px-4 py-10 lg:mt-16 lg:px-14 lg:py-20">
-        <div className="flex w-full max-w-[1200px] flex-col items-center gap-10 lg:flex-row lg:gap-14">
+      <section className="mt-16 flex w-full flex-col items-center bg-white px-4 pt-2 pb-10 lg:px-14 lg:py-20">
+        <div className="flex w-full max-w-[1200px] flex-col-reverse items-center gap-10 lg:flex-row lg:gap-14">
           {/* Left Content */}
           <div className="flex flex-1 flex-col gap-10">
             <div className="flex flex-col gap-4">
               {/* AI Nutritionist Gradient Text */}
               <p
-                className="bg-clip-text text-[28px] font-semibold leading-normal text-transparent"
+                className="bg-clip-text text-[20px] font-semibold leading-normal text-transparent lg:text-[28px]"
                 style={{
                   fontFamily: "var(--font-brand)",
                   WebkitTextFillColor: "transparent",
@@ -51,27 +52,28 @@ export default function Home() {
                   width: "fit-content",
                 }}
               >
-                AI nutritionist
+                Your AI nutritionist
               </p>
 
-              {/* Heading */}
-              <h1
-                className="text-[40px] font-semibold leading-tight tracking-tight lg:text-[64px] lg:leading-[64px]"
-                style={{ fontFamily: "var(--font-brand)" }}
-              >
-                Plan smarter.
-                <br />
-                Eat better.
-                <br />
-                Stress less.
-              </h1>
-            </div>
+              {/* Heading + description */}
+              <div className="flex flex-col gap-6">
+                <h1
+                  className="text-[40px] font-semibold leading-tight tracking-tight lg:text-[64px] lg:leading-[64px]"
+                  style={{ fontFamily: "var(--font-brand)" }}
+                >
+                  Your meals in.
+                  <br />
+                  Smart nutrition advice out.
+                </h1>
 
-            {/* Description */}
-            <p className="text-base font-normal leading-relaxed text-[var(--black-100)] lg:text-lg lg:leading-[27px]">
-              Meal plans tailored to your goals and lifestyle. Eat with
-              confidence and see real progress every day.
-            </p>
+                <p className="text-base font-normal leading-relaxed text-[var(--black-100)] lg:text-lg lg:leading-[27px]">
+                  Describe any meal in your own words. PrepIt logs it in
+                  seconds, shows how it&apos;ll affect your energy, hunger, and
+                  mood, and tells you what to do next. No food hunts. No guilt.
+                  Just a coach that fits how you actually eat.
+                </p>
+              </div>
+            </div>
 
             {/* App Store Buttons */}
             <div className="flex flex-row justify-start items-start gap-4">
@@ -103,15 +105,21 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Right Phone Mockup */}
-          <div className="flex flex-1 items-center justify-center">
-            <Image
-              src="/hero_image.png"
-              alt="PrepIt App Preview"
-              width={390}
-              height={844}
-              className="w-full max-w-[300px] lg:max-w-[390px]"
-            />
+          {/* Right Phone Mockup — image is 776×1276; mobile shows top 75% */}
+          <div className="relative w-full min-w-0 flex-1 lg:max-w-[420px]">
+            <div className="relative mx-auto w-full overflow-hidden max-lg:aspect-[776/957] lg:aspect-[776/1276]">
+              <Image
+                src="/hero_image.png"
+                alt="PrepIt App Preview"
+                fill
+                priority
+                sizes="(max-width: 1024px) 100vw, 420px"
+                className="object-cover object-top"
+              />
+              <div className="absolute inset-x-[7%] bottom-[5%] z-10">
+                <NlLogBottomSheetDemo overlay />
+              </div>
+            </div>
           </div>
         </div>
       </section>
