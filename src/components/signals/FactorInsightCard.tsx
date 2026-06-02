@@ -1,10 +1,11 @@
 import FactorContributorsTable, {
   type FactorContributor,
 } from "@/components/signals/FactorContributorsTable";
-import FactorStripChart, {
+import FactorStripChart from "@/components/signals/FactorStripChart";
+import {
   signedLabel,
   valueColorForComponent,
-} from "@/components/signals/FactorStripChart";
+} from "@/components/signals/factorStripUtils";
 import PrepItIcon from "@/components/shareable/PrepItIcon";
 
 export type FactorInsight = {
