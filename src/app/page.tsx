@@ -11,31 +11,33 @@ import ObjectionMirrorSection from "@/components/ObjectionMirrorSection";
 import TrustAccuracySection from "@/components/TrustAccuracySection";
 
 export const metadata: Metadata = {
-  title: "PrepIt - AI-Powered Meal Planning & Nutrition Tracking",
+  title: {
+    absolute: "PrepIt | Your AI Nutritionist – Meals In, Smart Advice Out",
+  },
   description:
-    "Plan smarter, eat better, stress less. Get personalized AI-powered meal plans, track nutrition, scan meals with your camera, and discover thousands of recipes tailored to your goals and lifestyle.",
+    "Describe any meal in your own words. PrepIt logs it in seconds, shows how it affects your energy, hunger, and mood, and tells you what to do next—no food hunts, no guilt.",
   alternates: {
     canonical: "https://www.tryprepit.app",
   },
   openGraph: {
-    title: "PrepIt - AI-Powered Meal Planning & Nutrition Tracking",
+    title: "PrepIt | Your AI Nutritionist – Meals In, Smart Advice Out",
     description:
-      "Plan smarter, eat better, stress less. Get personalized AI-powered meal plans, track nutrition, and discover thousands of recipes.",
+      "Log meals in plain English. PrepIt shows how each meal affects your energy, hunger, and mood—and what to do next.",
     url: "https://www.tryprepit.app",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "PrepIt App - Meal Planning and Nutrition Tracking",
+        alt: "PrepIt – Your AI nutritionist app",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "PrepIt - AI-Powered Meal Planning & Nutrition Tracking",
+    title: "PrepIt | Your AI Nutritionist – Meals In, Smart Advice Out",
     description:
-      "Plan smarter, eat better, stress less. Get personalized AI-powered meal plans, track nutrition, and discover thousands of recipes.",
+      "Log meals in plain English. PrepIt shows how each meal affects your energy, hunger, and mood—and what to do next.",
     images: ["/og-image.png"],
   },
 };
