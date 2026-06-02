@@ -12,7 +12,7 @@ const PILLARS: {
   },
   {
     title: "Honest about confidence",
-    body: "When there isn't enough data, PrepIt says so — instead of giving you confident, wrong advice.",
+    body: "When there isn't enough data, PrepIt says so, instead of giving you confident, wrong advice.",
     icon: "warning",
   },
   {

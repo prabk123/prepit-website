@@ -61,9 +61,9 @@ export default function AiCoachSection() {
               id="ai-coach-body"
               className="text-base font-normal leading-relaxed text-[var(--grey-60)] lg:text-lg lg:leading-[27px]"
             >
-              PrepIt&apos;s AI coach answers in plain language using your own data — and it
+              PrepIt&apos;s AI coach answers in plain language using your own data, and it
               doesn&apos;t just talk, it does the work. Log a meal, swap a dinner, find a recipe
-              with your remaining macros — straight from the chat. You confirm every change.
+              with your remaining macros, straight from the chat. You confirm every change.
             </p>
           </div>
 
@@ -79,7 +79,7 @@ export default function AiCoachSection() {
           </div>
 
           <p className="text-sm font-medium leading-relaxed text-[var(--grey-80)] lg:text-base">
-            It&apos;s a coach, not a doctor — and it&apos;ll always tell you when something needs
+            It&apos;s a coach, not a doctor, and it&apos;ll always tell you when something needs
             a professional.
           </p>
         </div>

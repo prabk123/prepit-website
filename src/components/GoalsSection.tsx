@@ -20,7 +20,7 @@ const GOALS: {
   {
     label: "More energy",
     benefit:
-      "Meals and timing tuned for steady focus — without the mid-afternoon crash.",
+      "Meals and timing tuned for steady focus, without the mid-afternoon crash.",
     icon: "sparkles",
   },
   {

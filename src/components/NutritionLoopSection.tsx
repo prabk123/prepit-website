@@ -6,17 +6,17 @@ const STEPS = [
   {
     number: 1,
     title: "Log",
-    body: "Describe your meal, snap a photo, or scan a barcode. PrepIt structures it in seconds — you just confirm.",
+    body: "Say what you ate, in your own words or with a photo. PrepIt builds the meal in seconds, and you just confirm.",
   },
   {
     number: 2,
     title: "Understand",
-    body: "Drive, Satiety, and Balance turn each meal into three live scores — so you know how you'll feel, not just what you logged.",
+    body: "Drive, Satiety, and Balance turn each meal into three live scores, so you know how you'll feel, not just what you logged.",
   },
   {
     number: 3,
     title: "Adjust",
-    body: "Every log comes with one clear next step — and an AI nutritionist when you want to go deeper.",
+    body: "Every log comes with one clear next step, and an AI nutritionist when you want to go deeper.",
   },
 ] as const;
 
@@ -49,7 +49,7 @@ function CoachSnippet() {
             </p>
           </div>
           <p className="mt-2 text-xs font-medium leading-5 text-[var(--grey-80)]">
-            Your wrap and flat white are light on protein — a Greek yogurt now would help hold
+            Your wrap and flat white are light on protein. A Greek yogurt now would help hold
             Satiety until dinner.
           </p>
         </div>

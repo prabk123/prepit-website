@@ -30,7 +30,7 @@ const SCIENCE_POINTS = [
   },
   {
     title: "Balance",
-    body: "Food quality, produce, alcohol, and calorie adequacy connect to observational research on stress eating, sleep, and emotional stability — without needing a wearable.",
+    body: "Food quality, produce, alcohol, and calorie adequacy connect to observational research on stress eating, sleep, and emotional stability, without needing a wearable.",
   },
 ] as const;
 
@@ -82,7 +82,7 @@ function FuelScienceModal({ open, onClose }: { open: boolean; onClose: () => voi
       </div>
       <div className="flex flex-col gap-5 px-6 py-5">
         <p className="text-sm leading-relaxed text-[var(--grey-60)] lg:text-base lg:leading-[27px]">
-          PrepIt&apos;s nutrition signals are built from published nutrition research — not vibes.
+          PrepIt&apos;s nutrition signals are built from published nutrition research, not vibes.
           Each 0–100 score blends weighted factors from your food log into a forward-looking read
           on how today&apos;s eating is likely to feel.
         </p>
@@ -133,7 +133,7 @@ export default function NutritionSignalsSection() {
                 Your daily nutrition signals are a 0–100 score built from three things you actually
                 care about. It&apos;s forward-looking: not a report card on yesterday, but a read
                 on what today&apos;s food is setting you up for. And it needs nothing but your food
-                log — no wearable, no CGM.
+                log. No wearable, no CGM.
               </p>
             </div>
 
@@ -145,7 +145,7 @@ export default function NutritionSignalsSection() {
 
             <div className="flex flex-col gap-4">
               <p className="text-base font-semibold leading-relaxed text-[var(--black-100)] lg:text-lg">
-                No app connects what you ate to how you&apos;ll feel — in real time, with a
+                No app connects what you ate to how you&apos;ll feel, in real time, with a
                 specific food fix.
               </p>
               <p className="text-sm leading-relaxed text-[var(--grey-60)] lg:text-base">

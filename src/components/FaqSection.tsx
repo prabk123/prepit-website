@@ -7,7 +7,7 @@ const FAQ_ITEMS = [
   {
     question: "Is PrepIt free?",
     answer:
-      "You get full access free for 3 days. After that, it's one simple subscription — choose annual (best value), weekly, or monthly. Cancel anytime.",
+      "You get full access free for 3 days. After that, it's one simple subscription: choose annual (best value), weekly, or monthly. Cancel anytime.",
   },
   {
     question: "Will I be charged during the trial?",
@@ -22,7 +22,7 @@ const FAQ_ITEMS = [
   {
     question: "How accurate is the AI logging?",
     answer:
-      "PrepIt estimates and shows its assumptions — you confirm or fix anything before it's saved. Estimates are clearly marked, never presented as clinical precision.",
+      "PrepIt estimates and shows its assumptions. You confirm or fix anything before it's saved. Estimates are clearly marked, never presented as clinical precision.",
   },
   {
     question: "Do I need a wearable or CGM?",
@@ -37,7 +37,7 @@ const FAQ_ITEMS = [
   {
     question: "Which devices?",
     answer:
-      "PrepIt is available on iPhone via the App Store. (Android coming — update when live.)",
+      "PrepIt is available on iPhone via the App Store. (Android coming soon.)",
   },
   {
     question: "Can I cancel anytime?",
