@@ -1,32 +1,43 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import LoggingSection from "@/components/LoggingSection";
+import NlLogBottomSheetDemo from "@/components/NlLogBottomSheetDemo";
+import NutritionLoopSection from "@/components/NutritionLoopSection";
+import AiCoachSection from "@/components/AiCoachSection";
+import GoalsSection from "@/components/GoalsSection";
+import FaqSection from "@/components/FaqSection";
+import NutritionSignalsSection from "@/components/NutritionSignalsSection";
+import ObjectionMirrorSection from "@/components/ObjectionMirrorSection";
+import TrustAccuracySection from "@/components/TrustAccuracySection";
 
 export const metadata: Metadata = {
-  title: "PrepIt - AI-Powered Meal Planning & Nutrition Tracking",
+  title: {
+    absolute: "PrepIt | Your AI Nutritionist – Meals In, Smart Advice Out",
+  },
   description:
-    "Plan smarter, eat better, stress less. Get personalized AI-powered meal plans, track nutrition, scan meals with your camera, and discover thousands of recipes tailored to your goals and lifestyle.",
+    "Describe any meal in your own words. PrepIt logs it in seconds, shows how it affects your energy, hunger, and mood, and tells you what to do next—no food hunts, no guilt.",
   alternates: {
     canonical: "https://www.tryprepit.app",
   },
   openGraph: {
-    title: "PrepIt - AI-Powered Meal Planning & Nutrition Tracking",
+    title: "PrepIt | Your AI Nutritionist – Meals In, Smart Advice Out",
     description:
-      "Plan smarter, eat better, stress less. Get personalized AI-powered meal plans, track nutrition, and discover thousands of recipes.",
+      "Log meals in plain English. PrepIt shows how each meal affects your energy, hunger, and mood—and what to do next.",
     url: "https://www.tryprepit.app",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "PrepIt App - Meal Planning and Nutrition Tracking",
+        alt: "PrepIt – Your AI nutritionist app",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "PrepIt - AI-Powered Meal Planning & Nutrition Tracking",
+    title: "PrepIt | Your AI Nutritionist – Meals In, Smart Advice Out",
     description:
-      "Plan smarter, eat better, stress less. Get personalized AI-powered meal plans, track nutrition, and discover thousands of recipes.",
+      "Log meals in plain English. PrepIt shows how each meal affects your energy, hunger, and mood—and what to do next.",
     images: ["/og-image.png"],
   },
 };
@@ -35,14 +46,14 @@ export default function Home() {
   return (
     <>
       {/* Hero Section */}
-      <section className="mt-16 flex w-full flex-col items-center bg-white px-4 py-10 lg:mt-16 lg:px-14 lg:py-20">
-        <div className="flex w-full max-w-[1200px] flex-col items-center gap-10 lg:flex-row lg:gap-14">
+      <section className="mt-16 flex w-full flex-col items-center bg-white px-4 pt-2 pb-10 lg:px-14 lg:py-20">
+        <div className="flex w-full max-w-[1200px] flex-col-reverse items-center gap-10 lg:flex-row lg:gap-14">
           {/* Left Content */}
           <div className="flex flex-1 flex-col gap-10">
             <div className="flex flex-col gap-4">
               {/* AI Nutritionist Gradient Text */}
               <p
-                className="bg-clip-text text-[28px] font-semibold leading-normal text-transparent"
+                className="bg-clip-text text-[20px] font-semibold leading-normal text-transparent lg:text-[28px]"
                 style={{
                   fontFamily: "var(--font-brand)",
                   WebkitTextFillColor: "transparent",
@@ -51,27 +62,28 @@ export default function Home() {
                   width: "fit-content",
                 }}
               >
-                AI nutritionist
+                Your AI nutritionist
               </p>
 
-              {/* Heading */}
-              <h1
-                className="text-[40px] font-semibold leading-tight tracking-tight lg:text-[64px] lg:leading-[64px]"
-                style={{ fontFamily: "var(--font-brand)" }}
-              >
-                Plan smarter.
-                <br />
-                Eat better.
-                <br />
-                Stress less.
-              </h1>
-            </div>
+              {/* Heading + description */}
+              <div className="flex flex-col gap-6">
+                <h1
+                  className="text-[40px] font-semibold leading-tight tracking-tight lg:text-[64px] lg:leading-[64px]"
+                  style={{ fontFamily: "var(--font-brand)" }}
+                >
+                  Your meals in.{" "}
+                  <br />
+                  Smart nutrition advice out.
+                </h1>
 
-            {/* Description */}
-            <p className="text-base font-normal leading-relaxed text-[var(--black-100)] lg:text-lg lg:leading-[27px]">
-              Meal plans tailored to your goals and lifestyle. Eat with
-              confidence and see real progress every day.
-            </p>
+                <p className="text-base font-normal leading-relaxed text-[var(--black-100)] lg:text-lg lg:leading-[27px]">
+                  Describe any meal in your own words. PrepIt logs it in
+                  seconds, shows how it&apos;ll affect your energy, hunger, and
+                  mood, and tells you what to do next. No food hunts. No guilt.
+                  Just a coach that fits how you actually eat.
+                </p>
+              </div>
+            </div>
 
             {/* App Store Buttons */}
             <div className="flex flex-row justify-start items-start gap-4">
@@ -103,192 +115,40 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Right Phone Mockup */}
-          <div className="flex flex-1 items-center justify-center">
-            <Image
-              src="/hero_image.png"
-              alt="PrepIt App Preview"
-              width={390}
-              height={844}
-              className="w-full max-w-[300px] lg:max-w-[390px]"
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section
-        id="features"
-        className="flex w-full flex-col items-center bg-white px-4 py-16 lg:px-20 lg:py-24"
-      >
-        <div className="w-full max-w-[1200px]">
-          {/* Section Title */}
-          <h2
-            className="mb-12 text-center text-[32px] font-semibold leading-tight lg:mb-16 lg:text-[40px]"
-            style={{ fontFamily: "var(--font-brand)" }}
-          >
-            Powerful features, simple to use
-          </h2>
-
-          {/* First 6 Features - 3 column grid */}
-          <div className="grid grid-cols-1 gap-x-6 gap-y-24 sm:grid-cols-2 lg:grid-cols-3 lg:gap-x-8 lg:gap-y-24">
-            {/* Feature 1: Meal Plan */}
-            <div className="flex flex-col items-center text-center">
-              <div className="mb-6 w-full">
-                <Image
-                  src="/feature_image_1.png"
-                  alt="Meal Plan"
-                  width={400}
-                  height={400}
-                  className="h-auto w-full"
-                />
+          {/* Right Phone Mockup — image is 776×1276; mobile shows top 75% */}
+          <div className="relative w-full min-w-0 flex-1 lg:max-w-[420px]">
+            <div className="relative mx-auto w-full overflow-hidden max-lg:aspect-[776/957] lg:aspect-[776/1276]">
+              <Image
+                src="/hero_image.png"
+                alt="PrepIt App Preview"
+                fill
+                priority
+                sizes="(max-width: 1024px) 100vw, 420px"
+                className="object-cover object-top"
+              />
+              <div className="absolute inset-x-[7%] bottom-[5%] z-10">
+                <NlLogBottomSheetDemo overlay />
               </div>
-              <h3 className="mb-2 text-xl font-bold leading-[30px] lg:text-[20px]">
-                Meal Plan
-              </h3>
-              <p className="text-base font-normal leading-[27px] text-[var(--grey-60)] lg:text-lg">
-                Plan a full week of meals in seconds
-              </p>
-            </div>
-
-            {/* Feature 2: Meal & Barcode Scan */}
-            <div className="flex flex-col items-center text-center">
-              <div className="mb-6 w-full">
-                <Image
-                  src="/feature_image_2.png"
-                  alt="Meal & Barcode Scan"
-                  width={400}
-                  height={400}
-                  className="h-auto w-full"
-                />
-              </div>
-              <h3 className="mb-2 text-xl font-bold leading-[30px] lg:text-[20px]">
-                Meal & Barcode Scan
-              </h3>
-              <p className="text-base font-normal leading-[27px] text-[var(--grey-60)] lg:text-lg">
-                Scan meals instantly
-              </p>
-            </div>
-
-            {/* Feature 3: Nutrition */}
-            <div className="flex flex-col items-center text-center">
-              <div className="mb-6 w-full">
-                <Image
-                  src="/feature_image_3.png"
-                  alt="Nutrition"
-                  width={400}
-                  height={400}
-                  className="h-auto w-full"
-                />
-              </div>
-              <h3 className="mb-2 text-xl font-bold leading-[30px] lg:text-[20px]">
-                Nutrition
-              </h3>
-              <p className="text-base font-normal leading-[27px] text-[var(--grey-60)] lg:text-lg">
-                Track calories & macros easily
-              </p>
-            </div>
-
-            {/* Feature 4: Food Tracker */}
-            <div className="flex flex-col items-center text-center">
-              <div className="mb-6 w-full">
-                <Image
-                  src="/feature_image_4.png"
-                  alt="Food Tracker"
-                  width={400}
-                  height={400}
-                  className="h-auto w-full"
-                />
-              </div>
-              <h3 className="mb-2 text-xl font-bold leading-[30px] lg:text-[20px]">
-                Food Tracker
-              </h3>
-              <p className="text-base font-normal leading-[27px] text-[var(--grey-60)] lg:text-lg">
-                Track everything you eat
-              </p>
-            </div>
-
-            {/* Feature 5: Quick Import */}
-            <div className="flex flex-col items-center text-center">
-              <div className="mb-6 w-full">
-                <Image
-                  src="/feature_image_5.png"
-                  alt="Quick Import"
-                  width={400}
-                  height={400}
-                  className="h-auto w-full"
-                />
-              </div>
-              <h3 className="mb-2 text-xl font-bold leading-[30px] lg:text-[20px]">
-                Quick Import
-              </h3>
-              <p className="text-base font-normal leading-[27px] text-[var(--grey-60)] lg:text-lg">
-                Import recipes from anywhere
-              </p>
-            </div>
-
-            {/* Feature 6: Cookbooks */}
-            <div className="flex flex-col items-center text-center">
-              <div className="mb-6 w-full">
-                <Image
-                  src="/feature_image_6.png"
-                  alt="Cookbooks"
-                  width={400}
-                  height={400}
-                  className="h-auto w-full"
-                />
-              </div>
-              <h3 className="mb-2 text-xl font-bold leading-[30px] lg:text-[20px]">
-                Cookbooks
-              </h3>
-              <p className="text-base font-normal leading-[27px] text-[var(--grey-60)] lg:text-lg">
-                All your recipes, perfectly organized
-              </p>
-            </div>
-          </div>
-
-          {/* Last 2 Features - 2 column grid with even spacing */}
-          <div className="mt-24 mb-24 grid grid-cols-1 gap-x-6 gap-y-24 sm:grid-cols-2 lg:gap-x-8 lg:gap-y-24">
-            {/* Feature 7: Discover Recipes */}
-            <div className="flex flex-col items-center text-center">
-              <div className="mb-6 w-full">
-                <Image
-                  src="/feature_image_7.png"
-                  alt="Discover Recipes"
-                  width={400}
-                  height={400}
-                  className="h-auto w-full"
-                />
-              </div>
-              <h3 className="mb-2 text-xl font-bold leading-[30px] lg:text-[20px]">
-                Discover Recipes
-              </h3>
-              <p className="text-base font-normal leading-[27px] text-[var(--grey-60)] lg:text-lg">
-                Thousands of meals tailored to your taste
-              </p>
-            </div>
-
-            {/* Feature 8: Grocery */}
-            <div className="flex flex-col items-center text-center">
-              <div className="mb-6 w-full">
-                <Image
-                  src="/feature_image_8.png"
-                  alt="Grocery"
-                  width={400}
-                  height={400}
-                  className="h-auto w-full"
-                />
-              </div>
-              <h3 className="mb-2 text-xl font-bold leading-[30px] lg:text-[20px]">
-                Grocery
-              </h3>
-              <p className="text-base font-normal leading-[27px] text-[var(--grey-60)] lg:text-lg">
-                Auto generated grocery list
-              </p>
             </div>
           </div>
         </div>
       </section>
+
+      <ObjectionMirrorSection />
+
+      <NutritionLoopSection />
+
+      <LoggingSection />
+
+      <NutritionSignalsSection />
+
+      <AiCoachSection />
+
+      <TrustAccuracySection />
+
+      <GoalsSection />
+
+      <FaqSection />
     </>
   );
 }

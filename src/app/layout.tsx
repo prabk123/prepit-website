@@ -44,22 +44,23 @@ const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.tryprepit.app";
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
   title: {
-    default: "PrepIt - AI-Powered Meal Planning & Nutrition Tracking",
+    default: "PrepIt | Your AI Nutritionist – Meals In, Smart Advice Out",
     template: "%s | PrepIt",
   },
   description:
-    "Plan smarter, eat better, stress less. Get personalized AI-powered meal plans, track nutrition, scan meals with your camera, and discover thousands of recipes tailored to your goals and lifestyle.",
+    "Describe any meal in your own words. PrepIt logs it in seconds, shows how it affects your energy, hunger, and mood, and tells you what to do next—no food hunts, no guilt.",
   keywords: [
-    "meal planning",
-    "nutrition tracking",
     "AI nutritionist",
+    "nutrition tracking",
+    "meal logging",
+    "natural language food log",
+    "food diary",
     "calorie counter",
-    "recipe app",
-    "meal prep",
+    "nutrition coach",
+    "personalized nutrition advice",
+    "energy hunger mood",
     "healthy eating",
-    "diet app",
-    "food tracker",
-    "barcode scanner",
+    "iOS nutrition app",
   ],
   authors: [{ name: "PrepIt" }],
   creator: "PrepIt",
@@ -74,23 +75,23 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: baseUrl,
     siteName: "PrepIt",
-    title: "PrepIt - AI-Powered Meal Planning & Nutrition Tracking",
+    title: "PrepIt | Your AI Nutritionist – Meals In, Smart Advice Out",
     description:
-      "Plan smarter, eat better, stress less. Personalized meal plans powered by AI.",
+      "Log meals in plain English. PrepIt shows how each meal affects your energy, hunger, and mood—and what to do next.",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "PrepIt - AI-Powered Meal Planning App",
+        alt: "PrepIt – Your AI nutritionist app",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "PrepIt - AI-Powered Meal Planning & Nutrition Tracking",
+    title: "PrepIt | Your AI Nutritionist – Meals In, Smart Advice Out",
     description:
-      "Plan smarter, eat better, stress less. Personalized meal plans powered by AI.",
+      "Log meals in plain English. PrepIt shows how each meal affects your energy, hunger, and mood—and what to do next.",
     images: ["/og-image.png"],
   },
   alternates: {
@@ -165,7 +166,7 @@ export default function RootLayout({
               url: baseUrl,
               logo: `${baseUrl}/logo.png`,
               description:
-                "AI-powered meal planning and nutrition tracking app",
+                "Your AI nutritionist—log meals in plain English and get personalized nutrition advice.",
               sameAs: [
                 // Add your social media links here when available
                 // "https://twitter.com/prepit",
@@ -184,7 +185,7 @@ export default function RootLayout({
               applicationCategory: "HealthApplication",
               operatingSystem: "iOS",
               description:
-                "AI-powered meal planning, nutrition tracking, and recipe discovery app",
+                "Log meals in your own words, see Energy, Satiety, and Mood scores, and get AI nutrition coaching tailored to your day.",
               offers: {
                 "@type": "Offer",
                 price: "0",
