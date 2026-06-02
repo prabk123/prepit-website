@@ -68,7 +68,7 @@ export default function LoggingSection() {
               className="text-[32px] font-semibold leading-tight tracking-tight text-[var(--black-100)] lg:text-[40px]"
               style={{ fontFamily: "var(--font-brand)" }}
             >
-              You describe the meal.
+              You describe the meal.{" "}
               <br className="hidden sm:block" />
               PrepIt builds the log.
             </h2>

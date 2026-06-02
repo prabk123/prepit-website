@@ -69,7 +69,7 @@ export default function Home() {
                   className="text-[40px] font-semibold leading-tight tracking-tight lg:text-[64px] lg:leading-[64px]"
                   style={{ fontFamily: "var(--font-brand)" }}
                 >
-                  Your meals in.
+                  Your meals in.{" "}
                   <br />
                   Smart nutrition advice out.
                 </h1>
