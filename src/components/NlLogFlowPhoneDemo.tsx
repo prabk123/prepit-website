@@ -21,6 +21,8 @@ const SUBMIT_HOLD_MS = 750;
 const LOADING_STAGE_MS = 1100;
 const REVIEW_HOLD_MS = 6800;
 const RESET_MS = 600;
+const PUSH_MS = 350;
+const PUSH_EASING = "cubic-bezier(0.32, 0.72, 0, 1)";
 
 /** iPhone 15/16 logical display (390×844pt). Inner width = 300px frame − 12px border. */
 const PHONE_INNER_WIDTH = 288;
@@ -29,6 +31,8 @@ const IPHONE_LOGICAL_HEIGHT = 844;
 const PHONE_INNER_HEIGHT = Math.round(
   PHONE_INNER_WIDTH * (IPHONE_LOGICAL_HEIGHT / IPHONE_LOGICAL_WIDTH),
 );
+
+const pushTransition = `transform ${PUSH_MS}ms ${PUSH_EASING}`;
 
 function PhoneShell({ children }: { children: ReactNode }) {
   return (
@@ -60,42 +64,47 @@ function InputSheet({
   text,
   showCursor,
   sendActive,
+  loadingMessage,
 }: {
   text: string;
   showCursor: boolean;
   sendActive?: boolean;
+  loadingMessage?: string;
 }) {
   return (
-    <div className="absolute inset-x-0 bottom-0 z-10 flex flex-col">
-      <div className="mx-3 mb-3 overflow-hidden rounded-2xl border border-[var(--grey-10)] bg-white shadow-[0_-4px_24px_rgba(0,0,0,0.12)]">
-        <div className="px-3 pb-3 pt-2">
-          <div className="mb-2 flex justify-center">
-            <div className="h-1 w-10 rounded-full bg-[#D3D3D5]" />
+    <div className="absolute inset-x-0 bottom-0 z-10 flex flex-col overflow-hidden rounded-t-[24px] bg-white shadow-[0_-8px_40px_rgba(0,0,0,0.18)]">
+      <div className="px-3 pb-3 pt-2">
+        <div className="mb-2 flex justify-center">
+          <div className="h-1 w-10 rounded-full bg-[#D3D3D5]" />
+        </div>
+        <h3 className="text-sm font-semibold leading-5 text-[var(--black-100)]">
+          Describe your meal
+        </h3>
+        <p className="mt-0.5 text-[11px] leading-4 text-[var(--grey-60)]">
+          Amount, brand, and restaurant details help improve accuracy.
+        </p>
+        <div className="mt-2.5 flex items-end gap-1.5">
+          <div className="min-h-[36px] flex-1 rounded-xl bg-[var(--grey-5)] px-3 py-2">
+            <p className="min-h-[20px] text-xs leading-4 text-[var(--black-100)]">
+              {text}
+              {showCursor && (
+                <span className="ml-px inline-block h-3 w-0.5 translate-y-0.5 animate-pulse bg-[var(--black-100)]" />
+              )}
+            </p>
           </div>
-          <h3 className="text-sm font-semibold leading-5 text-[var(--black-100)]">
-            Describe your meal
-          </h3>
-          <p className="mt-0.5 text-[11px] leading-4 text-[var(--grey-60)]">
-            Amount, brand, and restaurant details help improve accuracy.
-          </p>
-          <div className="mt-2.5 flex items-end gap-1.5">
-            <div className="min-h-[36px] flex-1 rounded-xl bg-[var(--grey-5)] px-3 py-2">
-              <p className="min-h-[20px] text-xs leading-4 text-[var(--black-100)]">
-                {text}
-                {showCursor && (
-                  <span className="ml-px inline-block h-3 w-0.5 translate-y-0.5 animate-pulse bg-[var(--black-100)]" />
-                )}
-              </p>
-            </div>
-            <div
-              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[var(--black-100)] transition-transform ${
-                sendActive ? "scale-95" : ""
-              }`}
-            >
-              <PrepItIcon name="arrowUp" size={16} color="#ffffff" />
-            </div>
+          <div
+            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[var(--black-100)] transition-transform ${
+              sendActive ? "scale-95" : ""
+            }`}
+          >
+            <PrepItIcon name="arrowUp" size={16} color="#ffffff" />
           </div>
         </div>
+        {loadingMessage && (
+          <div className="mt-4 flex justify-center">
+            <LoadingPill message={loadingMessage} />
+          </div>
+        )}
       </div>
     </div>
   );
@@ -108,6 +117,10 @@ export default function NlLogFlowPhoneDemo() {
   const [typedText, setTypedText] = useState("");
   const [loadingStage, setLoadingStage] = useState(0);
   const [fadeKey, setFadeKey] = useState(0);
+  const [reviewSlideIn, setReviewSlideIn] = useState(false);
+  const [inputFlowVisible, setInputFlowVisible] = useState(true);
+
+  const reviewOpen = phase === "review";
 
   useEffect(() => {
     const node = containerRef.current;
@@ -123,6 +136,34 @@ export default function NlLogFlowPhoneDemo() {
     observer.observe(node);
     return () => observer.disconnect();
   }, []);
+
+  useEffect(() => {
+    if (phase === "review") {
+      setReviewSlideIn(false);
+      setInputFlowVisible(true);
+
+      let slideFrame = 0;
+      const startFrame = requestAnimationFrame(() => {
+        slideFrame = requestAnimationFrame(() => {
+          setReviewSlideIn(true);
+        });
+      });
+
+      const hideInputTimer = setTimeout(() => {
+        setInputFlowVisible(false);
+      }, PUSH_MS);
+
+      return () => {
+        cancelAnimationFrame(startFrame);
+        cancelAnimationFrame(slideFrame);
+        clearTimeout(hideInputTimer);
+      };
+    }
+
+    setReviewSlideIn(false);
+    setInputFlowVisible(true);
+    return undefined;
+  }, [phase]);
 
   useEffect(() => {
     if (!active) return;
@@ -164,7 +205,6 @@ export default function NlLogFlowPhoneDemo() {
 
         if (cancelled) return;
         setPhase("review");
-        setFadeKey((k) => k + 1);
         await wait(REVIEW_HOLD_MS);
 
         if (cancelled) return;
@@ -183,25 +223,40 @@ export default function NlLogFlowPhoneDemo() {
   return (
     <div ref={containerRef} className="w-full">
       <PhoneShell>
-        <div key={fadeKey} className="nl-demo-fade relative h-full">
-          {phase === "review" ? (
-            <NlReviewScreenDemo />
-          ) : (
-            <>
-              <FakeLogScreenDemo />
-              <div className="absolute inset-0 z-[1] bg-black/60" aria-hidden />
-              <InputSheet
-                text={typedText}
-                showCursor={phase === "typing"}
-                sendActive={phase === "submitting"}
-              />
-              {phase === "loading" && (
-                <div className="absolute inset-x-0 bottom-[148px] z-20 flex justify-center">
-                  <LoadingPill message={LOADING_STAGES[loadingStage]} />
-                </div>
-              )}
-            </>
-          )}
+        <div key={fadeKey} className="nl-demo-fade relative h-full overflow-hidden">
+          <div
+            className="relative h-full will-change-transform"
+            style={{
+              transition: pushTransition,
+              transform: reviewSlideIn ? "translateX(-30%)" : "translateX(0)",
+            }}
+          >
+            <FakeLogScreenDemo />
+            {inputFlowVisible && (
+              <>
+                <div className="absolute inset-0 z-[1] bg-black/60" aria-hidden />
+                <InputSheet
+                  text={typedText}
+                  showCursor={phase === "typing"}
+                  sendActive={phase === "submitting"}
+                  loadingMessage={
+                    phase === "loading" ? LOADING_STAGES[loadingStage] : undefined
+                  }
+                />
+              </>
+            )}
+          </div>
+          <div
+            className="absolute inset-0 z-20 bg-[#F4F4F5] shadow-[-4px_0_16px_rgba(0,0,0,0.12)] will-change-transform"
+            style={{
+              transition: pushTransition,
+              transform: reviewSlideIn ? "translateX(0)" : "translateX(100%)",
+              visibility: reviewOpen ? "visible" : "hidden",
+              pointerEvents: reviewOpen ? "auto" : "none",
+            }}
+          >
+            {reviewOpen && <NlReviewScreenDemo />}
+          </div>
         </div>
       </PhoneShell>
     </div>
