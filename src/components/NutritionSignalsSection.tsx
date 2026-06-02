@@ -2,15 +2,15 @@ import NutritionSignalsVisual from "@/components/NutritionSignalsVisual";
 
 const SIGNAL_CARDS = [
   {
-    title: "Drive",
+    title: "Energy",
     body: "Will you have the energy and focus to get through the day? Built from your meal timing, glycaemic load and how early you front-load calories.",
   },
   {
-    title: "Control",
+    title: "Satiety",
     body: "Will you stay in control around food this afternoon? Driven by protein, fibre, and how processed your meals are.",
   },
   {
-    title: "Balance",
+    title: "Mood",
     body: "Will you feel steady or on edge? Shaped by food quality, vegetables, alcohol and how deep your deficit runs.",
   },
 ] as const;

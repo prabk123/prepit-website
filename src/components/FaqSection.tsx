@@ -17,7 +17,7 @@ const FAQ_ITEMS = [
   {
     question: "Do I have to count calories?",
     answer:
-      "No. You just describe what you ate. PrepIt does the structuring, and shows you what it means with your Fuel score.",
+      "No. You just describe what you ate. PrepIt does the structuring, and shows you what it means with your nutrition signals.",
   },
   {
     question: "How accurate is the AI logging?",
@@ -27,7 +27,7 @@ const FAQ_ITEMS = [
   {
     question: "Do I need a wearable or CGM?",
     answer:
-      "No. Your Fuel score (Drive, Control, Balance) is built entirely from your food logs. Apple Health can make it sharper, but it's never required.",
+      "No. Your nutrition signals (Energy, Satiety, Mood) are built entirely from your food logs. Apple Health can make it sharper, but it's never required.",
   },
   {
     question: "Is it a replacement for a doctor or dietitian?",

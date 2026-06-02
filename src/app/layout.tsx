@@ -185,7 +185,7 @@ export default function RootLayout({
               applicationCategory: "HealthApplication",
               operatingSystem: "iOS",
               description:
-                "Log meals in your own words, see Drive, Satiety, and Balance scores, and get AI nutrition coaching tailored to your day.",
+                "Log meals in your own words, see Energy, Satiety, and Mood scores, and get AI nutrition coaching tailored to your day.",
               offers: {
                 "@type": "Offer",
                 price: "0",

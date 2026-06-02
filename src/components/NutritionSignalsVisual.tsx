@@ -5,9 +5,9 @@ import SignalRing from "@/components/signals/SignalRing";
 import PrepItIcon from "@/components/shareable/PrepItIcon";
 
 const HOME_SIGNALS = [
-  { label: "Drive", score: 68 },
-  { label: "Control", score: 52 },
-  { label: "Balance", score: 71 },
+  { label: "Energy", score: 68 },
+  { label: "Satiety", score: 52 },
+  { label: "Mood", score: 71 },
 ] as const;
 
 const FACTOR_STACK: (FactorInsight & { stackClass: string })[] = [
@@ -35,7 +35,7 @@ const FACTOR_STACK: (FactorInsight & { stackClass: string })[] = [
     baselineComponent: 0.52,
     weight: 0.28,
     impact:
-      "Protein grams and protein share of calories are the largest lift to Control.",
+      "Protein grams and protein share of calories are the largest lift to Satiety.",
     expanded: true,
     contributorsSectionLabel: "From your log",
     contributorColumnHeaders: ["Protein (g)"],

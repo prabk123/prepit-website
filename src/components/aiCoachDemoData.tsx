@@ -23,7 +23,7 @@ export const AI_COACH_DEMO_SCENARIOS = [
   {
     userMessage: PROMPT_CHIPS[0].prompt,
     assistant:
-      "You've got about 500 cal and 42g protein left today. A salmon rice bowl or chicken stir-fry would hit protein and keep your Drive signal steady through the evening.",
+      "You've got about 500 cal and 42g protein left today. A salmon rice bowl or chicken stir-fry would hit protein and keep your Energy signal steady through the evening.",
   },
   {
     userMessage: PROMPT_CHIPS[1].prompt,

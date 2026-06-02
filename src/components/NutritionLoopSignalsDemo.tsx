@@ -3,9 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 
 const SIGNALS = [
-  { label: "Drive", score: 78 },
+  { label: "Energy", score: 78 },
   { label: "Satiety", score: 65 },
-  { label: "Balance", score: 71 },
+  { label: "Mood", score: 71 },
 ] as const;
 
 function colorForScore(score: number) {

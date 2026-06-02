@@ -11,7 +11,7 @@ const STEPS = [
   {
     number: 2,
     title: "Understand",
-    body: "Drive, Satiety, and Balance turn each meal into three live scores, so you know how you'll feel, not just what you logged.",
+    body: "Energy, Satiety, and Mood turn each meal into three live scores, so you know how you'll feel, not just what you logged.",
   },
   {
     number: 3,
@@ -45,7 +45,7 @@ function CoachSnippet() {
           <div className="flex items-center gap-2">
             <PrepItIcon name="sparkles" size={18} color="var(--black-100)" />
             <p className="text-sm font-bold leading-[21px] text-[var(--black-100)]">
-              Afternoon Drive looks soft
+              Afternoon Energy looks soft
             </p>
           </div>
           <p className="mt-2 text-xs font-medium leading-5 text-[var(--grey-80)]">
