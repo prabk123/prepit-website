@@ -45,7 +45,7 @@ export const metadata: Metadata = {
 
 const HERO_BULLETS: { text: string; icon: PrepItIconName }[] = [
   {
-    text: "Log meals accurately in seconds with natural language",
+    text: "Log meals accurately in seconds in your own words",
     icon: "pencil",
   },
   {

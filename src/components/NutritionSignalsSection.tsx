@@ -51,10 +51,8 @@ export default function NutritionSignalsSection() {
               id="nutrition-signals-body"
               className="text-base font-normal leading-relaxed text-[var(--grey-60)] lg:text-lg lg:leading-[27px]"
             >
-              Your daily nutrition signals are a 0–100 score built from three things you actually
-              care about. It&apos;s forward-looking: not a report card on yesterday, but a read
-              on what today&apos;s food is setting you up for. And it needs nothing but your food
-              log. No wearable, no CGM.
+              A forward-looking 0–100 score for energy, satiety and mood—built from your food
+              log alone. No wearable, no CGM.
             </p>
           </div>
 

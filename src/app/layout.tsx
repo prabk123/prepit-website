@@ -54,7 +54,7 @@ export const metadata: Metadata = {
     "AI nutritionist",
     "nutrition tracking",
     "meal logging",
-    "natural language food log",
+    "food log in your own words",
     "food diary",
     "calorie counter",
     "nutrition coach",
