@@ -8,6 +8,7 @@ import NavigationWrapper from "@/components/NavigationWrapper";
 import DownloadCTA from "@/components/DownloadCTA";
 import Footer from "@/components/Footer";
 import SmartBanner from "@/components/SmartBanner";
+import FloatingGetAppButton from "@/components/FloatingGetAppButton";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -53,7 +54,7 @@ export const metadata: Metadata = {
     "AI nutritionist",
     "nutrition tracking",
     "meal logging",
-    "natural language food log",
+    "food log in your own words",
     "food diary",
     "calorie counter",
     "nutrition coach",
@@ -199,6 +200,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${dmSans.variable} ${brandFont.variable} ${prepitIcons.variable} antialiased`}
       >
         <SmartBanner />
+        <FloatingGetAppButton />
         <div className="flex min-h-screen flex-col items-center bg-white">
           <NavigationWrapper />
 

@@ -53,7 +53,7 @@ function GoalCard({
   benefit: string;
 }) {
   return (
-    <article className="flex h-full flex-col rounded-2xl border border-[var(--grey-10)] bg-white p-4 text-left shadow-sm lg:p-5">
+    <article className="flex h-full flex-col rounded-2xl border border-[var(--grey-10)] bg-white p-4 text-left shadow-sm transition-colors hover:border-[var(--grey-40)] hover:shadow-md lg:p-5">
       <div className="ai-icon-chrome shrink-0" aria-hidden>
         <div className="ai-icon-chrome__inner">
           <PrepItIcon name={icon} size={20} color="var(--black-100)" />
@@ -83,7 +83,7 @@ export default function GoalsSection() {
             className="text-[32px] font-semibold leading-tight tracking-tight text-[var(--black-100)] lg:text-[40px]"
             style={{ fontFamily: "var(--font-brand)" }}
           >
-            Whatever you&apos;re working on, PrepIt optimises for it.
+            Whatever you&apos;re working on is fine
           </h2>
         </div>
 

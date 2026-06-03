@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import PrepItIcon, { type PrepItIconName } from "@/components/shareable/PrepItIcon";
 import LoggingSection from "@/components/LoggingSection";
-import NlLogBottomSheetDemo from "@/components/NlLogBottomSheetDemo";
+import HeroLoopDemo from "@/components/HeroLoopDemo";
 import NutritionLoopSection from "@/components/NutritionLoopSection";
 import AiCoachSection from "@/components/AiCoachSection";
 import GoalsSection from "@/components/GoalsSection";
@@ -42,6 +43,21 @@ export const metadata: Metadata = {
   },
 };
 
+const HERO_BULLETS: { text: string; icon: PrepItIconName }[] = [
+  {
+    text: "Log meals accurately in seconds in your own words",
+    icon: "pencil",
+  },
+  {
+    text: "Learn how your diet affects your energy, hunger and mood",
+    icon: "charts",
+  },
+  {
+    text: "Get personalised nutrition feedback, coaching and planning",
+    icon: "sparkles",
+  },
+];
+
 export default function Home() {
   return (
     <>
@@ -62,7 +78,7 @@ export default function Home() {
                   width: "fit-content",
                 }}
               >
-                Your AI nutritionist
+                Personalised AI Nutritionist
               </p>
 
               {/* Heading + description */}
@@ -71,17 +87,25 @@ export default function Home() {
                   className="text-[40px] font-semibold leading-tight tracking-tight lg:text-[64px] lg:leading-[64px]"
                   style={{ fontFamily: "var(--font-brand)" }}
                 >
-                  Your meals in.{" "}
+                  Not just tracking.{" "}
                   <br />
-                  Smart nutrition advice out.
+                  A system that actually improves how you eat.
                 </h1>
 
-                <p className="text-base font-normal leading-relaxed text-[var(--black-100)] lg:text-lg lg:leading-[27px]">
-                  Describe any meal in your own words. PrepIt logs it in
-                  seconds, shows how it&apos;ll affect your energy, hunger, and
-                  mood, and tells you what to do next. No food hunts. No guilt.
-                  Just a coach that fits how you actually eat.
-                </p>
+                <ul className="flex flex-col gap-4">
+                  {HERO_BULLETS.map(({ text, icon }) => (
+                    <li key={text} className="flex items-center gap-3 text-left">
+                      <div className="ai-icon-chrome shrink-0" aria-hidden>
+                        <div className="ai-icon-chrome__inner">
+                          <PrepItIcon name={icon} size={20} color="var(--black-100)" />
+                        </div>
+                      </div>
+                      <p className="min-w-0 flex-1 text-base font-normal leading-relaxed text-[var(--black-100)] lg:text-lg lg:leading-[27px]">
+                        {text}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
               </div>
             </div>
 
@@ -127,7 +151,7 @@ export default function Home() {
                 className="object-cover object-top"
               />
               <div className="absolute inset-x-[7%] bottom-[5%] z-10">
-                <NlLogBottomSheetDemo overlay />
+                <HeroLoopDemo />
               </div>
             </div>
           </div>
