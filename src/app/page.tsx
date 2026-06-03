@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import PrepItIcon, { type PrepItIconName } from "@/components/shareable/PrepItIcon";
 import LoggingSection from "@/components/LoggingSection";
 import HeroLoopDemo from "@/components/HeroLoopDemo";
 import NutritionLoopSection from "@/components/NutritionLoopSection";
@@ -42,6 +43,21 @@ export const metadata: Metadata = {
   },
 };
 
+const HERO_BULLETS: { text: string; icon: PrepItIconName }[] = [
+  {
+    text: "Log meals accurately in seconds with natural language",
+    icon: "pencil",
+  },
+  {
+    text: "Learn how your diet affects your energy, hunger and mood",
+    icon: "charts",
+  },
+  {
+    text: "Get personalised nutrition feedback, coaching and planning",
+    icon: "sparkles",
+  },
+];
+
 export default function Home() {
   return (
     <>
@@ -76,16 +92,19 @@ export default function Home() {
                   A system that actually improves how you eat.
                 </h1>
 
-                <ul className="list-disc space-y-2 pl-5 text-base font-normal leading-relaxed text-[var(--black-100)] lg:text-lg lg:leading-[27px]">
-                  <li>
-                    Log meals accurately in seconds with natural language
-                  </li>
-                  <li>
-                    Learn how your diet affects your energy, hunger and mood
-                  </li>
-                  <li>
-                    Get personalised nutrition feedback, coaching and planning
-                  </li>
+                <ul className="flex flex-col gap-4">
+                  {HERO_BULLETS.map(({ text, icon }) => (
+                    <li key={text} className="flex gap-3 text-left">
+                      <div className="ai-icon-chrome mt-0.5 shrink-0" aria-hidden>
+                        <div className="ai-icon-chrome__inner">
+                          <PrepItIcon name={icon} size={20} color="var(--black-100)" />
+                        </div>
+                      </div>
+                      <p className="min-w-0 flex-1 text-base font-normal leading-relaxed text-[var(--black-100)] lg:text-lg lg:leading-[27px]">
+                        {text}
+                      </p>
+                    </li>
+                  ))}
                 </ul>
               </div>
             </div>
