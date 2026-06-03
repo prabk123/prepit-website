@@ -144,6 +144,58 @@ body {
   animation: nlDemoFadeIn 0.35s ease-out both;
 }
 
+.hero-factor-stack-item {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  margin-top: 0;
+  transition:
+    grid-template-rows 380ms cubic-bezier(0.33, 1, 0.68, 1),
+    opacity 380ms cubic-bezier(0.33, 1, 0.68, 1),
+    margin-top 380ms cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+.hero-factor-stack-item--visible {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.hero-factor-stack-item--overlap.hero-factor-stack-item--visible {
+  margin-top: -10px;
+}
+
+.hero-factor-stack-item-inner {
+  overflow: hidden;
+}
+
+.hero-factor-stack-item-content {
+  transform: translateY(10px);
+  transition: transform 380ms cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+.hero-factor-stack-item--visible .hero-factor-stack-item-content {
+  transform: translateY(0);
+}
+
+@keyframes heroExploreChipTap {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  }
+  35% {
+    transform: scale(0.9);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+  }
+  100% {
+    transform: scale(0.94);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.16);
+  }
+}
+
+.hero-explore-chip-tap {
+  animation: heroExploreChipTap 380ms cubic-bezier(0.33, 1, 0.68, 1) forwards;
+}
+
 @keyframes nlLoadingShimmer {
   0% {
     opacity: 0.55;

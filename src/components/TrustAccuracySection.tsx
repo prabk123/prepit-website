@@ -69,7 +69,7 @@ export default function TrustAccuracySection() {
             id="trust-subtitle"
             className="text-base font-normal leading-relaxed text-[var(--grey-60)] lg:text-lg lg:leading-[27px]"
           >
-            No shame. No &ldquo;cheat days.&rdquo; No punishment language. Just a clearer next step.
+            No shame. No &ldquo;cheat days.&rdquo; Just a clearer next step.
           </p>
         </div>
 

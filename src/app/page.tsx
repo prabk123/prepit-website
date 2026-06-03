@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import LoggingSection from "@/components/LoggingSection";
-import NlLogBottomSheetDemo from "@/components/NlLogBottomSheetDemo";
+import HeroLoopDemo from "@/components/HeroLoopDemo";
 import NutritionLoopSection from "@/components/NutritionLoopSection";
 import AiCoachSection from "@/components/AiCoachSection";
 import GoalsSection from "@/components/GoalsSection";
@@ -62,7 +62,7 @@ export default function Home() {
                   width: "fit-content",
                 }}
               >
-                Your AI nutritionist
+                Personalised AI Nutritionist
               </p>
 
               {/* Heading + description */}
@@ -71,17 +71,22 @@ export default function Home() {
                   className="text-[40px] font-semibold leading-tight tracking-tight lg:text-[64px] lg:leading-[64px]"
                   style={{ fontFamily: "var(--font-brand)" }}
                 >
-                  Your meals in.{" "}
+                  Not just tracking.{" "}
                   <br />
-                  Smart nutrition advice out.
+                  A system that actually improves how you eat.
                 </h1>
 
-                <p className="text-base font-normal leading-relaxed text-[var(--black-100)] lg:text-lg lg:leading-[27px]">
-                  Describe any meal in your own words. PrepIt logs it in
-                  seconds, shows how it&apos;ll affect your energy, hunger, and
-                  mood, and tells you what to do next. No food hunts. No guilt.
-                  Just a coach that fits how you actually eat.
-                </p>
+                <ul className="list-disc space-y-2 pl-5 text-base font-normal leading-relaxed text-[var(--black-100)] lg:text-lg lg:leading-[27px]">
+                  <li>
+                    Log meals accurately in seconds with natural language
+                  </li>
+                  <li>
+                    Learn how your diet affects your energy, hunger and mood
+                  </li>
+                  <li>
+                    Get personalised nutrition feedback, coaching and planning
+                  </li>
+                </ul>
               </div>
             </div>
 
@@ -127,7 +132,7 @@ export default function Home() {
                 className="object-cover object-top"
               />
               <div className="absolute inset-x-[7%] bottom-[5%] z-10">
-                <NlLogBottomSheetDemo overlay />
+                <HeroLoopDemo />
               </div>
             </div>
           </div>

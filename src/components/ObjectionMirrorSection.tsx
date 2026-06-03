@@ -17,13 +17,8 @@ const CARDS = [
     icon: "calories" as const,
   },
   {
-    title: "The advice is too generic.",
-    body: (
-      <>
-        Drink water. Eat more protein. Thanks. But what should <em>I</em> eat,
-        tonight, with what&apos;s left in my day?
-      </>
-    ),
+    title: "They stop at tracking",
+    body: "I didn't eat enough protein. Great, but how can I change that? What should I eat tonight?",
     icon: "info" as const,
   },
 ] as const;

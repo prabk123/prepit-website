@@ -133,7 +133,8 @@ export default function NutritionLoopSection() {
             className="text-[32px] font-semibold leading-tight tracking-tight text-[var(--black-100)] lg:text-[40px]"
             style={{ fontFamily: "var(--font-brand)" }}
           >
-            Not just tracking. A loop that actually changes how you eat.
+            This isn&apos;t &ldquo;calories in, calories out&rdquo;. It&apos;s a
+            loop that builds lasting healthy habits.
           </h2>
           <p
             id="nutrition-loop-subtitle"

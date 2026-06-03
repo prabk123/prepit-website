@@ -3,23 +3,18 @@ import NlLogFlowPhoneDemo from "@/components/NlLogFlowPhoneDemo";
 
 const FEATURES: { title: string; body: string; icon: PrepItIconName }[] = [
   {
-    title: "Describe it",
-    body: "Type or dictate what you ate in plain English.",
+    title: "Describe it, snap it or both",
+    body: "Include details such as brand, restaurant, size or ingredients",
     icon: "pencil",
   },
   {
-    title: "Snap it",
-    body: "Photo of your plate or a nutrition label.",
-    icon: "camera",
+    title: "PrepIt does the research",
+    body: "PrepIt compiles all of the legitimate sources and cross-references them",
+    icon: "search",
   },
   {
-    title: "Review it",
-    body: "See the items, macros, and how PrepIt estimated them.",
-    icon: "eye",
-  },
-  {
-    title: "Confirm it",
-    body: "Edit anything, then add it to your log.",
+    title: "Review and confirm",
+    body: "You review it. Nothing\u2019s logged before you confirm you\u2019re happy",
     icon: "checkmark",
   },
 ];
@@ -68,17 +63,13 @@ export default function LoggingSection() {
               className="text-[32px] font-semibold leading-tight tracking-tight text-[var(--black-100)] lg:text-[40px]"
               style={{ fontFamily: "var(--font-brand)" }}
             >
-              You describe the meal.{" "}
-              <br className="hidden sm:block" />
-              PrepIt builds the log.
+              The most accurate logging.. naturally
             </h2>
             <p
               id="logging-body"
               className="text-base font-normal leading-relaxed text-[var(--grey-60)] lg:text-lg lg:leading-[27px]"
             >
-              &ldquo;Chicken wrap, an apple and a flat white.&rdquo; One sentence. PrepIt turns
-              it into items, portions, and macros&mdash;shows you what it assumed, and lets you fix
-              anything before it saves.
+              How it works
             </p>
           </div>
 

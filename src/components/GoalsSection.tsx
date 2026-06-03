@@ -83,7 +83,7 @@ export default function GoalsSection() {
             className="text-[32px] font-semibold leading-tight tracking-tight text-[var(--black-100)] lg:text-[40px]"
             style={{ fontFamily: "var(--font-brand)" }}
           >
-            Whatever you&apos;re working on, PrepIt optimises for it.
+            Whatever you&apos;re working on is fine
           </h2>
         </div>
 
