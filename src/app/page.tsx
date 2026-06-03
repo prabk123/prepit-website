@@ -94,8 +94,8 @@ export default function Home() {
 
                 <ul className="flex flex-col gap-4">
                   {HERO_BULLETS.map(({ text, icon }) => (
-                    <li key={text} className="flex gap-3 text-left">
-                      <div className="ai-icon-chrome mt-0.5 shrink-0" aria-hidden>
+                    <li key={text} className="flex items-center gap-3 text-left">
+                      <div className="ai-icon-chrome shrink-0" aria-hidden>
                         <div className="ai-icon-chrome__inner">
                           <PrepItIcon name={icon} size={20} color="var(--black-100)" />
                         </div>
