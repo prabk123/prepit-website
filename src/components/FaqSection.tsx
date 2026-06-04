@@ -121,7 +121,7 @@ export default function FaqSection() {
     <section
       id="faq"
       aria-labelledby="faq-heading"
-      className="flex w-full flex-col items-center bg-white px-4 py-16 lg:px-20 lg:py-24"
+      className="flex w-full flex-col items-center bg-[var(--grey-5)] px-4 py-16 lg:px-20 lg:py-24"
     >
       <div className="flex w-full max-w-[1200px] flex-col items-center gap-10 text-center lg:gap-12">
         <div className="flex max-w-[720px] flex-col gap-4">

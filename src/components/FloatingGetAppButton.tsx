@@ -2,9 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
-
-const APP_STORE_URL =
-  "https://apps.apple.com/app/prepit-ai-nutritionist/id6751211023";
+import AppStoreLink from "@/components/AppStoreLink";
 
 const BUTTON_BOTTOM_OFFSET_PX = 24; // bottom-6
 const BUTTON_HEIGHT_PX = 56; // h-14
@@ -41,8 +39,8 @@ export default function FloatingGetAppButton() {
   }, []);
 
   return (
-    <a
-      href={APP_STORE_URL}
+    <AppStoreLink
+      trackingSource="floating-button"
       className={`fixed bottom-6 right-4 z-50 transition-opacity hover:opacity-80 lg:right-14 ${
         hidden ? "pointer-events-none opacity-0" : ""
       }`}
@@ -57,6 +55,6 @@ export default function FloatingGetAppButton() {
         height={56}
         className="h-14 w-auto shadow-lg"
       />
-    </a>
+    </AppStoreLink>
   );
 }

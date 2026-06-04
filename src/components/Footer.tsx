@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import AppStoreLink from "@/components/AppStoreLink";
 import { HOME_SECTION_LINKS } from "@/lib/homeSections";
 
 export default function Footer() {
@@ -30,9 +31,12 @@ export default function Footer() {
               Made with ❤️ and late nights
             </p>
           </div>
-          <a href="https://apps.apple.com/app/prepit-ai-nutritionist/id6751211023" className="self-start rounded-xl bg-black px-4 py-3 text-sm font-bold text-white lg:self-auto">
+          <AppStoreLink
+            trackingSource="footer-cta"
+            className="self-start rounded-xl bg-black px-4 py-3 text-sm font-bold text-white lg:self-auto"
+          >
             Get the app
-          </a>
+          </AppStoreLink>
         </div>
 
         {/* Footer Links */}
@@ -55,12 +59,12 @@ export default function Footer() {
                   {link.label}
                 </Link>
               ))}
-              <a
-                href="https://apps.apple.com/app/prepit-ai-nutritionist/id6751211023"
+              <AppStoreLink
+                trackingSource="footer-explore"
                 className="text-base hover:opacity-70"
               >
                 Download App
-              </a>
+              </AppStoreLink>
             </div>
           </div>
 

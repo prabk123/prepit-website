@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import AppStoreLink from "@/components/AppStoreLink";
 import PrepItIcon, { type PrepItIconName } from "@/components/shareable/PrepItIcon";
 import LoggingSection from "@/components/LoggingSection";
 import HeroLoopDemo from "@/components/HeroLoopDemo";
 import NutritionLoopSection from "@/components/NutritionLoopSection";
 import AiCoachSection from "@/components/AiCoachSection";
-import GoalsSection from "@/components/GoalsSection";
 import FaqSection from "@/components/FaqSection";
 import NutritionSignalsSection from "@/components/NutritionSignalsSection";
 import ObjectionMirrorSection from "@/components/ObjectionMirrorSection";
@@ -78,7 +78,7 @@ export default function Home() {
                   width: "fit-content",
                 }}
               >
-                Personalised AI Nutritionist
+                Your personal AI nutritionist
               </p>
 
               {/* Heading + description */}
@@ -111,8 +111,8 @@ export default function Home() {
 
             {/* App Store Buttons */}
             <div className="flex flex-row justify-start items-start gap-4">
-              <a
-                href="https://apps.apple.com/app/prepit-ai-nutritionist/id6751211023"
+              <AppStoreLink
+                trackingSource="hero"
                 className="transition-opacity hover:opacity-80"
                 aria-label="Download on the App Store"
               >
@@ -123,7 +123,7 @@ export default function Home() {
                   height={48}
                   className="h-12 w-auto"
                 />
-              </a>
+              </AppStoreLink>
               <div className="flex flex-col items-center justify-center gap-1">
                 <Image
                   src="/play_store_download_disabled.png"
@@ -169,8 +169,6 @@ export default function Home() {
       <AiCoachSection />
 
       <TrustAccuracySection />
-
-      <GoalsSection />
 
       <FaqSection />
     </>

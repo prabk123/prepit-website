@@ -1,9 +1,9 @@
-import Image from "next/image";
+import AppStoreLink from "@/components/AppStoreLink";
 
 export default function AppStoreBadge() {
   return (
-    <a
-      href="https://apps.apple.com/app/prepit-ai-nutritionist/id6751211023"
+    <AppStoreLink
+      trackingSource="app-store-badge"
       className="inline-block h-12 w-36 overflow-hidden rounded-lg bg-black"
     >
       <div className="relative flex h-full w-full items-center px-2.5">
@@ -31,6 +31,6 @@ export default function AppStoreBadge() {
           </span>
         </div>
       </div>
-    </a>
+    </AppStoreLink>
   );
 }

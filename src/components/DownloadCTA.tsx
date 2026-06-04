@@ -1,4 +1,5 @@
 import Image from "next/image";
+import AppStoreLink from "@/components/AppStoreLink";
 
 export default function DownloadCTA() {
   return (
@@ -34,8 +35,8 @@ export default function DownloadCTA() {
             </div>
             <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center">
               {/* iOS Download Button */}
-              <a
-                href="https://apps.apple.com/app/prepit-ai-nutritionist/id6751211023"
+              <AppStoreLink
+                trackingSource="download-cta"
                 className="flex items-center justify-center gap-2 rounded-2xl bg-white px-4 py-4 transition-opacity hover:opacity-80"
                 aria-label="Download on iOS"
               >
@@ -54,7 +55,7 @@ export default function DownloadCTA() {
                 <span className="text-base font-bold leading-6 text-black">
                   Download on iOS
                 </span>
-              </a>
+              </AppStoreLink>
             </div>
           </div>
 

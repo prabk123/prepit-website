@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import AppStoreLink from "@/components/AppStoreLink";
 import { HEADER_SECTION_LINKS } from "@/lib/homeSections";
 
 export default function NavigationWrapper() {
@@ -56,19 +57,22 @@ export default function NavigationWrapper() {
             >
               Feedback
             </a>
-            <a href="https://apps.apple.com/app/prepit-ai-nutritionist/id6751211023" className="rounded-xl bg-black px-4 py-3 text-sm font-bold leading-[21px] text-white transition-opacity hover:opacity-80">
+            <AppStoreLink
+              trackingSource="header-desktop"
+              className="rounded-xl bg-black px-4 py-3 text-sm font-bold leading-[21px] text-white transition-opacity hover:opacity-80"
+            >
               Get the app
-            </a>
+            </AppStoreLink>
           </div>
 
           {/* Mobile: Get the app + menu */}
           <div className="flex items-center gap-3 lg:hidden">
-            <a
-              href="https://apps.apple.com/app/prepit-ai-nutritionist/id6751211023"
+            <AppStoreLink
+              trackingSource="header-mobile"
               className="rounded-xl bg-black px-3 py-2 text-sm font-bold leading-[21px] text-white transition-opacity hover:opacity-80"
             >
               Get the app
-            </a>
+            </AppStoreLink>
             <button
               className="flex h-6 w-6 items-center justify-center"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}

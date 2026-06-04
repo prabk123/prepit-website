@@ -1,9 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { GoalChangeActionCard, LogFoodActionCard } from "@/components/AiChatDemoCards";
-import type { AiCoachDemoIndex } from "@/components/aiCoachDemoData";
 import FakeLogScreenDemo from "@/components/FakeLogScreenDemo";
 import PrepItIcon from "@/components/shareable/PrepItIcon";
 
@@ -215,11 +214,11 @@ function AiChatBottomSheet({
 
 type AiChatPhoneDemoProps = {
   scenarios: readonly DemoScenario[];
-  onScenarioChange?: (index: AiCoachDemoIndex) => void;
 };
 
-export default function AiChatPhoneDemo({ scenarios, onScenarioChange }: AiChatPhoneDemoProps) {
+export default function AiChatPhoneDemo({ scenarios }: AiChatPhoneDemoProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const messagesScrollRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(false);
   const [phase, setPhase] = useState<DemoPhase>("typing");
   const [typedInput, setTypedInput] = useState("");
@@ -229,6 +228,28 @@ export default function AiChatPhoneDemo({ scenarios, onScenarioChange }: AiChatP
   const [actionDone, setActionDone] = useState(false);
   const [fadeKey, setFadeKey] = useState(0);
   const [displayScenario, setDisplayScenario] = useState<DemoScenario>(scenarios[0]);
+
+  const scrollMessagesToBottom = useCallback(() => {
+    const scrollEl = messagesScrollRef.current;
+    if (!scrollEl) return;
+    scrollEl.scrollTop = scrollEl.scrollHeight;
+  }, []);
+
+  useLayoutEffect(() => {
+    scrollMessagesToBottom();
+  }, [messages, streamedAssistant, showAction, actionDone, phase, fadeKey, scrollMessagesToBottom]);
+
+  useEffect(() => {
+    const scrollEl = messagesScrollRef.current;
+    const contentEl = scrollEl?.firstElementChild;
+    if (!scrollEl || !contentEl) return;
+
+    const observer = new ResizeObserver(() => {
+      scrollMessagesToBottom();
+    });
+    observer.observe(contentEl);
+    return () => observer.disconnect();
+  }, [fadeKey, scrollMessagesToBottom]);
 
   useEffect(() => {
     const node = containerRef.current;
@@ -260,7 +281,6 @@ export default function AiChatPhoneDemo({ scenarios, onScenarioChange }: AiChatP
       while (!cancelled) {
         const current = scenarios[scenarioIndex];
         setDisplayScenario(current);
-        onScenarioChange?.(scenarioIndex as AiCoachDemoIndex);
 
         setPhase("typing");
         setTypedInput("");
@@ -331,7 +351,7 @@ export default function AiChatPhoneDemo({ scenarios, onScenarioChange }: AiChatP
       cancelled = true;
       clearTimeout(timeout);
     };
-  }, [active, scenarios, onScenarioChange]);
+  }, [active, scenarios]);
 
   const listContent = (
     <div className="flex flex-col px-4 py-2">
@@ -362,14 +382,14 @@ export default function AiChatPhoneDemo({ scenarios, onScenarioChange }: AiChatP
   );
 
   return (
-    <div ref={containerRef} className="w-full">
+    <div ref={containerRef} className="pointer-events-none w-full select-none">
       <PhoneShell>
         <div key={fadeKey} className="relative h-full nl-demo-fade">
           <FakeLogScreenDemo />
           <div className="absolute inset-0 z-[1] bg-black/35" aria-hidden />
           <AiChatBottomSheet>
             <ChatHeader />
-            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+            <div ref={messagesScrollRef} className="min-h-0 flex-1 overflow-hidden">
               {listContent}
             </div>
             <Composer
