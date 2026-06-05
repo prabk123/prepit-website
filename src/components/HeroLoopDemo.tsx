@@ -68,18 +68,18 @@ const CHAT = {
     "Your wrap and flat white are light on protein, which can leave Energy dipping mid-afternoon. A Greek yogurt now adds ~15g protein and helps hold Satiety until dinner.",
 } as const;
 
-const TYPE_MS = 55;
-const PRE_TYPE_MS = 700;
-const LOG_HOLD_MS = 2600;
-const MEAL_MS = 5500;
-const SIGNALS_RINGS_HOLD_MS = 2000;
-const SIGNAL_FACTOR_HOLD_MS = 1600;
-const INSIGHT_HOLD_MS = 5200;
-const INSIGHT_TAP_MS = 380;
-const CHAT_THINK_MS = 900;
-const CHAT_STREAM_MS = 16;
-const CHAT_HOLD_MS = 5000;
-const FADE_MS = 600;
+const TYPE_MS = 30;
+const PRE_TYPE_MS = 400;
+const LOG_HOLD_MS = 1400;
+const MEAL_MS = 3000;
+const SIGNALS_RINGS_HOLD_MS = 1100;
+const SIGNAL_FACTOR_HOLD_MS = 900;
+const INSIGHT_HOLD_MS = 2800;
+const INSIGHT_TAP_MS = 220;
+const CHAT_THINK_MS = 500;
+const CHAT_STREAM_MS = 9;
+const CHAT_HOLD_MS = 2800;
+const FADE_MS = 350;
 
 function LogSheet({ text, typing }: { text: string; typing: boolean }) {
   return (
@@ -259,7 +259,7 @@ function SignalsCard({
                 score={signal.score}
                 label=""
                 animate
-                delayMs={index * 100}
+                delayMs={index * 60}
                 size={66}
                 showScoreOnly
               />

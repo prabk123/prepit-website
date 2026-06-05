@@ -16,12 +16,12 @@ const LOADING_STAGES = [
 
 type DemoPhase = "typing" | "submitting" | "loading" | "review";
 
-const TYPE_MS = 68;
-const SUBMIT_HOLD_MS = 750;
-const LOADING_STAGE_MS = 1100;
-const REVIEW_HOLD_MS = 6800;
-const RESET_MS = 600;
-const PUSH_MS = 350;
+const TYPE_MS = 52;
+const SUBMIT_HOLD_MS = 580;
+const LOADING_STAGE_MS = 850;
+const REVIEW_HOLD_MS = 5200;
+const RESET_MS = 480;
+const PUSH_MS = 280;
 const PUSH_EASING = "cubic-bezier(0.32, 0.72, 0, 1)";
 
 /** iPhone 15/16 logical display (390×844pt). Inner width = 300px frame − 12px border. */

@@ -7,8 +7,8 @@ const DESIGN_WIDTH = 390;
 const DESIGN_HEIGHT = 844;
 const SCALE = 288 / DESIGN_WIDTH;
 
-const SCROLL_DELAY_MS = 1000;
-const SCROLL_DURATION_MS = 2000;
+const SCROLL_DELAY_MS = 800;
+const SCROLL_DURATION_MS = 1600;
 
 const C = {
   scaffold: "#F4F4F5",
