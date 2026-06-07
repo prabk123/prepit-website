@@ -87,9 +87,7 @@ export default function Home() {
                   className="text-[40px] font-semibold leading-tight tracking-tight lg:text-[64px] lg:leading-[64px]"
                   style={{ fontFamily: "var(--font-brand)" }}
                 >
-                  Not just tracking.{" "}
-                  <br />
-                  A system that actually improves how you eat.
+                  Eat well with PrepIt
                 </h1>
 
                 <ul className="flex flex-col gap-4">
