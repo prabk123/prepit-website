@@ -3,15 +3,15 @@ import NutritionSignalsVisual from "@/components/NutritionSignalsVisual";
 const SIGNAL_CARDS = [
   {
     title: "Energy",
-    body: "Will you have the energy and focus to get through the day? Built from your meal timing, glycaemic load and how early you front-load calories.",
+    body: "Will you have stable energy and focus today? Built from your meal timing, glycaemic load, and how you spread calories through the day.",
   },
   {
     title: "Satiety",
-    body: "Will you stay in control around food this afternoon? Driven by protein, fibre, and how processed your meals are.",
+    body: "Will you stay in control around food? Driven by protein, fibre, and how processed your meals are.",
   },
   {
     title: "Mood",
-    body: "Will you feel steady or on edge? Shaped by food quality, vegetables, alcohol and how deep your deficit runs.",
+    body: "How well did yesterday's eating set you up for steadiness today? Shaped by food quality, vegetables, alcohol, and how deep your deficit was.",
   },
 ] as const;
 
@@ -51,8 +51,9 @@ export default function NutritionSignalsSection() {
               id="nutrition-signals-body"
               className="text-base font-normal leading-relaxed text-[var(--grey-60)] lg:text-lg lg:leading-[27px]"
             >
-              A forward-looking 0–100 score for energy, satiety and mood—built from your food
-              log alone. No wearable, no CGM.
+              A forward-looking 0–100 score for energy, satiety, and mood—built from your food
+              log alone. Energy and satiety update as you log today; mood reflects
+              yesterday&apos;s full log. No wearable, no CGM.
             </p>
           </div>
 
