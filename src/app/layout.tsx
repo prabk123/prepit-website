@@ -9,6 +9,7 @@ import DownloadCTA from "@/components/DownloadCTA";
 import Footer from "@/components/Footer";
 import SmartBanner from "@/components/SmartBanner";
 import FloatingGetAppButton from "@/components/FloatingGetAppButton";
+import CookieConsent from "@/components/CookieConsent";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -214,6 +215,7 @@ export default function RootLayout({
         </div>
         <SpeedInsights />
         <Analytics />
+        <CookieConsent />
       </body>
     </html>
   );
