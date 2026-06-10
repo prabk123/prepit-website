@@ -3,6 +3,7 @@
 import type { ComponentProps } from "react";
 import { APP_STORE_URL } from "@/lib/appStore";
 import { trackAppStoreClick } from "@/lib/metaPixel";
+import { trackPostHogAppStoreClick } from "@/lib/posthogAnalytics";
 
 type AppStoreLinkProps = ComponentProps<"a"> & {
   /** Identifies which CTA was tapped (sent to Meta Pixel as `source`). */
@@ -20,6 +21,7 @@ export default function AppStoreLink({
       href={href}
       onClick={(event) => {
         trackAppStoreClick(trackingSource);
+        trackPostHogAppStoreClick(trackingSource);
         onClick?.(event);
       }}
       {...props}
