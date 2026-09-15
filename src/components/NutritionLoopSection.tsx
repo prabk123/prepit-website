@@ -6,7 +6,7 @@ const STEPS = [
   {
     number: 1,
     title: "Log",
-    body: "Say what you ate, in your own words or with a photo. PrepIt builds the meal in seconds, and you just confirm.",
+    body: "Say what you ate, in your own words or with a photo. It lands in your log in seconds — you can edit it anytime.",
   },
   {
     number: 2,

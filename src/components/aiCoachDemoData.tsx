@@ -1,5 +1,11 @@
 export const AI_COACH_DEMO_SCENARIOS = [
   {
+    userMessage: "Plan my week?",
+    assistant:
+      "I'll draft the next few days around your targets and how you actually eat. Thursday dinner stays open since you're out. Review the draft when you're ready.",
+    actionType: "review_plan" as const,
+  },
+  {
     userMessage: "Am I on track with my goals?",
     assistant:
       "You're hitting calories most days but protein is often 15–20g short, which can slow progress. I'd nudge your daily targets up on protein with a small calorie tweak. Review and tap Save if you want to apply it.",

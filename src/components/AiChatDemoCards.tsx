@@ -125,6 +125,60 @@ export function LogFoodActionCard({
   );
 }
 
+export function ReviewPlanActionCard({
+  range,
+  note,
+  estimate,
+  done,
+}: {
+  range: string;
+  note: string;
+  estimate: string;
+  done?: boolean;
+}) {
+  return (
+    <div
+      className="mb-3 rounded-2xl border pl-4 pr-3 pt-4 pb-4"
+      style={{ backgroundColor: C.surface, borderColor: C.border }}
+    >
+      <div className="flex items-center gap-2">
+        <PrepItIcon name="calendar" size={14} color={C.textSecondary} />
+        <span
+          className="text-xs font-bold leading-[21px]"
+          style={{ color: C.textSecondary }}
+        >
+          Review plan
+        </span>
+      </div>
+
+      <div className="mt-3">
+        <p
+          className="text-xs font-bold leading-[21px]"
+          style={{ color: C.textPrimary }}
+        >
+          {range}
+        </p>
+        <p
+          className="mt-2 text-xs font-medium leading-[21px]"
+          style={{ color: C.textPrimary }}
+        >
+          {note}
+        </p>
+        <p
+          className="mt-2 text-xs font-medium leading-[21px]"
+          style={{ color: C.textSecondary }}
+        >
+          {estimate}
+        </p>
+      </div>
+
+      <div className="mt-4">
+        <LogFoodPrimaryButton label="Review draft" done={done} />
+      </div>
+    </div>
+  );
+}
+
 /** Matches [_GoalChangeActionCard] / [_FigmaConfirmActionCard] in ai_chat_action_cards.dart */
 export function GoalChangeActionCard({
   goalDescription,

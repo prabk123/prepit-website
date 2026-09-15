@@ -3,18 +3,18 @@ import NlLogFlowPhoneDemo from "@/components/NlLogFlowPhoneDemo";
 
 const FEATURES: { title: string; body: string; icon: PrepItIconName }[] = [
   {
-    title: "Describe it, snap it or both",
-    body: "Include details such as brand, restaurant, size or ingredients",
+    title: "Describe it, snap it, or pick a recent",
+    body: "Include the brand, restaurant, size, or ingredients — or take a photo",
     icon: "pencil",
   },
   {
-    title: "PrepIt does the research",
-    body: "PrepIt compiles all of the legitimate sources and cross-references them",
+    title: "It lands in your log in seconds",
+    body: "Pick the day and meal slot. PrepIt researches sources in the background while you keep going",
     icon: "search",
   },
   {
-    title: "Review and confirm",
-    body: "You review it. Nothing\u2019s logged before you confirm you\u2019re happy",
+    title: "Edit anything after",
+    body: "Open the meal to fix portions, swap items, or Refine with AI. Nothing is final until it looks right",
     icon: "checkmark",
   },
 ];
@@ -63,13 +63,14 @@ export default function LoggingSection() {
               className="text-[32px] font-semibold leading-tight tracking-tight text-[var(--black-100)] lg:text-[40px]"
               style={{ fontFamily: "var(--font-brand)" }}
             >
-              The most accurate logging.. naturally
+              Log it the way you&apos;d tell a friend
             </h2>
             <p
               id="logging-body"
               className="text-base font-normal leading-relaxed text-[var(--grey-60)] lg:text-lg lg:leading-[27px]"
             >
-              How it works
+              Type it, snap it, or pick something you&apos;ve had before. PrepIt
+              researches the sources — you can edit the result anytime.
             </p>
           </div>
 
@@ -80,7 +81,7 @@ export default function LoggingSection() {
           </ul>
 
           <p className="text-sm font-medium leading-relaxed text-[var(--grey-80)] lg:text-base">
-            PrepIt estimates. You confirm. Nothing is saved until it looks right.
+            PrepIt estimates in the background. Open the meal to edit it.
           </p>
         </div>
 

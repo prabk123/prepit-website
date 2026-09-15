@@ -7,18 +7,13 @@ import PrepItIcon from "@/components/shareable/PrepItIcon";
 
 const MEAL_TEXT = "chicken wrap, an apple and a flat white";
 
-const LOADING_STAGES = [
-  "Searching...",
-  "Extracting items...",
-  "Checking sources...",
-  "Finalizing details...",
-] as const;
-
-type DemoPhase = "typing" | "submitting" | "loading" | "review";
+type DemoPhase = "typing" | "submitting" | "slot" | "calculating" | "review";
 
 const TYPE_MS = 52;
 const SUBMIT_HOLD_MS = 580;
-const LOADING_STAGE_MS = 850;
+const SLOT_HOLD_MS = 1400;
+const SLOT_CONFIRM_MS = 420;
+const CALCULATING_HOLD_MS = 2200;
 const REVIEW_HOLD_MS = 5200;
 const RESET_MS = 480;
 const PUSH_MS = 280;
@@ -51,25 +46,14 @@ function PhoneShell({ children }: { children: ReactNode }) {
   );
 }
 
-function LoadingPill({ message }: { message: string }) {
-  return (
-    <div className="inline-flex items-center gap-2 rounded-full bg-[var(--black-100)] px-3 py-2">
-      <PrepItIcon name="sparkles" size={16} color="#ffffff" />
-      <span className="nl-loading-shimmer text-xs font-medium text-white">{message}</span>
-    </div>
-  );
-}
-
 function InputSheet({
   text,
   showCursor,
   sendActive,
-  loadingMessage,
 }: {
   text: string;
   showCursor: boolean;
   sendActive?: boolean;
-  loadingMessage?: string;
 }) {
   return (
     <div className="absolute inset-x-0 bottom-0 z-10 flex flex-col overflow-hidden rounded-t-[24px] bg-white shadow-[0_-8px_40px_rgba(0,0,0,0.18)]">
@@ -100,11 +84,54 @@ function InputSheet({
             <PrepItIcon name="arrowUp" size={16} color="#ffffff" />
           </div>
         </div>
-        {loadingMessage && (
-          <div className="mt-4 flex justify-center">
-            <LoadingPill message={loadingMessage} />
-          </div>
-        )}
+      </div>
+    </div>
+  );
+}
+
+const MEAL_SLOTS = ["Breakfast", "Lunch", "Dinner", "Snacks"] as const;
+
+function AddToLogSheet({ confirmActive }: { confirmActive?: boolean }) {
+  return (
+    <div className="absolute inset-x-0 bottom-0 z-10 flex flex-col overflow-hidden rounded-t-[24px] bg-white shadow-[0_-8px_40px_rgba(0,0,0,0.18)]">
+      <div className="px-3 pb-3 pt-2">
+        <div className="mb-2 flex justify-center">
+          <div className="h-1 w-10 rounded-full bg-[#D3D3D5]" />
+        </div>
+        <h3 className="text-sm font-semibold leading-5 text-[var(--black-100)]">
+          Add to Log
+        </h3>
+        <p className="mt-0.5 text-[11px] leading-4 text-[var(--grey-60)]">
+          Choose the day and meal slot
+        </p>
+        <div className="mt-3 flex items-center gap-2 rounded-xl bg-[var(--grey-5)] px-3 py-2.5">
+          <PrepItIcon name="calendarDay" size={16} color="var(--black-100)" />
+          <span className="text-xs font-semibold text-[var(--black-100)]">Today</span>
+        </div>
+        <div className="mt-2.5 grid grid-cols-4 gap-1.5">
+          {MEAL_SLOTS.map((slot) => {
+            const selected = slot === "Lunch";
+            return (
+              <div
+                key={slot}
+                className={`rounded-xl px-1 py-2 text-center text-[10px] font-semibold leading-4 ${
+                  selected
+                    ? "bg-[var(--black-100)] text-white"
+                    : "bg-[var(--grey-5)] text-[var(--grey-60)]"
+                }`}
+              >
+                {slot}
+              </div>
+            );
+          })}
+        </div>
+        <div
+          className={`mt-3 rounded-xl bg-[var(--black-100)] py-2.5 text-center text-xs font-bold text-white transition-transform ${
+            confirmActive ? "scale-95" : ""
+          }`}
+        >
+          Add to Lunch
+        </div>
       </div>
     </div>
   );
@@ -115,12 +142,17 @@ export default function NlLogFlowPhoneDemo() {
   const [active, setActive] = useState(false);
   const [phase, setPhase] = useState<DemoPhase>("typing");
   const [typedText, setTypedText] = useState("");
-  const [loadingStage, setLoadingStage] = useState(0);
+  const [slotConfirming, setSlotConfirming] = useState(false);
   const [fadeKey, setFadeKey] = useState(0);
   const [reviewSlideIn, setReviewSlideIn] = useState(false);
   const [inputFlowVisible, setInputFlowVisible] = useState(true);
 
   const reviewOpen = phase === "review";
+  const showOverlay =
+    inputFlowVisible &&
+    (phase === "typing" || phase === "submitting" || phase === "slot");
+  const lunchState =
+    phase === "calculating" || phase === "review" ? "calculating" : "empty";
 
   useEffect(() => {
     const node = containerRef.current;
@@ -182,7 +214,7 @@ export default function NlLogFlowPhoneDemo() {
       while (!cancelled) {
         setPhase("typing");
         setTypedText("");
-        setLoadingStage(0);
+        setSlotConfirming(false);
         setFadeKey((k) => k + 1);
 
         for (let i = 1; i <= MEAL_TEXT.length; i += 1) {
@@ -196,12 +228,16 @@ export default function NlLogFlowPhoneDemo() {
         await wait(SUBMIT_HOLD_MS);
 
         if (cancelled) return;
-        setPhase("loading");
-        for (let stage = 0; stage < LOADING_STAGES.length; stage += 1) {
-          if (cancelled) return;
-          setLoadingStage(stage);
-          await wait(LOADING_STAGE_MS);
-        }
+        setPhase("slot");
+        await wait(SLOT_HOLD_MS);
+
+        if (cancelled) return;
+        setSlotConfirming(true);
+        await wait(SLOT_CONFIRM_MS);
+
+        if (cancelled) return;
+        setPhase("calculating");
+        await wait(CALCULATING_HOLD_MS);
 
         if (cancelled) return;
         setPhase("review");
@@ -231,18 +267,19 @@ export default function NlLogFlowPhoneDemo() {
               transform: reviewSlideIn ? "translateX(-30%)" : "translateX(0)",
             }}
           >
-            <FakeLogScreenDemo />
-            {inputFlowVisible && (
+            <FakeLogScreenDemo lunchState={lunchState} />
+            {showOverlay && (
               <>
                 <div className="absolute inset-0 z-[1] bg-black/60" aria-hidden />
-                <InputSheet
-                  text={typedText}
-                  showCursor={phase === "typing"}
-                  sendActive={phase === "submitting"}
-                  loadingMessage={
-                    phase === "loading" ? LOADING_STAGES[loadingStage] : undefined
-                  }
-                />
+                {phase === "slot" ? (
+                  <AddToLogSheet confirmActive={slotConfirming} />
+                ) : (
+                  <InputSheet
+                    text={typedText}
+                    showCursor={phase === "typing"}
+                    sendActive={phase === "submitting"}
+                  />
+                )}
               </>
             )}
           </div>

@@ -148,6 +148,28 @@ function FoodCardLog({
   );
 }
 
+function CalculatingFoodCard({ title }: { title: string }) {
+  return (
+    <div
+      className="rounded-2xl border bg-white p-3"
+      style={{ borderColor: C.border }}
+    >
+      <p
+        className="text-sm font-medium leading-[21px] text-black"
+        style={{ fontFamily: "var(--font-dm-sans)" }}
+      >
+        {title}
+      </p>
+      <p
+        className="nl-loading-shimmer mt-1.5 text-xs font-medium leading-[18px]"
+        style={{ fontFamily: "var(--font-dm-sans)", color: C.textSecondary }}
+      >
+        Calculating…
+      </p>
+    </div>
+  );
+}
+
 function MealTypeActionButton() {
   return (
     <div
@@ -325,7 +347,22 @@ function NutritionCard() {
   );
 }
 
-function LogScreenContent() {
+export type LogLunchState = "empty" | "calculating" | "ready";
+
+function LogScreenContent({ lunchState }: { lunchState: LogLunchState }) {
+  const lunch =
+    lunchState === "ready" ? (
+      <FoodCardLog
+        title="Chicken wrap, an apple and a flat white"
+        kcal={487}
+        carbs={42}
+        protein={26}
+        fat={19}
+      />
+    ) : lunchState === "calculating" ? (
+      <CalculatingFoodCard title="Chicken wrap, an apple and a flat white" />
+    ) : null;
+
   return (
     <div className="bg-[#F4F4F5] pb-6 pt-[47px]" style={{ width: DESIGN_WIDTH }}>
       <LogHeader />
@@ -342,7 +379,18 @@ function LogScreenContent() {
             fat={8}
           />
         </MealSection>
-        <MealSection title="Lunch" totals="0 kcal, 0g Carbs, 0g Protein, 0g Fat" />
+        <MealSection
+          title="Lunch"
+          totals={
+            lunchState === "calculating"
+              ? "(calculating…)"
+              : lunchState === "ready"
+                ? "487 kcal, 42g Carbs, 26g Protein, 19g Fat"
+                : "0 kcal, 0g Carbs, 0g Protein, 0g Fat"
+          }
+        >
+          {lunch}
+        </MealSection>
         <MealSection title="Dinner" totals="0 kcal, 0g Carbs, 0g Protein, 0g Fat" />
         <MealSection title="Snacks" totals="0 kcal, 0g Carbs, 0g Protein, 0g Fat" />
       </div>
@@ -350,7 +398,11 @@ function LogScreenContent() {
   );
 }
 
-export default function FakeLogScreenDemo() {
+export default function FakeLogScreenDemo({
+  lunchState = "empty",
+}: {
+  lunchState?: LogLunchState;
+} = {}) {
   return (
     <div className="absolute inset-0 overflow-hidden bg-[#F4F4F5]">
       <div
@@ -361,7 +413,7 @@ export default function FakeLogScreenDemo() {
         }}
         aria-hidden
       >
-        <LogScreenContent />
+        <LogScreenContent lunchState={lunchState} />
       </div>
     </div>
   );

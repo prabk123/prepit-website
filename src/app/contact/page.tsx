@@ -5,21 +5,21 @@ import ContactForm from "@/components/ContactForm";
 export const metadata: Metadata = {
   title: "Contact Us",
   description:
-    "Get in touch with PrepIt. We're here to help with your questions about meal planning, nutrition tracking, and our AI-powered app features.",
+    "Get in touch with PrepIt. We're here to help with your questions about nutrition coaching, meal logging, and our AI-powered app features.",
   alternates: {
     canonical: "https://www.tryprepit.app/contact",
   },
   openGraph: {
     title: "Contact Us | PrepIt",
     description:
-      "Get in touch with PrepIt. We're here to help with your questions about meal planning and nutrition tracking.",
+      "Get in touch with PrepIt. We're here to help with your questions about nutrition coaching and meal logging.",
     url: "https://www.tryprepit.app/contact",
   },
   twitter: {
     card: "summary",
     title: "Contact Us | PrepIt",
     description:
-      "Get in touch with PrepIt. We're here to help with your questions about meal planning and nutrition tracking.",
+      "Get in touch with PrepIt. We're here to help with your questions about nutrition coaching and meal logging.",
   },
 };
 

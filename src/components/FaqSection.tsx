@@ -7,17 +7,22 @@ const FAQ_ITEMS = [
   {
     question: "Is PrepIt free?",
     answer:
-      "You get full access free for 3 days. After that, it's one simple annual plan: $99.99/year — that's only $1.92/week. Cancel anytime.",
+      "You get full access free for 7 days — enough time to complete your full AI nutritionist consultation, including your week-1 review. After that, it's one simple annual plan: $99.99/year — that's only $1.92/week. Cancel anytime.",
   },
   {
     question: "Will I be charged during the trial?",
     answer:
-      "No. You won't be charged today. You get 3 full days of free access. If you haven't cancelled, your $99.99/year subscription starts on day 4. Cancel anytime before then to avoid being charged.",
+      "No. You won't be charged today. You get 7 full days of free access. If you haven't cancelled, your $99.99/year subscription starts on day 8. Cancel anytime before then to avoid being charged.",
+  },
+  {
+    question: "What happens in my first week?",
+    answer:
+      "Three short chats with your nutritionist. Session 1 (about 5 minutes) is how they get to know you — then you eat normally and log as usual. Once a few days are in, Session 2 shares what they've noticed from your real logs, and you pick a focus plus two small swaps to try. Session 3 is your first weekly check-in: how the week went, and a clear focus for the week ahead. You can plan meals anytime; the nutritionist will also offer when it fits.",
   },
   {
     question: "How accurate is the AI logging?",
     answer:
-      "PrepIt is built for accuracy. Instead of picking from a static food database, it searches the web for trustworthy sources — official brand pages, restaurant nutrition info, and verified references. Other apps rely on crowdsourced databases that go out of date and list dozens of conflicting options for the same item. PrepIt does that checking for you. You can still review and adjust anything before it's saved.",
+      "PrepIt is built for accuracy. Instead of picking from a static food database, it searches the web for trustworthy sources — official brand pages, restaurant nutrition info, and verified references. Other apps rely on crowdsourced databases that go out of date and list dozens of conflicting options for the same item. PrepIt does that checking for you. Meals land in your log in seconds while it finishes estimating; you can open anything to edit portions, swap items, or Refine with AI.",
   },
   {
     question: "What are Energy, Satiety, and Mood?",
@@ -25,14 +30,24 @@ const FAQ_ITEMS = [
       "PrepIt turns your food log into three 0–100 nutrition signals — forward-looking scores that estimate how your eating is likely to affect you, not just what you ate. Energy measures how stable and sustained your available energy will be today, and how well your brain is fuelled for focus and mental load. Satiety reflects how well today's food choices suppress hunger hormones and reduce the drive to overeat or reach for low-quality food. Mood shows how well the previous day's food choices support cortisol regulation, emotional stability, and resistance to stress-driven eating. Energy and Satiety update as you log today; Mood is built from yesterday's full log. No wearable required — they're research-grounded estimates to guide your next meal, not a direct measure of how you feel.",
   },
   {
-    question: "What is Ask Coach?",
+    question: "What is Ask Nutritionist?",
     answer:
-      "Ask Coach is your AI nutritionist inside PrepIt. Tap it from Home to ask anything about your goals, your day, or your last meal — and get answers in plain language using your own data. It can prepare actions like logging a meal or updating your targets, but you confirm everything before anything is saved.",
+      "Ask Nutritionist is your AI nutritionist inside PrepIt. Tap the gradient pill above + to ask anything about your goals, your day, or your last meal — and get answers in plain language using your own data. It can prepare actions like logging a meal, drafting a week of meals, or updating your targets, but you confirm everything before anything is saved.",
+  },
+  {
+    question: "How do meal plans work?",
+    answer:
+      "Your nutritionist drafts meal structures — roles like protein, carb, and veg with portion sizes — not chef recipes. You choose the days (up to 7), skip meals you're eating out, set a grocery budget, and confirm the draft. Each plan comes with a grocery list and an estimated cost. Ask Nutritionist to swap any meal; nothing updates until you confirm.",
+  },
+  {
+    question: "What is a weekly check-in?",
+    answer:
+      "Once a week, your nutritionist reviews your logs and asks a few quick questions about how the week felt. You get a personalised report: what worked, one key pattern, and a single focus for the week ahead. Your first check-in is Session 3 of the consultation; after that it repeats about every seven days.",
   },
   {
     question: "How does PrepIt set my calorie, macro, and weight goals?",
     answer:
-      "During onboarding, PrepIt learns your goal (lose fat, build muscle, improve energy, and more), body stats, activity level, and target weight where relevant — then sets daily calorie and macro targets personalised to you. You can log weight over time and update your targets anytime in the app, or ask Coach to suggest changes.",
+      "During onboarding, PrepIt learns your goal (lose fat, build muscle, improve energy, and more), body stats, activity level, and target weight where relevant — then sets daily calorie and macro targets personalised to you, plus a sustainable weekly pace. You can log weight over time and update your targets anytime in the app, or ask the nutritionist to suggest changes.",
   },
   {
     question: "Do I need a wearable or CGM?",

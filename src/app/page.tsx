@@ -9,6 +9,8 @@ import AiCoachSection from "@/components/AiCoachSection";
 import FaqSection from "@/components/FaqSection";
 import NutritionSignalsSection from "@/components/NutritionSignalsSection";
 import ObjectionMirrorSection from "@/components/ObjectionMirrorSection";
+import FirstWeekSection from "@/components/FirstWeekSection";
+import PlanSection from "@/components/PlanSection";
 import TrustAccuracySection from "@/components/TrustAccuracySection";
 
 export const metadata: Metadata = {
@@ -16,14 +18,14 @@ export const metadata: Metadata = {
     absolute: "PrepIt | Your AI Nutritionist – Meals In, Smart Advice Out",
   },
   description:
-    "Describe any meal in your own words. PrepIt logs it in seconds, shows how it affects your energy, hunger, and mood, and tells you what to do next—no food hunts, no guilt.",
+    "Describe any meal in your own words. PrepIt logs it in seconds, shows how it affects your energy, hunger, and mood, and coaches you through your first week—no food hunts, no guilt.",
   alternates: {
     canonical: "https://www.tryprepit.app",
   },
   openGraph: {
     title: "PrepIt | Your AI Nutritionist – Meals In, Smart Advice Out",
     description:
-      "Log meals in plain English. PrepIt shows how each meal affects your energy, hunger, and mood—and what to do next.",
+      "Log meals in plain English. PrepIt shows how they affect your energy, hunger, and mood — then coaches you through your first week.",
     url: "https://www.tryprepit.app",
     images: [
       {
@@ -38,7 +40,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "PrepIt | Your AI Nutritionist – Meals In, Smart Advice Out",
     description:
-      "Log meals in plain English. PrepIt shows how each meal affects your energy, hunger, and mood—and what to do next.",
+      "Log meals in plain English. PrepIt shows how they affect your energy, hunger, and mood — then coaches you through your first week.",
     images: ["/og-image.png"],
   },
 };
@@ -165,6 +167,10 @@ export default function Home() {
       <LoggingSection />
 
       <NutritionSignalsSection />
+
+      <FirstWeekSection />
+
+      <PlanSection />
 
       <AiCoachSection />
 

@@ -2,7 +2,11 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { GoalChangeActionCard, LogFoodActionCard } from "@/components/AiChatDemoCards";
+import {
+  GoalChangeActionCard,
+  LogFoodActionCard,
+  ReviewPlanActionCard,
+} from "@/components/AiChatDemoCards";
 import FakeLogScreenDemo from "@/components/FakeLogScreenDemo";
 import PrepItIcon from "@/components/shareable/PrepItIcon";
 
@@ -32,7 +36,7 @@ type DemoPhase =
   | "hold"
   | "reset";
 
-type ActionType = "log_food" | "goal_change";
+type ActionType = "log_food" | "goal_change" | "review_plan";
 
 type DemoScenario = {
   userMessage: string;
@@ -145,6 +149,15 @@ function ScenarioActionCard({
           carbsG={180}
           proteinG={150}
           fatsG={55}
+          done={done}
+        />
+      );
+    case "review_plan":
+      return (
+        <ReviewPlanActionCard
+          range="Mon–Thu · 4 days"
+          note="Coach-structured meals. Thursday dinner left open."
+          estimate="Grocery estimate $48–65"
           done={done}
         />
       );
@@ -327,7 +340,8 @@ export default function AiChatPhoneDemo({ scenarios }: AiChatPhoneDemoProps) {
           await wait(1200);
           if (
             current.actionType === "log_food" ||
-            current.actionType === "goal_change"
+            current.actionType === "goal_change" ||
+            current.actionType === "review_plan"
           ) {
             setActionDone(true);
             await wait(800);

@@ -10,9 +10,10 @@ export const HOME_SECTION_LINKS: HomeSectionLink[] = [
   { label: "How it works", href: "/#nutrition-loop", inHeader: true },
   { label: "Logging", href: "/#logging" },
   { label: "Nutrition signals", href: "/#nutrition-signals" },
+  { label: "First week", href: "/#first-week", inHeader: true },
+  { label: "Meal plans", href: "/#plans" },
   { label: "AI Nutritionist", href: "/#ai-coach", inHeader: true },
   { label: "Trust", href: "/#trust" },
-  { label: "Goals", href: "/#goals" },
   { label: "FAQ", href: "/#faq", inHeader: true },
 ];
 

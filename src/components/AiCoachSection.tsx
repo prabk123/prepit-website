@@ -6,11 +6,11 @@ import PrepItIcon, { type PrepItIconName } from "@/components/shareable/PrepItIc
 
 const COACH_BULLETS: { text: string; icon: PrepItIconName }[] = [
   {
-    text: "Answers in plain language using your own data",
+    text: "Answers in plain language using your logs, signals, and focus",
     icon: "sparkles",
   },
   {
-    text: "Logs meals and helps you set your calorie and macro goals — right from chat",
+    text: "Logs meals, drafts a week, and updates targets — right from chat",
     icon: "edit",
   },
   {
