@@ -13,6 +13,7 @@ import {
   stepCompleteValue,
   visibleStepCount,
   visibleStepIndex,
+  WEB_STEPS,
   type WebStepId,
 } from "@/features/onboarding/steps";
 import { recommendedGoalSpeed } from "@/features/onboarding/mappings";
@@ -52,12 +53,13 @@ import {
   GoalWeightStep,
   HeightWeightStep,
 } from "@/features/onboarding/steps/BodySteps";
+import GetStartedPrimer from "@/features/onboarding/components/GetStartedPrimer";
 import CompleteStep from "@/features/onboarding/steps/CompleteStep";
 import LoginStep from "@/features/onboarding/steps/LoginStep";
 
 export default function OnboardingFlow() {
   const [state, setState] = useState<OnboardingState>(() => loadOnboardingState());
-  const [step, setStep] = useState<WebStepId>("goal");
+  const [step, setStep] = useState<WebStepId>("getStarted");
   const [hydrated, setHydrated] = useState(false);
   const [calculating, setCalculating] = useState(false);
   const [isSimulating, setIsSimulating] = useState(true);
@@ -88,7 +90,9 @@ export default function OnboardingFlow() {
     const restored = loadOnboardingState();
     const savedStep = loadOnboardingStepId();
     setState(restored);
-    if (savedStep) setStep(savedStep as WebStepId);
+    if (savedStep && (WEB_STEPS as readonly string[]).includes(savedStep)) {
+      setStep(savedStep as WebStepId);
+    }
     setHydrated(true);
     trackOnboardingStart();
   }, []);
@@ -154,6 +158,8 @@ export default function OnboardingFlow() {
 
   const body = useMemo(() => {
     switch (step) {
+      case "getStarted":
+        return null;
       case "goal":
         return <GoalStep state={state} onChange={update} />;
       case "mainBlocker":
@@ -210,6 +216,10 @@ export default function OnboardingFlow() {
 
   if (!hydrated) {
     return <div className="min-h-screen bg-[var(--funnel-bg)]" />;
+  }
+
+  if (step === "getStarted") {
+    return <GetStartedPrimer onGetStarted={() => void goNext()} />;
   }
 
   const fillViewport =

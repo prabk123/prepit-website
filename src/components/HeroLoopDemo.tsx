@@ -83,7 +83,7 @@ const FADE_MS = 350;
 
 function LogSheet({ text, typing }: { text: string; typing: boolean }) {
   return (
-    <div className="flex w-full flex-col overflow-hidden rounded-2xl border border-[var(--grey-10)] bg-white shadow-[0_-4px_24px_rgba(0,0,0,0.12)]">
+    <div className="flex w-full flex-col overflow-hidden rounded-2xl border border-[var(--grey-10)] bg-[var(--surface)] shadow-[0_-4px_24px_rgba(0,0,0,0.12)]">
       <div className="flex flex-col px-3 pb-3 pt-2">
         <div className="mb-2 flex justify-center">
           <div className="h-1 w-10 rounded-full bg-[#D3D3D5]" />
@@ -95,7 +95,7 @@ function LogSheet({ text, typing }: { text: string; typing: boolean }) {
           Amount, brand, and restaurant details help improve accuracy.
         </p>
         <div className="mt-2.5 flex items-end gap-1.5">
-          <div className="min-h-[36px] flex-1 rounded-xl bg-[var(--grey-5)] px-3 py-2">
+          <div className="min-h-[36px] flex-1 rounded-xl bg-[var(--input-fill)] px-3 py-2">
             <p className="min-h-[20px] text-sm leading-5 text-[var(--black-100)]">
               {text}
               {typing && (
@@ -103,8 +103,8 @@ function LogSheet({ text, typing }: { text: string; typing: boolean }) {
               )}
             </p>
           </div>
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--black-100)]">
-            <PrepItIcon name="arrowUp" size={20} color="#ffffff" />
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--primary)]">
+            <PrepItIcon name="arrowUp" size={20} color="var(--on-primary)" />
           </div>
         </div>
       </div>
@@ -114,7 +114,7 @@ function LogSheet({ text, typing }: { text: string; typing: boolean }) {
 
 function MacroChip({ value, label }: { value: string; label: string }) {
   return (
-    <div className="flex min-w-0 flex-1 flex-col items-center rounded-xl bg-[var(--grey-5)] px-1.5 py-2">
+    <div className="flex min-w-0 flex-1 flex-col items-center rounded-xl bg-[var(--input-fill)] px-1.5 py-2">
       <p
         className="text-base font-bold leading-none text-[var(--black-100)]"
         style={{ fontFamily: "var(--font-dm-sans)" }}
@@ -177,7 +177,7 @@ function MealCard() {
   const confidencePct = Math.round(MEAL.confidence * 100);
 
   return (
-    <div className="mx-auto w-full max-w-[340px] rounded-2xl bg-white p-4 shadow-[0_12px_36px_rgba(0,0,0,0.16)]">
+    <div className="mx-auto w-full max-w-[340px] rounded-2xl bg-[var(--surface)] p-4 shadow-[0_12px_36px_rgba(0,0,0,0.16)]">
       <p
         className="text-base font-semibold leading-6 text-[var(--black-100)]"
         style={{ fontFamily: "var(--font-brand)" }}
@@ -245,7 +245,7 @@ function SignalsCard({
 }) {
   return (
     <div className="relative mx-auto w-full max-w-[340px]">
-      <div className="relative z-40 rounded-2xl bg-white px-3 pb-3 pt-4 shadow-[0_12px_36px_rgba(0,0,0,0.16)]">
+      <div className="relative z-40 rounded-2xl bg-[var(--surface)] px-3 pb-3 pt-4 shadow-[0_12px_36px_rgba(0,0,0,0.16)]">
         <div
           key={`rings-${animKey}`}
           className="flex items-start justify-evenly gap-1 nl-demo-fade"
@@ -314,7 +314,7 @@ function InsightCard({ chipTapped }: { chipTapped: boolean }) {
           className="rounded-[14px] px-4 pb-7 pt-4"
           style={{
             backgroundImage:
-              "linear-gradient(90deg, color-mix(in srgb, var(--gradient-blue) 10%, #ffffff) 0%, color-mix(in srgb, var(--gradient-purple) 10%, #ffffff) 31%, color-mix(in srgb, var(--gradient-orange) 10%, #ffffff) 63%, color-mix(in srgb, var(--gradient-yellow) 10%, #ffffff) 97.5%)",
+              "linear-gradient(90deg, color-mix(in srgb, var(--gradient-blue) 10%, var(--ai-fill-base)) 0%, color-mix(in srgb, var(--gradient-purple) 10%, var(--ai-fill-base)) 31%, color-mix(in srgb, var(--gradient-orange) 10%, var(--ai-fill-base)) 63%, color-mix(in srgb, var(--gradient-yellow) 10%, var(--ai-fill-base)) 97.5%)",
           }}
         >
           <div className="flex items-center gap-2">
@@ -332,12 +332,12 @@ function InsightCard({ chipTapped }: { chipTapped: boolean }) {
 
       <div className="absolute right-3 -bottom-2" aria-hidden>
         <div
-          className={`flex items-center gap-2 rounded-full bg-[var(--black-100)] px-4 py-2.5 text-xs font-medium text-white shadow-[0_2px_8px_rgba(0,0,0,0.12)]${
+          className={`flex items-center gap-2 rounded-full bg-[var(--primary)] px-4 py-2.5 text-xs font-medium text-[var(--on-primary)] shadow-[0_2px_8px_rgba(0,0,0,0.12)]${
             chipTapped ? " hero-explore-chip-tap" : ""
           }`}
         >
           Explore this deeper
-          <PrepItIcon name="arrowRight" size={12} color="#ffffff" />
+          <PrepItIcon name="arrowRight" size={12} color="var(--on-primary)" />
         </div>
       </div>
     </div>
@@ -354,13 +354,13 @@ function ChatSheet({
   thinking: boolean;
 }) {
   return (
-    <div className="flex max-h-[min(72vw,300px)] min-h-[240px] w-full flex-col overflow-hidden rounded-2xl border border-[var(--grey-10)] bg-white shadow-[0_-4px_24px_rgba(0,0,0,0.12)]">
-      <div className="shrink-0 bg-white pt-2">
+    <div className="flex max-h-[min(72vw,300px)] min-h-[240px] w-full flex-col overflow-hidden rounded-2xl border border-[var(--grey-10)] bg-[var(--surface)] shadow-[0_-4px_24px_rgba(0,0,0,0.12)]">
+      <div className="shrink-0 bg-[var(--surface)] pt-2">
         <div className="flex justify-center pb-2">
           <div className="h-1 w-10 rounded-full bg-[#D3D3D5]" />
         </div>
         <div className="flex items-center gap-1.5 px-3 pb-2">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--grey-5)]">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--input-fill)]">
             <PrepItIcon name="history" size={14} color="var(--black-100)" />
           </div>
           <div className="flex min-w-0 flex-1 items-center justify-center gap-1.5">
@@ -375,7 +375,7 @@ function ChatSheet({
               Nutritionist
             </span>
           </div>
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--grey-5)]">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--input-fill)]">
             <PrepItIcon name="edit" size={14} color="var(--black-100)" />
           </div>
         </div>
@@ -383,7 +383,7 @@ function ChatSheet({
 
       <div className="min-h-0 flex-1 overflow-hidden px-3 pt-1 pb-5">
         <div className="flex justify-end pb-2.5">
-          <div className="max-w-[88%] rounded-xl rounded-br-[2px] bg-[var(--grey-5)] px-3 py-2.5">
+          <div className="max-w-[88%] rounded-xl rounded-br-[2px] bg-[var(--input-fill)] px-3 py-2.5">
             <p className="text-xs leading-[18px] text-[var(--black-100)]">
               {userMessage}
             </p>
@@ -399,9 +399,9 @@ function ChatSheet({
         )}
       </div>
 
-      <div className="shrink-0 border-t border-[var(--grey-10)] bg-white px-3 pb-3 pt-2">
+      <div className="shrink-0 border-t border-[var(--grey-10)] bg-[var(--surface)] px-3 pb-3 pt-2">
         <div className="flex items-end gap-1.5">
-          <div className="min-h-[36px] flex-1 rounded-xl bg-[var(--grey-5)] px-3 py-2">
+          <div className="min-h-[36px] flex-1 rounded-xl bg-[var(--input-fill)] px-3 py-2">
             <p className="text-xs leading-[18px] text-[var(--grey-60)]">
               Ask about your nutrition...
             </p>
@@ -415,9 +415,15 @@ function ChatSheet({
   );
 }
 
-export default function HeroLoopDemo() {
+export default function HeroLoopDemo({
+  layout = "overlay",
+  autoPlay = false,
+}: {
+  layout?: "overlay" | "fill";
+  autoPlay?: boolean;
+}) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [active, setActive] = useState(false);
+  const [active, setActive] = useState(autoPlay);
   const [phase, setPhase] = useState<Phase>("log");
   const [typed, setTyped] = useState("");
   const [chatStreamed, setChatStreamed] = useState("");
@@ -427,6 +433,10 @@ export default function HeroLoopDemo() {
   const [exploreChipTapped, setExploreChipTapped] = useState(false);
 
   useEffect(() => {
+    if (autoPlay) {
+      setActive(true);
+      return;
+    }
     const node = containerRef.current;
     if (!node) return;
 
@@ -437,7 +447,7 @@ export default function HeroLoopDemo() {
 
     observer.observe(node);
     return () => observer.disconnect();
-  }, []);
+  }, [autoPlay]);
 
   useEffect(() => {
     if (!active) return;
@@ -537,13 +547,21 @@ export default function HeroLoopDemo() {
   ];
 
   return (
-    <div ref={containerRef} className="relative w-full" aria-hidden="true">
+    <div
+      ref={containerRef}
+      className={layout === "fill" ? "relative h-full w-full" : "relative w-full"}
+      aria-hidden="true"
+    >
       {layers.map((layer) => {
         const isActive = layer.id === phase;
         return (
           <div
             key={layer.id}
-            className="absolute inset-x-0 bottom-0 ease-out"
+            className={
+              layout === "fill"
+                ? "absolute inset-0 flex items-center justify-center ease-out"
+                : "absolute inset-x-0 bottom-0 ease-out"
+            }
             style={{
               opacity: isActive ? 1 : 0,
               transform: isActive ? "translateY(0)" : "translateY(10px)",
@@ -552,7 +570,9 @@ export default function HeroLoopDemo() {
               pointerEvents: "none",
             }}
           >
-            {layer.node}
+            <div className={layout === "fill" ? "w-full max-h-full overflow-hidden" : undefined}>
+              {layer.node}
+            </div>
           </div>
         );
       })}

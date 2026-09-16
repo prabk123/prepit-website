@@ -4,6 +4,7 @@ import {
 import type { OnboardingState } from "@/features/onboarding/state";
 
 export const WEB_STEPS = [
+  "getStarted",
   "goal",
   "mainBlocker",
   "recallIntro",
@@ -88,8 +89,10 @@ export function previousStepId(
 }
 
 export function visibleStepIndex(current: WebStepId, state: OnboardingState): number {
+  if (current === "getStarted") return 0;
   let count = 0;
   for (const step of WEB_STEPS) {
+    if (step === "getStarted") continue;
     if (step === "goalWeight" && shouldSkipGoalWeight(state)) continue;
     if (step === "goalSpeed" && shouldSkipGoalSpeed(state)) continue;
     if (step === current) return count;
@@ -100,6 +103,7 @@ export function visibleStepIndex(current: WebStepId, state: OnboardingState): nu
 
 export function visibleStepCount(state: OnboardingState): number {
   return WEB_STEPS.filter((step) => {
+    if (step === "getStarted") return false;
     if (step === "goalWeight" && shouldSkipGoalWeight(state)) return false;
     if (step === "goalSpeed" && shouldSkipGoalSpeed(state)) return false;
     return true;
@@ -126,6 +130,7 @@ export function canContinue(step: WebStepId, state: OnboardingState): boolean {
 }
 
 export function continueLabel(step: WebStepId): string {
+  if (step === "getStarted") return "Get Started";
   if (step === "complete") return "Save my plan";
   return "Continue";
 }
