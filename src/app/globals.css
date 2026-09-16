@@ -48,6 +48,20 @@
   background: var(--funnel-bg);
   color: var(--text-primary);
   color-scheme: light;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  * {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  &::-webkit-scrollbar,
+  *::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
 }
 
 @theme inline {
@@ -477,4 +491,12 @@ body {
 
 .legal-content table tbody tr:last-child td {
   border-bottom: none;
+}
+
+html:has(.funnel),
+html:has(.funnel) body {
+  overflow: hidden;
+  height: 100dvh;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }

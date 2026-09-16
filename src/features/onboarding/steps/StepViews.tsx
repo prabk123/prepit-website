@@ -317,10 +317,10 @@ export function IntolerancesStep({
                     : [...state.intolerances, option],
                 })
               }
-              className={`rounded-full border px-4 py-2 text-sm font-medium ${
+              className={`rounded-full border px-4 py-2 text-xs font-medium ${
                 selected
-                  ? "border-[var(--primary)] bg-[var(--border)] text-[var(--text-primary)]"
-                  : "border-[var(--text-tertiary)] bg-[var(--surface)] text-[var(--text-primary)]"
+                  ? "border-[var(--primary)] bg-[var(--border)] text-[var(--primary)]"
+                  : "border-[var(--border-strong)] bg-[var(--surface)] text-[var(--primary)]"
               }`}
             >
               {option}
