@@ -233,10 +233,18 @@ export default function OnboardingFlow() {
         showProgress={showProgress}
         onBack={previousStepId(step, state) ? goBack : undefined}
       />
-      <main className="mx-auto flex w-full max-w-lg min-h-0 flex-1 flex-col overflow-hidden px-4 pt-4">
+      <main
+        className={`mx-auto flex w-full max-w-lg min-h-0 flex-1 flex-col px-4 pt-4 ${
+          step === "complete" && isSimulating ? "overflow-visible" : "overflow-hidden"
+        }`}
+      >
         <div
           className={`flex min-h-0 flex-1 flex-col ${
-            fillViewport ? "overflow-hidden" : "overflow-y-auto"
+            step === "complete" && isSimulating
+              ? "overflow-visible"
+              : fillViewport
+                ? "overflow-hidden"
+                : "overflow-y-auto"
           }`}
         >
           {body}

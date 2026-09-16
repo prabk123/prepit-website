@@ -105,7 +105,7 @@ function SignalFactorCore({
   return (
     <div className="flex flex-col">
       <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
-        <p className="text-base font-semibold leading-[1.25] tracking-[0.1px] text-[#1A1A2E]">
+        <p className="text-base font-semibold leading-[1.25] tracking-[0.1px] text-[var(--text-headline)]">
           {factor.label}
         </p>
         {onLearnMore ? (
@@ -120,13 +120,13 @@ function SignalFactorCore({
         ) : null}
       </div>
       {snippet ? (
-        <p className="mt-1 text-sm leading-[1.45] text-[var(--grey-80)]">
+        <p className="mt-1 text-sm leading-[1.45] text-[var(--text-body)]">
           {snippet}
         </p>
       ) : null}
       <div className="relative mt-1 h-[18px]">
         <p
-          className="absolute top-0 max-w-[90%] -translate-x-1/2 truncate text-sm font-semibold leading-[1.25] text-[var(--grey-80)]"
+          className="absolute top-0 max-w-[90%] -translate-x-1/2 truncate text-sm font-semibold leading-[1.25] text-[var(--text-body)]"
           style={{ left: `${factor.component * 100}%` }}
         >
           {factor.summary}
@@ -146,7 +146,7 @@ function SignalFactorCore({
       </div>
       <div className="relative mt-0.5 h-[15px]">
         <p
-          className="absolute top-0 max-w-[90%] -translate-x-1/2 truncate text-xs font-medium leading-[1.25] text-[var(--grey-60)]"
+          className="absolute top-0 max-w-[90%] -translate-x-1/2 truncate text-xs font-medium leading-[1.25] text-[var(--text-secondary)]"
           style={{ left: `${factor.baselineComponent * 100}%` }}
         >
           {factor.baselineSummary} ({factor.baselineDaysUsed}-day avg)
@@ -461,7 +461,7 @@ export default function NutritionSignalsIntro() {
         {FACTORS.map((factor) => (
           <div
             key={factor.label}
-            className="rounded-xl bg-[var(--grey-5)] px-4 py-3.5"
+            className="rounded-xl bg-[var(--input-fill)] px-4 py-3.5 [@media(prefers-color-scheme:dark)]:bg-[var(--surface)]"
           >
             <SignalFactorCore
               factor={factor}

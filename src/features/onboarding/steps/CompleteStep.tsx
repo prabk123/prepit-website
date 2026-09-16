@@ -173,7 +173,7 @@ export default function CompleteStep({
           />
         </div>
         <p className="mt-6 text-base text-[var(--text-secondary)]">{STAGES[stage]}</p>
-        <SpinningAiGlow className="mt-6 w-full">
+        <SpinningAiGlow className="mt-6 w-full" pad={12}>
           <div className="rounded-2xl bg-[var(--input-fill)] p-4 text-left">
             <p className="font-bold">Daily recommendations for</p>
             <ul className="mt-2 space-y-1 text-base">
