@@ -463,7 +463,7 @@ export default function WeeklyCheckInDemo({
   const [startScroll, setStartScroll] = useState(false);
   const [zoom, setZoom] = useState(1);
   const [alignY, setAlignY] = useState(0);
-  const [zoomDurationMs, setZoomDurationMs] = useState(TIMING.zoomInMs);
+  const [zoomDurationMs, setZoomDurationMs] = useState<number>(TIMING.zoomInMs);
   const [cycleKey, setCycleKey] = useState(0);
 
   useEffect(() => {

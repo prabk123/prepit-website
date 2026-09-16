@@ -349,9 +349,9 @@ export default function MealPlanIntroDemo({
   const [highlightConfirm, setHighlightConfirm] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [showCreatedSheet, setShowCreatedSheet] = useState(false);
-  const [zoom, setZoom] = useState(CAMERA.zoomedOut.zoom);
-  const [alignY, setAlignY] = useState(CAMERA.zoomedOut.alignY);
-  const [zoomDurationMs, setZoomDurationMs] = useState(TIMING.zoomMs);
+  const [zoom, setZoom] = useState<number>(CAMERA.zoomedOut.zoom);
+  const [alignY, setAlignY] = useState<number>(CAMERA.zoomedOut.alignY);
+  const [zoomDurationMs, setZoomDurationMs] = useState<number>(TIMING.zoomMs);
 
   useEffect(() => {
     let cancelled = false;
