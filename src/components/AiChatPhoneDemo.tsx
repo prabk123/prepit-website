@@ -5,6 +5,8 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react
 import { GoalChangeActionCard, LogFoodActionCard } from "@/components/AiChatDemoCards";
 import FakeLogScreenDemo from "@/components/FakeLogScreenDemo";
 import PrepItIcon from "@/components/shareable/PrepItIcon";
+import PhoneDemoViewport from "@/features/onboarding/components/PhoneDemoViewport";
+import { startDemoProgressTracker } from "@/features/onboarding/components/demoProgress";
 
 const PHONE_INNER_WIDTH = 288;
 const IPHONE_LOGICAL_WIDTH = 390;
@@ -47,12 +49,12 @@ type ChatMessage =
 function PhoneShell({ children }: { children: React.ReactNode }) {
   return (
     <div
-      className="relative mx-auto w-full max-w-[300px] overflow-hidden rounded-[40px] border-[6px] border-[var(--black-100)] bg-[var(--grey-5)] shadow-[0_24px_48px_rgba(0,0,0,0.12)]"
+      className="relative mx-auto w-full max-w-[300px] overflow-hidden rounded-[40px] border-[6px] border-black bg-[var(--scaffold)] shadow-[0_24px_48px_rgba(0,0,0,0.12)]"
       aria-hidden="true"
     >
-      <div className="absolute left-1/2 top-2 z-20 h-[22px] w-[88px] -translate-x-1/2 rounded-full bg-[var(--black-100)]" />
+      <div className="absolute left-1/2 top-2 z-20 h-[22px] w-[88px] -translate-x-1/2 rounded-full bg-black" />
       <div
-        className="relative overflow-hidden bg-[#F4F4F5]"
+        className="relative overflow-hidden bg-[var(--scaffold)]"
         style={{ height: PHONE_INNER_HEIGHT }}
       >
         {children}
@@ -63,14 +65,14 @@ function PhoneShell({ children }: { children: React.ReactNode }) {
 
 function ChatHeader() {
   return (
-    <div className="shrink-0 bg-white pt-2">
+    <div className="shrink-0 bg-[var(--surface)] pt-2">
       <div className="flex justify-center pb-2">
-        <div className="h-1.5 w-12 rounded-full bg-[#D3D3D5]" />
+        <div className="h-1.5 w-12 rounded-full bg-[var(--border-strong)]" />
       </div>
       <div className="flex items-center gap-1.5 px-4 pb-2">
         <button
           type="button"
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--grey-5)]"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--input-fill)]"
           tabIndex={-1}
         >
           <PrepItIcon name="history" size={14} color="var(--black-100)" />
@@ -83,7 +85,7 @@ function ChatHeader() {
         </div>
         <button
           type="button"
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--grey-5)]"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--input-fill)]"
           tabIndex={-1}
         >
           <PrepItIcon name="edit" size={14} color="var(--black-100)" />
@@ -96,7 +98,7 @@ function ChatHeader() {
 function UserBubble({ text }: { text: string }) {
   return (
     <div className="flex justify-end pb-3">
-      <div className="max-w-[85%] rounded-xl rounded-br-[2px] bg-[var(--grey-5)] px-4 py-3">
+      <div className="max-w-[85%] rounded-xl rounded-br-[2px] bg-[var(--input-fill)] px-4 py-3">
         <p className="text-[13px] leading-5 text-[var(--black-100)]">{text}</p>
       </div>
     </div>
@@ -165,9 +167,9 @@ function Composer({
   const hasText = text.length > 0;
 
   return (
-    <div className="shrink-0 border-t border-[var(--grey-10)] bg-white px-4 pt-2 pb-2.5">
+    <div className="shrink-0 border-t border-[var(--grey-10)] bg-[var(--surface)] px-4 pt-2 pb-2.5">
       <div className="flex items-end gap-2">
-        <div className="min-h-[40px] flex-1 rounded-xl bg-[var(--grey-5)] px-3 py-2.5">
+        <div className="min-h-[40px] flex-1 rounded-xl bg-[var(--input-fill)] px-3 py-2.5">
           {hasText ? (
             <p className="text-[13px] leading-5 text-[var(--black-100)]">
               {text}
@@ -182,14 +184,14 @@ function Composer({
         <div
           className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-transform ${
             hasText || sendActive
-              ? "bg-[var(--black-100)]"
+              ? "bg-[var(--primary)]"
               : "bg-[var(--grey-10)]"
           } ${sendActive ? "scale-95" : ""}`}
         >
           <PrepItIcon
             name="arrowUp"
             size={14}
-            color={hasText || sendActive ? "#ffffff" : "var(--grey-40)"}
+            color={hasText || sendActive ? "var(--on-primary)" : "var(--grey-40)"}
           />
         </div>
       </div>
@@ -204,7 +206,7 @@ function AiChatBottomSheet({
 }) {
   return (
     <div
-      className="absolute inset-x-0 bottom-0 z-10 flex flex-col overflow-hidden rounded-t-[24px] bg-white shadow-[0_-8px_40px_rgba(0,0,0,0.18)]"
+      className="absolute inset-x-0 bottom-0 z-10 flex flex-col overflow-hidden rounded-t-[24px] bg-[var(--surface)] shadow-[0_-8px_40px_rgba(0,0,0,0.18)]"
       style={{ height: CHAT_SHEET_HEIGHT }}
     >
       {children}
@@ -214,12 +216,30 @@ function AiChatBottomSheet({
 
 type AiChatPhoneDemoProps = {
   scenarios: readonly DemoScenario[];
+  fit?: boolean;
+  onProgressChanged?: (progress: number) => void;
 };
 
-export default function AiChatPhoneDemo({ scenarios }: AiChatPhoneDemoProps) {
+function chatCycleMs(scenario: DemoScenario) {
+  return (
+    scenario.userMessage.length * TYPE_MS +
+    SEND_MS +
+    THINK_MS +
+    scenario.assistant.length * STREAM_MS +
+    (scenario.actionType ? 2000 : 0) +
+    HOLD_MS +
+    RESET_MS
+  );
+}
+
+export default function AiChatPhoneDemo({
+  scenarios,
+  fit = false,
+  onProgressChanged,
+}: AiChatPhoneDemoProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const messagesScrollRef = useRef<HTMLDivElement>(null);
-  const [active, setActive] = useState(false);
+  const [active, setActive] = useState(fit);
   const [phase, setPhase] = useState<DemoPhase>("typing");
   const [typedInput, setTypedInput] = useState("");
   const [streamedAssistant, setStreamedAssistant] = useState("");
@@ -252,6 +272,10 @@ export default function AiChatPhoneDemo({ scenarios }: AiChatPhoneDemoProps) {
   }, [fadeKey, scrollMessagesToBottom]);
 
   useEffect(() => {
+    if (fit) {
+      setActive(true);
+      return;
+    }
     const node = containerRef.current;
     if (!node) return;
 
@@ -261,7 +285,7 @@ export default function AiChatPhoneDemo({ scenarios }: AiChatPhoneDemoProps) {
     );
     observer.observe(node);
     return () => observer.disconnect();
-  }, []);
+  }, [fit]);
 
   useEffect(() => {
     if (!active) return;
@@ -269,6 +293,7 @@ export default function AiChatPhoneDemo({ scenarios }: AiChatPhoneDemoProps) {
     let cancelled = false;
     let timeout: ReturnType<typeof setTimeout>;
     let scenarioIndex = 0;
+    let stopProgress = () => {};
 
     const wait = (ms: number) =>
       new Promise<void>((resolve) => {
@@ -280,6 +305,8 @@ export default function AiChatPhoneDemo({ scenarios }: AiChatPhoneDemoProps) {
     const runCycle = async () => {
       while (!cancelled) {
         const current = scenarios[scenarioIndex];
+        stopProgress();
+        stopProgress = startDemoProgressTracker(chatCycleMs(current), onProgressChanged);
         setDisplayScenario(current);
 
         setPhase("typing");
@@ -349,9 +376,10 @@ export default function AiChatPhoneDemo({ scenarios }: AiChatPhoneDemoProps) {
 
     return () => {
       cancelled = true;
+      stopProgress();
       clearTimeout(timeout);
     };
-  }, [active, scenarios]);
+  }, [active, onProgressChanged, scenarios]);
 
   const listContent = (
     <div className="flex flex-col px-4 py-2">
@@ -381,25 +409,35 @@ export default function AiChatPhoneDemo({ scenarios }: AiChatPhoneDemoProps) {
     </div>
   );
 
+  const screen = (
+    <div key={fadeKey} className="relative h-full nl-demo-fade">
+      <FakeLogScreenDemo />
+      <div className="absolute inset-0 z-[1] bg-black/35" aria-hidden />
+      <AiChatBottomSheet>
+        <ChatHeader />
+        <div ref={messagesScrollRef} className="min-h-0 flex-1 overflow-hidden">
+          {listContent}
+        </div>
+        <Composer
+          text={phase === "typing" ? typedInput : ""}
+          showCursor={phase === "typing"}
+          sendActive={phase === "send"}
+        />
+      </AiChatBottomSheet>
+    </div>
+  );
+
+  if (fit) {
+    return (
+      <div ref={containerRef} className="pointer-events-none h-full w-full min-h-0 select-none">
+        <PhoneDemoViewport>{screen}</PhoneDemoViewport>
+      </div>
+    );
+  }
+
   return (
     <div ref={containerRef} className="pointer-events-none w-full select-none">
-      <PhoneShell>
-        <div key={fadeKey} className="relative h-full nl-demo-fade">
-          <FakeLogScreenDemo />
-          <div className="absolute inset-0 z-[1] bg-black/35" aria-hidden />
-          <AiChatBottomSheet>
-            <ChatHeader />
-            <div ref={messagesScrollRef} className="min-h-0 flex-1 overflow-hidden">
-              {listContent}
-            </div>
-            <Composer
-              text={phase === "typing" ? typedInput : ""}
-              showCursor={phase === "typing"}
-              sendActive={phase === "send"}
-            />
-          </AiChatBottomSheet>
-        </div>
-      </PhoneShell>
+      <PhoneShell>{screen}</PhoneShell>
     </div>
   );
 }

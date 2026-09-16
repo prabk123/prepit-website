@@ -11,15 +11,15 @@ const SCROLL_DELAY_MS = 800;
 const SCROLL_DURATION_MS = 1600;
 
 const C = {
-  scaffold: "#F4F4F5",
-  surface: "#FFFFFF",
-  textPrimary: "#000000",
-  textSecondary: "#7A7A82",
-  textTertiary: "#A6A6AC",
-  border: "#E9E9EA",
-  inputFill: "#F4F4F5",
-  calorieAccent: "#FF644F",
-  success: "#258400",
+  scaffold: "var(--scaffold)",
+  surface: "var(--surface)",
+  textPrimary: "var(--text-primary)",
+  textSecondary: "var(--text-secondary)",
+  textTertiary: "var(--text-tertiary)",
+  border: "var(--border)",
+  inputFill: "var(--input-fill)",
+  calorieAccent: "var(--coral-100)",
+  success: "var(--success)",
 } as const;
 
 const PREVIEW = {
@@ -77,7 +77,7 @@ function SemiCircleConfidenceGauge({
         />
       </svg>
       <p
-        className="absolute inset-x-0 top-[26px] text-center text-[28px] font-semibold leading-[34px] text-black"
+        className="absolute inset-x-0 top-[26px] text-center text-[28px] font-semibold leading-[34px] text-[var(--text-primary)]"
         style={{ fontFamily: "var(--font-brand)" }}
       >
         {percentLabel}
@@ -88,7 +88,7 @@ function SemiCircleConfidenceGauge({
 
 function IconCircleButton({ icon }: { icon: "chevronLeft" | "menuDots" }) {
   return (
-    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white">
+    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--surface)]">
       <PrepItIcon name={icon} size={24} color={C.textPrimary} />
     </div>
   );
@@ -107,16 +107,16 @@ function NutritionStatsRow() {
       {stats.map((stat) => (
         <div
           key={stat.label}
-          className="flex min-w-0 flex-1 flex-col items-center rounded-2xl bg-white px-2 py-2"
+          className="flex min-w-0 flex-1 flex-col items-center rounded-2xl bg-[var(--surface)] px-2 py-2"
         >
           <p
-            className="text-lg font-bold leading-none text-black"
+            className="text-lg font-bold leading-none text-[var(--text-primary)]"
             style={{ fontFamily: "var(--font-dm-sans)" }}
           >
             {stat.value}
           </p>
           <p
-            className="mt-1 text-xs font-medium text-black"
+            className="mt-1 text-xs font-medium text-[var(--text-primary)]"
             style={{ fontFamily: "var(--font-dm-sans)" }}
           >
             {stat.label}
@@ -129,13 +129,13 @@ function NutritionStatsRow() {
 
 function QtyStepper() {
   return (
-    <div className="flex h-14 items-center rounded-2xl bg-white px-2">
+    <div className="flex h-14 items-center rounded-2xl bg-[var(--surface)] px-2">
       <div className="flex flex-1 justify-center">
         <PrepItIcon name="minus" size={24} color={C.textPrimary} />
       </div>
       <div className="flex flex-[2] justify-center">
         <span
-          className="text-base font-medium text-black"
+          className="text-base font-medium text-[var(--text-primary)]"
           style={{ fontFamily: "var(--font-dm-sans)" }}
         >
           1
@@ -186,7 +186,7 @@ function ItemMacroRow({
 function SectionTitle({ children }: { children: ReactNode }) {
   return (
     <h3
-      className="text-xl font-semibold leading-[30px] text-black"
+      className="text-xl font-semibold leading-[30px] text-[var(--text-primary)]"
       style={{ fontFamily: "var(--font-brand)" }}
     >
       {children}
@@ -197,7 +197,7 @@ function SectionTitle({ children }: { children: ReactNode }) {
 function ReviewFooter() {
   return (
     <div
-      className="shrink-0 border-t bg-white px-2 pb-[34px] pt-4"
+      className="shrink-0 border-t bg-[var(--surface)] px-2 pb-[34px] pt-4"
       style={{ borderColor: C.border }}
     >
       <div className="flex gap-2">
@@ -207,16 +207,16 @@ function ReviewFooter() {
         >
           <PrepItIcon name="sparkles" size={18} color={C.textPrimary} />
           <span
-            className="text-base font-bold text-black"
+            className="text-base font-bold text-[var(--text-primary)]"
             style={{ fontFamily: "var(--font-dm-sans)" }}
           >
             Update
           </span>
         </div>
-        <div className="flex h-14 flex-1 items-center justify-center gap-2 rounded-2xl bg-black py-3.5">
-          <PrepItIcon name="appleLogo" size={22} color="#ffffff" />
+        <div className="flex h-14 flex-1 items-center justify-center gap-2 rounded-2xl bg-[var(--primary)] py-3.5">
+          <PrepItIcon name="appleLogo" size={22} color="var(--on-primary)" />
           <span
-            className="text-base font-bold text-white"
+            className="text-base font-bold text-[var(--on-primary)]"
             style={{ fontFamily: "var(--font-dm-sans)" }}
           >
             Add to Log
@@ -254,7 +254,7 @@ function ReviewContent() {
   }, []);
 
   return (
-    <div className="flex h-full flex-col bg-[#F4F4F5]">
+    <div className="flex h-full flex-col bg-[var(--scaffold)]">
       <div className="pt-[47px]">
         <div className="flex h-10 items-center px-4 pb-3 pt-3">
           <IconCircleButton icon="chevronLeft" />
@@ -286,11 +286,11 @@ function ReviewContent() {
 
           <div className="mt-8">
             <SectionTitle>Meal items</SectionTitle>
-            <div className="mt-4 rounded-2xl bg-white p-4">
+            <div className="mt-4 rounded-2xl bg-[var(--surface)] p-4">
               {PREVIEW.items.map((item, index) => (
                 <div key={item.name} className={index < PREVIEW.items.length - 1 ? "mb-4" : ""}>
                   <p
-                    className="text-sm font-medium leading-[21px] text-black"
+                    className="text-sm font-medium leading-[21px] text-[var(--text-primary)]"
                     style={{ fontFamily: "var(--font-dm-sans)" }}
                   >
                     {item.name}
@@ -315,10 +315,10 @@ function ReviewContent() {
               style={{ fontFamily: "var(--font-dm-sans)", color: C.textSecondary }}
             >
               Amount, brand, and restaurant details help improve accuracy.{" "}
-              <span className="font-bold text-black underline">Learn more</span>
+              <span className="font-bold text-[var(--text-primary)] underline">Learn more</span>
             </p>
 
-            <div className="mt-4 rounded-2xl bg-white p-4">
+            <div className="mt-4 rounded-2xl bg-[var(--surface)] p-4">
               <div className="flex items-center gap-6">
                 <SemiCircleConfidenceGauge
                   progress={PREVIEW.confidence}
@@ -327,7 +327,7 @@ function ReviewContent() {
                 />
                 <div>
                   <p
-                    className="text-xl font-bold leading-[30px] text-black"
+                    className="text-xl font-bold leading-[30px] text-[var(--text-primary)]"
                     style={{ fontFamily: "var(--font-dm-sans)" }}
                   >
                     High
@@ -342,7 +342,7 @@ function ReviewContent() {
               </div>
 
               <p
-                className="mt-4 text-sm leading-[21px] text-black"
+                className="mt-4 text-sm leading-[21px] text-[var(--text-primary)]"
                 style={{ fontFamily: "var(--font-dm-sans)" }}
               >
                 {PREVIEW.estimationNotes}
@@ -359,7 +359,7 @@ function ReviewContent() {
 
 export default function NlReviewScreenDemo() {
   return (
-    <div className="absolute inset-0 overflow-hidden bg-[#F4F4F5]">
+    <div className="absolute inset-0 overflow-hidden bg-[var(--scaffold)]">
       <div
         className="pointer-events-none select-none"
         style={{

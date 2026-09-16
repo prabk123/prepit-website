@@ -4,11 +4,6 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
 import Script from "next/script";
 import localFont from "next/font/local";
-import NavigationWrapper from "@/components/NavigationWrapper";
-import DownloadCTA from "@/components/DownloadCTA";
-import Footer from "@/components/Footer";
-import SmartBanner from "@/components/SmartBanner";
-import FloatingGetAppButton from "@/components/FloatingGetAppButton";
 import CookieConsent from "@/components/CookieConsent";
 import "./globals.css";
 
@@ -40,7 +35,6 @@ const prepitIcons = localFont({
   display: "block",
 });
 
-// Base URL - production URL
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.tryprepit.app";
 
 export const metadata: Metadata = {
@@ -169,11 +163,7 @@ export default function RootLayout({
               logo: `${baseUrl}/logo.png`,
               description:
                 "Your AI nutritionist—log meals in plain English and get personalized nutrition advice.",
-              sameAs: [
-                // Add your social media links here when available
-                // "https://twitter.com/prepit",
-                // "https://instagram.com/prepit",
-              ],
+              sameAs: [],
             }),
           }}
         />
@@ -200,19 +190,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${dmSans.variable} ${brandFont.variable} ${prepitIcons.variable} antialiased`}
       >
-        <SmartBanner />
-        <FloatingGetAppButton />
-        <div className="flex min-h-screen flex-col items-center bg-white">
-          <NavigationWrapper />
-
-          <main className="w-full">
-            {children}
-            <SpeedInsights />
-          </main>
-
-          <DownloadCTA />
-          <Footer />
-        </div>
+        {children}
         <SpeedInsights />
         <Analytics />
         <CookieConsent />

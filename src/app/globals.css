@@ -20,6 +20,34 @@
   --gradient-purple: #d093d9;
   --gradient-orange: #f38c61;
   --gradient-yellow: #f5cc77;
+
+  /* Semantic tokens matching PrepItColors.light */
+  --funnel-bg: #ffffff;
+  --scaffold: #f4f4f5;
+  --surface: #ffffff;
+  --surface-elevated: #ffffff;
+  --surface-tertiary: #f0f0f2;
+  --primary: #000000;
+  --on-primary: #ffffff;
+  --text-primary: #000000;
+  --text-secondary: #7a7a82;
+  --text-tertiary: #a6a6ac;
+  --text-headline: #1a1a2e;
+  --text-body: #4d4d59;
+  --border: #e9e9ea;
+  --border-strong: #d3d3d5;
+  --input-fill: #f4f4f5;
+  --ai-fill-base: #ffffff;
+  --calorie-text: #b24637;
+  --success: #258400;
+  --success-soft: #ebffe3;
+  --error: #d93c27;
+}
+
+.funnel {
+  background: var(--funnel-bg);
+  color: var(--text-primary);
+  color-scheme: light;
 }
 
 @theme inline {
@@ -31,6 +59,7 @@
   /* Font family utilities */
   --font-family-dm-sans: var(--font-dm-sans);
   --font-family-brand: var(--font-brand);
+  --font-clash: var(--font-brand);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -38,6 +67,44 @@
     --background: #ffffff;
     --foreground: #171717;
   }
+
+  html:has(.funnel),
+  .funnel {
+    color-scheme: dark;
+    --background: #1c1c1e;
+    --foreground: #f5f5f5;
+    --funnel-bg: #1c1c1e;
+    --scaffold: #1c1c1e;
+    --surface: #2c2c2e;
+    --surface-elevated: #3a3a3c;
+    --surface-tertiary: #3a3a3c;
+    --primary: #ffffff;
+    --on-primary: #000000;
+    --text-primary: #f5f5f5;
+    --text-secondary: #a1a1a6;
+    --text-tertiary: #8e8e93;
+    --text-headline: #f5f5f5;
+    --text-body: #e5e5ea;
+    --border: #3a3a3c;
+    --border-strong: #545458;
+    --input-fill: #48484a;
+    --ai-fill-base: #2c2c2e;
+    --calorie-text: #ff644f;
+    --success: #32d74b;
+    --success-soft: color-mix(in srgb, #32d74b 16%, #2c2c2e);
+    --error: #ff453a;
+    --grey-5: #2c2c2e;
+    --grey-10: #3a3a3c;
+    --grey-40: #8e8e93;
+    --grey-60: #a1a1a6;
+    --grey-80: #e5e5ea;
+    --black-100: #f5f5f5;
+  }
+}
+
+html:has(.funnel) {
+  background: var(--funnel-bg);
+  color: var(--text-primary);
 }
 
 html {
@@ -118,10 +185,10 @@ body {
   border-radius: 10px;
   background-image: linear-gradient(
     90deg,
-    color-mix(in srgb, var(--gradient-blue) 10%, #ffffff) 0%,
-    color-mix(in srgb, var(--gradient-purple) 10%, #ffffff) 31%,
-    color-mix(in srgb, var(--gradient-orange) 10%, #ffffff) 63%,
-    color-mix(in srgb, var(--gradient-yellow) 10%, #ffffff) 97.5%
+    color-mix(in srgb, var(--gradient-blue) 10%, var(--ai-fill-base)) 0%,
+    color-mix(in srgb, var(--gradient-purple) 10%, var(--ai-fill-base)) 31%,
+    color-mix(in srgb, var(--gradient-orange) 10%, var(--ai-fill-base)) 63%,
+    color-mix(in srgb, var(--gradient-yellow) 10%, var(--ai-fill-base)) 97.5%
   );
 }
 
@@ -210,6 +277,62 @@ body {
 
 .nl-loading-shimmer {
   animation: nlLoadingShimmer 1.4s ease-in-out infinite;
+}
+
+.wheel-picker-mask {
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    #000 18%,
+    #000 82%,
+    transparent
+  );
+  scrollbar-width: none;
+}
+
+.wheel-picker-mask::-webkit-scrollbar {
+  display: none;
+}
+
+@property --spinning-ai-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes spinningAiGlow {
+  to {
+    --spinning-ai-angle: 360deg;
+  }
+}
+
+.spinning-ai-glow {
+  background: conic-gradient(
+    from var(--spinning-ai-angle),
+    #809ff9,
+    #d093d9,
+    #f38c61,
+    #f5cc77,
+    #809ff9
+  );
+  animation: spinningAiGlow 3s linear infinite;
+}
+
+.spinning-ai-glow--soft {
+  filter: blur(8px);
+  opacity: 0.55;
+}
+
+.spinning-ai-glow--edge {
+  filter: blur(3px);
+  opacity: 0.75;
+}
+
+.phone-demo-glow {
+  box-shadow:
+    0 0 0 3px rgba(128, 159, 249, 0.35),
+    0 0 24px 4px rgba(208, 147, 217, 0.35),
+    0 24px 48px rgba(0, 0, 0, 0.12);
 }
 
 @keyframes aiChatThinkingShimmer {

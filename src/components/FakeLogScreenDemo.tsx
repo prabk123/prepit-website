@@ -1,21 +1,21 @@
 import type { ReactNode } from "react";
 import PrepItIcon from "@/components/shareable/PrepItIcon";
 
-/** Matches PrepItColors.light from fresca_app/lib/theme/prep_it_colors.dart */
+/** Matches PrepItColors — follows funnel light/dark tokens. */
 const C = {
-  scaffold: "#F4F4F5",
-  surface: "#FFFFFF",
-  textPrimary: "#000000",
-  textSecondary: "#7A7A82",
-  textTertiary: "#A6A6AC",
-  textBody: "#4D4D59",
-  border: "#E9E9EA",
-  inputFill: "#F4F4F5",
-  calorieAccent: "#FF644F",
-  onTrackText: "#258400",
-  onTrackBg: "#EBFFE3",
+  scaffold: "var(--scaffold)",
+  surface: "var(--surface)",
+  textPrimary: "var(--text-primary)",
+  textSecondary: "var(--text-secondary)",
+  textTertiary: "var(--text-tertiary)",
+  textBody: "var(--text-body)",
+  border: "var(--border)",
+  inputFill: "var(--input-fill)",
+  calorieAccent: "var(--coral-100)",
+  onTrackText: "var(--success)",
+  onTrackBg: "var(--success-soft)",
   calChipBg: "rgba(255, 100, 79, 0.1)",
-  calChipText: "#B24637",
+  calChipText: "var(--calorie-text)",
 } as const;
 
 const DESIGN_WIDTH = 390;
@@ -37,7 +37,7 @@ function DonutRing({ progress, isOver = false }: { progress: number; isOver?: bo
         cy={size / 2}
         r={r}
         fill="none"
-        stroke={isOver ? "#D93C27" : C.calorieAccent}
+        stroke={isOver ? "var(--error)" : C.calorieAccent}
         strokeWidth={stroke}
         strokeLinecap="round"
         strokeDasharray={c}
@@ -65,7 +65,7 @@ function MacroCell({ name, eaten, goal }: { name: string; eaten: number; goal: n
         <DonutRing progress={progress} isOver={over} />
         <div className="min-w-0">
           <p
-            className="text-sm font-bold leading-[21px] text-black"
+            className="text-sm font-bold leading-[21px] text-[var(--text-primary)]"
             style={{ fontFamily: "var(--font-dm-sans)" }}
           >
             {name}
@@ -74,7 +74,7 @@ function MacroCell({ name, eaten, goal }: { name: string; eaten: number; goal: n
             className="text-xs font-medium leading-[18px]"
             style={{
               fontFamily: "var(--font-dm-sans)",
-              color: over ? "#D93C27" : C.textSecondary,
+              color: over ? "var(--error)" : C.textSecondary,
             }}
           >
             {goal > 0 ? `${eaten}/${goal}g` : "0/0g"}
@@ -105,7 +105,7 @@ function CalorieChip({ kcal }: { kcal: number }) {
 function MacroLetterChip({ letter, grams }: { letter: string; grams: number }) {
   return (
     <span
-      className="inline-flex rounded-full px-1.5 py-[3px] text-[10px] leading-3 text-black"
+      className="inline-flex rounded-full px-1.5 py-[3px] text-[10px] leading-3 text-[var(--text-primary)]"
       style={{ fontFamily: "var(--font-dm-sans)", backgroundColor: C.inputFill }}
     >
       <span className="font-extrabold">{letter}</span>
@@ -129,11 +129,11 @@ function FoodCardLog({
 }) {
   return (
     <div
-      className="rounded-2xl border bg-white p-3"
+      className="rounded-2xl border bg-[var(--surface)] p-3"
       style={{ borderColor: C.border }}
     >
       <p
-        className="text-sm font-medium leading-[21px] text-black"
+        className="text-sm font-medium leading-[21px] text-[var(--text-primary)]"
         style={{ fontFamily: "var(--font-dm-sans)" }}
       >
         {title}
@@ -151,10 +151,10 @@ function FoodCardLog({
 function MealTypeActionButton() {
   return (
     <div
-      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-black shadow-[0_2px_8px_rgba(0,0,0,0.12)]"
+      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--primary)] shadow-[0_2px_8px_rgba(0,0,0,0.12)]"
       aria-hidden
     >
-      <PrepItIcon name="plus" size={14} color="#ffffff" />
+      <PrepItIcon name="plus" size={14} color="var(--on-primary)" />
     </div>
   );
 }
@@ -173,7 +173,7 @@ function MealSection({
       <div className="flex items-center gap-2">
         <div className="min-w-0 flex-1">
           <p
-            className="text-xl font-semibold leading-[30px] text-black"
+            className="text-xl font-semibold leading-[30px] text-[var(--text-primary)]"
             style={{ fontFamily: "var(--font-brand)" }}
           >
             {title}
@@ -202,7 +202,7 @@ function LogHeader() {
         tabIndex={-1}
       >
         <span
-          className="text-xl font-bold leading-[30px] text-black"
+          className="text-xl font-bold leading-[30px] text-[var(--text-primary)]"
           style={{ fontFamily: "var(--font-brand)" }}
         >
           Today, 2 Jun
@@ -212,13 +212,13 @@ function LogHeader() {
 
       <div className="flex items-center gap-2">
         <div
-          className="flex items-center gap-1 rounded-2xl bg-white px-2 py-2"
+          className="flex items-center gap-1 rounded-2xl bg-[var(--surface)] px-2 py-2"
           style={{ fontFamily: "var(--font-dm-sans)" }}
         >
           <PrepItIcon name="fire" size={24} color={C.calorieAccent} />
-          <span className="text-sm font-bold leading-[21px] text-black">4</span>
+          <span className="text-sm font-bold leading-[21px] text-[var(--text-primary)]">4</span>
         </div>
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white">
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--surface)]">
           <PrepItIcon name="calendarDay" size={25} color={C.textPrimary} />
         </div>
       </div>
@@ -234,7 +234,7 @@ function NutritionCard() {
   const fillWidth = `${Math.max(8, Math.round(fillRatio * 100))}%`;
 
   return (
-    <div className="mx-4 rounded-[20px] border bg-white p-4" style={{ borderColor: C.border }}>
+    <div className="mx-4 rounded-[20px] border bg-[var(--surface)] p-4" style={{ borderColor: C.border }}>
       <div className="flex items-center gap-4">
         <PrepItIcon name="fire" size={40} color={C.calorieAccent} />
         <div className="flex min-w-0 flex-1 items-start gap-2">
@@ -245,7 +245,7 @@ function NutritionCard() {
             >
               Eaten
             </p>
-            <p className="mt-0.5 leading-none text-black">
+            <p className="mt-0.5 leading-none text-[var(--text-primary)]">
               <span
                 className="text-2xl font-semibold"
                 style={{ fontFamily: "var(--font-brand)" }}
@@ -286,7 +286,7 @@ function NutritionCard() {
             >
               {stat.label}
             </p>
-            <p className="mt-0.5 leading-none text-black">
+            <p className="mt-0.5 leading-none text-[var(--text-primary)]">
               <span
                 className="text-lg font-semibold"
                 style={{ fontFamily: "var(--font-brand)" }}
@@ -304,7 +304,7 @@ function NutritionCard() {
         ))}
       </div>
 
-      <div className="relative mt-4 h-4 overflow-hidden rounded bg-[#F4F4F5]">
+      <div className="relative mt-4 h-4 overflow-hidden rounded bg-[var(--scaffold)]">
         <div
           className="absolute inset-y-0 left-0 rounded"
           style={{
@@ -327,7 +327,7 @@ function NutritionCard() {
 
 function LogScreenContent() {
   return (
-    <div className="bg-[#F4F4F5] pb-6 pt-[47px]" style={{ width: DESIGN_WIDTH }}>
+    <div className="bg-[var(--scaffold)] pb-6 pt-[47px]" style={{ width: DESIGN_WIDTH }}>
       <LogHeader />
       <div className="px-0">
         <NutritionCard />
@@ -352,7 +352,7 @@ function LogScreenContent() {
 
 export default function FakeLogScreenDemo() {
   return (
-    <div className="absolute inset-0 overflow-hidden bg-[#F4F4F5]">
+    <div className="absolute inset-0 overflow-hidden bg-[var(--scaffold)]">
       <div
         className="pointer-events-none origin-top-left select-none"
         style={{

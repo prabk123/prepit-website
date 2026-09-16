@@ -1,20 +1,20 @@
 import PrepItIcon from "@/components/shareable/PrepItIcon";
 
-/** Matches PrepItColors.light from fresca_app */
+/** Matches PrepItColors — follows funnel light/dark tokens. */
 const C = {
-  surface: "#FFFFFF",
-  textPrimary: "#000000",
-  textSecondary: "#7A7A82",
-  textBody: "#4D4D59",
-  border: "#E9E9EA",
-  inputFill: "#F4F4F5",
+  surface: "var(--surface)",
+  textPrimary: "var(--text-primary)",
+  textSecondary: "var(--text-secondary)",
+  textBody: "var(--text-body)",
+  border: "var(--border)",
+  inputFill: "var(--input-fill)",
   kcalTagBg: "rgba(255, 100, 79, 0.1)",
-  kcalTagText: "#B24637",
+  kcalTagText: "var(--calorie-text)",
 } as const;
 
 function GoalMacroWordTag({ word, grams }: { word: string; grams: number }) {
   return (
-    <span className="inline-flex rounded-full bg-[#F4F4F5] px-2 py-1 text-[10px] leading-3 text-black">
+    <span className="inline-flex rounded-full bg-[var(--input-fill)] px-2 py-1 text-[10px] leading-3 text-[var(--text-primary)]">
       <span className="font-extrabold">{word} </span>
       <span className="font-medium">{grams}g</span>
     </span>
@@ -23,7 +23,7 @@ function GoalMacroWordTag({ word, grams }: { word: string; grams: number }) {
 
 function MacroInitialTag({ letter, grams }: { letter: string; grams: number }) {
   return (
-    <span className="inline-flex rounded-full bg-[#F4F4F5] px-2 py-1 text-[10px] leading-3 text-black">
+    <span className="inline-flex rounded-full bg-[var(--input-fill)] px-2 py-1 text-[10px] leading-3 text-[var(--text-primary)]">
       <span className="font-extrabold">{letter}</span>
       <span className="font-medium">{` ${grams}g`}</span>
     </span>
@@ -59,8 +59,8 @@ function LogFoodPrimaryButton({ label, done }: { label: string; done?: boolean }
   return (
     <button
       type="button"
-      className="w-full rounded-lg py-2 text-center text-xs font-bold leading-[21px] text-white"
-      style={{ backgroundColor: C.textPrimary }}
+      className="w-full rounded-lg py-2 text-center text-xs font-bold leading-[21px] text-[var(--on-primary)]"
+      style={{ backgroundColor: "var(--primary)" }}
       tabIndex={-1}
     >
       {label}

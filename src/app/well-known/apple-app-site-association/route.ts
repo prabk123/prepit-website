@@ -33,7 +33,7 @@ export async function GET() {
       details: [
         {
           appID: `${teamId}.${bundleId}`,
-          paths: ["*"],
+          paths: ["/email-signin", "/email-signin/*", "/auth/link", "/auth/link/*", "/sharable/*"],
         },
       ],
     },

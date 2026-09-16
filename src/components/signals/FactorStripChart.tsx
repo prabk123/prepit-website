@@ -69,7 +69,7 @@ export default function FactorStripChart({
 
       {baselineComponent != null && (
         <div
-          className="absolute top-1/2 h-3 w-0.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--grey-60)] opacity-70"
+          className="absolute bottom-0 h-0 w-0 -translate-x-1/2 border-x-4 border-t-[6px] border-x-transparent border-t-[var(--grey-60)]"
           style={{ left: `${baselineComponent * 100}%` }}
         />
       )}

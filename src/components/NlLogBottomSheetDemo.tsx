@@ -67,7 +67,7 @@ export default function NlLogBottomSheetDemo({
 
         <div className={`flex items-end gap-1.5 ${compact ? "mt-2.5" : "mt-6"}`}>
           <div
-            className={`min-h-[36px] flex-1 rounded-xl bg-[var(--grey-5)] px-3 py-2 ${
+            className={`min-h-[36px] flex-1 rounded-xl bg-[var(--input-fill)] px-3 py-2 ${
               compact ? "" : "min-h-[48px] px-4 py-3"
             }`}
           >

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import posthog from "posthog-js";
 import { isAnalyticsEnabled } from "@/lib/analytics";
@@ -13,9 +14,11 @@ import {
 } from "@/lib/cookies";
 
 export default function CookieConsent() {
+  const pathname = usePathname();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
+    if (pathname.startsWith("/start")) return;
     if (!isAnalyticsEnabled()) return;
 
     const isEu = readCookie(PREPIT_GEO_COOKIE) === "eu";
@@ -36,7 +39,7 @@ export default function CookieConsent() {
     setVisible(false);
   }
 
-  if (!visible) return null;
+  if (pathname.startsWith("/start") || !visible) return null;
 
   return (
     <div
