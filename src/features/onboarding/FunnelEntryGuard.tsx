@@ -5,11 +5,13 @@ import { useRouter } from "next/navigation";
 import {
   consumeRedirectResult,
   isFirebaseConfigured,
+  resolveAuthProvider,
   waitForAuthUser,
 } from "@/lib/firebase";
 import { hasPremiumEntitlement, isRevenueCatConfigured } from "@/lib/revenuecat";
 import { createAccountFromSavedState } from "@/features/onboarding/completeAccount";
 import {
+  identifyFunnelUser,
   trackAuthSignupSuccess,
   trackOnboardingComplete,
 } from "@/lib/funnelAnalytics";
@@ -33,11 +35,13 @@ export default function FunnelEntryGuard() {
           if (!cancelled) setReady(true);
           return;
         }
+        const method = resolveAuthProvider(user) ?? "oauth";
+        identifyFunnelUser(user.uid, { email: user.email, method });
         const result = await createAccountFromSavedState(user);
         if (cancelled) return;
         if (result !== "incomplete") {
           if (result === "created") {
-            trackAuthSignupSuccess("oauth");
+            trackAuthSignupSuccess(method);
             trackOnboardingComplete();
           }
           if (isRevenueCatConfigured()) {

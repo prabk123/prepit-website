@@ -35,6 +35,33 @@ NEXT_PUBLIC_FIREBASE_APP_ID=1:764630790288:web:1cb684d569cdd41293a815
 NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=G-17FLLM4ZC0
 NEXT_PUBLIC_REVENUECAT_WEB_API_KEY=
 NEXT_PUBLIC_API_BASE_URL=https://api.tryprepit.app
+NEXT_PUBLIC_ANALYTICS_ENABLED=true
+NEXT_PUBLIC_POSTHOG_KEY=
+NEXT_PUBLIC_POSTHOG_HOST=https://b.tryprepit.app
+NEXT_PUBLIC_POSTHOG_UI_HOST=https://eu.posthog.com
+NEXT_PUBLIC_META_PIXEL_ID=
 ```
 
 Use the sandbox RevenueCat key and a staging API URL while testing.
+
+## Analytics (PostHog + Meta)
+
+Website product events use the same names as the app, plus `platform: web` and (on funnel events) `signup_source: web`. After login the site identifies PostHog with the Firebase UID so RevenueCat `rc_*` events join the same person.
+
+**PostHog (RevenueCat dashboard → Integrations → PostHog)**
+
+1. Use the **EU** region (or self-hosted `https://b.tryprepit.app` if that is the ingest host).
+2. Project API key = the same `NEXT_PUBLIC_POSTHOG_KEY` / `POSTHOG_PROJECT_API_KEY`.
+3. Keep subscription events on the integration (`rc_initial_purchase_event`, `rc_trial_started_event`, …). Do not also send purchase events from the website or webhook.
+
+**Meta Ads (RevenueCat dashboard → Integrations → Meta Ads)**
+
+1. Prefer **Conversions API**. Add production Dataset ID + CAPI token.
+2. Add sandbox Dataset ID + token for test purchases.
+3. Event mapping: Trial Started → `StartTrial`; Trial Converted / Initial Purchase / Renewal → `Subscribe`.
+4. Report **gross** revenue.
+5. Once a sandbox web purchase shows a Meta delivery row on the RevenueCat customer, turn off the backend `processWebPurchaseMetaCapi` path so events are not double-counted.
+
+The website Pixel (`NEXT_PUBLIC_META_PIXEL_ID`) is for `PageView`, `CompleteRegistration`, `InitiateCheckout`, and `AppStoreClick` only. Do not fire Pixel `Purchase` / `Subscribe`.
+
+The website writes `$email`, `$posthogUserId`, UTMs, and `_fbp` / `_fbc` onto the RevenueCat customer before the web paywall so the Meta integration can match web checkout.

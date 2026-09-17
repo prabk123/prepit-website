@@ -13,7 +13,9 @@ import {
   presentPaywall,
 } from "@/lib/revenuecat";
 import {
-  trackMetaInitiateCheckout,
+  identifyFunnelUser,
+  trackWebPaywallDismissed,
+  trackWebPaywallSkipped,
   trackWebPaywallView,
   trackWebPurchaseSuccess,
 } from "@/lib/funnelAnalytics";
@@ -41,6 +43,7 @@ export default function PaywallPage() {
         router.replace("/start");
         return;
       }
+      identifyFunnelUser(user.uid, { email: user.email });
       if (!isRevenueCatConfigured()) {
         setStatus("error");
         setMessage("Payments are not configured yet.");
@@ -54,7 +57,6 @@ export default function PaywallPage() {
           return;
         }
         trackWebPaywallView();
-        trackMetaInitiateCheckout();
         setStatus("presenting");
         await new Promise((resolve) => requestAnimationFrame(resolve));
         const target = containerRef.current;
@@ -65,10 +67,16 @@ export default function PaywallPage() {
           onBack: (closePaywall) => closePaywall(),
         });
         if (cancelled) return;
-        trackWebPurchaseSuccess();
+        const purchased = await hasPremiumEntitlement(user.uid);
+        if (purchased) {
+          trackWebPurchaseSuccess();
+        } else {
+          trackWebPaywallDismissed();
+        }
         router.replace("/start/welcome");
       } catch (error) {
         if (cancelled) return;
+        trackWebPaywallDismissed();
         setStatus("dismissed");
         setMessage(
           error instanceof Error
@@ -108,7 +116,10 @@ export default function PaywallPage() {
             <button
               type="button"
               className="h-12 w-full rounded-2xl border border-[var(--border)] text-base font-bold"
-              onClick={() => router.push("/start/welcome")}
+              onClick={() => {
+                trackWebPaywallSkipped();
+                router.push("/start/welcome");
+              }}
             >
               Continue without subscribing
             </button>

@@ -1,10 +1,15 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import { Geist, Geist_Mono, DM_Sans } from "next/font/google";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
 import Script from "next/script";
 import localFont from "next/font/local";
 import CookieConsent from "@/components/CookieConsent";
+import {
+  PREPIT_ANALYTICS_CONSENT_COOKIE,
+  PREPIT_GEO_COOKIE,
+} from "@/lib/cookies";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -111,12 +116,17 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   const metaPixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID;
+  const cookieStore = await cookies();
+  const isEu = cookieStore.get(PREPIT_GEO_COOKIE)?.value === "eu";
+  const consentGranted =
+    cookieStore.get(PREPIT_ANALYTICS_CONSENT_COOKIE)?.value === "granted";
+  const metaConsent = !isEu || consentGranted;
 
   return (
     <html lang="en">
@@ -137,19 +147,22 @@ export default function RootLayout({
                 t.src=v;s=b.getElementsByTagName(e)[0];
                 s.parentNode.insertBefore(t,s)}(window, document,'script',
                 'https://connect.facebook.net/en_US/fbevents.js');
+                fbq('consent', '${metaConsent ? "grant" : "revoke"}');
                 fbq('init', '${metaPixelId}');
-                fbq('track', 'PageView');
+                ${metaConsent ? "fbq('track', 'PageView');" : ""}
               `}
             </Script>
-            <noscript>
-              <img
-                height="1"
-                width="1"
-                style={{ display: "none" }}
-                src={`https://www.facebook.com/tr?id=${metaPixelId}&ev=PageView&noscript=1`}
-                alt=""
-              />
-            </noscript>
+            {metaConsent ? (
+              <noscript>
+                <img
+                  height="1"
+                  width="1"
+                  style={{ display: "none" }}
+                  src={`https://www.facebook.com/tr?id=${metaPixelId}&ev=PageView&noscript=1`}
+                  alt=""
+                />
+              </noscript>
+            ) : null}
           </>
         )}
         <script

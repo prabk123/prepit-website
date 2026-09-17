@@ -10,6 +10,8 @@ import {
   DEMO_STEPS,
   nextStepId,
   previousStepId,
+  shouldSkipGoalSpeed,
+  shouldSkipGoalWeight,
   stepCompleteValue,
   visibleStepCount,
   visibleStepIndex,
@@ -25,9 +27,11 @@ import {
   saveOnboardingStepId,
   type OnboardingState,
 } from "@/features/onboarding/state";
+import { captureAttributionFromLocation } from "@/lib/attribution";
 import {
   trackOnboardingStart,
   trackOnboardingStepComplete,
+  trackOnboardingSkip,
   trackOnboardingStepView,
   trackAuthSignupView,
 } from "@/lib/funnelAnalytics";
@@ -94,6 +98,7 @@ export default function OnboardingFlow() {
       setStep(savedStep as WebStepId);
     }
     setHydrated(true);
+    captureAttributionFromLocation();
     trackOnboardingStart();
   }, []);
 
@@ -147,6 +152,12 @@ export default function OnboardingFlow() {
       setCalculating(false);
     }
     trackOnboardingStepComplete(step, stepCompleteValue(step, state));
+    if (step === "age" && shouldSkipGoalWeight(state)) {
+      trackOnboardingSkip("goalWeight");
+    }
+    if ((step === "age" || step === "goalWeight") && shouldSkipGoalSpeed(state)) {
+      trackOnboardingSkip("goalSpeed");
+    }
     const next = nextStepId(step, state);
     if (next) setStep(next);
   }, [state, step]);

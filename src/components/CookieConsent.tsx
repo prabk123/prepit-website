@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import posthog from "posthog-js";
-import { isAnalyticsEnabled } from "@/lib/analytics";
+import { isAnalyticsEnabled, isMetaPixelEnabled } from "@/lib/analytics";
 import {
   COOKIE_MAX_AGE_ONE_YEAR,
   PREPIT_ANALYTICS_CONSENT_COOKIE,
@@ -12,34 +12,36 @@ import {
   readCookie,
   setClientCookie,
 } from "@/lib/cookies";
+import { grantMetaConsent, revokeMetaConsent } from "@/lib/metaPixel";
 
 export default function CookieConsent() {
   const pathname = usePathname();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (pathname.startsWith("/start")) return;
-    if (!isAnalyticsEnabled()) return;
+    if (!isAnalyticsEnabled() && !isMetaPixelEnabled()) return;
 
     const isEu = readCookie(PREPIT_GEO_COOKIE) === "eu";
     const consent = readCookie(PREPIT_ANALYTICS_CONSENT_COOKIE);
     setVisible(isEu && consent !== "granted" && consent !== "denied");
-  }, []);
+  }, [pathname]);
 
   function acceptAnalytics() {
     setClientCookie(PREPIT_ANALYTICS_CONSENT_COOKIE, "granted", COOKIE_MAX_AGE_ONE_YEAR);
     posthog.opt_in_capturing();
     posthog.startSessionRecording();
+    grantMetaConsent();
     setVisible(false);
   }
 
   function rejectAnalytics() {
     setClientCookie(PREPIT_ANALYTICS_CONSENT_COOKIE, "denied", COOKIE_MAX_AGE_ONE_YEAR);
     posthog.opt_out_capturing();
+    revokeMetaConsent();
     setVisible(false);
   }
 
-  if (pathname.startsWith("/start") || !visible) return null;
+  if (!visible) return null;
 
   return (
     <div

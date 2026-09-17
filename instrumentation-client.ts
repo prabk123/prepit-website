@@ -1,5 +1,6 @@
 import posthog from "posthog-js";
 import { isPostHogEnabled } from "@/lib/analytics";
+import { captureAttributionFromLocation } from "@/lib/attribution";
 import {
   PREPIT_ANALYTICS_CONSENT_COOKIE,
   PREPIT_GEO_COOKIE,
@@ -23,4 +24,9 @@ if (isPostHogEnabled()) {
     },
     debug: process.env.NODE_ENV === "development",
   });
+  posthog.register({ platform: "web" });
+  const attribution = captureAttributionFromLocation();
+  if (Object.keys(attribution).length > 0) {
+    posthog.register(attribution);
+  }
 }

@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { signInWithApple, signInWithGoogle } from "@/lib/firebase";
 import {
+  identifyFunnelUser,
   trackAuthSignupSuccess,
   trackOnboardingComplete,
 } from "@/lib/funnelAnalytics";
@@ -31,12 +32,13 @@ export default function LoginStep({
       const user =
         method === "google" ? await signInWithGoogle() : await signInWithApple();
       if (user.displayName) onNameCaptured(user.displayName);
+      identifyFunnelUser(user.uid, { email: user.email, method });
       const result = await createAccountFromSavedState(user);
       if (result === "incomplete") {
         throw new Error("Please finish the earlier onboarding steps.");
       }
       if (result === "created") {
-        trackAuthSignupSuccess("oauth");
+        trackAuthSignupSuccess(method);
         trackOnboardingComplete();
       }
       router.push("/start/plan");

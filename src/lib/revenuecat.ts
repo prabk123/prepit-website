@@ -1,5 +1,7 @@
 "use client";
 
+import { getAttribution, facebookBrowserId, facebookClickId } from "@/lib/attribution";
+
 export const PREMIUM_ENTITLEMENT = "premium";
 
 type PresentPaywallOptions = {
@@ -13,6 +15,7 @@ type PurchasesInstance = {
     entitlements: { active: Record<string, unknown> };
   }>;
   presentPaywall: (options: PresentPaywallOptions) => Promise<unknown>;
+  setAttributes: (attributes: Record<string, string | null>) => Promise<void>;
 };
 
 let configuredForUid: string | null = null;
@@ -44,6 +47,49 @@ export async function hasPremiumEntitlement(appUserId: string): Promise<boolean>
   return Boolean(info.entitlements.active[PREMIUM_ENTITLEMENT]);
 }
 
+function compactAttributes(values: Record<string, string | undefined>): Record<string, string> {
+  const attributes: Record<string, string> = {};
+  for (const [key, value] of Object.entries(values)) {
+    if (value && value.trim()) attributes[key] = value.trim();
+  }
+  return attributes;
+}
+
+/** Feeds RevenueCat Meta / PostHog integrations before Web Billing checkout. */
+export async function syncWebBillingAttributes(
+  appUserId: string,
+  extras?: { email?: string | null },
+): Promise<void> {
+  const client = await configurePurchases(appUserId);
+  const attribution = getAttribution();
+  const reserved = compactAttributes({
+    $email: extras?.email ?? undefined,
+    $posthogUserId: appUserId,
+    $mediaSource: attribution.utm_source,
+    $campaign: attribution.utm_campaign,
+    $adGroup: attribution.utm_content,
+    $keyword: attribution.utm_term,
+  });
+  const webMatch = compactAttributes({
+    $fbp: facebookBrowserId(),
+    $fbc: facebookClickId(),
+    $userAgent: typeof navigator !== "undefined" ? navigator.userAgent : undefined,
+    $pageUrl: typeof window !== "undefined" ? window.location.href : undefined,
+  });
+
+  if (typeof client.setAttributes !== "function") return;
+  if (Object.keys(reserved).length > 0) {
+    await client.setAttributes(reserved);
+  }
+  if (Object.keys(webMatch).length === 0) return;
+  try {
+    await client.setAttributes(webMatch);
+  } catch {
+    // $fbp / $fbc / $userAgent / $pageUrl are used by Meta web matching but
+    // are not in the purchases-js reserved enum. Ignore if the API rejects them.
+  }
+}
+
 export async function presentPaywall(
   appUserId: string,
   options: PresentPaywallOptions = {},
@@ -51,6 +97,7 @@ export async function presentPaywall(
   if (presentPaywallInFlight) return presentPaywallInFlight;
   presentPaywallInFlight = (async () => {
     const client = await configurePurchases(appUserId);
+    await syncWebBillingAttributes(appUserId, { email: options.customerEmail });
     await client.presentPaywall(options);
   })().finally(() => {
     presentPaywallInFlight = null;

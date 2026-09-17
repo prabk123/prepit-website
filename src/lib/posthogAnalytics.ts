@@ -8,5 +8,9 @@ export function trackPostHogAppStoreClick(source: string) {
   if (typeof window === "undefined" || !isPostHogEnabled()) return;
 
   // sendBeacon survives same-tab navigation to the App Store before the request completes.
-  posthog.capture(POSTHOG_APP_STORE_EVENT, { source }, { transport: "sendBeacon" });
+  posthog.capture(
+    POSTHOG_APP_STORE_EVENT,
+    { source, platform: "web" },
+    { transport: "sendBeacon" },
+  );
 }

@@ -2,13 +2,54 @@
 
 import posthog from "posthog-js";
 import { isPostHogEnabled } from "@/lib/analytics";
+import { attributionProperties } from "@/lib/attribution";
+import {
+  initMetaAdvancedMatching,
+  trackMetaCompleteRegistration,
+  trackMetaInitiateCheckout,
+} from "@/lib/metaPixel";
+
+const ONBOARDING_START_KEY = "prepit.onboardingStartTracked";
 
 function capture(event: string, properties?: Record<string, unknown>) {
   if (typeof window === "undefined" || !isPostHogEnabled()) return;
-  posthog.capture(event, properties);
+  posthog.capture(event, {
+    platform: "web",
+    signup_source: "web",
+    ...attributionProperties(),
+    ...properties,
+  });
+}
+
+export function identifyFunnelUser(
+  userId: string,
+  extras?: { email?: string | null; method?: string },
+) {
+  if (typeof window === "undefined" || !userId) return;
+
+  if (isPostHogEnabled()) {
+    posthog.identify(userId, {
+      platform: "web",
+      signup_source: "web",
+      ...(extras?.email ? { email: extras.email } : {}),
+      ...(extras?.method ? { signup_method: extras.method } : {}),
+    });
+  }
+
+  initMetaAdvancedMatching({
+    email: extras?.email ?? undefined,
+    externalId: userId,
+  });
 }
 
 export function trackOnboardingStart() {
+  if (typeof window === "undefined") return;
+  try {
+    if (sessionStorage.getItem(ONBOARDING_START_KEY) === "1") return;
+    sessionStorage.setItem(ONBOARDING_START_KEY, "1");
+  } catch {
+    // Still fire once per page load if storage is unavailable.
+  }
   capture("onboarding_start");
 }
 
@@ -37,17 +78,27 @@ export function trackAuthSignupView() {
 
 export function trackAuthSignupSuccess(method: string) {
   capture("auth_signup_success", { method });
+  trackMetaCompleteRegistration(method);
 }
 
 export function trackWebPaywallView() {
   capture("web_paywall_view");
+  trackMetaInitiateCheckout();
 }
 
 export function trackWebPurchaseSuccess() {
   capture("web_purchase_success");
 }
 
-export function trackMetaInitiateCheckout() {
-  if (typeof window === "undefined" || typeof window.fbq !== "function") return;
-  window.fbq("track", "InitiateCheckout");
+export function trackWebPaywallDismissed() {
+  capture("web_paywall_dismissed");
 }
+
+export function trackWebPaywallSkipped() {
+  capture("web_paywall_skipped");
+}
+
+export function trackWebWelcomeView() {
+  capture("web_welcome_view");
+}
+

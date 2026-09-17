@@ -25,6 +25,7 @@ import {
   waitForAuthUser,
 } from "@/lib/firebase";
 import { APP_STORE_URL } from "@/lib/appStore";
+import { identifyFunnelUser, trackWebWelcomeView } from "@/lib/funnelAnalytics";
 import {
   calculateNutritionalGoals,
   getAccount,
@@ -106,12 +107,14 @@ export default function WelcomePage() {
     const saved = loadOnboardingState();
     setPlanState(saved);
     setFirstName(splitDisplayName(saved.name).firstName || null);
+    trackWebWelcomeView();
 
     void (async () => {
       const persisted = readPersistedAuthProvider();
       if (persisted) setProvider(persisted);
       await consumeRedirectResult();
       const user = await waitForAuthUser();
+      if (user) identifyFunnelUser(user.uid, { email: user.email });
       setEmail(user?.email ?? null);
       const nextProvider = resolveAuthProvider(user);
       setProvider(nextProvider);
