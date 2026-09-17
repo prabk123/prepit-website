@@ -2,17 +2,22 @@
 
 export const PREMIUM_ENTITLEMENT = "premium";
 
+type PresentPaywallOptions = {
+  htmlTarget?: HTMLElement;
+  customerEmail?: string;
+  onBack?: (closePaywall: () => void) => void;
+};
+
 type PurchasesInstance = {
   getCustomerInfo: () => Promise<{
     entitlements: { active: Record<string, unknown> };
   }>;
-  presentPaywall: (options: {
-    htmlTarget: HTMLElement;
-  }) => Promise<unknown>;
+  presentPaywall: (options: PresentPaywallOptions) => Promise<unknown>;
 };
 
 let configuredForUid: string | null = null;
 let purchases: PurchasesInstance | null = null;
+let presentPaywallInFlight: Promise<void> | null = null;
 
 export function isRevenueCatConfigured(): boolean {
   return Boolean(process.env.NEXT_PUBLIC_REVENUECAT_WEB_API_KEY?.trim());
@@ -41,8 +46,14 @@ export async function hasPremiumEntitlement(appUserId: string): Promise<boolean>
 
 export async function presentPaywall(
   appUserId: string,
-  htmlTarget: HTMLElement,
+  options: PresentPaywallOptions = {},
 ): Promise<void> {
-  const client = await configurePurchases(appUserId);
-  await client.presentPaywall({ htmlTarget });
+  if (presentPaywallInFlight) return presentPaywallInFlight;
+  presentPaywallInFlight = (async () => {
+    const client = await configurePurchases(appUserId);
+    await client.presentPaywall(options);
+  })().finally(() => {
+    presentPaywallInFlight = null;
+  });
+  return presentPaywallInFlight;
 }

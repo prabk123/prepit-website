@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { signInWithApple, signInWithGoogle } from "@/lib/firebase";
 import {
@@ -72,7 +73,7 @@ export default function LoginStep({
             onClick={() => void finishAuth("google")}
             className="flex h-14 items-center justify-center gap-2 rounded-2xl border border-[var(--border)] bg-[var(--surface)] text-base font-bold text-[var(--text-primary)] disabled:opacity-60"
           >
-            <PrepItIcon name="googleLogo" size={20} />
+            <Image src="/google-icon.png" alt="" width={20} height={20} />
             {loading === "google" ? "Signing in..." : "Continue with Google"}
           </button>
         </div>

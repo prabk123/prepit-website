@@ -1,9 +1,11 @@
 "use client";
 
+import PrepItIcon, { type PrepItIconName } from "@/components/shareable/PrepItIcon";
 import {
   cmToFeetInches,
   feetInchesToCm,
   kgToLb,
+  LB_PER_KG,
   lbToKg,
   recommendedGoalSpeed,
 } from "@/features/onboarding/mappings";
@@ -157,6 +159,41 @@ export function GoalWeightStep({
   );
 }
 
+function formatPaceValue(paceKg: number, imperial: boolean): string {
+  const value = imperial ? paceKg * LB_PER_KG : paceKg;
+  const unit = imperial ? "lb" : "kg";
+  const rounded = Number(value.toFixed(2));
+  const decimals = Number.isInteger(rounded) ? 0 : 2;
+  return `${rounded.toFixed(decimals)} ${unit}`;
+}
+
+function formatChangeValue(changeKg: number, imperial: boolean): string {
+  const value = imperial ? kgToLb(changeKg) : changeKg;
+  return value.toFixed(0);
+}
+
+function projectedGoalDate(changeKg: number, paceKg: number): Date | null {
+  if (paceKg <= 0 || changeKg <= 0) return null;
+  const date = new Date();
+  date.setDate(date.getDate() + Math.round((changeKg / paceKg) * 7));
+  return date;
+}
+
+function WhyPaceRow({ icon, text }: { icon: PrepItIconName; text: string }) {
+  return (
+    <div className="flex items-start gap-3 py-2">
+      <div className="ai-icon-chrome" aria-hidden>
+        <div className="ai-icon-chrome__inner">
+          <PrepItIcon name={icon} size={20} color="var(--text-primary)" />
+        </div>
+      </div>
+      <p className="min-w-0 flex-1 text-base leading-[1.5] text-[var(--text-primary)]">
+        {text}
+      </p>
+    </div>
+  );
+}
+
 export function GoalSpeedStep({
   state,
 }: {
@@ -165,43 +202,58 @@ export function GoalSpeedStep({
   const pace = recommendedGoalSpeed(state.weight, state.goalWeight);
   const losing = state.goalWeight < state.weight;
   const imperial = state.unit === "Imperial";
-  const paceDisplay = imperial ? (pace * 2.20462).toFixed(2) : pace.toFixed(2);
+  const unitLabel = imperial ? "lb" : "kg";
   const changeAbs = Math.abs(state.goalWeight - state.weight);
-  const weeks = pace > 0 && changeAbs > 0 ? changeAbs / pace : 0;
-  const date =
-    weeks > 0
-      ? new Date(Date.now() + weeks * 7 * 24 * 60 * 60 * 1000).toLocaleDateString(
-          undefined,
-          { month: "long", year: "numeric" },
-        )
-      : null;
-  const displayChange = imperial ? kgToLb(changeAbs) : changeAbs;
+  const goalDate = projectedGoalDate(changeAbs, pace);
+  const dateLabel = goalDate
+    ? goalDate.toLocaleDateString(undefined, { month: "long", year: "numeric" })
+    : null;
 
   return (
-    <div>
+    <div className="flex min-h-0 flex-1 flex-col">
       <StepCopy title="We've set your pace" />
-      <p className="text-4xl font-semibold">
-        {paceDisplay} {imperial ? "lb" : "kg"}
-        <span className="ml-2 text-lg font-medium text-[var(--text-secondary)]">per week</span>
-      </p>
-      {date ? (
-        <p className="mt-3 text-base">
-          You should {losing ? "lose" : "gain"} {displayChange}{" "}
-          {imperial ? "lb" : "kg"} by {date}
+      <div className="flex min-h-0 flex-1 flex-col justify-center overflow-y-auto">
+        <p className="text-center text-[28px] font-bold leading-none">
+          {formatPaceValue(pace, imperial)}
         </p>
-      ) : null}
-      <p className="mt-4 text-sm leading-6 text-[var(--text-secondary)]">
-        This isn&apos;t a miracle plan — it&apos;s one you can actually stick to.
-        Consistency gets you there.
-      </p>
-      <div className="mt-6 rounded-2xl bg-[var(--input-fill)] p-4">
-        <p className="font-semibold">Why this pace?</p>
-        <p className="mt-2 text-sm leading-6 text-[var(--text-body)]">
-          {losing
-            ? "A sustainable fat-loss pace protects muscle and fits real life."
-            : "A measured gain pace supports lean mass without unnecessary surplus."}{" "}
-          Fits real life, not a crash week.
+        <p className="mt-2 text-center text-base text-[var(--text-secondary)]">
+          per week
         </p>
+        {dateLabel ? (
+          <p className="mt-6 rounded-2xl bg-[var(--input-fill)] px-4 py-4 text-center text-base">
+            You should {losing ? "lose" : "gain"} {formatChangeValue(changeAbs, imperial)}{" "}
+            {unitLabel} by {dateLabel}
+          </p>
+        ) : null}
+        <p className="mt-6 text-center text-base leading-[1.5] text-[var(--text-secondary)]">
+          This isn&apos;t a miracle plan — it&apos;s one you can actually stick to.
+          Consistency gets you there.
+        </p>
+        <div className="mt-4">
+          <p className="text-lg font-bold">Why this pace?</p>
+          <div className="mt-2">
+            <WhyPaceRow
+              icon="protein"
+              text={
+                losing
+                  ? "Protects your muscle — rapid loss burns muscle, not just fat"
+                  : "Builds lean muscle — gaining faster mostly adds fat"
+              }
+            />
+            <WhyPaceRow
+              icon="restaurant"
+              text="Fits real life — no crash dieting, no constant hunger"
+            />
+            <WhyPaceRow
+              icon="charts"
+              text={
+                losing
+                  ? "Lasts — weight lost slowly is far more likely to stay off"
+                  : "Lasts — steady gains you can keep building on"
+              }
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

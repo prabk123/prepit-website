@@ -500,3 +500,12 @@ html:has(.funnel) body {
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
+
+/* RevenueCat paywall: keep the logo off the top edge and honor the notch. */
+html:has(.funnel) #rcb-ui-pw-root,
+html:has(.funnel) .rcb-ui-pw-root,
+.web-paywall-root {
+  box-sizing: border-box;
+  padding-top: max(2.5rem, calc(env(safe-area-inset-top, 0px) + 1.25rem));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}

@@ -56,6 +56,13 @@ export function getGoalBackendValue(displayLabel: string): string {
   );
 }
 
+export function getGoalDisplayLabel(backendValue: string): string | null {
+  return (
+    GOAL_OPTIONS.find((opt) => opt.backendValue === backendValue)?.displayLabel ??
+    null
+  );
+}
+
 export const BLOCKER_OPTIONS = [
   "Logging takes too long",
   "I get hungry",

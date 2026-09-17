@@ -39,6 +39,7 @@ export const CENTERED_STEPS = new Set<WebStepId>([
   "heightWeight",
   "age",
   "goalWeight",
+  "goalSpeed",
   "complete",
   "login",
 ]);

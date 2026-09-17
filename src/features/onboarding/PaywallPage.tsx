@@ -22,7 +22,7 @@ import FunnelHeader from "@/features/onboarding/components/FunnelHeader";
 export default function PaywallPage() {
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
-  const [status, setStatus] = useState<"loading" | "ready" | "dismissed" | "error">(
+  const [status, setStatus] = useState<"loading" | "presenting" | "dismissed" | "error">(
     "loading",
   );
   const [message, setMessage] = useState<string | null>(null);
@@ -55,11 +55,15 @@ export default function PaywallPage() {
         }
         trackWebPaywallView();
         trackMetaInitiateCheckout();
-        setStatus("ready");
+        setStatus("presenting");
         await new Promise((resolve) => requestAnimationFrame(resolve));
         const target = containerRef.current;
         if (!target) return;
-        await presentPaywall(user.uid, target);
+        await presentPaywall(user.uid, {
+          htmlTarget: target,
+          customerEmail: user.email ?? undefined,
+          onBack: (closePaywall) => closePaywall(),
+        });
         if (cancelled) return;
         trackWebPurchaseSuccess();
         router.replace("/start/welcome");
@@ -79,40 +83,47 @@ export default function PaywallPage() {
     };
   }, [router]);
 
-  return (
-    <div className="flex min-h-screen flex-col bg-[var(--funnel-bg)] text-[var(--text-primary)]">
-      <FunnelHeader progress={1} showProgress={false} onBack={() => router.push("/start")} />
-      <main className="mx-auto flex w-full max-w-lg flex-1 flex-col px-4 pb-8 pt-4">
-        <h1 className="font-clash text-[28px] font-semibold leading-8 tracking-tight text-[var(--text-primary)]">
-          Unlock PrepIt
-        </h1>
-        <p className="mt-2 text-base leading-[1.5] text-[var(--text-secondary)]">
-          Subscribe to save your plan and use PrepIt on your phone.
-        </p>
-        <div ref={containerRef} className="mt-6 min-h-[420px] w-full" />
-        {status === "loading" ? (
-          <p className="mt-4 text-sm text-[var(--text-secondary)]">Loading your plan...</p>
-        ) : null}
-        {status === "error" || status === "dismissed" ? (
-          <div className="mt-4 space-y-3">
-            {message ? <p className="text-sm text-[var(--text-secondary)]">{message}</p> : null}
+  if (status === "error" || status === "dismissed") {
+    return (
+      <div className="flex h-dvh flex-col bg-[var(--funnel-bg)] text-[var(--text-primary)]">
+        <FunnelHeader progress={1} showProgress={false} onBack={() => router.push("/start")} />
+        <main className="mx-auto flex w-full max-w-lg flex-1 flex-col justify-center px-4 pb-8">
+          <h1 className="font-clash text-[28px] font-semibold leading-8 tracking-tight text-[var(--text-primary)]">
+            Unlock PrepIt
+          </h1>
+          <p className="mt-2 text-base leading-[1.5] text-[var(--text-secondary)]">
+            Subscribe to save your plan and use PrepIt on your phone.
+          </p>
+          {message ? (
+            <p className="mt-4 text-sm text-[var(--text-secondary)]">{message}</p>
+          ) : null}
+          <div className="mt-6 space-y-3">
             <button
               type="button"
-              className="h-12 w-full rounded-xl bg-[var(--primary)] text-sm font-semibold text-[var(--on-primary)]"
+              className="h-12 w-full rounded-2xl bg-[var(--primary)] text-base font-bold text-[var(--on-primary)]"
               onClick={() => window.location.reload()}
             >
               Show paywall again
             </button>
             <button
               type="button"
-              className="h-12 w-full rounded-xl border border-[var(--border)] text-sm font-semibold"
+              className="h-12 w-full rounded-2xl border border-[var(--border)] text-base font-bold"
               onClick={() => router.push("/start/welcome")}
             >
               Continue without subscribing
             </button>
           </div>
-        ) : null}
-      </main>
+        </main>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative h-dvh bg-[var(--funnel-bg)] text-[var(--text-primary)]">
+      <div className="absolute inset-0 flex items-center justify-center">
+        <p className="text-sm text-[var(--text-secondary)]">Loading your plan...</p>
+      </div>
+      <div ref={containerRef} className="web-paywall-root absolute inset-0 z-10 overflow-auto" />
     </div>
   );
 }

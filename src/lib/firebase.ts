@@ -87,7 +87,38 @@ export async function consumeRedirectResult(): Promise<User | null> {
   }
 }
 
+export type WebAuthProvider = "google" | "apple";
+
+const AUTH_PROVIDER_KEY = "prepit.webAuthProvider";
+
+export function persistAuthProvider(provider: WebAuthProvider): void {
+  try {
+    sessionStorage.setItem(AUTH_PROVIDER_KEY, provider);
+  } catch {
+    // Ignore quota / private-mode failures.
+  }
+}
+
+export function readPersistedAuthProvider(): WebAuthProvider | null {
+  try {
+    const value = sessionStorage.getItem(AUTH_PROVIDER_KEY);
+    if (value === "google" || value === "apple") return value;
+  } catch {
+    // Ignore storage access failures.
+  }
+  return null;
+}
+
+export function resolveAuthProvider(user: User | null): WebAuthProvider | null {
+  for (const info of user?.providerData ?? []) {
+    if (info.providerId === "apple.com") return "apple";
+    if (info.providerId === "google.com") return "google";
+  }
+  return readPersistedAuthProvider();
+}
+
 export async function signInWithGoogle(): Promise<User> {
+  persistAuthProvider("google");
   const provider = new GoogleAuthProvider();
   try {
     const result = await signInWithPopup(getFirebaseAuth(), provider);
@@ -100,6 +131,7 @@ export async function signInWithGoogle(): Promise<User> {
 }
 
 export async function signInWithApple(): Promise<User> {
+  persistAuthProvider("apple");
   const provider = new OAuthProvider("apple.com");
   provider.addScope("email");
   provider.addScope("name");
