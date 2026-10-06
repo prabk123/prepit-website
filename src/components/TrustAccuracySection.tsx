@@ -7,7 +7,7 @@ const PILLARS: {
 }[] = [
   {
     title: "Editable by design",
-    body: "Every AI estimate shows its assumptions and is one tap to fix. Nothing is saved until it looks right.",
+    body: "Every AI estimate shows its assumptions and is one tap to fix, even after it's logged.",
     icon: "edit",
   },
   {

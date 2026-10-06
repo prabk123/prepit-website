@@ -1,5 +1,6 @@
 "use client";
 
+import { MicrophoneIcon } from "@/components/demoIcons";
 import PrepItIcon from "@/components/shareable/PrepItIcon";
 import { useTypingExamples } from "@/hooks/useTypingExamples";
 
@@ -21,6 +22,11 @@ export default function NlLogBottomSheetDemo({
 }: NlLogBottomSheetDemoProps) {
   const text = useTypingExamples(EXAMPLES);
   const compact = overlay || loop;
+  const hasText = text.length > 0;
+  const tile = `flex shrink-0 items-center justify-center rounded-xl ${
+    loop ? "h-8 w-8" : compact ? "h-10 w-10" : "h-12 w-12"
+  }`;
+  const iconSize = loop ? 16 : compact ? 20 : 24;
 
   return (
     <div
@@ -62,17 +68,18 @@ export default function NlLogBottomSheetDemo({
                 : "text-base leading-6"
           }`}
         >
-          Amount, brand, and restaurant details help improve accuracy.
+          Amount, brand, and restaurant details help improve accuracy.{" "}
+          <span className="underline">Learn more</span>
         </p>
 
         <div className={`flex items-end gap-1.5 ${compact ? "mt-2.5" : "mt-6"}`}>
           <div
-            className={`min-h-[36px] flex-1 rounded-xl bg-[var(--grey-5)] px-3 py-2 ${
+            className={`min-h-[36px] min-w-0 flex-1 rounded-xl bg-[var(--grey-5)] px-3 py-2 ${
               compact ? "" : "min-h-[48px] px-4 py-3"
             }`}
           >
             <p
-              className={`min-h-[20px] text-[var(--black-100)] ${
+              className={`min-h-[20px] ${hasText ? "text-[var(--black-100)]" : "text-[#A6A6AC]"} ${
                 loop
                   ? "text-xs leading-4"
                   : compact
@@ -80,7 +87,7 @@ export default function NlLogBottomSheetDemo({
                     : "text-base leading-6"
               }`}
             >
-              {text}
+              {hasText ? text : "What did you eat?"}
               <span
                 className={`ml-px inline-block w-0.5 translate-y-0.5 animate-pulse bg-[var(--black-100)] ${
                   loop ? "h-3" : "h-[14px]"
@@ -89,17 +96,20 @@ export default function NlLogBottomSheetDemo({
             </p>
           </div>
 
-          <div
-            className={`flex shrink-0 items-center justify-center rounded-xl bg-[var(--black-100)] ${
-              loop ? "h-8 w-8" : compact ? "h-10 w-10" : "h-12 w-12"
-            }`}
-          >
-            <PrepItIcon
-              name="arrowUp"
-              size={loop ? 16 : compact ? 20 : 24}
-              color="#ffffff"
-            />
-          </div>
+          {hasText ? (
+            <div className={`${tile} bg-[var(--black-100)]`}>
+              <PrepItIcon name="arrowUp" size={iconSize} color="#ffffff" />
+            </div>
+          ) : (
+            <>
+              <div className={`${tile} bg-[var(--grey-5)]`}>
+                <MicrophoneIcon size={iconSize} color="var(--black-100)" />
+              </div>
+              <div className={`${tile} bg-[var(--grey-5)]`}>
+                <PrepItIcon name="camera" size={iconSize} color="var(--black-100)" />
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

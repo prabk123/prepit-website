@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { GoalChangeActionCard, LogFoodActionCard } from "@/components/AiChatDemoCards";
 import FakeLogScreenDemo from "@/components/FakeLogScreenDemo";
+import { MicrophoneIcon } from "@/components/demoIcons";
 import PrepItIcon from "@/components/shareable/PrepItIcon";
 
 const PHONE_INNER_WIDTH = 288;
@@ -18,8 +19,17 @@ const CHAT_SHEET_HEIGHT = Math.round(PHONE_INNER_HEIGHT * 0.92);
 
 const TYPE_MS = 42;
 const THINK_MS = 900;
-const STREAM_MS = 14;
+const BUBBLE_TYPING_MS = 750;
+const BUBBLE_READ_MS = 650;
 const HOLD_MS = 4200;
+
+/** Replies are split into bubbles on `---`, like the app's conversation. */
+function splitBubbles(text: string) {
+  return text
+    .split(/\n?---\n?/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+}
 const RESET_MS = 500;
 const SEND_MS = 320;
 
@@ -63,31 +73,13 @@ function PhoneShell({ children }: { children: React.ReactNode }) {
 
 function ChatHeader() {
   return (
-    <div className="shrink-0 bg-white pt-2">
+    <div className="shrink-0 pt-2">
       <div className="flex justify-center pb-2">
-        <div className="h-1.5 w-12 rounded-full bg-[#D3D3D5]" />
+        <div className="h-1 w-10 rounded-full bg-[#D3D3D5]" />
       </div>
-      <div className="flex items-center gap-1.5 px-4 pb-2">
-        <button
-          type="button"
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--grey-5)]"
-          tabIndex={-1}
-        >
-          <PrepItIcon name="history" size={14} color="var(--black-100)" />
-        </button>
-        <div className="flex min-w-0 flex-1 items-center justify-center gap-1.5">
-          <Image src="/logo.png" alt="" width={18} height={18} className="rounded-[5px]" />
-          <span className="text-sm font-bold leading-5 text-[var(--black-100)]">
-            Nutritionist
-          </span>
-        </div>
-        <button
-          type="button"
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--grey-5)]"
-          tabIndex={-1}
-        >
-          <PrepItIcon name="edit" size={14} color="var(--black-100)" />
-        </button>
+      <div className="flex items-center justify-center gap-1.5 px-4 pb-2.5">
+        <Image src="/logo.png" alt="" width={18} height={18} className="rounded-[5px]" />
+        <span className="text-sm font-bold leading-5 text-[var(--black-100)]">Nutritionist</span>
       </div>
     </div>
   );
@@ -96,24 +88,41 @@ function ChatHeader() {
 function UserBubble({ text }: { text: string }) {
   return (
     <div className="flex justify-end pb-3">
-      <div className="max-w-[85%] rounded-xl rounded-br-[2px] bg-[var(--grey-5)] px-4 py-3">
+      <div className="max-w-[80%] rounded-xl rounded-br-[2px] bg-[#D3D3D5] px-3 py-2">
         <p className="text-[13px] leading-5 text-[var(--black-100)]">{text}</p>
       </div>
     </div>
   );
 }
 
-function AssistantText({ text }: { text: string }) {
+function AssistantBubbles({ bubbles, fadeIn = false }: { bubbles: string[]; fadeIn?: boolean }) {
   return (
-    <div className="pb-3">
-      <p className="text-[13px] leading-5 text-[var(--black-100)]">{text}</p>
+    <div className="flex flex-col items-start gap-1 pb-3">
+      {bubbles.map((bubble, i) => (
+        <div
+          key={i}
+          className={`${fadeIn ? "nl-demo-fade " : ""}max-w-[85%] rounded-xl rounded-bl-[2px] bg-white px-3 py-2`}
+        >
+          <p className="text-[13px] leading-5 text-[var(--black-100)]">{bubble}</p>
+        </div>
+      ))}
     </div>
   );
 }
 
-function ThinkingShimmer() {
+function TypingDots() {
   return (
-    <p className="ai-chat-thinking pb-3 text-[13px] leading-5">Thinking...</p>
+    <div className="pb-3">
+      <div className="inline-flex items-center gap-1 rounded-2xl bg-white px-3.5 py-3">
+        {[0, 1, 2].map((i) => (
+          <span
+            key={i}
+            className="ai-chat-typing-dot h-[7px] w-[7px] rounded-full bg-[#7A7A82]"
+            style={{ animationDelay: `${i * 240}ms` }}
+          />
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -165,9 +174,9 @@ function Composer({
   const hasText = text.length > 0;
 
   return (
-    <div className="shrink-0 border-t border-[var(--grey-10)] bg-white px-4 pt-2 pb-2.5">
+    <div className="shrink-0 bg-white px-4 pt-2 pb-2.5">
       <div className="flex items-end gap-2">
-        <div className="min-h-[40px] flex-1 rounded-xl bg-[var(--grey-5)] px-3 py-2.5">
+        <div className="min-h-[40px] min-w-0 flex-1 rounded-xl bg-[var(--grey-5)] px-3 py-2.5">
           {hasText ? (
             <p className="text-[13px] leading-5 text-[var(--black-100)]">
               {text}
@@ -176,22 +185,29 @@ function Composer({
               )}
             </p>
           ) : (
-            <p className="text-[13px] leading-5 text-[var(--grey-60)]">Ask about your nutrition...</p>
+            <p className="truncate text-[13px] leading-5 text-[#A6A6AC]">
+              Ask about your nutrition...
+            </p>
           )}
         </div>
-        <div
-          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-transform ${
-            hasText || sendActive
-              ? "bg-[var(--black-100)]"
-              : "bg-[var(--grey-10)]"
-          } ${sendActive ? "scale-95" : ""}`}
-        >
-          <PrepItIcon
-            name="arrowUp"
-            size={14}
-            color={hasText || sendActive ? "#ffffff" : "var(--grey-40)"}
-          />
-        </div>
+        {hasText || sendActive ? (
+          <div
+            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--black-100)] transition-transform ${
+              sendActive ? "scale-90" : ""
+            }`}
+          >
+            <PrepItIcon name="arrowUp" size={16} color="#ffffff" />
+          </div>
+        ) : (
+          <>
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--grey-5)]">
+              <MicrophoneIcon size={16} color="var(--black-100)" />
+            </div>
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--grey-5)]">
+              <PrepItIcon name="camera" size={16} color="var(--black-100)" />
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
@@ -204,7 +220,7 @@ function AiChatBottomSheet({
 }) {
   return (
     <div
-      className="absolute inset-x-0 bottom-0 z-10 flex flex-col overflow-hidden rounded-t-[24px] bg-white shadow-[0_-8px_40px_rgba(0,0,0,0.18)]"
+      className="absolute inset-x-0 bottom-0 z-10 flex flex-col overflow-hidden rounded-t-[24px] bg-[#F4F4F5] shadow-[0_-8px_40px_rgba(0,0,0,0.18)]"
       style={{ height: CHAT_SHEET_HEIGHT }}
     >
       {children}
@@ -306,12 +322,17 @@ export default function AiChatPhoneDemo({ scenarios }: AiChatPhoneDemoProps) {
         setPhase("thinking");
         await wait(THINK_MS);
 
-        if (cancelled) return;
-        setPhase("streaming");
-        for (let i = 1; i <= current.assistant.length; i += 1) {
+        const bubbles = splitBubbles(current.assistant);
+        for (let i = 0; i < bubbles.length; i += 1) {
           if (cancelled) return;
-          setStreamedAssistant(current.assistant.slice(0, i));
-          await wait(STREAM_MS);
+          if (i > 0) {
+            setPhase("thinking");
+            await wait(BUBBLE_TYPING_MS);
+            if (cancelled) return;
+          }
+          setPhase("streaming");
+          setStreamedAssistant(bubbles.slice(0, i + 1).join("\n---\n"));
+          await wait(BUBBLE_READ_MS);
         }
 
         if (cancelled) return;
@@ -360,7 +381,7 @@ export default function AiChatPhoneDemo({ scenarios }: AiChatPhoneDemoProps) {
           <UserBubble key={`u-${i}`} text={msg.text} />
         ) : (
           <div key={`a-${i}`}>
-            <AssistantText text={msg.text} />
+            <AssistantBubbles bubbles={splitBubbles(msg.text)} />
             {showAction &&
               displayScenario.actionType &&
               i === messages.length - 1 && (
@@ -374,10 +395,10 @@ export default function AiChatPhoneDemo({ scenarios }: AiChatPhoneDemoProps) {
           </div>
         ),
       )}
-      {phase === "thinking" && <ThinkingShimmer />}
-      {phase === "streaming" && streamedAssistant && (
-        <AssistantText text={streamedAssistant} />
+      {(phase === "thinking" || phase === "streaming") && streamedAssistant && (
+        <AssistantBubbles bubbles={splitBubbles(streamedAssistant)} fadeIn />
       )}
+      {phase === "thinking" && <TypingDots />}
     </div>
   );
 

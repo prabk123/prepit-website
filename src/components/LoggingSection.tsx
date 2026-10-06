@@ -13,8 +13,8 @@ const FEATURES: { title: string; body: string; icon: PrepItIconName }[] = [
     icon: "search",
   },
   {
-    title: "Review and confirm",
-    body: "You review it. Nothing\u2019s logged before you confirm you\u2019re happy",
+    title: "Logged instantly",
+    body: "It lands in your log straight away. Every estimate is one tap to fix",
     icon: "checkmark",
   },
 ];
@@ -80,7 +80,7 @@ export default function LoggingSection() {
           </ul>
 
           <p className="text-sm font-medium leading-relaxed text-[var(--grey-80)] lg:text-base">
-            PrepIt estimates. You confirm. Nothing is saved until it looks right.
+            Logged instantly. Every estimate is one tap to fix.
           </p>
         </div>
 

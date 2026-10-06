@@ -17,7 +17,7 @@ const FAQ_ITEMS = [
   {
     question: "How accurate is the AI logging?",
     answer:
-      "PrepIt is built for accuracy. Instead of picking from a static food database, it searches the web for trustworthy sources — official brand pages, restaurant nutrition info, and verified references. Other apps rely on crowdsourced databases that go out of date and list dozens of conflicting options for the same item. PrepIt does that checking for you. You can still review and adjust anything before it's saved.",
+      "PrepIt is built for accuracy. Instead of picking from a static food database, it searches the web for trustworthy sources — official brand pages, restaurant nutrition info, and verified references. Other apps rely on crowdsourced databases that go out of date and list dozens of conflicting options for the same item. PrepIt does that checking for you. Meals are logged straight away, and you can adjust any estimate in one tap.",
   },
   {
     question: "What are Energy, Satiety, and Mood?",

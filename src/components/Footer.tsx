@@ -9,7 +9,7 @@ export default function Footer() {
       <div className="w-full max-w-[1200px] rounded-[32px] bg-[var(--grey-5)] p-6 lg:p-14">
         {/* Footer Header */}
         <div className="mb-8 flex flex-col gap-6 lg:mb-10 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2">
               <div className="relative h-8 w-8">
@@ -27,9 +27,6 @@ export default function Footer() {
                 PrepIt
               </span>
             </Link>
-            <p className="text-sm font-medium text-[var(--grey-60)]">
-              Made with ❤️ and late nights
-            </p>
           </div>
           <AppStoreLink
             trackingSource="footer-cta"

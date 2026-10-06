@@ -6,6 +6,7 @@ import FactorInsightCard, {
   type FactorInsight,
 } from "@/components/signals/FactorInsightCard";
 import SignalRing from "@/components/signals/SignalRing";
+import { MicrophoneIcon } from "@/components/demoIcons";
 import PrepItIcon from "@/components/shareable/PrepItIcon";
 
 const MEAL_TEXT = "chicken wrap, an apple and a flat white";
@@ -64,8 +65,11 @@ type Phase = "log" | "meal" | "signals" | "insight" | "chat";
 
 const CHAT = {
   userMessage: "Why is my afternoon energy soft after this lunch?",
-  assistantMessage:
-    "Your wrap and flat white are light on protein, which can leave Energy dipping mid-afternoon. A Greek yogurt now adds ~15g protein and helps hold Satiety until dinner.",
+  /** The reply arrives one bubble at a time, like the conversation. */
+  assistantBubbles: [
+    "Your wrap and flat white are light on protein, which can leave Energy dipping mid-afternoon.",
+    "A Greek yogurt now adds ~15g protein and helps hold Satiety until dinner.",
+  ],
 } as const;
 
 const TYPE_MS = 30;
@@ -76,10 +80,61 @@ const SIGNALS_RINGS_HOLD_MS = 1100;
 const SIGNAL_FACTOR_HOLD_MS = 900;
 const INSIGHT_HOLD_MS = 2800;
 const INSIGHT_TAP_MS = 220;
-const CHAT_THINK_MS = 500;
-const CHAT_STREAM_MS = 9;
+const CHAT_THINK_MS = 700;
+const CHAT_BUBBLE_TYPING_MS = 750;
 const CHAT_HOLD_MS = 2800;
 const FADE_MS = 350;
+
+/** Text field plus microphone and camera, which become send once there is text. */
+function ComposerRow({
+  hint,
+  text = "",
+  typing = false,
+  size,
+}: {
+  hint: string;
+  text?: string;
+  typing?: boolean;
+  size: number;
+}) {
+  const hasText = text.length > 0;
+  const tile = "flex shrink-0 items-center justify-center rounded-xl";
+  const tileStyle = { width: size, height: size };
+
+  return (
+    <div className="flex items-end gap-1.5">
+      <div
+        className="flex min-w-0 flex-1 items-center rounded-xl bg-[var(--grey-5)] px-3 py-2"
+        style={{ minHeight: size }}
+      >
+        <p
+          className={`truncate text-sm leading-5 ${
+            hasText ? "text-[var(--black-100)]" : "text-[#A6A6AC]"
+          }`}
+        >
+          {hasText ? text : hint}
+          {typing && (
+            <span className="ml-px inline-block h-[14px] w-0.5 translate-y-0.5 animate-pulse bg-[var(--black-100)]" />
+          )}
+        </p>
+      </div>
+      {hasText ? (
+        <div className={`${tile} bg-[var(--black-100)]`} style={tileStyle}>
+          <PrepItIcon name="arrowUp" size={size * 0.45} color="#ffffff" />
+        </div>
+      ) : (
+        <>
+          <div className={`${tile} bg-[var(--grey-5)]`} style={tileStyle}>
+            <MicrophoneIcon size={size * 0.4} color="var(--black-100)" />
+          </div>
+          <div className={`${tile} bg-[var(--grey-5)]`} style={tileStyle}>
+            <PrepItIcon name="camera" size={size * 0.4} color="var(--black-100)" />
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
 
 function LogSheet({ text, typing }: { text: string; typing: boolean }) {
   return (
@@ -88,24 +143,15 @@ function LogSheet({ text, typing }: { text: string; typing: boolean }) {
         <div className="mb-2 flex justify-center">
           <div className="h-1 w-10 rounded-full bg-[#D3D3D5]" />
         </div>
-        <h3 className="text-base font-semibold leading-6 text-[var(--black-100)]">
+        <h3 className="text-lg font-semibold leading-6 text-[var(--black-100)]">
           Describe your meal
         </h3>
         <p className="mt-0.5 text-xs leading-4 text-[var(--grey-60)]">
-          Amount, brand, and restaurant details help improve accuracy.
+          Amount, brand, and restaurant details help improve accuracy.{" "}
+          <span className="underline">Learn more</span>
         </p>
-        <div className="mt-2.5 flex items-end gap-1.5">
-          <div className="min-h-[36px] flex-1 rounded-xl bg-[var(--grey-5)] px-3 py-2">
-            <p className="min-h-[20px] text-sm leading-5 text-[var(--black-100)]">
-              {text}
-              {typing && (
-                <span className="ml-px inline-block h-[14px] w-0.5 translate-y-0.5 animate-pulse bg-[var(--black-100)]" />
-              )}
-            </p>
-          </div>
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--black-100)]">
-            <PrepItIcon name="arrowUp" size={20} color="#ffffff" />
-          </div>
+        <div className="mt-2.5">
+          <ComposerRow hint="What did you eat?" text={text} typing={typing} size={40} />
         </div>
       </div>
     </div>
@@ -346,70 +392,60 @@ function InsightCard({ chipTapped }: { chipTapped: boolean }) {
 
 function ChatSheet({
   userMessage,
-  assistantText,
+  assistantBubbles,
   thinking,
 }: {
   userMessage: string;
-  assistantText: string;
+  assistantBubbles: readonly string[];
   thinking: boolean;
 }) {
   return (
-    <div className="flex max-h-[min(72vw,300px)] min-h-[240px] w-full flex-col overflow-hidden rounded-2xl border border-[var(--grey-10)] bg-white shadow-[0_-4px_24px_rgba(0,0,0,0.12)]">
-      <div className="shrink-0 bg-white pt-2">
+    <div className="flex max-h-[min(72vw,300px)] min-h-[240px] w-full flex-col overflow-hidden rounded-2xl border border-[var(--grey-10)] bg-[#F4F4F5] shadow-[0_-4px_24px_rgba(0,0,0,0.12)]">
+      <div className="shrink-0 pt-2">
         <div className="flex justify-center pb-2">
           <div className="h-1 w-10 rounded-full bg-[#D3D3D5]" />
         </div>
-        <div className="flex items-center gap-1.5 px-3 pb-2">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--grey-5)]">
-            <PrepItIcon name="history" size={14} color="var(--black-100)" />
-          </div>
-          <div className="flex min-w-0 flex-1 items-center justify-center gap-1.5">
-            <Image
-              src="/logo.png"
-              alt=""
-              width={18}
-              height={18}
-              className="rounded-[5px]"
-            />
-            <span className="text-sm font-bold leading-5 text-[var(--black-100)]">
-              Nutritionist
-            </span>
-          </div>
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--grey-5)]">
-            <PrepItIcon name="edit" size={14} color="var(--black-100)" />
-          </div>
+        <div className="flex items-center justify-center gap-1.5 px-3 pb-2">
+          <Image src="/logo.png" alt="" width={18} height={18} className="rounded-[5px]" />
+          <span className="text-sm font-bold leading-5 text-[var(--black-100)]">
+            Nutritionist
+          </span>
         </div>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-hidden px-3 pt-1 pb-5">
+      <div className="flex min-h-0 flex-1 flex-col justify-end overflow-hidden px-3 pt-1 pb-3">
         <div className="flex justify-end pb-2.5">
-          <div className="max-w-[88%] rounded-xl rounded-br-[2px] bg-[var(--grey-5)] px-3 py-2.5">
-            <p className="text-xs leading-[18px] text-[var(--black-100)]">
-              {userMessage}
-            </p>
+          <div className="max-w-[80%] rounded-xl rounded-br-[2px] bg-[#D3D3D5] px-3 py-2">
+            <p className="text-xs leading-[18px] text-[var(--black-100)]">{userMessage}</p>
           </div>
+        </div>
+        <div className="flex flex-col items-start gap-1">
+          {assistantBubbles.map((bubble) => (
+            <div
+              key={bubble}
+              className="nl-demo-fade max-w-[85%] rounded-xl rounded-bl-[2px] bg-white px-3 py-2"
+            >
+              <p className="text-xs leading-[18px] text-[var(--black-100)]">{bubble}</p>
+            </div>
+          ))}
         </div>
         {thinking && (
-          <p className="ai-chat-thinking text-xs leading-[18px]">Thinking...</p>
-        )}
-        {!thinking && assistantText && (
-          <p className="pb-2 text-xs leading-[18px] text-[var(--black-100)]">
-            {assistantText}
-          </p>
+          <div className={assistantBubbles.length > 0 ? "pt-2" : ""}>
+            <div className="inline-flex items-center gap-1 rounded-2xl bg-white px-3 py-2.5">
+              {[0, 1, 2].map((i) => (
+                <span
+                  key={i}
+                  className="ai-chat-typing-dot h-1.5 w-1.5 rounded-full bg-[#7A7A82]"
+                  style={{ animationDelay: `${i * 240}ms` }}
+                />
+              ))}
+            </div>
+          </div>
         )}
       </div>
 
-      <div className="shrink-0 border-t border-[var(--grey-10)] bg-white px-3 pb-3 pt-2">
-        <div className="flex items-end gap-1.5">
-          <div className="min-h-[36px] flex-1 rounded-xl bg-[var(--grey-5)] px-3 py-2">
-            <p className="text-xs leading-[18px] text-[var(--grey-60)]">
-              Ask about your nutrition...
-            </p>
-          </div>
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--grey-10)]">
-            <PrepItIcon name="arrowUp" size={14} color="var(--grey-40)" />
-          </div>
-        </div>
+      <div className="shrink-0 bg-white px-3 pb-3 pt-2">
+        <ComposerRow hint="Ask about your nutrition..." size={36} />
       </div>
     </div>
   );
@@ -420,7 +456,7 @@ export default function HeroLoopDemo() {
   const [active, setActive] = useState(false);
   const [phase, setPhase] = useState<Phase>("log");
   const [typed, setTyped] = useState("");
-  const [chatStreamed, setChatStreamed] = useState("");
+  const [chatBubbleCount, setChatBubbleCount] = useState(0);
   const [chatThinking, setChatThinking] = useState(false);
   const [signalsRevealCount, setSignalsRevealCount] = useState(0);
   const [signalsAnimKey, setSignalsAnimKey] = useState(0);
@@ -494,16 +530,16 @@ export default function HeroLoopDemo() {
 
         if (cancelled) return;
         setPhase("chat");
-        setChatStreamed("");
+        setChatBubbleCount(0);
         setChatThinking(true);
         await wait(CHAT_THINK_MS);
 
-        if (cancelled) return;
-        setChatThinking(false);
-        for (let i = 1; i <= CHAT.assistantMessage.length; i += 1) {
+        const bubbleTotal = CHAT.assistantBubbles.length;
+        for (let i = 1; i <= bubbleTotal; i += 1) {
           if (cancelled) return;
-          setChatStreamed(CHAT.assistantMessage.slice(0, i));
-          await wait(CHAT_STREAM_MS);
+          setChatBubbleCount(i);
+          setChatThinking(i < bubbleTotal);
+          if (i < bubbleTotal) await wait(CHAT_BUBBLE_TYPING_MS);
         }
 
         if (cancelled) return;
@@ -529,7 +565,7 @@ export default function HeroLoopDemo() {
       node: (
         <ChatSheet
           userMessage={CHAT.userMessage}
-          assistantText={chatStreamed}
+          assistantBubbles={CHAT.assistantBubbles.slice(0, chatBubbleCount)}
           thinking={chatThinking}
         />
       ),

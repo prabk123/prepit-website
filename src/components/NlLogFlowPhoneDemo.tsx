@@ -1,28 +1,31 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import FakeLogScreenDemo from "@/components/FakeLogScreenDemo";
-import NlReviewScreenDemo from "@/components/NlReviewScreenDemo";
+import {
+  DAY_AFTER,
+  DAY_BEFORE,
+  DesignCanvas,
+  LogScreen,
+} from "@/components/FakeLogScreenDemo";
+import { MicrophoneIcon } from "@/components/demoIcons";
 import PrepItIcon from "@/components/shareable/PrepItIcon";
 
 const MEAL_TEXT = "chicken wrap, an apple and a flat white";
 
-const LOADING_STAGES = [
-  "Searching...",
-  "Extracting items...",
-  "Checking sources...",
-  "Finalizing details...",
-] as const;
-
-type DemoPhase = "typing" | "submitting" | "loading" | "review";
+/**
+ * Log-first flow, as in the app: describe the meal, the sheet closes, the Log
+ * shows a calculating card, then calories and Energy / Satiety / Mood appear.
+ */
+type DemoPhase = "typing" | "submitting" | "calculating" | "resolved" | "summary";
 
 const TYPE_MS = 52;
 const SUBMIT_HOLD_MS = 580;
-const LOADING_STAGE_MS = 850;
-const REVIEW_HOLD_MS = 5200;
+const SHEET_DISMISS_MS = 320;
+const CALCULATING_MS = 2200;
+const RESOLVED_HOLD_MS = 1800;
+const SCROLL_MS = 700;
+const SUMMARY_HOLD_MS = 3400;
 const RESET_MS = 480;
-const PUSH_MS = 280;
-const PUSH_EASING = "cubic-bezier(0.32, 0.72, 0, 1)";
 
 /** iPhone 15/16 logical display (390×844pt). Inner width = 300px frame − 12px border. */
 const PHONE_INNER_WIDTH = 288;
@@ -32,7 +35,7 @@ const PHONE_INNER_HEIGHT = Math.round(
   PHONE_INNER_WIDTH * (IPHONE_LOGICAL_HEIGHT / IPHONE_LOGICAL_WIDTH),
 );
 
-const pushTransition = `transform ${PUSH_MS}ms ${PUSH_EASING}`;
+const dmSans = { fontFamily: "var(--font-dm-sans)" } as const;
 
 function PhoneShell({ children }: { children: ReactNode }) {
   return (
@@ -41,69 +44,84 @@ function PhoneShell({ children }: { children: ReactNode }) {
       aria-hidden="true"
     >
       <div className="absolute left-1/2 top-2 z-20 h-[22px] w-[88px] -translate-x-1/2 rounded-full bg-[var(--black-100)]" />
-      <div
-        className="relative overflow-hidden bg-[#F4F4F5]"
-        style={{ height: PHONE_INNER_HEIGHT }}
-      >
+      <div className="relative overflow-hidden bg-[#F4F4F5]" style={{ height: PHONE_INNER_HEIGHT }}>
         {children}
       </div>
     </div>
   );
 }
 
-function LoadingPill({ message }: { message: string }) {
+function ComposerTile({ dark, children }: { dark?: boolean; children: ReactNode }) {
   return (
-    <div className="inline-flex items-center gap-2 rounded-full bg-[var(--black-100)] px-3 py-2">
-      <PrepItIcon name="sparkles" size={16} color="#ffffff" />
-      <span className="nl-loading-shimmer text-xs font-medium text-white">{message}</span>
+    <div
+      className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${
+        dark ? "bg-black" : "bg-[#F4F4F5]"
+      }`}
+    >
+      {children}
     </div>
   );
 }
 
-function InputSheet({
+/** Log Meal sheet in design units: title, helper with Learn more, field, mic / camera or send. */
+function LogMealSheet({
   text,
   showCursor,
   sendActive,
-  loadingMessage,
+  visible,
 }: {
   text: string;
   showCursor: boolean;
-  sendActive?: boolean;
-  loadingMessage?: string;
+  sendActive: boolean;
+  visible: boolean;
 }) {
+  const hasText = text.length > 0;
+
   return (
-    <div className="absolute inset-x-0 bottom-0 z-10 flex flex-col overflow-hidden rounded-t-[24px] bg-white shadow-[0_-8px_40px_rgba(0,0,0,0.18)]">
-      <div className="px-3 pb-3 pt-2">
-        <div className="mb-2 flex justify-center">
-          <div className="h-1 w-10 rounded-full bg-[#D3D3D5]" />
-        </div>
-        <h3 className="text-sm font-semibold leading-5 text-[var(--black-100)]">
-          Describe your meal
-        </h3>
-        <p className="mt-0.5 text-[11px] leading-4 text-[var(--grey-60)]">
-          Amount, brand, and restaurant details help improve accuracy.
-        </p>
-        <div className="mt-2.5 flex items-end gap-1.5">
-          <div className="min-h-[36px] flex-1 rounded-xl bg-[var(--grey-5)] px-3 py-2">
-            <p className="min-h-[20px] text-xs leading-4 text-[var(--black-100)]">
-              {text}
-              {showCursor && (
-                <span className="ml-px inline-block h-3 w-0.5 translate-y-0.5 animate-pulse bg-[var(--black-100)]" />
-              )}
-            </p>
-          </div>
-          <div
-            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[var(--black-100)] transition-transform ${
-              sendActive ? "scale-95" : ""
-            }`}
+    <div
+      className="absolute inset-x-0 bottom-0 z-10 rounded-t-[24px] bg-white px-4 pb-[46px] pt-2 shadow-[0_-8px_40px_rgba(0,0,0,0.18)]"
+      style={{
+        transform: visible ? "translateY(0)" : "translateY(105%)",
+        transition: `transform ${SHEET_DISMISS_MS}ms cubic-bezier(0.32, 0.72, 0, 1)`,
+      }}
+    >
+      <div className="flex justify-center">
+        <div className="h-1 w-10 rounded-full bg-[#D3D3D5]" />
+      </div>
+      <h3 className="mt-3 text-xl font-semibold leading-[28px] text-black" style={dmSans}>
+        Describe your meal
+      </h3>
+      <p className="mt-1 text-sm leading-5 text-[#7A7A82]" style={dmSans}>
+        Amount, brand, and restaurant details help improve accuracy.{" "}
+        <span className="underline">Learn more</span>
+      </p>
+      <div className="mt-4 flex items-end gap-2">
+        <div className="flex min-h-12 flex-1 items-center rounded-xl bg-[#F4F4F5] px-4 py-3">
+          <p
+            className={`text-base leading-6 ${hasText ? "text-black" : "text-[#A6A6AC]"}`}
+            style={dmSans}
           >
-            <PrepItIcon name="arrowUp" size={16} color="#ffffff" />
-          </div>
+            {hasText ? text : "What did you eat?"}
+            {showCursor && (
+              <span className="ml-px inline-block h-4 w-0.5 translate-y-0.5 animate-pulse bg-black" />
+            )}
+          </p>
         </div>
-        {loadingMessage && (
-          <div className="mt-4 flex justify-center">
-            <LoadingPill message={loadingMessage} />
+        {hasText ? (
+          <div className={`transition-transform ${sendActive ? "scale-90" : ""}`}>
+            <ComposerTile dark>
+              <PrepItIcon name="arrowUp" size={20} color="#ffffff" />
+            </ComposerTile>
           </div>
+        ) : (
+          <>
+            <ComposerTile>
+              <MicrophoneIcon size={20} color="#000000" />
+            </ComposerTile>
+            <ComposerTile>
+              <PrepItIcon name="camera" size={20} color="#000000" />
+            </ComposerTile>
+          </>
         )}
       </div>
     </div>
@@ -115,12 +133,7 @@ export default function NlLogFlowPhoneDemo() {
   const [active, setActive] = useState(false);
   const [phase, setPhase] = useState<DemoPhase>("typing");
   const [typedText, setTypedText] = useState("");
-  const [loadingStage, setLoadingStage] = useState(0);
   const [fadeKey, setFadeKey] = useState(0);
-  const [reviewSlideIn, setReviewSlideIn] = useState(false);
-  const [inputFlowVisible, setInputFlowVisible] = useState(true);
-
-  const reviewOpen = phase === "review";
 
   useEffect(() => {
     const node = containerRef.current;
@@ -136,34 +149,6 @@ export default function NlLogFlowPhoneDemo() {
     observer.observe(node);
     return () => observer.disconnect();
   }, []);
-
-  useEffect(() => {
-    if (phase === "review") {
-      setReviewSlideIn(false);
-      setInputFlowVisible(true);
-
-      let slideFrame = 0;
-      const startFrame = requestAnimationFrame(() => {
-        slideFrame = requestAnimationFrame(() => {
-          setReviewSlideIn(true);
-        });
-      });
-
-      const hideInputTimer = setTimeout(() => {
-        setInputFlowVisible(false);
-      }, PUSH_MS);
-
-      return () => {
-        cancelAnimationFrame(startFrame);
-        cancelAnimationFrame(slideFrame);
-        clearTimeout(hideInputTimer);
-      };
-    }
-
-    setReviewSlideIn(false);
-    setInputFlowVisible(true);
-    return undefined;
-  }, [phase]);
 
   useEffect(() => {
     if (!active) return;
@@ -182,7 +167,6 @@ export default function NlLogFlowPhoneDemo() {
       while (!cancelled) {
         setPhase("typing");
         setTypedText("");
-        setLoadingStage(0);
         setFadeKey((k) => k + 1);
 
         for (let i = 1; i <= MEAL_TEXT.length; i += 1) {
@@ -196,16 +180,16 @@ export default function NlLogFlowPhoneDemo() {
         await wait(SUBMIT_HOLD_MS);
 
         if (cancelled) return;
-        setPhase("loading");
-        for (let stage = 0; stage < LOADING_STAGES.length; stage += 1) {
-          if (cancelled) return;
-          setLoadingStage(stage);
-          await wait(LOADING_STAGE_MS);
-        }
+        setPhase("calculating");
+        await wait(SHEET_DISMISS_MS + CALCULATING_MS);
 
         if (cancelled) return;
-        setPhase("review");
-        await wait(REVIEW_HOLD_MS);
+        setPhase("resolved");
+        await wait(RESOLVED_HOLD_MS);
+
+        if (cancelled) return;
+        setPhase("summary");
+        await wait(SCROLL_MS + SUMMARY_HOLD_MS);
 
         if (cancelled) return;
         await wait(RESET_MS);
@@ -220,43 +204,35 @@ export default function NlLogFlowPhoneDemo() {
     };
   }, [active]);
 
+  const composing = phase === "typing" || phase === "submitting";
+
   return (
     <div ref={containerRef} className="w-full">
       <PhoneShell>
-        <div key={fadeKey} className="nl-demo-fade relative h-full overflow-hidden">
-          <div
-            className="relative h-full will-change-transform"
-            style={{
-              transition: pushTransition,
-              transform: reviewSlideIn ? "translateX(-30%)" : "translateX(0)",
-            }}
-          >
-            <FakeLogScreenDemo />
-            {inputFlowVisible && (
-              <>
-                <div className="absolute inset-0 z-[1] bg-black/60" aria-hidden />
-                <InputSheet
-                  text={typedText}
-                  showCursor={phase === "typing"}
-                  sendActive={phase === "submitting"}
-                  loadingMessage={
-                    phase === "loading" ? LOADING_STAGES[loadingStage] : undefined
-                  }
-                />
-              </>
-            )}
-          </div>
-          <div
-            className="absolute inset-0 z-20 bg-[#F4F4F5] shadow-[-4px_0_16px_rgba(0,0,0,0.12)] will-change-transform"
-            style={{
-              transition: pushTransition,
-              transform: reviewSlideIn ? "translateX(0)" : "translateX(100%)",
-              visibility: reviewOpen ? "visible" : "hidden",
-              pointerEvents: reviewOpen ? "auto" : "none",
-            }}
-          >
-            {reviewOpen && <NlReviewScreenDemo />}
-          </div>
+        <div key={fadeKey} className="nl-demo-fade absolute inset-0">
+          <DesignCanvas>
+            <LogScreen
+              showLunch={!composing}
+              lunchResolved={phase === "resolved" || phase === "summary"}
+              lunchTypedText={MEAL_TEXT}
+              focusLunch={phase === "calculating" || phase === "resolved"}
+              day={phase === "summary" ? DAY_AFTER : DAY_BEFORE}
+            />
+            <div
+              className="absolute inset-0 z-[5] bg-black/55"
+              style={{
+                opacity: composing ? 1 : 0,
+                transition: `opacity ${SHEET_DISMISS_MS}ms ease-out`,
+              }}
+              aria-hidden
+            />
+            <LogMealSheet
+              text={typedText}
+              showCursor={phase === "typing"}
+              sendActive={phase === "submitting"}
+              visible={composing}
+            />
+          </DesignCanvas>
         </div>
       </PhoneShell>
     </div>
