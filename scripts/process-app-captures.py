@@ -4,7 +4,9 @@
 Stills (1206x2622 PNG) become AVIF and WebP at 1x (402 px wide) and 2x
 (804 px). Videos are cut to the segments listed in SEGMENTS and written as
 H.264 MP4 and VP9 WebM at 804 px wide, each with a WebP poster. The test
-account's profile photo is blurred wherever the Home header shows it.
+account's profile photo is blurred wherever the Home header shows it, and the
+Dynamic Island is painted out (the site's DeviceFrame draws its own). Widget
+renders are cropped to the widget with transparent corners.
 
 Usage: python3 scripts/process-app-captures.py <raw dir> [out dir]
 Needs Pillow with AVIF support and ffmpeg (libx264, libvpx-vp9).
@@ -41,6 +43,16 @@ AVATAR_VIDEOS = ("03-log-typed", "04-log-photo", "21-walkthrough")
 
 WIDTHS = {"1x": 402, "2x": 804}
 
+# Screen recordings (and frames taken from them) include the Dynamic Island,
+# which the site's DeviceFrame draws itself. The pill on a 1206x2622 frame,
+# padded a little, is painted over with the status bar colour just left of it.
+ISLAND = (411, 38, 386, 118)  # x, y, width, height
+ISLAND_SAMPLE_X = 405
+
+# Widget renders: a 36 px margin around the widget, whose corner radius is 64 px.
+WIDGET_MARGIN = 36
+WIDGET_RADIUS = 64
+
 
 def blur_avatar(im: Image.Image) -> Image.Image:
     x, y, r = AVATAR
@@ -52,15 +64,37 @@ def blur_avatar(im: Image.Image) -> Image.Image:
     return im
 
 
+def paint_out_island(im: Image.Image) -> Image.Image:
+    x, y, w, h = ISLAND
+    if sum(im.getpixel((x + w // 2, y + h // 2))) < 20:
+        fill = im.crop((ISLAND_SAMPLE_X, y, ISLAND_SAMPLE_X + 1, y + h)).resize((w, h))
+        im.paste(fill, (x, y))
+    return im
+
+
+def widget(im: Image.Image) -> Image.Image:
+    """Crop a widget render to the widget and make its corners transparent."""
+    m = WIDGET_MARGIN
+    im = im.convert("RGBA").crop((m, m, im.width - m, im.height - m))
+    ss = 4
+    mask = Image.new("L", (im.width * ss, im.height * ss), 0)
+    ImageDraw.Draw(mask).rounded_rectangle((0, 0, im.width * ss - 1, im.height * ss - 1),
+                                           radius=WIDGET_RADIUS * ss, fill=255)
+    im.putalpha(mask.resize(im.size, Image.LANCZOS))
+    return im
+
+
 def still(name: str) -> None:
-    im = Image.open(os.path.join(RAW, name + ".png")).convert("RGB")
+    im = Image.open(os.path.join(RAW, name + ".png"))
     if im.size != (1206, 2622):
         # Widget renders: the render itself is the 2x asset, half of it the 1x.
+        im = widget(im)
         for scale, factor in (("1x", 2), ("2x", 1)):
             out = im.resize((im.width // factor, im.height // factor), Image.LANCZOS)
             out.save(os.path.join(OUT, f"{name}@{scale}.avif"), quality=60)
             out.save(os.path.join(OUT, f"{name}@{scale}.webp"), quality=82, method=6)
         return
+    im = paint_out_island(im.convert("RGB"))
     if name.startswith(AVATAR_STILLS):
         im = blur_avatar(im)
     for scale, width in WIDTHS.items():
@@ -85,6 +119,11 @@ def video(name: str) -> None:
             f"geq=r='r(X,Y)':g='g(X,Y)':b='b(X,Y)':a='if(lte(hypot(X-{r},Y-{r}),{r}),255,0)'[c];"
             f"[a][c]overlay={x-r}:{y-r}"
         )
+    ix, iy, iw, ih = ISLAND
+    filters.append(
+        f"split[m][n];[n]crop=2:{ih}:{ISLAND_SAMPLE_X}:{iy},scale={iw}:{ih}:flags=neighbor[p];"
+        f"[m][p]overlay={ix}:{iy}"
+    )
     filters.append("scale=804:-2")
     vf = ",".join(filters)
     base = os.path.join(OUT, name)
