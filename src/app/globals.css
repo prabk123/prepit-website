@@ -1,5 +1,21 @@
 @import "tailwindcss";
 
+/*
+ * Dark mode follows the system setting. `data-theme="light"` or
+ * `data-theme="dark"` on any element forces a scheme for that subtree (used by
+ * the /dev/components preview to show both side by side).
+ */
+@custom-variant dark {
+  @media (prefers-color-scheme: dark) {
+    &:where(:not([data-theme="light"], [data-theme="light"] *)) {
+      @slot;
+    }
+  }
+  &:where([data-theme="dark"], [data-theme="dark"] *) {
+    @slot;
+  }
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -26,11 +42,75 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-dm-sans);
-  --font-mono: var(--font-geist-mono);
 
   /* Font family utilities */
   --font-family-dm-sans: var(--font-dm-sans);
   --font-family-brand: var(--font-brand);
+
+  /* Theme-aware surfaces and text (see "Theme plumbing" below). */
+  --color-page: var(--theme-page);
+  --color-surface: var(--theme-surface);
+  --color-surface-raised: var(--theme-surface-raised);
+  --color-ink: var(--theme-ink);
+  --color-ink-secondary: var(--theme-ink-secondary);
+  --color-ink-tertiary: var(--theme-ink-tertiary);
+  --color-line: var(--theme-line);
+  --color-line-strong: var(--theme-line-strong);
+  --color-accent: var(--theme-accent);
+}
+
+/*
+ * Theme plumbing.
+ *
+ * PROVISIONAL VALUES: copied from the app's PrepItColors (fresca_app
+ * lib/theme/prep_it_colors.dart) so light and dark work end to end. The final
+ * colour, type, spacing, radius, shadow and glow tokens land in a follow-up
+ * commit once the design direction from the mock-ups ticket (PRE-197) is
+ * picked. Existing pages still use --background/--foreground and stay light
+ * until their page ticket moves them onto these tokens.
+ */
+:root,
+[data-theme="light"] {
+  --theme-page: #f4f4f5;
+  --theme-surface: #ffffff;
+  --theme-surface-raised: #ffffff;
+  --theme-ink: #000000;
+  --theme-ink-secondary: #7a7a82;
+  --theme-ink-tertiary: #a6a6ac;
+  --theme-line: #e9e9ea;
+  --theme-line-strong: #d3d3d5;
+  --theme-accent: #b4e800;
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --theme-page: #1c1c1e;
+    --theme-surface: #2c2c2e;
+    --theme-surface-raised: #3a3a3c;
+    --theme-ink: #f5f5f5;
+    --theme-ink-secondary: #a1a1a6;
+    --theme-ink-tertiary: #8e8e93;
+    --theme-line: #3a3a3c;
+    --theme-line-strong: #545458;
+    --theme-accent: #b4e800;
+  }
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --theme-page: #1c1c1e;
+  --theme-surface: #2c2c2e;
+  --theme-surface-raised: #3a3a3c;
+  --theme-ink: #f5f5f5;
+  --theme-ink-secondary: #a1a1a6;
+  --theme-ink-tertiary: #8e8e93;
+  --theme-line: #3a3a3c;
+  --theme-line-strong: #545458;
+  --theme-accent: #b4e800;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -42,6 +122,118 @@
 
 html {
   scroll-behavior: smooth;
+}
+
+/*
+ * <DeviceFrame>: iPhone 17 Pro drawn in CSS. Every measurement is a share of
+ * the frame width (cqw), so one set of proportions covers 260 to 420 px.
+ * Screen is 402 x 874 pt (1206 x 2622 px captures).
+ */
+.device-frame {
+  container-type: inline-size;
+  width: var(--device-w, 320px);
+  flex: none;
+  rotate: var(--device-tilt, 0deg);
+}
+
+.device-frame__shell {
+  position: relative;
+  padding: 1.1cqw;
+  border-radius: 17cqw;
+  background: linear-gradient(145deg, #8a8a8f 0%, #3c3c40 18%, #2a2a2d 50%, #3c3c40 82%, #8a8a8f 100%);
+  box-shadow:
+    0 0 0 0.25cqw rgba(0, 0, 0, 0.35),
+    0 6cqw 14cqw -4cqw rgba(0, 0, 0, 0.35),
+    0 2cqw 4cqw rgba(0, 0, 0, 0.12);
+}
+
+.device-frame__bezel {
+  padding: 2.9cqw;
+  border-radius: 15.9cqw;
+  background: #050505;
+}
+
+.device-frame__screen {
+  position: relative;
+  aspect-ratio: 402 / 874;
+  overflow: hidden;
+  border-radius: 13.2cqw;
+  background: #000;
+  isolation: isolate;
+}
+
+.device-frame__screen > picture,
+.device-frame__screen > picture > img,
+.device-frame__screen > img,
+.device-frame__screen > video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+
+.device-frame__island {
+  position: absolute;
+  z-index: 1;
+  top: 2.5cqw;
+  left: 50%;
+  width: 29cqw;
+  height: 8.6cqw;
+  translate: -50% 0;
+  border-radius: 999px;
+  background: #000;
+  pointer-events: none;
+}
+
+.device-frame__button {
+  position: absolute;
+  width: 0.9cqw;
+  border-radius: 0.6cqw;
+  background: linear-gradient(90deg, #2a2a2d, #6e6e73);
+}
+
+.device-frame__button--action {
+  left: -0.55cqw;
+  top: 21%;
+  height: 7%;
+}
+
+.device-frame__button--volume-up {
+  left: -0.55cqw;
+  top: 31%;
+  height: 11%;
+}
+
+.device-frame__button--volume-down {
+  left: -0.55cqw;
+  top: 44%;
+  height: 11%;
+}
+
+.device-frame__button--side {
+  right: -0.55cqw;
+  top: 32%;
+  height: 16%;
+}
+
+.device-frame__button--camera {
+  right: -0.4cqw;
+  top: 58%;
+  height: 8%;
+  width: 0.7cqw;
+}
+
+/* <DevicePair>: two frames overlapping, the second slightly lower. */
+.device-pair {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.device-pair > .device-frame + .device-frame {
+  margin-left: calc(var(--device-w, 320px) * var(--device-overlap, -0.28));
+  margin-top: calc(var(--device-w, 320px) * 0.18);
 }
 
 body {
