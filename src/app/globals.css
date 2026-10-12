@@ -124,116 +124,160 @@ html {
   scroll-behavior: smooth;
 }
 
-/*
- * <DeviceFrame>: iPhone 17 Pro drawn in CSS. Every measurement is a share of
- * the frame width (cqw), so one set of proportions covers 260 to 420 px.
- * Screen is 402 x 874 pt (1206 x 2622 px captures).
- */
-.device-frame {
-  container-type: inline-size;
-  width: var(--device-w, 320px);
-  flex: none;
-  rotate: var(--device-tilt, 0deg);
-}
+/* In a layer so Tailwind utilities passed as className still win. */
+@layer components {
+  /*
+   * <DeviceFrame>: iPhone 17 Pro drawn in CSS. Every measurement is a share of
+   * the frame width (cqw), so one set of proportions covers 260 to 420 px.
+   * Screen is 402 x 874 pt (1206 x 2622 px captures).
+   */
+  .device-frame {
+    container-type: inline-size;
+    width: var(--device-w, 320px);
+    flex: none;
+    rotate: var(--device-tilt, 0deg);
+  }
 
-.device-frame__shell {
-  position: relative;
-  padding: 1.1cqw;
-  border-radius: 17cqw;
-  background: linear-gradient(145deg, #8a8a8f 0%, #3c3c40 18%, #2a2a2d 50%, #3c3c40 82%, #8a8a8f 100%);
-  box-shadow:
-    0 0 0 0.25cqw rgba(0, 0, 0, 0.35),
-    0 6cqw 14cqw -4cqw rgba(0, 0, 0, 0.35),
-    0 2cqw 4cqw rgba(0, 0, 0, 0.12);
-}
+  .device-frame__shell {
+    position: relative;
+    padding: 1.1cqw;
+    border-radius: 17cqw;
+    background: linear-gradient(145deg, #8a8a8f 0%, #3c3c40 18%, #2a2a2d 50%, #3c3c40 82%, #8a8a8f 100%);
+    box-shadow:
+      0 0 0 0.25cqw rgba(0, 0, 0, 0.35),
+      0 6cqw 14cqw -4cqw rgba(0, 0, 0, 0.35),
+      0 2cqw 4cqw rgba(0, 0, 0, 0.12);
+  }
 
-.device-frame__bezel {
-  padding: 2.9cqw;
-  border-radius: 15.9cqw;
-  background: #050505;
-}
+  .device-frame__bezel {
+    padding: 2.9cqw;
+    border-radius: 15.9cqw;
+    background: #050505;
+  }
 
-.device-frame__screen {
-  position: relative;
-  aspect-ratio: 402 / 874;
-  overflow: hidden;
-  border-radius: 13.2cqw;
-  background: #000;
-  isolation: isolate;
-}
+  .device-frame__screen {
+    position: relative;
+    aspect-ratio: 402 / 874;
+    overflow: hidden;
+    border-radius: 13.2cqw;
+    background: #000;
+    isolation: isolate;
+  }
 
-.device-frame__screen > picture,
-.device-frame__screen > picture > img,
-.device-frame__screen > img,
-.device-frame__screen > video {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: top;
-}
+  .device-frame__screen > picture,
+  .device-frame__screen > picture > img,
+  .device-frame__screen > img,
+  .device-frame__screen > .loop-video,
+  .device-frame__screen > .loop-video > video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+  }
 
-.device-frame__island {
-  position: absolute;
-  z-index: 1;
-  top: 2.5cqw;
-  left: 50%;
-  width: 29cqw;
-  height: 8.6cqw;
-  translate: -50% 0;
-  border-radius: 999px;
-  background: #000;
-  pointer-events: none;
-}
+  .device-frame__island {
+    position: absolute;
+    z-index: 1;
+    top: 2.5cqw;
+    left: 50%;
+    width: 29cqw;
+    height: 8.6cqw;
+    translate: -50% 0;
+    border-radius: 999px;
+    background: #000;
+    pointer-events: none;
+  }
 
-.device-frame__button {
-  position: absolute;
-  width: 0.9cqw;
-  border-radius: 0.6cqw;
-  background: linear-gradient(90deg, #2a2a2d, #6e6e73);
-}
+  .device-frame__button {
+    position: absolute;
+    width: 0.9cqw;
+    border-radius: 0.6cqw;
+    background: linear-gradient(90deg, #2a2a2d, #6e6e73);
+  }
 
-.device-frame__button--action {
-  left: -0.55cqw;
-  top: 21%;
-  height: 7%;
-}
+  .device-frame__button--action {
+    left: -0.55cqw;
+    top: 21%;
+    height: 7%;
+  }
 
-.device-frame__button--volume-up {
-  left: -0.55cqw;
-  top: 31%;
-  height: 11%;
-}
+  .device-frame__button--volume-up {
+    left: -0.55cqw;
+    top: 31%;
+    height: 11%;
+  }
 
-.device-frame__button--volume-down {
-  left: -0.55cqw;
-  top: 44%;
-  height: 11%;
-}
+  .device-frame__button--volume-down {
+    left: -0.55cqw;
+    top: 44%;
+    height: 11%;
+  }
 
-.device-frame__button--side {
-  right: -0.55cqw;
-  top: 32%;
-  height: 16%;
-}
+  .device-frame__button--side {
+    right: -0.55cqw;
+    top: 32%;
+    height: 16%;
+  }
 
-.device-frame__button--camera {
-  right: -0.4cqw;
-  top: 58%;
-  height: 8%;
-  width: 0.7cqw;
-}
+  .device-frame__button--camera {
+    right: -0.4cqw;
+    top: 58%;
+    height: 8%;
+    width: 0.7cqw;
+  }
 
-/* <DevicePair>: two frames overlapping, the second slightly lower. */
-.device-pair {
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-}
+  /* <DevicePair>: two frames overlapping, the second slightly lower. */
+  .device-pair {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+  }
 
-.device-pair > .device-frame + .device-frame {
-  margin-left: calc(var(--device-w, 320px) * var(--device-overlap, -0.28));
-  margin-top: calc(var(--device-w, 320px) * 0.18);
+  .device-pair > .device-frame + .device-frame {
+    margin-left: calc(var(--device-w, 320px) * var(--device-overlap, -0.28));
+    margin-top: calc(var(--device-w, 320px) * 0.18);
+  }
+
+  /* <LoopVideo>: the clip plus its pause/play button. */
+  .loop-video {
+    position: relative;
+  }
+
+  .loop-video > video {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    object-position: top;
+  }
+
+  .loop-video__toggle {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    cursor: pointer;
+    transition: background 150ms ease;
+  }
+
+  .loop-video__toggle:hover {
+    background: rgba(0, 0, 0, 0.75);
+  }
+
+  .loop-video__toggle:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+  }
 }
 
 body {

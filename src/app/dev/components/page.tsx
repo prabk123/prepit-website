@@ -175,7 +175,7 @@ export default function ComponentPreviewPage() {
 
       <Section
         title="LoopVideo in a DeviceFrame"
-        note="Muted, inline, plays only in view, poster under reduced motion. MP4 and WebM."
+        note="Muted, inline, plays only in view, with a pause button. Stays on the poster under reduced motion until played. MP4 and WebM."
       >
         <ThemePanels>
           {() => (

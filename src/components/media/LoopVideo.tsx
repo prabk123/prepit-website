@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 
@@ -19,7 +19,7 @@ export type LoopVideoProps = {
   mp4: string;
   /** VP9 or AV1 WebM, offered first because it is usually smaller. */
   webm?: string;
-  /** Shown before the first frame, and instead of the video under reduced motion. */
+  /** Shown before the first frame, and as the still under reduced motion. */
   poster: string;
   /** Intrinsic size of the video, so the box is reserved before it loads. */
   width: number;
@@ -30,8 +30,10 @@ export type LoopVideoProps = {
 };
 
 /**
- * A muted, looping clip that plays only while it is on screen. Under
- * `prefers-reduced-motion` it renders the poster as a still image instead.
+ * A muted, looping clip that plays only while it is on screen, with a
+ * pause/play button (WCAG 2.2.2). Under `prefers-reduced-motion` it stays on
+ * the poster until the visitor presses play. The poster loads only as the clip
+ * nears the viewport, and the video itself only when it first plays.
  */
 export default function LoopVideo({
   mp4,
@@ -43,21 +45,47 @@ export default function LoopVideo({
   className,
 }: LoopVideoProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  // The visitor's own choice from the button; null until they press it.
+  const choiceRef = useRef<"play" | "pause" | null>(null);
+  const [playing, setPlaying] = useState(false);
+  const [nearView, setNearView] = useState(false);
   const reducedMotion = useSyncExternalStore(
     subscribeToReducedMotion,
     prefersReducedMotion,
     () => false,
   );
 
+  // Lazy-load the poster: attach it once the clip is within ~1.5 screens.
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || reducedMotion) return;
+    if (!video) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
+          setNearView(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "150% 0px" },
+    );
+    observer.observe(video);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const shouldPlay = () =>
+      choiceRef.current === "play" ||
+      (choiceRef.current === null && !reducedMotion);
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && shouldPlay()) {
           // Autoplay can still be refused (Low Power Mode, data saver); the
-          // poster stays visible, so there is nothing to recover.
+          // poster stays visible and the button offers play.
           video.play().catch(() => {});
         } else {
           video.pause();
@@ -73,41 +101,58 @@ export default function LoopVideo({
     };
   }, [reducedMotion]);
 
-  const a11y = label
-    ? { role: "img", "aria-label": label }
-    : { "aria-hidden": true as const };
-
-  if (reducedMotion) {
-    return (
-      // eslint-disable-next-line @next/next/no-img-element -- poster is already sized and optimised
-      <img
-        src={poster}
-        width={width}
-        height={height}
-        alt={label}
-        className={className}
-        decoding="async"
-      />
-    );
-  }
+  const toggle = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (playing) {
+      choiceRef.current = "pause";
+      video.pause();
+    } else {
+      choiceRef.current = "play";
+      video.play().catch(() => {});
+    }
+  };
 
   return (
-    <video
-      ref={videoRef}
-      width={width}
-      height={height}
-      poster={poster}
-      className={className}
-      muted
-      loop
-      playsInline
-      preload="metadata"
-      disablePictureInPicture
-      disableRemotePlayback
-      {...a11y}
+    <div
+      className={`loop-video ${className ?? ""}`}
+      {...(label ? { role: "group", "aria-label": label } : {})}
     >
-      {webm && <source src={webm} type="video/webm" />}
-      <source src={mp4} type="video/mp4" />
-    </video>
+      <video
+        ref={videoRef}
+        width={width}
+        height={height}
+        poster={nearView ? poster : undefined}
+        muted
+        loop
+        playsInline
+        preload="none"
+        disablePictureInPicture
+        disableRemotePlayback
+        aria-hidden
+        onPlay={() => setPlaying(true)}
+        onPause={() => setPlaying(false)}
+      >
+        {webm && <source src={webm} type="video/webm" />}
+        <source src={mp4} type="video/mp4" />
+      </video>
+      <button
+        type="button"
+        className="loop-video__toggle"
+        aria-label={playing ? "Pause video" : "Play video"}
+        onClick={toggle}
+      >
+        {playing ? (
+          <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden>
+            <rect x="3" y="2" width="3.5" height="12" rx="1" fill="currentColor" />
+            <rect x="9.5" y="2" width="3.5" height="12" rx="1" fill="currentColor" />
+          </svg>
+        ) : (
+          <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden>
+            <path d="M4 2.6v10.8a1 1 0 0 0 1.5.86l9-5.4a1 1 0 0 0 0-1.72l-9-5.4A1 1 0 0 0 4 2.6Z" fill="currentColor" />
+          </svg>
+        )}
+      </button>
+    </div>
   );
 }
