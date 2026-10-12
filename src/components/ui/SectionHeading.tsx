@@ -1,13 +1,16 @@
 import type { ReactNode } from "react";
 
 type SectionHeadingProps = {
-  /** Chapter number shown before the eyebrow, e.g. "01". */
-  chapter?: string;
   eyebrow?: string;
+  /**
+   * D3 keeps the brand gradient for the hero eyebrow and the final CTA line
+   * only; every other eyebrow is muted text.
+   */
+  eyebrowTone?: "muted" | "gradient";
   title: ReactNode;
   /** The one supporting line. */
   lead?: ReactNode;
-  /** `hero` for the page's h1, `chapter` for numbered sections, `title` for smaller blocks. */
+  /** `hero` for the page's h1, `chapter` for section headlines, `title` for smaller blocks. */
   size?: "hero" | "chapter" | "title";
   as?: "h1" | "h2" | "h3";
   id?: string;
@@ -21,10 +24,10 @@ const titleSize = {
   title: "text-title",
 } as const;
 
-/** Eyebrow (gradient), headline and one supporting line. */
+/** Eyebrow, headline and one supporting line. Headings are not numbered (D3). */
 export default function SectionHeading({
-  chapter,
   eyebrow,
+  eyebrowTone = "muted",
   title,
   lead,
   size = "chapter",
@@ -40,11 +43,9 @@ export default function SectionHeading({
     <div
       className={`flex flex-col gap-5 ${centered ? "items-center text-center" : ""} ${className ?? ""}`}
     >
-      {(chapter || eyebrow) && (
+      {eyebrow && (
         <p className="text-eyebrow font-medium uppercase">
-          <span className="text-gradient-brand">
-            {chapter && <span className="tabular-nums">{chapter}</span>}
-            {chapter && eyebrow && <span aria-hidden>&ensp;</span>}
+          <span className={eyebrowTone === "gradient" ? "text-gradient-brand" : "text-ink-muted"}>
             {eyebrow}
           </span>
         </p>

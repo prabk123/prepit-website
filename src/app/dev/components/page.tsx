@@ -10,7 +10,6 @@ import FeatureSplit from "@/components/ui/FeatureSplit";
 import Glow from "@/components/ui/Glow";
 import PricingCard from "@/components/ui/PricingCard";
 import QuoteCard from "@/components/ui/QuoteCard";
-import Reveal from "@/components/ui/Reveal";
 import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
 
@@ -96,12 +95,12 @@ export default function ComponentPreviewPage() {
           size="title"
           as="h1"
           id="preview-title"
-          lead="Every building block in the warm dark direction. All values come from src/app/tokens.css."
+          lead="Every building block in direction D3, annotated plates. All values come from src/app/tokens.css."
         />
       </Section>
 
       <Section tone="surface" labelledBy="tokens">
-        <Reveal className="flex flex-col gap-12">
+        <div className="flex flex-col gap-12">
           <SectionHeading title="Tokens" size="title" id="tokens" />
           <div className="grid grid-cols-3 gap-4 sm:grid-cols-5 lg:grid-cols-7">
             {colours.map(([name, className]) => (
@@ -123,13 +122,37 @@ export default function ComponentPreviewPage() {
               </div>
             ))}
           </div>
-        </Reveal>
+        </div>
       </Section>
 
       <Section labelledBy="hero-sample">
-        <PreviewLabel>Hero: SectionHeading (hero), AppStoreCta with note, rating and QR, DevicePair with Glow and drift</PreviewLabel>
+        <PreviewLabel>Hero (D3): headline first, supporting line and AppStoreCta beside it. The annotated cafe photo underneath comes with PRE-201</PreviewLabel>
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-end lg:gap-12">
+          <SectionHeading
+            eyebrow="Your AI nutritionist"
+            eyebrowTone="gradient"
+            title="Eat well. Feel the difference."
+            size="hero"
+            as="h2"
+            id="hero-sample"
+          />
+          <div className="flex flex-col gap-8">
+            <p className="text-lead text-ink-secondary text-pretty">
+              Tell PrepIt what you ate in your own words. See how it will shape your energy, hunger and mood, and know what to eat next.
+            </p>
+            <AppStoreCta
+              trackingSource="dev-preview-hero"
+              note="3 days free"
+              rating={sampleRating}
+              qrCaption="Scan to get PrepIt on your iPhone"
+            />
+          </div>
+        </div>
+      </Section>
+
+      <Section labelledBy="plans-sample">
+        <PreviewLabel>Two-column section: FeatureSplit with DevicePair and Glow</PreviewLabel>
         <FeatureSplit
-          emphasis="text"
           media={
             <div className="relative py-6">
               <Glow />
@@ -137,37 +160,28 @@ export default function ComponentPreviewPage() {
                 <DeviceFrame
                   tilt={-4}
                   capture={groceryCapture}
-                  priority
-                  className="animate-drift [--device-w:260px] lg:[--device-w:320px]"
+                  className="[--device-w:260px] lg:[--device-w:300px]"
                 />
                 <DeviceFrame
                   tilt={4}
                   capture={recipeCapture}
-                  className="hidden animate-drift [animation-delay:-4s] [--device-w:260px] sm:block lg:[--device-w:320px]"
+                  className="hidden [--device-w:260px] sm:block lg:[--device-w:300px]"
                 />
               </DevicePair>
             </div>
           }
         >
           <SectionHeading
-            eyebrow="Your AI nutritionist"
-            title="Eat well. Feel the difference."
-            size="hero"
-            as="h2"
-            id="hero-sample"
-            lead="Tell PrepIt what you ate in your own words. See how it will shape your energy, hunger and mood, and know what to eat next."
-          />
-          <AppStoreCta
-            trackingSource="dev-preview-hero"
-            note="3 days free"
-            rating={sampleRating}
-            qrCaption="Scan to get PrepIt on your iPhone"
+            eyebrow="Meal plans"
+            title="Plans that fit your week."
+            id="plans-sample"
+            lead="Ask for a plan in chat and get meals built around your goals, tastes and budget."
           />
         </FeatureSplit>
       </Section>
 
       <Section labelledBy="logging-sample">
-        <Reveal>
+        <div>
           <PreviewLabel>Chapter: FeatureSplit (reversed) with LoopVideo in a DeviceFrame</PreviewLabel>
           <FeatureSplit
             reverse
@@ -179,14 +193,13 @@ export default function ComponentPreviewPage() {
             }
           >
             <SectionHeading
-              chapter="01"
               eyebrow="Logging"
               title="Log a meal in seconds."
               id="logging-sample"
               lead="Type it, snap it or say it. PrepIt works out the calories and macros, and nothing is saved until you confirm."
             />
           </FeatureSplit>
-        </Reveal>
+        </div>
       </Section>
 
       <Section
@@ -198,20 +211,19 @@ export default function ComponentPreviewPage() {
           height: 900,
         }}
       >
-        <Reveal>
-          <PreviewLabel>Section tone=&quot;photo&quot;: full-bleed photo (placeholder until PRE-199) under the dark gradient</PreviewLabel>
+        <div>
+          <PreviewLabel>Section tone=&quot;photo&quot;: full-bleed photo (placeholder until PRE-199) with the dark gradient on the left</PreviewLabel>
           <SectionHeading
-            chapter="03"
             eyebrow="Your Nutritionist"
             title="A nutritionist who knows your day."
             id="photo-sample"
             lead="Ask anything and get answers built on what you actually ate, any time of day."
           />
-        </Reveal>
+        </div>
       </Section>
 
       <Section labelledBy="bento-sample">
-        <Reveal className="flex flex-col gap-stack">
+        <div className="flex flex-col gap-stack">
           <PreviewLabel>BentoGrid and BentoTile (large, medium, small)</PreviewLabel>
           <SectionHeading
             title="Everything in one place."
@@ -236,11 +248,11 @@ export default function ComponentPreviewPage() {
               Bring in your activity and weight.
             </BentoTile>
           </BentoGrid>
-        </Reveal>
+        </div>
       </Section>
 
       <Section tone="surface" labelledBy="quotes-sample">
-        <Reveal className="flex flex-col gap-stack">
+        <div className="flex flex-col gap-stack">
           <PreviewLabel>QuoteCard (placeholder reviews)</PreviewLabel>
           <SectionHeading title="What people say" size="title" id="quotes-sample" />
           <div className="grid gap-4 md:grid-cols-3">
@@ -248,11 +260,11 @@ export default function ComponentPreviewPage() {
             <QuoteCard quote="[REVIEW 2]" name="[NAME]" stars={5} />
             <QuoteCard quote="[REVIEW 3]" name="[NAME]" stars={5} />
           </div>
-        </Reveal>
+        </div>
       </Section>
 
       <Section labelledBy="pricing-sample">
-        <Reveal className="flex flex-col items-center gap-stack">
+        <div className="flex flex-col items-center gap-stack">
           <PreviewLabel>PricingCard with the dark AppStoreCta</PreviewLabel>
           <SectionHeading
             title="One plan. Everything included."
@@ -278,11 +290,11 @@ export default function ComponentPreviewPage() {
               />
             }
           />
-        </Reveal>
+        </div>
       </Section>
 
       <Section labelledBy="cta-sample">
-        <Reveal>
+        <div>
           <PreviewLabel>CtaBand with AppStoreCta and QR (QR shows from 1024 px)</PreviewLabel>
           <CtaBand
             id="cta-sample"
@@ -295,11 +307,11 @@ export default function ComponentPreviewPage() {
               />
             }
           />
-        </Reveal>
+        </div>
       </Section>
 
       <Section tone="surface" labelledBy="frames-sample">
-        <Reveal className="flex flex-col gap-stack">
+        <div className="flex flex-col gap-stack">
           <SectionHeading
             title="DeviceFrame sizes"
             size="title"
@@ -311,7 +323,7 @@ export default function ComponentPreviewPage() {
             <DeviceFrame width={320} capture={groceryCapture} />
             <DeviceFrame width={420} capture={recipeCapture} className="hidden md:block" />
           </div>
-        </Reveal>
+        </div>
       </Section>
     </div>
   );

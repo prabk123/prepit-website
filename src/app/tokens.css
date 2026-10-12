@@ -1,6 +1,6 @@
 /*
- * PrepIt website design tokens: direction D, "warm dark" (PRE-197, chosen
- * 12 Oct 2026). The marketing site is dark only.
+ * PrepIt website design tokens: direction D3, "annotated plates" (PRE-197,
+ * chosen 12 Oct 2026). The marketing site is dark only.
  *
  * Every colour, type, spacing, radius, shadow, glow and motion value for the
  * revamp lives in this file, so a palette or scale change is a one-file edit.
@@ -13,10 +13,10 @@
 
 @theme static {
   /* Surfaces: warm near-black, never pure black. */
-  --color-page: #100c09;
-  --color-surface: #1a1512;
+  --color-page: #110f0c;
+  --color-surface: #1a1612;
   --color-surface-raised: #241d18;
-  --color-line: #2c241e;
+  --color-line: #2a241e;
   --color-line-strong: #3a3029;
 
   /* Text: cream and soft beige, never pure white. */
@@ -29,7 +29,7 @@
 
   /* Cream buttons and the cream pricing card, with near-black text on them. */
   --color-cream: #f7f1e8;
-  --color-on-cream: #100c09;
+  --color-on-cream: #110f0c;
   --color-on-cream-muted: #5c5148;
 
   /* The app's Energy, Satiety and Mood signal colours. */
@@ -49,12 +49,12 @@
   --color-device-metal-edge: #8a8a8f;
   --color-device-bezel: #050505;
   --color-device-button: #6e6e73;
-  --color-overlay: rgb(16 12 9 / 0.6);
-  --color-overlay-strong: rgb(16 12 9 / 0.8);
+  --color-overlay: rgb(17 15 12 / 0.6);
+  --color-overlay-strong: rgb(17 15 12 / 0.8);
 
   /* Type scale. Clash Display headlines (weight 600, tracking -0.025em),
      DM Sans body. Hero 60 to 112 px, chapter heads 46 to 80 px. */
-  --text-hero: clamp(60px, 40.7px + 4.95vw, 112px);
+  --text-hero: clamp(60px, 37.7px + 5.71vw, 120px);
   --text-hero--line-height: 0.95;
   --text-hero--letter-spacing: -0.025em;
   --text-hero--font-weight: 600;
@@ -94,10 +94,9 @@
   /* Shadows. Cards are flat; phones float. */
   --shadow-phone: 0 40px 80px -24px rgb(0 0 0 / 0.7), 0 12px 24px -12px rgb(0 0 0 / 0.5);
 
-  /* Motion: slow and calm. The drift settles after four passes (about 36 s),
-     so nothing moves on its own for long (WCAG 2.2.2). */
+  /* Motion: D3 has one moment only (photo labels drawing in, PRE-201).
+     Nothing else on the page animates. */
   --ease-calm: cubic-bezier(0.22, 1, 0.36, 1);
-  --animate-drift: drift 9s ease-in-out 4 alternate;
 }
 
 /* Font families come from next/font variables set on <body>, so they are
@@ -119,14 +118,11 @@
   --glow-warm:
     radial-gradient(closest-side, rgb(243 140 97 / 0.32), transparent),
     radial-gradient(closest-side at 70% 65%, rgb(245 204 119 / 0.22), transparent);
-  /* Dark gradient over full-bleed photos so text stays readable. */
+  /* Dark gradient on the left of full-bleed photos, behind the text column. */
   --scrim-photo: linear-gradient(
-    180deg,
-    rgb(16 12 9 / 0.55) 0%,
-    rgb(16 12 9 / 0.35) 40%,
-    rgb(16 12 9 / 0.9) 100%
+    90deg,
+    rgb(17 15 12 / 0.92) 0%,
+    rgb(17 15 12 / 0.8) 45%,
+    rgb(17 15 12 / 0.15) 85%
   );
-  --reveal-distance: 16px;
-  --reveal-duration: 900ms;
-  --drift-distance: 6px;
 }
