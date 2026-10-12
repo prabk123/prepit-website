@@ -1,6 +1,6 @@
 # PRE-198 (website screenshots and videos): simulator capture job
 
-Raw captures for the website revamp. This branch (`captures/pre-198-raw`) is a drop box: it is never merged. The cloud thread optimises what lands here and opens the real PR into `website-revamp`.
+Raw captures for the website revamp. They come back as a secret gist (the same way simulator proof is shared on PRs); the cloud thread optimises them and opens the real PR into `website-revamp`. This file and the food photo live on the `prepit-website` branch `claude/project-thread-ygt98i`.
 
 ## Rules
 
@@ -13,7 +13,7 @@ Raw captures for the website revamp. This branch (`captures/pre-198-raw`) is a d
 
 1. `fresca_backend`: `git fetch origin && git checkout claude/project-thread-ygt98i && git pull` (backend PR #288 adds the chart and weigh-ins to `showcase-full-account`; once #288 is merged, `main` is fine). Run `yarn install` if the lockfile changed.
 2. `fresca_app`: `git fetch origin && git checkout main && git pull`, then `scripts/flutter_setup.sh` if needed.
-3. `prepit-website`: clone if missing (`git clone https://github.com/prabk123/prepit-website` in the agent folder), then `git fetch origin && git checkout captures/pre-198-raw && git pull`.
+3. `prepit-website`: clone if missing (`git clone https://github.com/prabk123/prepit-website` in the agent folder), then `git fetch origin && git checkout claude/project-thread-ygt98i && git pull` (read only: just this job file and the food photo).
 4. Add the food photo for shot 4 to the simulator's Photos once: `xcrun simctl addmedia <UDID> ../prepit-website/captures/inputs/burrito-bowl.jpg`.
 5. In the app, Profile (avatar, top right of Home), then Settings: the app theme must follow the system. Switch themes with `xcrun simctl ui <UDID> appearance light` / `dark`.
 6. Status bar before capturing: `xcrun simctl status_bar <UDID> override --time 9:41 --batteryState charged --batteryLevel 100 --cellularBars 4 --wifiBars 3`. Clear it at the end with `xcrun simctl status_bar <UDID> clear`.
@@ -96,7 +96,7 @@ Not possible on the simulator (skip, don't try): Siri, the Action button, Lock S
 
 ## Handing back
 
-1. Copy every capture into `prepit-website/captures/raw/` with the file names above.
-2. Write `captures/raw/RESULTS.md`: one line per shot with pass/fail and anything odd (wrong data, a nudge or banner in the way, a test-looking name, a reshoot needed).
-3. Commit only `captures/raw/` and push to `captures/pre-198-raw`. A file over 90 MB will be refused by GitHub: re-record shorter rather than skipping it.
-4. Clean up with `./scripts/dev-down.sh`, clear the status bar override, set appearance back to light, and tell the coordinator the slot is free.
+1. Gather every capture, with the file names above, in one folder.
+2. Write `RESULTS.md` there: one line per shot with pass/fail and anything odd (wrong data, a nudge or banner in the way, a test-looking name, a reshoot needed).
+3. Put them in one secret gist, as for PR proof: `gh gist create RESULTS.md`, `git clone` the gist, copy the PNGs and MP4s in, commit, push. A file over 90 MB is refused: re-record it shorter rather than skipping it. Don't commit captures to any repo.
+4. Clean up with `./scripts/dev-down.sh`, clear the status bar override, set appearance back to light, and tell the coordinator the slot is free, with the gist link.
