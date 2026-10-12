@@ -62,8 +62,10 @@ export default function Home() {
   return (
     <>
       {/* Hero Section */}
-      <section className="mt-16 flex w-full flex-col items-center bg-white px-4 pt-2 pb-10 lg:px-14 lg:py-20">
-        <div className="flex w-full max-w-[1200px] flex-col-reverse items-center gap-10 lg:flex-row lg:gap-14">
+      <section
+        id="hero"
+        className="mt-16 flex w-full flex-col items-center bg-white px-4 pt-6 pb-10 lg:px-14 lg:py-20">
+        <div className="flex w-full max-w-[1200px] flex-col items-center gap-10 lg:flex-row lg:gap-14">
           {/* Left Content */}
           <div className="flex flex-1 flex-col gap-10">
             <div className="flex flex-col gap-4">
@@ -109,7 +111,7 @@ export default function Home() {
               </div>
             </div>
 
-            {/* App Store Buttons */}
+            {/* App Store Button */}
             <div className="flex flex-row justify-start items-start gap-4">
               <AppStoreLink
                 trackingSource="hero"
@@ -124,18 +126,6 @@ export default function Home() {
                   className="h-12 w-auto"
                 />
               </AppStoreLink>
-              <div className="flex flex-col items-center justify-center gap-1">
-                <Image
-                  src="/play_store_download_disabled.png"
-                  alt="Get it on Google Play"
-                  width={160}
-                  height={48}
-                  className="h-12 w-auto opacity-50"
-                />
-                <span className="text-sm text-[var(--grey-60)] pt-2">
-                  Coming soon 🕒
-                </span>
-              </div>
             </div>
           </div>
 

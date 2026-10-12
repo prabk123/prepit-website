@@ -25,14 +25,14 @@ const FAQ_ITEMS = [
       "PrepIt turns your food log into three 0–100 nutrition signals — forward-looking scores that estimate how your eating is likely to affect you, not just what you ate. Energy measures how stable and sustained your available energy will be today, and how well your brain is fuelled for focus and mental load. Satiety reflects how well today's food choices suppress hunger hormones and reduce the drive to overeat or reach for low-quality food. Mood shows how well the previous day's food choices support cortisol regulation, emotional stability, and resistance to stress-driven eating. Energy and Satiety update as you log today; Mood is built from yesterday's full log. No wearable required — they're research-grounded estimates to guide your next meal, not a direct measure of how you feel.",
   },
   {
-    question: "What is Ask Coach?",
+    question: "What is the PrepIt Nutritionist?",
     answer:
-      "Ask Coach is your AI nutritionist inside PrepIt. Tap it from Home to ask anything about your goals, your day, or your last meal — and get answers in plain language using your own data. It can prepare actions like logging a meal or updating your targets, but you confirm everything before anything is saved.",
+      "The Nutritionist is your AI nutritionist inside PrepIt. Tap Ask Nutritionist to ask anything about your goals, your day, or your last meal — and get answers in plain language using your own data. It can prepare actions like logging a meal or updating your targets, but you confirm everything before anything is saved.",
   },
   {
     question: "How does PrepIt set my calorie, macro, and weight goals?",
     answer:
-      "During onboarding, PrepIt learns your goal (lose fat, build muscle, improve energy, and more), body stats, activity level, and target weight where relevant — then sets daily calorie and macro targets personalised to you. You can log weight over time and update your targets anytime in the app, or ask Coach to suggest changes.",
+      "During onboarding, PrepIt learns your goal (lose fat, build muscle, improve energy, and more), body stats, activity level, and target weight where relevant — then sets daily calorie and macro targets personalised to you. You can log weight over time and update your targets anytime in the app, or ask the Nutritionist to suggest changes.",
   },
   {
     question: "Do I need a wearable or CGM?",
@@ -42,7 +42,7 @@ const FAQ_ITEMS = [
   {
     question: "Is it a replacement for a doctor or dietitian?",
     answer:
-      "No. PrepIt is a coach, not a medical service. It'll point you to a professional when something needs one.",
+      "No. PrepIt gives nutrition guidance, not medical care. It'll point you to a professional when something needs one.",
   },
   {
     question: "Is my data private?",

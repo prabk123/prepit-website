@@ -28,7 +28,7 @@ export default function Footer() {
               </span>
             </Link>
             <p className="text-sm font-medium text-[var(--grey-60)]">
-              Made with ❤️ and late nights
+              Your AI nutritionist, on iPhone.
             </p>
           </div>
           <AppStoreLink
@@ -129,7 +129,7 @@ export default function Footer() {
         {/* Copyright */}
         <div className="border-t border-[#D3D3D5] pt-8">
           <p className="text-base text-[var(--grey-60)]">
-            © {new Date().getFullYear()} PrepIt App. All Rights Reserved
+            © {new Date().getFullYear()} PrepIt. All rights reserved.
           </p>
         </div>
       </div>

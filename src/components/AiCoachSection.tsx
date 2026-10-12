@@ -55,7 +55,7 @@ export default function AiCoachSection() {
           </ul>
 
           <p className="text-sm font-medium leading-relaxed text-[var(--grey-80)] lg:text-base">
-            It&apos;s a coach, not a doctor, and it&apos;ll always tell you when something needs
+            It&apos;s a nutritionist, not a doctor, and it&apos;ll always tell you when something needs
             a professional.
           </p>
         </div>
