@@ -3,6 +3,16 @@ import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import DeviceFrame, { type DeviceCapture } from "@/components/device/DeviceFrame";
 import DevicePair from "@/components/device/DevicePair";
+import AppStoreCta from "@/components/ui/AppStoreCta";
+import { BentoGrid, BentoTile } from "@/components/ui/Bento";
+import CtaBand from "@/components/ui/CtaBand";
+import FeatureSplit from "@/components/ui/FeatureSplit";
+import Glow from "@/components/ui/Glow";
+import PricingCard from "@/components/ui/PricingCard";
+import QuoteCard from "@/components/ui/QuoteCard";
+import Reveal from "@/components/ui/Reveal";
+import Section from "@/components/ui/Section";
+import SectionHeading from "@/components/ui/SectionHeading";
 
 export const metadata: Metadata = {
   title: "Component preview",
@@ -14,24 +24,19 @@ export const metadata: Metadata = {
 const previewEnabled =
   process.env.NODE_ENV !== "production" || process.env.VERCEL_ENV === "preview";
 
+// Real dark-mode simulator captures. The full set comes with PRE-198.
 const recipeCapture: DeviceCapture = {
   alt: "PrepIt recipe screen with ingredients and preparation steps",
-  // Light captures arrive with the simulator capture ticket (PRE-198); the
-  // dark one stands in for both until then.
-  light: {
-    avif: "/dev-preview/capture-recipe.avif",
-    webp: "/dev-preview/capture-recipe.webp",
-    src: "/dev-preview/capture-recipe.webp",
-  },
+  avif: "/dev-preview/capture-recipe.avif",
+  webp: "/dev-preview/capture-recipe.webp",
+  src: "/dev-preview/capture-recipe.webp",
 };
 
 const groceryCapture: DeviceCapture = {
   alt: "PrepIt grocery list grouped by aisle",
-  light: {
-    avif: "/dev-preview/capture-grocery.avif",
-    webp: "/dev-preview/capture-grocery.webp",
-    src: "/dev-preview/capture-grocery.webp",
-  },
+  avif: "/dev-preview/capture-grocery.avif",
+  webp: "/dev-preview/capture-grocery.webp",
+  src: "/dev-preview/capture-grocery.webp",
 };
 
 const loopVideo = {
@@ -43,61 +48,39 @@ const loopVideo = {
   label: "PrepIt screens: a recipe, the grocery list and a plan day",
 };
 
-const swatches = [
+// Sample only. The real rating is a placeholder until Prabodh supplies it.
+const sampleRating = { value: 4.8 };
+
+const colours = [
   ["page", "bg-page"],
   ["surface", "bg-surface"],
   ["surface-raised", "bg-surface-raised"],
-  ["ink", "bg-ink"],
-  ["ink-secondary", "bg-ink-secondary"],
-  ["ink-tertiary", "bg-ink-tertiary"],
   ["line", "bg-line"],
   ["line-strong", "bg-line-strong"],
-  ["accent", "bg-accent"],
+  ["ink", "bg-ink"],
+  ["ink-secondary", "bg-ink-secondary"],
+  ["ink-muted", "bg-ink-muted"],
+  ["ink-faint", "bg-ink-faint"],
+  ["cream", "bg-cream"],
+  ["energy", "bg-energy"],
+  ["satiety", "bg-satiety"],
+  ["mood", "bg-mood"],
 ] as const;
 
-function Swatches() {
-  return (
-    <div className="grid grid-cols-3 gap-3 sm:grid-cols-5">
-      {swatches.map(([name, className]) => (
-        <div key={name} className="flex flex-col gap-2">
-          <div className={`h-14 rounded-2xl border border-line ${className}`} />
-          <span className="text-xs text-ink-secondary">{name}</span>
-        </div>
-      ))}
-    </div>
-  );
-}
+const typeScale = [
+  ["hero", "font-display text-hero", "Eat well."],
+  ["chapter", "font-display text-chapter", "Log a meal in seconds."],
+  ["title", "font-display text-title", "One plan. Everything included."],
+  ["card-title", "font-display text-card-title", "Home Screen widgets"],
+  ["lead", "text-lead text-ink-secondary", "Type it, snap it or say it."],
+  ["body", "text-body text-ink-muted", "Log meals, water, supplements and weight with no signal."],
+  ["small", "text-small text-ink-muted", "Research-based estimates, not a medical measurement."],
+  ["eyebrow", "text-eyebrow uppercase font-medium text-ink-muted", "Energy, Satiety and Mood"],
+] as const;
 
-function ThemePanels({ children }: { children: (scheme: "light" | "dark") => ReactNode }) {
+function PreviewLabel({ children }: { children: ReactNode }) {
   return (
-    <div className="grid gap-4 xl:grid-cols-2">
-      {(["light", "dark"] as const).map((scheme) => (
-        <div
-          key={scheme}
-          data-theme={scheme}
-          className="min-w-0 overflow-hidden rounded-3xl border border-line bg-page p-4 text-ink sm:p-8"
-        >
-          <p className="mb-6 text-xs font-bold uppercase tracking-widest text-ink-secondary">
-            {scheme}
-          </p>
-          {children(scheme)}
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function Section({ title, note, children }: { title: string; note: string; children: ReactNode }) {
-  return (
-    <section className="flex flex-col gap-4">
-      <div>
-        <h2 className="text-2xl font-semibold" style={{ fontFamily: "var(--font-brand)" }}>
-          {title}
-        </h2>
-        <p className="text-base text-[var(--grey-60)]">{note}</p>
-      </div>
-      {children}
-    </section>
+    <p className="mb-8 border-b border-line pb-3 text-small text-ink-faint">{children}</p>
   );
 }
 
@@ -105,85 +88,230 @@ export default function ComponentPreviewPage() {
   if (!previewEnabled) notFound();
 
   return (
-    <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-16 px-4 pb-24 pt-28 lg:px-10">
-      <header className="flex flex-col gap-2">
-        <p className="text-xs font-bold uppercase tracking-widest text-[var(--grey-60)]">
-          Website revamp
-        </p>
-        <h1 className="text-4xl font-semibold" style={{ fontFamily: "var(--font-brand)" }}>
-          Component preview
-        </h1>
-        <p className="max-w-2xl text-base text-[var(--grey-60)]">
-          Every revamp building block in light and dark. Colours are provisional
-          (from the app) until the design direction is picked.
-        </p>
-      </header>
-
-      <Section
-        title="Theme tokens"
-        note="The first panel follows your system setting; the two below force light and dark."
-      >
-        <div className="rounded-3xl border border-line bg-page p-4 text-ink sm:p-8">
-          <p className="mb-6 text-xs font-bold uppercase tracking-widest text-ink-secondary">
-            Your system setting
-          </p>
-          <Swatches />
-        </div>
-        <ThemePanels>{() => <Swatches />}</ThemePanels>
+    <div className="bg-page pt-16 text-ink [color-scheme:dark] lg:pt-[72px]">
+      <Section labelledBy="preview-title">
+        <SectionHeading
+          eyebrow="Website revamp · dev only"
+          title="Component preview"
+          size="title"
+          as="h1"
+          id="preview-title"
+          lead="Every building block in the warm dark direction. All values come from src/app/tokens.css."
+        />
       </Section>
 
-      <Section title="DeviceFrame sizes" note="260 px (smallest), 320 px and 420 px with a real capture.">
-        <ThemePanels>
-          {(scheme) => (
-            <div className="flex flex-wrap items-end justify-center gap-8">
-              <DeviceFrame width={260} capture={recipeCapture} scheme={scheme} priority />
-              <DeviceFrame width={320} capture={groceryCapture} scheme={scheme} />
-              <DeviceFrame
-                width={420}
-                capture={recipeCapture}
-                scheme={scheme}
-                className="hidden md:block"
-              />
+      <Section tone="surface" labelledBy="tokens">
+        <Reveal className="flex flex-col gap-12">
+          <SectionHeading title="Tokens" size="title" id="tokens" />
+          <div className="grid grid-cols-3 gap-4 sm:grid-cols-5 lg:grid-cols-7">
+            {colours.map(([name, className]) => (
+              <div key={name} className="flex flex-col gap-2">
+                <div className={`h-16 rounded-2xl border border-line-strong ${className}`} />
+                <span className="text-small text-ink-muted">{name}</span>
+              </div>
+            ))}
+            <div className="flex flex-col gap-2">
+              <div className="h-16 rounded-2xl bg-[image:var(--gradient-brand)]" />
+              <span className="text-small text-ink-muted">gradient-brand</span>
             </div>
-          )}
-        </ThemePanels>
+          </div>
+          <div className="flex flex-col gap-6">
+            {typeScale.map(([name, className, sample]) => (
+              <div key={name} className="flex min-w-0 flex-col gap-1 border-t border-line pt-4">
+                <span className="text-small text-ink-faint">text-{name}</span>
+                <span className={`${className} min-w-0 break-words`}>{sample}</span>
+              </div>
+            ))}
+          </div>
+        </Reveal>
       </Section>
 
-      <Section
-        title="DevicePair with tilt"
-        note="Two frames, the second overlapping and lower. Sized by classes: 260 px on phones, 320 px from md. Phones show one frame."
-      >
-        <ThemePanels>
-          {(scheme) => (
-            <DevicePair className="py-6">
-              <DeviceFrame
-                tilt={-4}
-                capture={groceryCapture}
-                scheme={scheme}
-                className="[--device-w:260px] md:[--device-w:320px]"
-              />
-              <DeviceFrame
-                tilt={4}
-                capture={recipeCapture}
-                scheme={scheme}
-                className="hidden [--device-w:260px] sm:block md:[--device-w:320px]"
-              />
-            </DevicePair>
-          )}
-        </ThemePanels>
-      </Section>
-
-      <Section
-        title="LoopVideo in a DeviceFrame"
-        note="Muted, inline, plays only in view, with a pause button. Stays on the poster under reduced motion until played. MP4 and WebM."
-      >
-        <ThemePanels>
-          {() => (
-            <div className="flex justify-center">
-              <DeviceFrame width={300} video={loopVideo} />
+      <Section labelledBy="hero-sample">
+        <PreviewLabel>Hero: SectionHeading (hero), AppStoreCta with note, rating and QR, DevicePair with Glow and drift</PreviewLabel>
+        <FeatureSplit
+          emphasis="text"
+          media={
+            <div className="relative py-6">
+              <Glow />
+              <DevicePair>
+                <DeviceFrame
+                  tilt={-4}
+                  capture={groceryCapture}
+                  priority
+                  className="animate-drift [--device-w:260px] lg:[--device-w:320px]"
+                />
+                <DeviceFrame
+                  tilt={4}
+                  capture={recipeCapture}
+                  className="hidden animate-drift [animation-delay:-4s] [--device-w:260px] sm:block lg:[--device-w:320px]"
+                />
+              </DevicePair>
             </div>
-          )}
-        </ThemePanels>
+          }
+        >
+          <SectionHeading
+            eyebrow="Your AI nutritionist"
+            title="Eat well. Feel the difference."
+            size="hero"
+            as="h2"
+            id="hero-sample"
+            lead="Tell PrepIt what you ate in your own words. See how it will shape your energy, hunger and mood, and know what to eat next."
+          />
+          <AppStoreCta
+            trackingSource="dev-preview-hero"
+            note="3 days free"
+            rating={sampleRating}
+            qrCaption="Scan to get PrepIt on your iPhone"
+          />
+        </FeatureSplit>
+      </Section>
+
+      <Section labelledBy="logging-sample">
+        <Reveal>
+          <PreviewLabel>Chapter: FeatureSplit (reversed) with LoopVideo in a DeviceFrame</PreviewLabel>
+          <FeatureSplit
+            reverse
+            media={
+              <div className="relative py-6">
+                <Glow />
+                <DeviceFrame width={300} video={loopVideo} />
+              </div>
+            }
+          >
+            <SectionHeading
+              chapter="01"
+              eyebrow="Logging"
+              title="Log a meal in seconds."
+              id="logging-sample"
+              lead="Type it, snap it or say it. PrepIt works out the calories and macros, and nothing is saved until you confirm."
+            />
+          </FeatureSplit>
+        </Reveal>
+      </Section>
+
+      <Section
+        tone="photo"
+        labelledBy="photo-sample"
+        photo={{
+          src: "/dev-preview/photo-placeholder.webp",
+          width: 1600,
+          height: 900,
+        }}
+      >
+        <Reveal>
+          <PreviewLabel>Section tone=&quot;photo&quot;: full-bleed photo (placeholder until PRE-199) under the dark gradient</PreviewLabel>
+          <SectionHeading
+            chapter="03"
+            eyebrow="Your Nutritionist"
+            title="A nutritionist who knows your day."
+            id="photo-sample"
+            lead="Ask anything and get answers built on what you actually ate, any time of day."
+          />
+        </Reveal>
+      </Section>
+
+      <Section labelledBy="bento-sample">
+        <Reveal className="flex flex-col gap-stack">
+          <PreviewLabel>BentoGrid and BentoTile (large, medium, small)</PreviewLabel>
+          <SectionHeading
+            title="Everything in one place."
+            id="bento-sample"
+            lead="The small things that make it easy to keep going."
+          />
+          <BentoGrid>
+            <BentoTile
+              size="large"
+              title="Home Screen widgets"
+              media={<DeviceFrame width={260} capture={groceryCapture} />}
+            >
+              Add water, tick supplements and Log it or Skip planned meals without opening the app.
+            </BentoTile>
+            <BentoTile size="medium" title="Works offline">
+              Log meals, water, supplements and weight with no signal. It all sends when you&apos;re back.
+            </BentoTile>
+            <BentoTile size="small" title="Achievements">
+              Streaks and milestones that celebrate the habit.
+            </BentoTile>
+            <BentoTile size="small" title="Apple Health">
+              Bring in your activity and weight.
+            </BentoTile>
+          </BentoGrid>
+        </Reveal>
+      </Section>
+
+      <Section tone="surface" labelledBy="quotes-sample">
+        <Reveal className="flex flex-col gap-stack">
+          <PreviewLabel>QuoteCard (placeholder reviews)</PreviewLabel>
+          <SectionHeading title="What people say" size="title" id="quotes-sample" />
+          <div className="grid gap-4 md:grid-cols-3">
+            <QuoteCard quote="[REVIEW 1]" name="[NAME]" stars={5} />
+            <QuoteCard quote="[REVIEW 2]" name="[NAME]" stars={5} />
+            <QuoteCard quote="[REVIEW 3]" name="[NAME]" stars={5} />
+          </div>
+        </Reveal>
+      </Section>
+
+      <Section labelledBy="pricing-sample">
+        <Reveal className="flex flex-col items-center gap-stack">
+          <PreviewLabel>PricingCard with the dark AppStoreCta</PreviewLabel>
+          <SectionHeading
+            title="One plan. Everything included."
+            align="center"
+            id="pricing-sample"
+          />
+          <PricingCard
+            title="PrepIt"
+            price="3 days free, then $99.99 a year"
+            priceNote="That's $1.92 a week. Cancel anytime in the App Store."
+            features={[
+              "Unlimited logging by text, photo and Siri",
+              "Energy, Satiety and Mood every day",
+              "Your Nutritionist, any time",
+              "Meal plans and grocery lists",
+              "Widgets and offline logging",
+            ]}
+            cta={
+              <AppStoreCta
+                trackingSource="dev-preview-pricing"
+                label="Start your free trial"
+                variant="dark"
+              />
+            }
+          />
+        </Reveal>
+      </Section>
+
+      <Section labelledBy="cta-sample">
+        <Reveal>
+          <PreviewLabel>CtaBand with AppStoreCta and QR (QR shows from 1024 px)</PreviewLabel>
+          <CtaBand
+            id="cta-sample"
+            title="Start feeling the difference."
+            line="Try PrepIt free for 3 days."
+            cta={
+              <AppStoreCta
+                trackingSource="dev-preview-final-cta"
+                qrCaption="Scan with your iPhone camera"
+              />
+            }
+          />
+        </Reveal>
+      </Section>
+
+      <Section tone="surface" labelledBy="frames-sample">
+        <Reveal className="flex flex-col gap-stack">
+          <SectionHeading
+            title="DeviceFrame sizes"
+            size="title"
+            id="frames-sample"
+            lead="260 px (smallest), 320 px and 420 px with a real capture."
+          />
+          <div className="flex flex-wrap items-end justify-center gap-10">
+            <DeviceFrame width={260} capture={recipeCapture} />
+            <DeviceFrame width={320} capture={groceryCapture} />
+            <DeviceFrame width={420} capture={recipeCapture} className="hidden md:block" />
+          </div>
+        </Reveal>
       </Section>
     </div>
   );

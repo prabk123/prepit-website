@@ -15,12 +15,8 @@ export type CaptureSources = {
   src: string;
 };
 
-export type DeviceCapture = {
-  alt: string;
-  light: CaptureSources;
-  /** Shown when the visitor's system is in dark mode. Defaults to `light`. */
-  dark?: CaptureSources;
-};
+/** A real app capture. The site is dark only, so use the app's dark-mode captures. */
+export type DeviceCapture = CaptureSources & { alt: string };
 
 type DeviceFrameProps = {
   /**
@@ -37,11 +33,6 @@ type DeviceFrameProps = {
   video?: Omit<LoopVideoProps, "className">;
   /** Load the capture eagerly (above the fold). */
   priority?: boolean;
-  /**
-   * Pick light or dark captures without the system setting. Only for previews
-   * that force a theme; real pages leave this unset.
-   */
-  scheme?: "light" | "dark";
   className?: string;
   children?: ReactNode;
 };
@@ -53,30 +44,16 @@ function clampWidth(width: number) {
 function CapturePicture({
   capture,
   priority,
-  scheme,
 }: {
   capture: DeviceCapture;
   priority?: boolean;
-  scheme?: "light" | "dark";
 }) {
-  const dark = capture.dark ?? capture.light;
-  const base = scheme === "dark" ? dark : capture.light;
-  const darkMedia = "(prefers-color-scheme: dark)";
-  const offerDark = !scheme && capture.dark;
-
   return (
     <picture>
-      {offerDark && dark.avif && (
-        <source srcSet={dark.avif} type="image/avif" media={darkMedia} />
-      )}
-      {offerDark && dark.webp && (
-        <source srcSet={dark.webp} type="image/webp" media={darkMedia} />
-      )}
-      {offerDark && <source srcSet={dark.src} media={darkMedia} />}
-      {base.avif && <source srcSet={base.avif} type="image/avif" />}
-      {base.webp && <source srcSet={base.webp} type="image/webp" />}
+      {capture.avif && <source srcSet={capture.avif} type="image/avif" />}
+      {capture.webp && <source srcSet={capture.webp} type="image/webp" />}
       <img
-        src={base.src}
+        src={capture.src}
         alt={capture.alt}
         width={CAPTURE_WIDTH}
         height={CAPTURE_HEIGHT}
@@ -98,7 +75,6 @@ export default function DeviceFrame({
   capture,
   video,
   priority,
-  scheme,
   className,
   children,
 }: DeviceFrameProps) {
@@ -118,7 +94,7 @@ export default function DeviceFrame({
         <div className="device-frame__bezel">
           <div className="device-frame__screen">
             {capture && (
-              <CapturePicture capture={capture} priority={priority} scheme={scheme} />
+              <CapturePicture capture={capture} priority={priority} />
             )}
             {video && <LoopVideo {...video} />}
             {children}
