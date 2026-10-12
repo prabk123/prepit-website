@@ -23,7 +23,9 @@
   --color-ink: #f7f1e8;
   --color-ink-secondary: #e0d6c9;
   --color-ink-muted: #b8ad9f;
-  --color-ink-faint: #8c8074;
+  /* Faint is the lowest tone that still passes AA everywhere:
+     5.6:1 on page, 5.2:1 on surface, 4.7:1 on surface-raised. */
+  --color-ink-faint: #93877a;
 
   /* Cream buttons and the cream pricing card, with near-black text on them. */
   --color-cream: #f7f1e8;
@@ -92,9 +94,10 @@
   /* Shadows. Cards are flat; phones float. */
   --shadow-phone: 0 40px 80px -24px rgb(0 0 0 / 0.7), 0 12px 24px -12px rgb(0 0 0 / 0.5);
 
-  /* Motion: slow and calm. */
+  /* Motion: slow and calm. The drift settles after four passes (about 36 s),
+     so nothing moves on its own for long (WCAG 2.2.2). */
   --ease-calm: cubic-bezier(0.22, 1, 0.36, 1);
-  --animate-drift: drift 9s ease-in-out infinite alternate;
+  --animate-drift: drift 9s ease-in-out 4 alternate;
 }
 
 /* Font families come from next/font variables set on <body>, so they are

@@ -10,8 +10,8 @@ type AppStoreCtaProps = {
   variant?: "cream" | "dark";
   /** Line under the button, e.g. "3 days free". */
   note?: string;
-  /** App Store rating shown after the note. Leave unset until the real figure is known. */
-  rating?: { value: number; count?: number };
+  /** App Store rating shown after the note. Use "placeholder" until the real figure is known. */
+  rating?: { value: number | "placeholder"; count?: number };
   /** Desktop only: a QR code beside the button with this caption. */
   qrCaption?: string;
   className?: string;

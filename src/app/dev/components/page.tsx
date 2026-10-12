@@ -48,8 +48,8 @@ const loopVideo = {
   label: "PrepIt screens: a recipe, the grocery list and a plan day",
 };
 
-// Sample only. The real rating is a placeholder until Prabodh supplies it.
-const sampleRating = { value: 4.8 };
+// Shows a visible [RATING] until Prabodh supplies the real figure.
+const sampleRating = { value: "placeholder" as const };
 
 const colours = [
   ["page", "bg-page"],

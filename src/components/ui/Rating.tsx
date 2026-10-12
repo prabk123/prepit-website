@@ -1,6 +1,9 @@
 type RatingProps = {
-  /** Average App Store rating, 0 to 5. */
-  value: number;
+  /**
+   * Average App Store rating, 0 to 5. "placeholder" shows empty stars and a
+   * visible [RATING] until the real figure is known; never invent one.
+   */
+  value: number | "placeholder";
   /** Number of ratings, when it is worth showing. */
   count?: number;
   /** Text after the number, e.g. "on the App Store". */
@@ -25,8 +28,13 @@ function Star({ fill }: { fill: number }) {
 
 /** Stars plus "4.8 on the App Store". Read out as one sentence. */
 export default function Rating({ value, count, suffix = "on the App Store", className }: RatingProps) {
-  const rounded = Math.round(value * 10) / 10;
+  const isPlaceholder = value === "placeholder";
+  const rounded = isPlaceholder ? 0 : Math.round(value * 10) / 10;
+  const shown = isPlaceholder ? "[RATING]" : rounded;
   const countText = count ? ` from ${count.toLocaleString("en-US")} ratings` : "";
+  const spoken = isPlaceholder
+    ? `Rating placeholder ${suffix}`
+    : `Rated ${rounded} out of 5${countText} ${suffix}`;
 
   return (
     <span className={`inline-flex items-center gap-2 ${className ?? ""}`}>
@@ -35,9 +43,9 @@ export default function Rating({ value, count, suffix = "on the App Store", clas
           <Star key={index} fill={Math.min(1, Math.max(0, rounded - index))} />
         ))}
       </span>
-      <span className="sr-only">{`Rated ${rounded} out of 5${countText} ${suffix}`}</span>
+      <span className="sr-only">{spoken}</span>
       <span aria-hidden className="tabular-nums">
-        {rounded}
+        {shown}
         {countText} {suffix}
       </span>
     </span>

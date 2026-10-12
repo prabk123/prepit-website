@@ -63,6 +63,16 @@ html {
   }
 }
 
+/* High Contrast drops the background image but keeps the transparent fill,
+   so gradient text would vanish. Fall back to the system text colour. */
+@media (forced-colors: active) {
+  .text-gradient-brand {
+    background: none;
+    -webkit-text-fill-color: currentColor;
+    color: CanvasText;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-drift {
     animation: none;

@@ -11,6 +11,8 @@ export type SectionPhoto = {
   alt?: string;
   /** CSS object-position, for keeping the subject in frame. */
   position?: string;
+  /** Load eagerly at high priority, for a photo section at the top of a page. */
+  priority?: boolean;
 };
 
 type SectionProps = {
@@ -54,7 +56,8 @@ export default function Section({
               alt={photo.alt ?? ""}
               width={photo.width}
               height={photo.height}
-              loading="lazy"
+              loading={photo.priority ? "eager" : "lazy"}
+              fetchPriority={photo.priority ? "high" : undefined}
               decoding="async"
               className="absolute inset-0 -z-20 h-full w-full object-cover"
               style={{ objectPosition: photo.position }}
