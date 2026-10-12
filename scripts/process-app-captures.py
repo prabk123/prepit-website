@@ -22,16 +22,19 @@ OUT = sys.argv[2] if len(sys.argv) > 2 else "public/app"
 # The Home header avatar on a 1206x2622 capture: centre and radius.
 AVATAR = (1097, 270, 66)
 # Stills whose top bar is the Home header (with the avatar).
-AVATAR_STILLS = ("01-home", "01b-home-log", "16-supplements-card", "17-achievement", "18-offline", "18c-back-online")
+AVATAR_STILLS = ("01-home", "01b-home-log", "01c-home-scrolled", "16-supplements-card", "17-achievement",
+                 "17b-achievement-confetti", "18b-offline-waiting-list")
 
 # Seconds to keep from each raw video, in order. Long model waits are cut out.
 SEGMENTS = {
     "03-log-typed": [(0, 1.2), (1.8, 3.2), (4, 5), (7.8, 9.2), (9.5, 11), (16, 18), (34.6, 38)],
     "04-log-photo": [(0, 1.2), (2, 3), (4, 5), (7, 8.2), (12, 13.5), (18.5, 21), (33.5, 34.5),
                      (35, 36.5), (44.5, 46.5), (50, 52.5), (65, 66), (76, 78.4)],
-    "08-chat-ask": [(2.5, 14.5)],
+    "08-chat-ask": [(0.5, 11)],
     "09-chat-log-it": [(0, 7.5)],
-    "12-plan-week": [(0, 1.6), (2, 3.2), (5, 8), (14.5, 17), (22, 24.5), (25.5, 27.5)],
+    "12-plan-week": [(0, 3.5), (7.5, 21.2)],
+    "21-walkthrough": [(0, 2.5), (4.5, 10.5), (12, 13), (18.5, 20.5), (35, 39), (59.5, 62), (63, 65),
+                       (66, 71), (72, 74.5), (109, 111), (111.5, 113.5), (115, 123)],
 }
 # Videos that show the Home header somewhere, so the avatar is blurred throughout.
 AVATAR_VIDEOS = ("03-log-typed", "04-log-photo", "21-walkthrough")
@@ -70,7 +73,9 @@ def video(name: str) -> None:
     src = os.path.join(RAW, name + ".mp4")
     segs = SEGMENTS.get(name)
     select = "+".join(f"between(t,{a},{b})" for a, b in segs) if segs else None
-    filters = []
+    # Resample to a constant 30 fps first: simulator recordings drop frames while
+    # the screen is still, so a pause would otherwise vanish from the cut.
+    filters = ["fps=30"]
     if select:
         filters.append(f"select='{select}',setpts=N/FRAME_RATE/TB")
     if name in AVATAR_VIDEOS:
@@ -80,7 +85,7 @@ def video(name: str) -> None:
             f"geq=r='r(X,Y)':g='g(X,Y)':b='b(X,Y)':a='if(lte(hypot(X-{r},Y-{r}),{r}),255,0)'[c];"
             f"[a][c]overlay={x-r}:{y-r}"
         )
-    filters.append("fps=30,scale=804:-2")
+    filters.append("scale=804:-2")
     vf = ",".join(filters)
     base = os.path.join(OUT, name)
     common = ["ffmpeg", "-y", "-hide_banner", "-loglevel", "error", "-i", src, "-vf", vf, "-an"]
