@@ -55,6 +55,19 @@ const swatches = [
   ["accent", "bg-accent"],
 ] as const;
 
+function Swatches() {
+  return (
+    <div className="grid grid-cols-3 gap-3 sm:grid-cols-5">
+      {swatches.map(([name, className]) => (
+        <div key={name} className="flex flex-col gap-2">
+          <div className={`h-14 rounded-2xl border border-line ${className}`} />
+          <span className="text-xs text-ink-secondary">{name}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function ThemePanels({ children }: { children: (scheme: "light" | "dark") => ReactNode }) {
   return (
     <div className="grid gap-4 xl:grid-cols-2">
@@ -106,19 +119,17 @@ export default function ComponentPreviewPage() {
         </p>
       </header>
 
-      <Section title="Theme tokens" note="Follow the system setting; forced per panel here.">
-        <ThemePanels>
-          {() => (
-            <div className="grid grid-cols-3 gap-3 sm:grid-cols-5">
-              {swatches.map(([name, className]) => (
-                <div key={name} className="flex flex-col gap-2">
-                  <div className={`h-14 rounded-2xl border border-line ${className}`} />
-                  <span className="text-xs text-ink-secondary">{name}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </ThemePanels>
+      <Section
+        title="Theme tokens"
+        note="The first panel follows your system setting; the two below force light and dark."
+      >
+        <div className="rounded-3xl border border-line bg-page p-4 text-ink sm:p-8">
+          <p className="mb-6 text-xs font-bold uppercase tracking-widest text-ink-secondary">
+            Your system setting
+          </p>
+          <Swatches />
+        </div>
+        <ThemePanels>{() => <Swatches />}</ThemePanels>
       </Section>
 
       <Section title="DeviceFrame sizes" note="260 px (smallest), 320 px and 420 px with a real capture.">
