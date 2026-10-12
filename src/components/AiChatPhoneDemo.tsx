@@ -281,7 +281,8 @@ export default function AiChatPhoneDemo({ scenarios }: AiChatPhoneDemoProps) {
     let cancelled = false;
     let timeout: ReturnType<typeof setTimeout>;
     let scenarioIndex = 0;
-    // The first scenario is already on screen finished: hold it, then move on.
+    // Each activation (including scrolling back in) starts on the finished
+    // first scenario, held, so the phone never comes back to a half-typed chat.
     let skipFirstPlay = true;
 
     const wait = (ms: number) =>
@@ -295,6 +296,13 @@ export default function AiChatPhoneDemo({ scenarios }: AiChatPhoneDemoProps) {
       while (!cancelled) {
         if (skipFirstPlay) {
           skipFirstPlay = false;
+          setDisplayScenario(scenarios[0]);
+          setMessages(completedMessages(scenarios[0]));
+          setStreamedAssistant("");
+          setTypedInput("");
+          setShowAction(Boolean(scenarios[0].actionType));
+          setActionDone(true);
+          setPhase("hold");
           await wait(HOLD_MS);
           if (cancelled) return;
           scenarioIndex = (scenarioIndex + 1) % scenarios.length;

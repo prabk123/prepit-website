@@ -27,7 +27,7 @@ const FAQ_ITEMS = [
   {
     question: "What is the PrepIt Nutritionist?",
     answer:
-      "The Nutritionist is your AI nutritionist inside PrepIt. Tap Ask Nutritionist to ask anything about your goals, your day, or your last meal — and get answers in plain language using your own data. It can prepare actions like logging a meal or updating your targets, but you confirm everything before anything is saved.",
+      "It's the AI nutritionist inside PrepIt. Tap Ask Nutritionist to ask anything about your goals, your day, or your last meal — and get answers in plain language using your own data. It can prepare actions like logging a meal or updating your targets, but you confirm everything before anything is saved.",
   },
   {
     question: "How does PrepIt set my calorie, macro, and weight goals?",
