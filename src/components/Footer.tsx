@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import AppStoreLink from "@/components/AppStoreLink";
+import { FEATURE_SLUGS, FEATURES, featureHref } from "@/lib/features";
 import { HOME_SECTION_LINKS, SITE_PAGE_LINKS } from "@/lib/homeSections";
 
 const linkClass = "text-body text-ink-muted transition-colors hover:text-ink";
@@ -14,7 +15,7 @@ function Column({ title, children }: { title: string; children: React.ReactNode 
   );
 }
 
-/** The site footer (D3): dark, tagline, explore, support and legal links. */
+/** The site footer (D3): dark, tagline, explore, feature pages, company and legal links. */
 export default function Footer() {
   return (
     <footer className="w-full border-t border-line bg-page text-ink">
@@ -30,7 +31,7 @@ export default function Footer() {
             <p className="text-small text-ink-muted">PrepIt, your personal AI nutritionist.</p>
           </div>
 
-          <div className="grid grid-cols-1 gap-10 sm:grid-cols-3 lg:gap-16">
+          <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-14">
             <Column title="Explore">
               <Link href="/" className={linkClass}>
                 Home
@@ -43,6 +44,13 @@ export default function Footer() {
               <AppStoreLink trackingSource="footer-explore" className={linkClass}>
                 Download the app
               </AppStoreLink>
+            </Column>
+            <Column title="Features">
+              {FEATURE_SLUGS.map((slug) => (
+                <Link key={slug} href={featureHref(slug)} className={linkClass}>
+                  {FEATURES[slug].name}
+                </Link>
+              ))}
             </Column>
             <Column title="Company">
               {SITE_PAGE_LINKS.map((link) => (

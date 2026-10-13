@@ -5,6 +5,7 @@ import Glow from "@/components/ui/Glow";
 import PointList from "@/components/ui/PointList";
 import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
+import TextLink from "@/components/ui/TextLink";
 import { appVideo } from "@/lib/captures";
 
 const WAYS = [
@@ -42,6 +43,7 @@ export default function LoggingSection() {
           lead="Describe it, snap it or say it. PrepIt looks for official brand and restaurant figures first, and nothing is logged until you confirm."
         />
         <PointList layout="rows" points={WAYS} />
+        <TextLink href="/features/logging">More about logging</TextLink>
       </FeatureSplit>
     </Section>
   );

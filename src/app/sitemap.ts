@@ -1,4 +1,5 @@
 import { MetadataRoute } from "next";
+import { FEATURE_SLUGS, featureHref } from "@/lib/features";
 import { getGuides } from "@/lib/guides";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -12,6 +13,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly",
       priority: 1,
     },
+    ...FEATURE_SLUGS.map((slug) => ({
+      url: `${baseUrl}${featureHref(slug)}`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.9,
+    })),
     {
       url: `${baseUrl}/guides`,
       lastModified: new Date(),

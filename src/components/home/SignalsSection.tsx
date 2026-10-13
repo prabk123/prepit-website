@@ -5,6 +5,7 @@ import Glow from "@/components/ui/Glow";
 import PointList from "@/components/ui/PointList";
 import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
+import TextLink from "@/components/ui/TextLink";
 import { appCapture } from "@/lib/captures";
 
 const SIGNALS = [
@@ -64,6 +65,7 @@ export default function SignalsSection() {
         <p className="text-small text-ink-faint">
           Grounded in published nutrition research. Estimates to guide your next meal, not a medical measurement.
         </p>
+        <TextLink href="/features/nutrition-signals">More about Energy, Satiety and Mood</TextLink>
       </div>
     </Section>
   );

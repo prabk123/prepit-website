@@ -3,6 +3,7 @@ import DevicePair from "@/components/device/DevicePair";
 import PhotoBand from "@/components/ui/PhotoBand";
 import PointList from "@/components/ui/PointList";
 import SectionHeading from "@/components/ui/SectionHeading";
+import TextLink from "@/components/ui/TextLink";
 import { appCapture, appVideo } from "@/lib/captures";
 import { nutritionistEvening } from "@/content/lifestyle";
 
@@ -48,6 +49,7 @@ export default function NutritionistBand() {
         lead="Answers in plain language, built on what you actually ate. It can log, move or fix a meal, and set your goals, right from chat."
       />
       <PointList layout="rows" points={ASKS} />
+      <TextLink href="/features/ai-nutritionist">More about your nutritionist</TextLink>
     </PhotoBand>
   );
 }

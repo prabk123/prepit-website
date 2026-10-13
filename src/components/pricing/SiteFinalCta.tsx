@@ -5,10 +5,10 @@ import type { ReactNode } from "react";
 
 /**
  * Pages that end with their own download band: shared plans ("Make your own
- * plan") and each guide (the same band, counted per guide). The guides index
- * keeps the site band.
+ * plan"), each guide and each feature page (the same band, counted per
+ * page). The guides index keeps the site band.
  */
-const OWN_CLOSING_CTA_PREFIXES = ["/sharable/", "/guides/"];
+const OWN_CLOSING_CTA_PREFIXES = ["/sharable/", "/guides/", "/features/"];
 
 /**
  * Shows the site's closing download section on every page except those that

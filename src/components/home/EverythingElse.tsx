@@ -1,7 +1,9 @@
 import DeviceFrame from "@/components/device/DeviceFrame";
+import WidgetImage from "@/components/device/WidgetImage";
 import { BentoGrid, BentoTile } from "@/components/ui/Bento";
 import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
+import TextLink from "@/components/ui/TextLink";
 import { appCapture, widgetCapture } from "@/lib/captures";
 
 /**
@@ -17,24 +19,6 @@ function PhonePeek({ name, alt, crop = "top" }: { name: string; alt: string; cro
     >
       <DeviceFrame className="[--device-w:260px]" capture={appCapture(name, alt)} />
     </div>
-  );
-}
-
-function Widget({ capture }: { capture: ReturnType<typeof widgetCapture> }) {
-  return (
-    <picture>
-      {capture.avif && <source srcSet={capture.avif} type="image/avif" />}
-      <source srcSet={capture.webp} type="image/webp" />
-      <img
-        src={capture.src}
-        alt={capture.alt}
-        width={capture.width}
-        height={capture.height}
-        loading="lazy"
-        decoding="async"
-        className="h-auto w-full rounded-widget shadow-phone"
-      />
-    </picture>
   );
 }
 
@@ -67,7 +51,7 @@ export default function EverythingElse() {
             title="Home Screen widgets"
             media={
               <div className="grid w-full max-w-[460px] grid-cols-[minmax(0,2fr)_minmax(0,1fr)] items-start gap-4">
-                <Widget
+                <WidgetImage
                   capture={widgetCapture(
                     "15-widget-today-plan-large",
                     "Large Today's plan widget with Log it and Skip on planned meals",
@@ -76,10 +60,10 @@ export default function EverythingElse() {
                   )}
                 />
                 <div className="flex flex-col gap-4">
-                  <Widget
+                  <WidgetImage
                     capture={widgetCapture("15-widget-water-small", "Small water widget", 474, 474)}
                   />
-                  <Widget
+                  <WidgetImage
                     capture={widgetCapture("15-widget-streak-small", "Small streak widget", 474, 474)}
                   />
                 </div>
@@ -135,6 +119,7 @@ export default function EverythingElse() {
             We never sell your data. Delete your account any time.
           </BentoTile>
         </BentoGrid>
+        <TextLink href="/features/widgets-and-siri">More about widgets and Siri</TextLink>
       </div>
     </Section>
   );
