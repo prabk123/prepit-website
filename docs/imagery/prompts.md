@@ -58,8 +58,8 @@ Failed variations are dropped, with the reason noted in the Generations table. I
 | 6 | Overhead flat-lays: protein overnight oats with apple and cinnamon; chicken wrap with hummus and salad; Mediterranean salmon bowl with quinoa | Features (PRE-203), Plans; share images (PRE-206) | None | Meals from the showcase plan. Dark space on the left for text |
 | 7 | Honey light texture | Backgrounds for sections with no photo | None | Decorative, empty alt |
 | 8 | Cafe clip from the hero still | Homepage hero video option | Starts from the hero still | Failed (see Generations); not shipped |
-| 9 | Cooking clip: chicken, peppers and spinach in a cast-iron pan | Features (PRE-203), Plans | None | Plays through `LoopVideo` (`cookingClip` in `src/content/lifestyle.ts`) |
-| 10 | Voiceover and music bed for `21-walkthrough` | Homepage hero video (with sound) and App Store preview | None | Mixed onto the walkthrough as `public/app/21-walkthrough-narrated.mp4`: voice from 1 s, music ducked under the voice and faded out over the last 3 s. The silent loops are unchanged |
+| 9 | Cooking clip: chicken, peppers and spinach in a cast-iron pan | Features (PRE-203), Plans | None | Plays through `LoopVideo` (`cookingClip` in `src/content/featureImagery.ts`, which holds all of shots 4 to 10; the homepage photos stay in `lifestyle.ts`) |
+| 10 | Voiceover and music bed for `21-walkthrough` | Homepage hero video (with sound) and App Store preview | None | Mixed onto the walkthrough as `public/app/21-walkthrough-narrated.mp4` and `.webm`: voice from 1 s, music ducked under the voice and faded out over the last 3 s. The silent loops are unchanged |
 
 Flat-lay prompt (the oats one; the others swap the dish line):
 
@@ -106,3 +106,5 @@ All 12 variations with their screen checks: [contact sheet](https://claude.ai/ar
 | Cooking clip | Veo 3.1 Fast, 8 s, 1080p, no audio | None | Not exposed | 1 / 1 | `i6dE8Sdn2OEA7obO7K8a` | As above |
 | Voiceover | eleven_v3, voice Cass | None | n/a | 2 (46.5 s and 45.9 s) | 1 (`sZM4Mf8hKxcug18sjYC6`) | As above |
 | Music bed | eleven_music_v2_5, instrumental, 54 s | None | n/a | 2 | 1 (`h7XB3xj324ridSyjJbGW`) | As above |
+
+`/dev/imagery` (local development and Vercel previews only, like `/dev/components`) shows shots 4 to 10 the way a page would use them, for checking in the browser.
