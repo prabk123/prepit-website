@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import AppStoreLink from "@/components/AppStoreLink";
-import { HOME_SECTION_LINKS } from "@/lib/homeSections";
+import { HOME_SECTION_LINKS, SITE_PAGE_LINKS } from "@/lib/homeSections";
 
 const linkClass = "text-body text-ink-muted transition-colors hover:text-ink";
 
@@ -44,10 +44,12 @@ export default function Footer() {
                 Download the app
               </AppStoreLink>
             </Column>
-            <Column title="Support">
-              <Link href="/contact" className={linkClass}>
-                Contact
-              </Link>
+            <Column title="Company">
+              {SITE_PAGE_LINKS.map((link) => (
+                <Link key={link.href} href={link.href} className={linkClass}>
+                  {link.label}
+                </Link>
+              ))}
               <a href="https://prepit.userjot.com/" target="_blank" rel="noopener noreferrer" className={linkClass}>
                 Feedback
               </a>

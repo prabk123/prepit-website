@@ -18,3 +18,13 @@ export const HOME_SECTION_LINKS: HomeSectionLink[] = [
 export const HEADER_SECTION_LINKS = HOME_SECTION_LINKS.filter(
   (link) => link.inHeader,
 );
+
+/**
+ * Site pages in the header and footer beside the homepage sections. /guides
+ * and /about come with PRE-204.
+ */
+export const SITE_PAGE_LINKS: HomeSectionLink[] = [
+  { label: "Guides", href: "/guides" },
+  { label: "About", href: "/about" },
+  { label: "Contact", href: "/contact" },
+];

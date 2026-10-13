@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import AppStoreLink from "@/components/AppStoreLink";
-import { HEADER_SECTION_LINKS } from "@/lib/homeSections";
+import { HEADER_SECTION_LINKS, SITE_PAGE_LINKS } from "@/lib/homeSections";
 
 const linkClass =
   "text-small font-medium text-ink-muted transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cream";
@@ -34,14 +34,11 @@ export default function NavigationWrapper() {
 
           {/* Desktop */}
           <div className="hidden items-center gap-8 lg:flex">
-            {HEADER_SECTION_LINKS.map((link) => (
+            {[...HEADER_SECTION_LINKS, ...SITE_PAGE_LINKS].map((link) => (
               <Link key={link.href} href={link.href} className={linkClass}>
                 {link.label}
               </Link>
             ))}
-            <Link href="/contact" className={linkClass}>
-              Contact
-            </Link>
             <AppStoreLink trackingSource="header-desktop" className={pillClass}>
               Get the app
             </AppStoreLink>
@@ -89,7 +86,7 @@ export default function NavigationWrapper() {
         className="fixed left-0 right-0 top-16 z-40 border-b border-line bg-surface lg:hidden"
       >
         <div className="flex flex-col gap-1 px-gutter py-4">
-          {[...HEADER_SECTION_LINKS, { label: "Contact", href: "/contact" }].map((link) => (
+          {[...HEADER_SECTION_LINKS, ...SITE_PAGE_LINKS].map((link) => (
             <Link
               key={link.href}
               href={link.href}
