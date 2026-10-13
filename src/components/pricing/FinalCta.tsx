@@ -11,7 +11,7 @@ import { TRIAL_DAYS } from "@/lib/pricing";
  */
 export default function FinalCta() {
   return (
-    <Section id="download" labelledBy="download-heading">
+    <Section id="download" labelledBy="download-heading" analyticsName="final-cta">
       <div className="relative flex flex-col items-center gap-8 text-center">
         <div className="flex flex-col items-center gap-5">
           <h2 id="download-heading" className="font-display text-chapter text-ink text-balance">

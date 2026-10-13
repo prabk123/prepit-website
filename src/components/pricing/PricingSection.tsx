@@ -16,7 +16,7 @@ const INCLUDED = [
 /** The price and free trial, outside the FAQ: heading on the left, cream card on the right. */
 export default function PricingSection() {
   return (
-    <Section id="pricing" labelledBy="pricing-heading">
+    <Section id="pricing" labelledBy="pricing-heading" analyticsName="pricing">
       <div className="grid items-center gap-stack lg:grid-cols-[minmax(0,1fr)_minmax(0,520px)] lg:gap-16">
         <SectionHeading
           title="One app. Everything included."

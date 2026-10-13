@@ -193,7 +193,7 @@ export default function RootLayout({
       >
         <SmartBanner />
         <FloatingGetAppButton />
-        <div className="flex min-h-screen flex-col items-center bg-white">
+        <div className="flex min-h-screen flex-col items-center bg-page">
           <NavigationWrapper />
 
           <main className="w-full">

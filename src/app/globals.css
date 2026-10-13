@@ -82,6 +82,15 @@ html {
     background: var(--scrim-photo-end);
   }
 
+  /* <PhotoBand>: shorter gradients that keep the subject clear of the text. */
+  .photo-band-scrim {
+    background: var(--scrim-band-start);
+  }
+
+  .photo-band-scrim-end {
+    background: var(--scrim-band-end);
+  }
+
   /*
    * <DeviceFrame>: iPhone 17 Pro drawn in CSS. Every measurement is a share of
    * the frame width (cqw), so one set of proportions covers 260 to 420 px.
@@ -199,6 +208,149 @@ html {
     margin-top: calc(var(--device-w, 320px) * 0.18);
   }
 
+  /* <AnnotatedPhoto>: amber ring, leader line and dark glass label (D3). */
+  /*
+   * <AnnotatedPhoto>: the media box is a size container, and the layer inside
+   * is sized and placed like object-fit: cover with object-position. The
+   * photo fills the layer and the labels are placed on it in % of the photo,
+   * so they stay on the food however the box crops it. Phones use the phone
+   * crop's ratio and focus.
+   */
+  .annotated-photo__media {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    container-type: size;
+  }
+
+  .annotated-photo__layer {
+    --ar: var(--photo-ar-phone);
+    --fx: var(--photo-x-phone);
+    --fy: var(--photo-y-phone);
+    --layer-w: max(100cqw, 100cqh * var(--ar));
+    --layer-h: max(100cqh, 100cqw / var(--ar));
+    position: absolute;
+    width: var(--layer-w);
+    height: var(--layer-h);
+    left: calc((100cqw - var(--layer-w)) * var(--fx));
+    top: calc((100cqh - var(--layer-h)) * var(--fy));
+  }
+
+  @media (min-width: 1024px) {
+    .annotated-photo__layer {
+      --ar: var(--photo-ar);
+      --fx: var(--photo-x);
+      --fy: var(--photo-y);
+    }
+  }
+
+  .annotated-photo__layer img {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .annotated-photo__fade {
+    pointer-events: none;
+    background: var(--fade-photo-edges);
+  }
+
+  .photo-annotation {
+    position: absolute;
+    z-index: 2;
+    width: 0;
+    height: 0;
+    --annotation-delay: calc(var(--annotation-index, 0) * var(--delay-annotation-step));
+  }
+
+  .photo-annotation__ring {
+    position: absolute;
+    left: -7px;
+    top: -7px;
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--color-annotation);
+    border-radius: 999px;
+    background: var(--color-annotation-ring-fill);
+  }
+
+  .photo-annotation__line {
+    position: absolute;
+    top: -0.75px;
+    width: var(--annotation-length);
+    height: 1.5px;
+    background: var(--color-annotation);
+  }
+
+  .photo-annotation__label {
+    position: absolute;
+    top: -21px;
+    padding: 10px 14px;
+    white-space: nowrap;
+    border: 1px solid var(--color-annotation-border);
+    border-radius: 12px;
+    background: var(--color-annotation-label);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: var(--color-ink);
+    font-size: var(--text-small);
+    line-height: 1.2;
+  }
+
+  .photo-annotation__label b {
+    margin-right: 2px;
+    color: var(--color-annotation);
+    font-family: var(--font-brand), system-ui, sans-serif;
+    font-weight: 600;
+  }
+
+  .photo-annotation[data-side="right"] .photo-annotation__line {
+    left: 7px;
+    transform-origin: left center;
+  }
+
+  .photo-annotation[data-side="right"] .photo-annotation__label {
+    left: calc(var(--annotation-length) + 7px);
+  }
+
+  .photo-annotation[data-side="left"] .photo-annotation__line {
+    right: 7px;
+    transform-origin: right center;
+  }
+
+  .photo-annotation[data-side="left"] .photo-annotation__label {
+    right: calc(var(--annotation-length) + 7px);
+  }
+
+  /* Draw-in: hidden while armed, then ring and line, then the label. */
+  .annotated-photo[data-annotations="armed"] .photo-annotation__ring,
+  .annotated-photo[data-annotations="armed"] .photo-annotation__label {
+    opacity: 0;
+  }
+
+  .annotated-photo[data-annotations="armed"] .photo-annotation__line {
+    scale: 0 1;
+  }
+
+  .annotated-photo[data-annotations="shown"] .photo-annotation__ring {
+    transition: opacity var(--duration-annotation-label) var(--ease-calm) var(--annotation-delay);
+  }
+
+  .annotated-photo[data-annotations="shown"] .photo-annotation__line {
+    transition: scale var(--duration-annotation-line) var(--ease-calm) var(--annotation-delay);
+  }
+
+  .annotated-photo[data-annotations="shown"] .photo-annotation__label {
+    transition: opacity var(--duration-annotation-label) var(--ease-calm)
+      calc(var(--annotation-delay) + var(--duration-annotation-line));
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .annotated-photo .photo-annotation * {
+      transition: none !important;
+    }
+  }
+
   /* <LoopVideo>: the clip plus its pause/play button. */
   .loop-video {
     position: relative;
@@ -244,191 +396,6 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-dm-sans), Arial, Helvetica, sans-serif;
-}
-
-@keyframes fadeInLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-.animate-fade-in-left {
-  animation: fadeInLeft 0.8s ease-out forwards;
-}
-
-@keyframes objectionCardRevealY {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes objectionCardRevealX {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-.objection-card-reveal {
-  animation: objectionCardRevealY 0.55s ease-out both;
-}
-
-.ai-icon-chrome {
-  display: inline-flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  width: 48px;
-  height: 48px;
-  padding: 2px;
-  border-radius: 12px;
-  background-image: linear-gradient(
-    90deg,
-    var(--gradient-blue) 0%,
-    var(--gradient-purple) 31%,
-    var(--gradient-orange) 63%,
-    var(--gradient-yellow) 97.5%
-  );
-}
-
-.ai-icon-chrome__inner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  border-radius: 10px;
-  background-image: linear-gradient(
-    90deg,
-    color-mix(in srgb, var(--gradient-blue) 10%, #ffffff) 0%,
-    color-mix(in srgb, var(--gradient-purple) 10%, #ffffff) 31%,
-    color-mix(in srgb, var(--gradient-orange) 10%, #ffffff) 63%,
-    color-mix(in srgb, var(--gradient-yellow) 10%, #ffffff) 97.5%
-  );
-}
-
-@media (min-width: 768px) {
-  .objection-card-reveal {
-    animation-name: objectionCardRevealX;
-  }
-}
-
-@keyframes nlDemoFadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-.nl-demo-fade {
-  animation: nlDemoFadeIn 0.35s ease-out both;
-}
-
-.hero-factor-stack-item {
-  display: grid;
-  grid-template-rows: 0fr;
-  opacity: 0;
-  margin-top: 0;
-  transition:
-    grid-template-rows 220ms cubic-bezier(0.33, 1, 0.68, 1),
-    opacity 220ms cubic-bezier(0.33, 1, 0.68, 1),
-    margin-top 220ms cubic-bezier(0.33, 1, 0.68, 1);
-}
-
-.hero-factor-stack-item--visible {
-  grid-template-rows: 1fr;
-  opacity: 1;
-}
-
-.hero-factor-stack-item--overlap.hero-factor-stack-item--visible {
-  margin-top: -10px;
-}
-
-.hero-factor-stack-item-inner {
-  overflow: hidden;
-}
-
-.hero-factor-stack-item-content {
-  transform: translateY(10px);
-  transition: transform 220ms cubic-bezier(0.33, 1, 0.68, 1);
-}
-
-.hero-factor-stack-item--visible .hero-factor-stack-item-content {
-  transform: translateY(0);
-}
-
-@keyframes heroExploreChipTap {
-  0% {
-    transform: scale(1);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-  }
-  35% {
-    transform: scale(0.9);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
-  }
-  100% {
-    transform: scale(0.94);
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.16);
-  }
-}
-
-.hero-explore-chip-tap {
-  animation: heroExploreChipTap 220ms cubic-bezier(0.33, 1, 0.68, 1) forwards;
-}
-
-@keyframes nlLoadingShimmer {
-  0% {
-    opacity: 0.55;
-  }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0.55;
-  }
-}
-
-.nl-loading-shimmer {
-  animation: nlLoadingShimmer 1.4s ease-in-out infinite;
-}
-
-@keyframes aiChatThinkingShimmer {
-  0% {
-    background-position: 200% center;
-  }
-  100% {
-    background-position: -200% center;
-  }
-}
-
-.ai-chat-thinking {
-  background: linear-gradient(
-    90deg,
-    var(--grey-60) 0%,
-    var(--grey-40) 45%,
-    var(--grey-60) 90%
-  );
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: aiChatThinkingShimmer 2.2s linear infinite;
 }
 
 /* Legal content styling */
