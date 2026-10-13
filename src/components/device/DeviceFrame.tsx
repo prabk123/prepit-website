@@ -31,7 +31,7 @@ type DeviceFrameProps = {
   capture?: DeviceCapture;
   /** A looping screen recording, played only in view. */
   video?: Omit<LoopVideoProps, "className">;
-  /** Load the capture eagerly (above the fold). */
+  /** Load the capture, or the clip's poster, eagerly (above the fold). */
   priority?: boolean;
   className?: string;
   children?: ReactNode;
@@ -96,7 +96,7 @@ export default function DeviceFrame({
             {capture && (
               <CapturePicture capture={capture} priority={priority} />
             )}
-            {video && <LoopVideo {...video} />}
+            {video && <LoopVideo {...video} priority={priority} />}
             {children}
             <span aria-hidden className="device-frame__island" />
           </div>

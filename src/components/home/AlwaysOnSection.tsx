@@ -7,11 +7,11 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import { appVideo } from "@/lib/captures";
 
 const ACTIONS = [
-  { title: "Checks in", detail: "Haven't logged breakfast by your usual time? It asks, and one reply logs it." },
+  { title: "Checks in", detail: "Haven't logged breakfast by your usual time? It asks, and your reply becomes a meal to confirm." },
   { title: "Spots patterns", detail: "Short on protein three weeks running? It notices and suggests an easy, good-value fix." },
   { title: "Asks when it's unsure", detail: "“Dinner at a restaurant” gets a quick question, so your day stays accurate." },
   { title: "Suggests a better week", detail: "More room on the days you always go over, same weekly total." },
-  { title: "Reminds you to weigh in", detail: "When it's been a week, it asks, and a number logs it." },
+  { title: "Reminds you to weigh in", detail: "When it's been a week, it asks. Reply with the number and confirm." },
 ];
 
 /** "It doesn't wait for you to ask": the nutritionist speaking up on its own. */

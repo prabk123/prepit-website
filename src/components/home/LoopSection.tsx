@@ -5,7 +5,7 @@ import SectionHeading from "@/components/ui/SectionHeading";
 const STEPS = [
   {
     title: "Log",
-    detail: "Say what you ate, in your own words or with a photo. PrepIt builds the meal in seconds, and you confirm.",
+    detail: "Say what you ate, in your own words or with a photo. PrepIt builds the meal in seconds, and you can fix anything in one tap.",
   },
   {
     title: "Understand",

@@ -2,6 +2,7 @@ import DeviceFrame from "@/components/device/DeviceFrame";
 import PhotoBand from "@/components/ui/PhotoBand";
 import PointList from "@/components/ui/PointList";
 import SectionHeading from "@/components/ui/SectionHeading";
+import TextLink from "@/components/ui/TextLink";
 import { appCapture, appVideo } from "@/lib/captures";
 import { plansKitchen } from "@/content/lifestyle";
 
@@ -44,6 +45,7 @@ export default function PlansBand() {
         lead="Your nutritionist plans around your goals, tastes and budget, then helps you stick to it."
       />
       <PointList layout="rows" points={PLAN_POINTS} />
+      <TextLink href="/features/meal-plans">More about meal plans</TextLink>
     </PhotoBand>
   );
 }

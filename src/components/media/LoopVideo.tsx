@@ -32,6 +32,11 @@ export type LoopVideoProps = {
    * e.g. "03-log-typed". Leave unset to send nothing.
    */
   analyticsId?: string;
+  /**
+   * Above the fold: render the poster with the page instead of lazily, since
+   * it is likely the largest paint. Pair with a preload of the poster.
+   */
+  priority?: boolean;
   className?: string;
 };
 
@@ -49,6 +54,7 @@ export default function LoopVideo({
   height,
   label,
   analyticsId,
+  priority,
   className,
 }: LoopVideoProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -130,7 +136,7 @@ export default function LoopVideo({
         ref={videoRef}
         width={width}
         height={height}
-        poster={nearView ? poster : undefined}
+        poster={priority || nearView ? poster : undefined}
         muted
         loop
         playsInline
