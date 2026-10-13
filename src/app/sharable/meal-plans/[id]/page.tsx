@@ -1,15 +1,19 @@
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getMealPlanById } from "@/lib/meal-plan";
+import { countRecipes, formatPlanRange } from "@/lib/plan-dates";
 import MealPlanView from "@/components/shareable/MealPlanView";
+import MakeYourOwnPlan from "@/components/shareable/MakeYourOwnPlan";
+import SharedPlanBanner from "@/components/shareable/SharedPlanBanner";
+import SharedPlanViewTracker from "@/components/shareable/SharedPlanViewTracker";
+import { APP_STORE_ID } from "@/lib/appStore";
 
 type Props = {
   params: Promise<{ id: string }>;
 };
 
-function formatDate(dateStr: string): string {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString("en-US", { day: "numeric", month: "short" });
+function plural(count: number, word: string): string {
+  return `${count} ${word}${count === 1 ? "" : "s"}`;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -17,40 +21,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const plan = await getMealPlanById(id);
 
   if (!plan) {
-    return { title: "Meal Plan Not Found" };
+    return { title: "Meal plan not found", robots: { index: false, follow: false } };
   }
 
-  const startDate = formatDate(plan.days[0].date);
-  const endDate = formatDate(plan.days[plan.days.length - 1].date);
-  const recipeCount = plan.days.reduce((count, day) => {
-    if (day.breakfast) count++;
-    if (day.lunch) count++;
-    if (day.dinner) count++;
-    if (day.snack) count++;
-    return count;
-  }, 0);
+  const title = `Meal plan: ${formatPlanRange(plan.days)}`;
+  const description = `${plural(plan.days.length, "day")} and ${plural(countRecipes(plan.days), "recipe")}, made with PrepIt, your personal AI nutritionist.`;
 
-  const title = `Meal Plan: ${startDate} - ${endDate}`;
-  const description = `${plan.days.length}-day meal plan with ${recipeCount} recipes. Made with PrepIt.`;
-
+  // The preview image comes from opengraph-image.tsx and twitter-image.tsx
+  // in this folder.
   return {
     title,
     description,
-    openGraph: {
-      title,
-      description,
-      type: "website",
-      images: [{ url: "/og-image.png", width: 1200, height: 630 }],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-    },
-    robots: {
-      index: false,
-      follow: false,
-    },
+    openGraph: { title, description, type: "website", siteName: "PrepIt" },
+    twitter: { card: "summary_large_image", title, description },
+    itunes: { appId: APP_STORE_ID },
+    robots: { index: false, follow: false },
   };
 }
 
@@ -62,5 +47,30 @@ export default async function SharableMealPlanPage({ params }: Props) {
     notFound();
   }
 
-  return <MealPlanView plan={plan} />;
+  const recipeCount = countRecipes(plan.days);
+
+  return (
+    <>
+      <SharedPlanViewTracker
+        planId={plan._id}
+        dayCount={plan.days.length}
+        recipeCount={recipeCount}
+        hasGroceries={plan.groceries.length > 0}
+      />
+
+      <SharedPlanBanner />
+
+      <header className="flex flex-col gap-3">
+        <p className="text-eyebrow font-medium uppercase text-ink-muted">Shared meal plan</p>
+        <h1 className="font-display text-chapter text-ink">{formatPlanRange(plan.days)}</h1>
+        <p className="text-lead text-ink-secondary">
+          {plural(plan.days.length, "day")} · {plural(recipeCount, "recipe")}
+        </p>
+      </header>
+
+      <MealPlanView plan={plan} />
+
+      <MakeYourOwnPlan />
+    </>
+  );
 }
