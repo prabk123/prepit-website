@@ -1,0 +1,72 @@
+import AppStoreLink from "@/components/AppStoreLink";
+import AppStoreQr from "@/components/ui/AppStoreQr";
+import Rating from "@/components/ui/Rating";
+
+type AppStoreCtaProps = {
+  /** Sent with the `app_store_click` event, e.g. "home-hero". */
+  trackingSource: string;
+  label?: string;
+  /** `cream` on dark sections; `dark` on the cream pricing card. */
+  variant?: "cream" | "dark";
+  /** Line under the button, e.g. "3 days free". */
+  note?: string;
+  /** App Store rating shown after the note. Use "placeholder" until the real figure is known. */
+  rating?: { value: number | "placeholder"; count?: number };
+  /** Desktop only: a QR code beside the button with this caption. */
+  qrCaption?: string;
+  className?: string;
+};
+
+function AppleLogo() {
+  return (
+    <svg width="18" height="21" viewBox="0 0 18 21" aria-hidden>
+      <path
+        d="M14.78 11.12c-.02-2.26 1.85-3.35 1.94-3.41-1.07-1.57-2.73-1.77-3.32-1.79-1.42-.15-2.81.92-3.54.92-.74 0-1.86-.9-3.08-.88-1.59.02-3.07.98-3.87 2.46-1.63 3.02-.41 7.45 1.15 9.87.78 1.19 1.7 2.51 2.94 2.46 1.19-.05 1.61-.8 3.05-.8 1.43 0 1.83.8 3.07.77 1.27-.02 2.06-1.19 2.82-2.39.9-1.33 1.26-2.64 1.28-2.71-.03-.01-2.42-.93-2.44-4.5ZM12.28 4.34c.64-.78 1.09-1.85.96-2.94-.91.04-2.03.61-2.7 1.38-.59.68-1.13 1.78-.98 2.82 1.02.08 2.07-.49 2.72-1.26Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
+/**
+ * The one App Store call to action: a pill button that keeps AppStoreLink's
+ * Meta Pixel and PostHog tracking, an optional trial and rating line, and an
+ * optional QR code for desktop visitors.
+ */
+export default function AppStoreCta({
+  trackingSource,
+  label = "Download on the App Store",
+  variant = "cream",
+  note,
+  rating,
+  qrCaption,
+  className,
+}: AppStoreCtaProps) {
+  const button =
+    variant === "cream"
+      ? "bg-cream text-on-cream focus-visible:outline-cream"
+      : "bg-on-cream text-cream focus-visible:outline-on-cream";
+  const subtle = variant === "cream" ? "text-ink-muted" : "text-on-cream-muted";
+
+  return (
+    <div className={`flex flex-wrap items-center gap-x-10 gap-y-6 ${className ?? ""}`}>
+      <div className="flex flex-col items-start gap-3">
+        <AppStoreLink
+          trackingSource={trackingSource}
+          className={`inline-flex h-14 items-center gap-2.5 rounded-control px-7 text-body font-medium transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-4 ${button}`}
+        >
+          <AppleLogo />
+          {label}
+        </AppStoreLink>
+        {(note || rating) && (
+          <p className={`flex flex-wrap items-center gap-x-2 text-small ${subtle}`}>
+            {note && <span>{note}</span>}
+            {note && rating && <span aria-hidden>·</span>}
+            {rating && <Rating value={rating.value} count={rating.count} />}
+          </p>
+        )}
+      </div>
+      {qrCaption && <AppStoreQr caption={qrCaption} className="hidden lg:flex" />}
+    </div>
+  );
+}

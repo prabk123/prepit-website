@@ -6,7 +6,7 @@ import {
 } from "@/lib/cookies";
 import { isEuCountry, resolveCountryCode } from "@/lib/geo";
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const country = resolveCountryCode(request);
   const geoRegion = isEuCountry(country) ? "eu" : "non-eu";
   const response = NextResponse.next();
