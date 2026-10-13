@@ -1,3 +1,4 @@
+import { preload } from "react-dom";
 import DeviceFrame from "@/components/device/DeviceFrame";
 import DevicePair from "@/components/device/DevicePair";
 import AnnotatedPhoto from "@/components/media/AnnotatedPhoto";
@@ -20,6 +21,17 @@ const HERO_POINTS = [
  * screen.
  */
 export default function HomeHero() {
+  // The photo is the phone LCP. Preload the size this screen will pick, so it
+  // starts before the stylesheet and fonts are done.
+  const photo = HERO_SCENE.photo;
+  preload(photo.src, {
+    as: "image",
+    imageSrcSet: photo.avif ?? photo.webp,
+    imageSizes: photo.sizes,
+    type: photo.avif ? "image/avif" : "image/webp",
+    fetchPriority: "high",
+  });
+
   return (
     <section
       id="hero"
@@ -65,7 +77,6 @@ export default function HomeHero() {
           <Glow style={{ width: "120%" }} />
           <DevicePair className="[--device-w:270px] sm:[--device-w:300px] lg:[--device-w:clamp(260px,20vw,300px)]">
             <DeviceFrame
-              priority
               capture={appCapture("01-home", "PrepIt Home: today's Energy, Satiety and Mood rings, calories and macros")}
             />
             <DeviceFrame
