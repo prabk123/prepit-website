@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { trackVideoPlayed } from "@/lib/posthogAnalytics";
 
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 
@@ -26,6 +27,11 @@ export type LoopVideoProps = {
   height: number;
   /** Describes what the clip shows. Empty string for a purely decorative clip. */
   label: string;
+  /**
+   * Fixed name sent with `website_video_played` the first time the clip plays,
+   * e.g. "03-log-typed". Leave unset to send nothing.
+   */
+  analyticsId?: string;
   className?: string;
 };
 
@@ -42,11 +48,13 @@ export default function LoopVideo({
   width,
   height,
   label,
+  analyticsId,
   className,
 }: LoopVideoProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   // The visitor's own choice from the button; null until they press it.
   const choiceRef = useRef<"play" | "pause" | null>(null);
+  const trackedRef = useRef(false);
   const [playing, setPlaying] = useState(false);
   const [nearView, setNearView] = useState(false);
   const reducedMotion = useSyncExternalStore(
@@ -130,7 +138,13 @@ export default function LoopVideo({
         disablePictureInPicture
         disableRemotePlayback
         aria-hidden
-        onPlay={() => setPlaying(true)}
+        onPlay={() => {
+          setPlaying(true);
+          if (analyticsId && !trackedRef.current) {
+            trackedRef.current = true;
+            trackVideoPlayed(analyticsId, choiceRef.current === "play" ? "button" : "auto");
+          }
+        }}
         onPause={() => setPlaying(false)}
       >
         {webm && <source src={webm} type="video/webm" />}
