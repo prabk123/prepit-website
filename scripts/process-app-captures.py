@@ -35,9 +35,17 @@ SEGMENTS = {
     "08-chat-ask": [(2.5, 13)],
     "09-chat-log-it": [(4.5, 7), (49.5, 55.5), (56, 60)],
     "12-plan-week": [(4.7, 8), (10, 12), (17.5, 20.5), (21.5, 24), (30, 32.5), (34.5, 38.3)],
-    "21-walkthrough": [(0, 2.5), (4.5, 10.5), (12, 13), (18.5, 20.5), (35, 39), (59.5, 62), (63, 65),
-                       (66, 71), (72, 74.5), (109, 111), (111.5, 113.5), (115, 123)],
+    "21-walkthrough": [(0, 3), (6, 8), (8.5, 11), (16, 18), (20, 21.5), (31.5, 33), (38, 42), (53, 56),
+                       (62, 63), (65, 68), (74, 76), (80, 83), (84, 92), (96, 100), (104, 105), (106, 108),
+                       (114, 118), (119, 124.5)],
 }
+# The nutritionist greets the test account by its first name. Blur that word:
+# raw seconds (start, end) and the top of the name's line on the 1206x2622 frame.
+NAME_BLURS = {
+    "21-walkthrough": [(85.2, 87.7, 1754), (87.7, 103.8, 1415)],
+}
+NAME_BOX_X, NAME_BOX_W, NAME_BOX_H = 728, 240, 86
+
 # Videos that show the Home header somewhere, so the avatar is blurred throughout.
 AVATAR_VIDEOS = ("03-log-typed", "04-log-photo", "21-walkthrough")
 
@@ -109,7 +117,14 @@ def video(name: str) -> None:
     select = "+".join(f"between(t,{a},{b})" for a, b in segs) if segs else None
     # Resample to a constant 30 fps first: simulator recordings drop frames while
     # the screen is still, so a pause would otherwise vanish from the cut.
-    filters = ["fps=30"]
+    filters = []
+    for i, (a, b, top) in enumerate(NAME_BLURS.get(name, [])):
+        y = top - 8
+        filters.append(
+            f"split[n{i}a][n{i}b];[n{i}b]crop={NAME_BOX_W}:{NAME_BOX_H}:{NAME_BOX_X}:{y},boxblur=20[n{i}c];"
+            f"[n{i}a][n{i}c]overlay={NAME_BOX_X}:{y}:enable='between(t,{a},{b})'"
+        )
+    filters.append("fps=30")
     if select:
         filters.append(f"select='{select}',setpts=N/FRAME_RATE/TB")
     if name in AVATAR_VIDEOS:
