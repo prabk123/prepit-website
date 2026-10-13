@@ -1,6 +1,7 @@
 import Link from "next/link";
 import AppStoreCta from "@/components/ui/AppStoreCta";
 import CtaBand from "@/components/ui/CtaBand";
+import { TRIAL_NOTE } from "@/lib/pricing";
 
 // TODO(PRE-203): point at the meal plans feature page once it exists.
 export const MEAL_PLANS_PAGE_HREF = "/#ai-coach";
@@ -16,7 +17,7 @@ export default function MakeYourOwnPlan() {
         <div className="flex flex-col items-start gap-6">
           <AppStoreCta
             trackingSource="shared-meal-plan-end"
-            note="3 days free"
+            note={TRIAL_NOTE}
             qrCaption="Scan with your iPhone camera"
           />
           <Link

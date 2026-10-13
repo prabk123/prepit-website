@@ -6,7 +6,8 @@ import LoggingSection from "@/components/LoggingSection";
 import HeroLoopDemo from "@/components/HeroLoopDemo";
 import NutritionLoopSection from "@/components/NutritionLoopSection";
 import AiCoachSection from "@/components/AiCoachSection";
-import FaqSection from "@/components/FaqSection";
+import FaqSection from "@/components/pricing/FaqSection";
+import PricingSection from "@/components/pricing/PricingSection";
 import NutritionSignalsSection from "@/components/NutritionSignalsSection";
 import ObjectionMirrorSection from "@/components/ObjectionMirrorSection";
 import TrustAccuracySection from "@/components/TrustAccuracySection";
@@ -159,6 +160,8 @@ export default function Home() {
       <AiCoachSection />
 
       <TrustAccuracySection />
+
+      <PricingSection />
 
       <FaqSection />
     </>

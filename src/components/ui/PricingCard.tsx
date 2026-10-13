@@ -2,18 +2,20 @@ import type { ReactNode } from "react";
 
 type PricingCardProps = {
   title: string;
-  /** e.g. "3 days free, then $99.99 a year". */
+  /** e.g. "Then $99.99 a year or $14.99 a month". */
   price: string;
   /** e.g. "That's $1.92 a week. Cancel anytime in the App Store." */
   priceNote?: string;
   features: string[];
   /** Usually <AppStoreCta variant="dark" />. */
   cta: ReactNode;
+  /** Small print under the button, e.g. how prices vary by country. */
+  finePrint?: string;
   className?: string;
 };
 
 /** The cream pricing card with near-black text. */
-export default function PricingCard({ title, price, priceNote, features, cta, className }: PricingCardProps) {
+export default function PricingCard({ title, price, priceNote, features, cta, finePrint, className }: PricingCardProps) {
   return (
     <article
       className={`flex w-full max-w-[520px] flex-col gap-8 rounded-card bg-cream p-8 text-on-cream lg:p-12 ${className ?? ""}`}
@@ -33,7 +35,10 @@ export default function PricingCard({ title, price, priceNote, features, cta, cl
           </li>
         ))}
       </ul>
-      {cta}
+      <div className="flex flex-col gap-4">
+        {cta}
+        {finePrint && <p className="text-small text-on-cream-muted">{finePrint}</p>}
+      </div>
     </article>
   );
 }

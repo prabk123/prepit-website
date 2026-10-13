@@ -1,5 +1,6 @@
 import Image from "next/image";
 import AppStoreCta from "@/components/ui/AppStoreCta";
+import { TRIAL_NOTE } from "@/lib/pricing";
 
 /**
  * The top banner on a shared plan: who made it (PrepIt, never the person who
@@ -20,7 +21,7 @@ export default function SharedPlanBanner() {
           </p>
         </div>
       </div>
-      <AppStoreCta trackingSource="shared-meal-plan-banner" note="3 days free" className="shrink-0" />
+      <AppStoreCta trackingSource="shared-meal-plan-banner" note={TRIAL_NOTE} className="shrink-0" />
     </aside>
   );
 }
