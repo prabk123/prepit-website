@@ -6,7 +6,7 @@ import { GUIDE_SECTIONS, getGuides } from "@/lib/guides";
 
 const title = "Guides";
 const description =
-  "Short, step-by-step guides to PrepIt: log meals with Siri and widgets, describe meals accurately, read Energy, Satiety and Mood, and plan your week.";
+  "Short, step-by-step guides to PrepIt: log meals with the Action button, Siri and widgets, describe meals accurately, read Energy, Satiety and Mood, and plan your week.";
 const url = "https://www.tryprepit.app/guides";
 
 export const metadata: Metadata = {
