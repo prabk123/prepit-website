@@ -32,6 +32,12 @@ type AnnotatedPhotoProps = {
   placeholder?: string;
   /** Fade the photo into the page at its top and bottom edges. */
   fadeEdges?: boolean;
+  /**
+   * Below 1024 px, show the photo as a strip at the top and let the children
+   * follow underneath it (D3's phone layout), instead of setting them over it.
+   * The strip height is `--photo-strip-h`.
+   */
+  stackOnPhones?: boolean;
   /** Size and position the box, e.g. an aspect ratio or `absolute inset-0`. */
   className?: string;
   /** Overlays on top of the photo, e.g. a phone. */
@@ -51,6 +57,7 @@ export default function AnnotatedPhoto({
   annotations = [],
   placeholder,
   fadeEdges,
+  stackOnPhones,
   className,
   children,
 }: AnnotatedPhotoProps) {
@@ -84,56 +91,60 @@ export default function AnnotatedPhoto({
   return (
     <div
       ref={ref}
-      className={`annotated-photo relative overflow-hidden ${className ?? ""}`}
+      className={`annotated-photo relative overflow-hidden ${
+        stackOnPhones ? "[--photo-strip-h:min(75vw,440px)]" : ""
+      } ${className ?? ""}`}
       data-annotations="static"
     >
-      <picture>
-        {photo.avif && <source srcSet={photo.avif} sizes={photo.sizes ?? "100vw"} type="image/avif" />}
-        {photo.webp && <source srcSet={photo.webp} sizes={photo.sizes ?? "100vw"} type="image/webp" />}
-        <img
-          src={photo.src}
-          alt={photo.alt ?? ""}
-          width={photo.width}
-          height={photo.height}
-          loading={photo.priority ? "eager" : "lazy"}
-          fetchPriority={photo.priority ? "high" : undefined}
-          decoding="async"
-          className="absolute inset-0 h-full w-full object-cover"
-          style={{ objectPosition: photo.position }}
-        />
-      </picture>
-      {fadeEdges && <div aria-hidden className="annotated-photo__fade absolute inset-0" />}
-      {annotations.length > 0 && (
-        <ul className="hidden lg:block" aria-label="What PrepIt reads on this plate">
-          {annotations.map((note, index) => (
-            <li
-              key={`${note.value}-${note.label}`}
-              className="photo-annotation"
-              data-side={note.side}
-              style={
-                {
-                  left: `${note.x}%`,
-                  top: `${note.y}%`,
-                  "--annotation-length": `${note.length ?? 72}px`,
-                  "--annotation-index": index,
-                } as CSSProperties
-              }
-            >
-              <span aria-hidden className="photo-annotation__ring" />
-              <span aria-hidden className="photo-annotation__line" />
-              <span className="photo-annotation__label">
-                <b>{note.value}</b> {note.label}
-              </span>
-            </li>
-          ))}
-        </ul>
-      )}
+      <div className={`absolute inset-0 ${stackOnPhones ? "max-lg:bottom-auto max-lg:h-[var(--photo-strip-h)]" : ""}`}>
+        <picture>
+          {photo.avif && <source srcSet={photo.avif} sizes={photo.sizes ?? "100vw"} type="image/avif" />}
+          {photo.webp && <source srcSet={photo.webp} sizes={photo.sizes ?? "100vw"} type="image/webp" />}
+          <img
+            src={photo.src}
+            alt={photo.alt ?? ""}
+            width={photo.width}
+            height={photo.height}
+            loading={photo.priority ? "eager" : "lazy"}
+            fetchPriority={photo.priority ? "high" : undefined}
+            decoding="async"
+            className="absolute inset-0 h-full w-full object-cover"
+            style={{ objectPosition: photo.position }}
+          />
+        </picture>
+        {fadeEdges && <div aria-hidden className="annotated-photo__fade absolute inset-0" />}
+        {annotations.length > 0 && (
+          <ul className="hidden lg:block" aria-label="What PrepIt reads on this plate">
+            {annotations.map((note, index) => (
+              <li
+                key={`${note.value}-${note.label}`}
+                className="photo-annotation"
+                data-side={note.side}
+                style={
+                  {
+                    left: `${note.x}%`,
+                    top: `${note.y}%`,
+                    "--annotation-length": `${note.length ?? 72}px`,
+                    "--annotation-index": index,
+                  } as CSSProperties
+                }
+              >
+                <span aria-hidden className="photo-annotation__ring" />
+                <span aria-hidden className="photo-annotation__line" />
+                <span className="photo-annotation__label">
+                  <b>{note.value}</b> {note.label}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+        {placeholder && (
+          <p className="absolute bottom-4 left-4 z-10 rounded-control border border-dashed border-line-strong bg-overlay-strong px-3 py-1.5 text-small text-ink-secondary">
+            Placeholder photo: {placeholder}
+          </p>
+        )}
+      </div>
       {children}
-      {placeholder && (
-        <p className="absolute bottom-4 left-4 z-10 rounded-control border border-dashed border-line-strong bg-overlay-strong px-3 py-1.5 text-small text-ink-secondary">
-          Placeholder photo: {placeholder}
-        </p>
-      )}
     </div>
   );
 }

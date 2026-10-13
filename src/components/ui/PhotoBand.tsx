@@ -21,6 +21,7 @@ type PhotoBandProps = {
  * D3's full-bleed photo section: an annotated lifestyle photo with the text on
  * a dark gradient at the left, and phones rising from its bottom edge. The
  * annotations sit on the right of the photo, clear of the text and phones.
+ * Below 1024 px the photo is a strip on top, with the text and phones under it.
  */
 export default function PhotoBand({
   id,
@@ -44,10 +45,11 @@ export default function PhotoBand({
         annotations={annotations}
         placeholder={placeholder}
         fadeEdges
-        className="min-h-[560px] lg:aspect-[1376/768] lg:max-h-[860px] lg:min-h-[640px]"
+        stackOnPhones
+        className="lg:aspect-[1376/768] lg:max-h-[860px] lg:min-h-[640px]"
       >
-        <div aria-hidden className="section-photo-scrim absolute inset-0 z-[1] max-lg:opacity-90" />
-        <div className="relative z-[3] mx-auto flex h-full w-full max-w-content items-center px-gutter py-16">
+        <div aria-hidden className="section-photo-scrim absolute inset-0 z-[1] max-lg:hidden" />
+        <div className="relative z-[3] mx-auto flex h-full w-full max-w-content items-center px-gutter pt-[calc(var(--photo-strip-h)+1.5rem)] lg:py-16">
           <div className="flex max-w-[460px] flex-col gap-8">{children}</div>
         </div>
       </AnnotatedPhoto>
