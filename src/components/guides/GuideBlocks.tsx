@@ -82,7 +82,8 @@ export function Widget({ name, alt, caption }: { name: string; alt: string; capt
 export function Tips({ title, children }: { title?: string; children: ReactNode }) {
   return (
     <div className="my-12 flex flex-col gap-5">
-      {title && <h3 className="font-display text-card-title text-ink">{title}</h3>}
+      {/* A label, not a heading: each tip inside is already an h3. */}
+      {title && <p className="text-eyebrow font-medium uppercase text-ink-muted">{title}</p>}
       <div className="grid gap-4 sm:grid-cols-2">{children}</div>
     </div>
   );

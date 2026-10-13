@@ -17,14 +17,24 @@ export const metadata: Metadata = {
   title: { absolute: `${title} | Your personal AI nutritionist` },
   description,
   alternates: { canonical: url },
-  openGraph: { type: "website", url, title, description },
-  twitter: { card: "summary_large_image", title, description },
+  // Page-level openGraph and twitter replace the root layout's, so the shared
+  // preview image and site name are repeated here.
+  openGraph: {
+    type: "website",
+    url,
+    title,
+    description,
+    siteName: "PrepIt",
+    locale: "en_US",
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "PrepIt – Your AI nutritionist app" }],
+  },
+  twitter: { card: "summary_large_image", title, description, images: ["/og-image.png"] },
 };
 
 const principles = [
   {
-    title: "Accurate first",
-    body: "PrepIt checks official brand and restaurant nutrition information instead of a crowdsourced database, and every estimate shows what it assumed.",
+    title: "Official sources first",
+    body: "PrepIt checks official brand and restaurant nutrition information before anything else, and every estimate shows what it assumed.",
   },
   {
     title: "Honest about confidence",
@@ -36,7 +46,7 @@ const principles = [
   },
   {
     title: "No guilt",
-    body: "No shame, no “cheat days”, no red marks for a big dinner. Just a clearer next step.",
+    body: "No shame. No “cheat days”. Just a clearer next step.",
   },
 ];
 
@@ -109,8 +119,8 @@ export default function AboutPage() {
               </BentoTile>
             ))}
             <BentoTile size="medium" title="You stay in control">
-              Your nutritionist can log, move or fix a meal and change your goals, but you confirm
-              every change before anything is saved.
+              Your nutritionist can log, move or fix a meal, plan your week and change your goals,
+              but you confirm every log, plan or goal change before it’s saved.
             </BentoTile>
             <BentoTile size="medium" title="A nutritionist, not a doctor">
               PrepIt gives nutrition guidance, not medical advice, and will tell you when something

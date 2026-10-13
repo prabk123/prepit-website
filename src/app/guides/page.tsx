@@ -13,7 +13,8 @@ export const metadata: Metadata = {
   title,
   description,
   alternates: { canonical: url },
-  openGraph: { type: "website", url, title: `${title} | PrepIt`, description },
+  // The preview image comes from ./opengraph-image.tsx.
+  openGraph: { type: "website", url, title: `${title} | PrepIt`, description, siteName: "PrepIt", locale: "en_US" },
   twitter: { card: "summary_large_image", title: `${title} | PrepIt`, description },
 };
 

@@ -17,9 +17,12 @@ const tokens = {
   mood: "#809ff9",
 };
 
-/** A guide's link preview: the PrepIt mark, the guide's section, title and summary. */
-export async function renderGuideOg(slug: string): Promise<ImageResponse> {
-  const guide = await loadGuide(slug);
+/**
+ * A guide's link preview: the PrepIt mark, the guide's section, title and
+ * summary. With no slug, the preview for the guides index.
+ */
+export async function renderGuideOg(slug: string | null): Promise<ImageResponse> {
+  const guide = slug ? await loadGuide(slug) : null;
   const [clash, logo] = await Promise.all([
     // The preview renderer cannot read variable fonts, so it uses a static
     // weight-600 instance of the site's Clash Display.
@@ -27,8 +30,8 @@ export async function renderGuideOg(slug: string): Promise<ImageResponse> {
     readFile(path.join(process.cwd(), "public/logo.png")),
   ]);
 
-  const title = guide?.meta.title ?? "PrepIt guides";
-  const summary = guide?.meta.summary ?? "Step-by-step guides to getting the most out of PrepIt.";
+  const title = guide?.meta.title ?? "Get more from your nutritionist.";
+  const summary = guide?.meta.summary ?? "Short, step-by-step guides to getting the most out of PrepIt.";
   const eyebrow = guide ? `Guide · ${guideSectionTitle(guide.meta.section)}` : "Guides";
 
   return new ImageResponse(
