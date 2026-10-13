@@ -1,11 +1,7 @@
 import { preload } from "react-dom";
-import DeviceFrame from "@/components/device/DeviceFrame";
-import DevicePair from "@/components/device/DevicePair";
 import AnnotatedPhoto from "@/components/media/AnnotatedPhoto";
 import AppStoreCta from "@/components/ui/AppStoreCta";
-import Glow from "@/components/ui/Glow";
-import { appCapture } from "@/lib/captures";
-import { HERO_SCENE } from "@/lib/lifestylePhotos";
+import { heroCafe } from "@/content/lifestyle";
 import { TRIAL_DAYS } from "@/lib/pricing";
 
 const HERO_POINTS = [
@@ -16,21 +12,26 @@ const HERO_POINTS = [
 
 /**
  * Headline first, then the supporting line and App Store button, then the
- * annotated cafe photo with Home and a chat reply on real phones. On a
- * 390 x 844 phone the headline, button and the top of Home all fit the first
- * screen.
+ * annotated cafe photo, whose phone shows today's log. Phones get the 4:5 crop
+ * around the phone; on a 390 x 844 phone the headline, button and the top of
+ * that photo fit the first screen.
  */
 export default function HomeHero() {
-  // The photo is the phone LCP. Preload the size this screen will pick, so it
-  // starts before the stylesheet and fonts are done.
-  const photo = HERO_SCENE.photo;
-  preload(photo.src, {
-    as: "image",
-    imageSrcSet: photo.avif ?? photo.webp,
-    imageSizes: photo.sizes,
-    type: photo.avif ? "image/avif" : "image/webp",
-    fetchPriority: "high",
-  });
+  // The photo is the LCP. Preload the crop and size this screen will pick, so
+  // it starts before the stylesheet and fonts are done.
+  for (const [photo, media] of [
+    [heroCafe.desktop, "(min-width: 1024px)"],
+    [heroCafe.mobile, "(max-width: 1023.98px)"],
+  ] as const) {
+    preload(photo.src, {
+      as: "image",
+      imageSrcSet: photo.avif,
+      imageSizes: photo.sizes,
+      type: "image/avif",
+      media,
+      fetchPriority: "high",
+    });
+  }
 
   return (
     <section
@@ -67,28 +68,12 @@ export default function HomeHero() {
       </div>
 
       <AnnotatedPhoto
-        photo={HERO_SCENE.photo}
-        annotations={HERO_SCENE.annotations}
-        placeholder={HERO_SCENE.placeholder}
+        photo={heroCafe.desktop}
+        phonePhoto={heroCafe.mobile}
+        annotations={heroCafe.annotations}
         fadeEdges
-        className="mt-8 h-[520px] sm:h-[600px] lg:mt-14 lg:h-auto lg:aspect-[1376/768] lg:max-h-[860px]"
-      >
-        <div className="absolute inset-x-0 top-6 z-[3] flex justify-center lg:inset-x-auto lg:right-[max(var(--spacing-gutter),calc((100vw-var(--container-content))/2+var(--spacing-gutter)))] lg:top-[7%]">
-          <Glow style={{ width: "120%" }} />
-          <DevicePair className="[--device-w:270px] sm:[--device-w:300px] lg:[--device-w:clamp(260px,20vw,300px)]">
-            <DeviceFrame
-              capture={appCapture("01-home", "PrepIt Home: today's Energy, Satiety and Mood rings, calories and macros")}
-            />
-            <DeviceFrame
-              className="hidden sm:block"
-              capture={appCapture(
-                "02-chat-chart",
-                "The nutritionist answering “show my protein for the last week” with a bar chart",
-              )}
-            />
-          </DevicePair>
-        </div>
-      </AnnotatedPhoto>
+        className="mt-8 aspect-[4/5] max-h-[720px] w-full lg:mt-14 lg:aspect-[1376/768] lg:max-h-[860px]"
+      />
     </section>
   );
 }

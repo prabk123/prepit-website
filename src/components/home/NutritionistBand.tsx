@@ -4,12 +4,12 @@ import PhotoBand from "@/components/ui/PhotoBand";
 import PointList from "@/components/ui/PointList";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { appCapture, appVideo } from "@/lib/captures";
-import { EVENING_SCENE } from "@/lib/lifestylePhotos";
+import { nutritionistEvening } from "@/content/lifestyle";
 
 const ASKS = [
   { title: "Charts on request", detail: "“Show my protein this week”" },
   { title: "Voice notes", detail: "Talk, and hear a spoken reply" },
-  { title: "You confirm", detail: "Every change before it's saved" },
+  { title: "You confirm", detail: "Every log, plan or goal change" },
 ];
 
 /** "Ask anything": the chat, on the evening photo. */
@@ -19,9 +19,10 @@ export default function NutritionistBand() {
       id="ask"
       labelledBy="ask-heading"
       analyticsName="ask-anything"
-      photo={EVENING_SCENE.photo}
-      annotations={EVENING_SCENE.annotations}
-      placeholder={EVENING_SCENE.placeholder}
+      photo={nutritionistEvening.desktop}
+      phonePhoto={nutritionistEvening.mobile}
+      annotations={nutritionistEvening.annotations}
+      textSide={nutritionistEvening.textSide}
       media={
         <DevicePair className="[--device-w:260px] sm:[--device-w:290px] lg:[--device-w:clamp(260px,20vw,300px)]">
           <DeviceFrame

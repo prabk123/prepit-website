@@ -32,7 +32,7 @@ export const FAQ_ITEMS: FaqItem[] = [
     id: "logging-accuracy",
     question: "How accurate is the logging?",
     answer:
-      "Instead of a crowdsourced database, PrepIt checks trustworthy sources such as official brand pages and restaurant nutrition information. You can review and adjust anything before it's saved.",
+      "Official sources first. PrepIt looks for the brand's or restaurant's own nutrition information before anything else, and only then uses other food databases. You can review and adjust every item before it's logged.",
   },
   {
     id: "energy-satiety-mood",
@@ -44,7 +44,7 @@ export const FAQ_ITEMS: FaqItem[] = [
     id: "nutritionist",
     question: "What can the nutritionist do?",
     answer:
-      "Answer questions about your day, draw charts of your trends, run your consultation and weekly check-in, build and change meal plans, and log, move or fix meals for you. You confirm every change.",
+      "Answer questions about your day, draw charts of your trends, run your consultation and weekly check-in, build and change meal plans, and log, move or fix meals for you. You confirm every log, plan or goal change before it's saved.",
   },
   {
     id: "messages",

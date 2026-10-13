@@ -5,7 +5,7 @@ import SectionHeading from "@/components/ui/SectionHeading";
 const PROMISES = [
   {
     title: "Editable by design",
-    detail: "Every estimate shows its assumptions and is one tap to fix. Nothing is saved until it looks right.",
+    detail: "Every estimate shows its assumptions and is one tap to fix. Nothing is logged until it looks right.",
   },
   {
     title: "Honest about confidence",

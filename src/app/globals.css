@@ -82,6 +82,15 @@ html {
     background: var(--scrim-photo-end);
   }
 
+  /* <PhotoBand>: shorter gradients that keep the subject clear of the text. */
+  .photo-band-scrim {
+    background: var(--scrim-band-start);
+  }
+
+  .photo-band-scrim-end {
+    background: var(--scrim-band-end);
+  }
+
   /*
    * <DeviceFrame>: iPhone 17 Pro drawn in CSS. Every measurement is a share of
    * the frame width (cqw), so one set of proportions covers 260 to 420 px.
@@ -200,6 +209,47 @@ html {
   }
 
   /* <AnnotatedPhoto>: amber ring, leader line and dark glass label (D3). */
+  /*
+   * <AnnotatedPhoto>: the media box is a size container, and the layer inside
+   * is sized and placed like object-fit: cover with object-position. The
+   * photo fills the layer and the labels are placed on it in % of the photo,
+   * so they stay on the food however the box crops it. Phones use the phone
+   * crop's ratio and focus.
+   */
+  .annotated-photo__media {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    container-type: size;
+  }
+
+  .annotated-photo__layer {
+    --ar: var(--photo-ar-phone);
+    --fx: var(--photo-x-phone);
+    --fy: var(--photo-y-phone);
+    --layer-w: max(100cqw, 100cqh * var(--ar));
+    --layer-h: max(100cqh, 100cqw / var(--ar));
+    position: absolute;
+    width: var(--layer-w);
+    height: var(--layer-h);
+    left: calc((100cqw - var(--layer-w)) * var(--fx));
+    top: calc((100cqh - var(--layer-h)) * var(--fy));
+  }
+
+  @media (min-width: 1024px) {
+    .annotated-photo__layer {
+      --ar: var(--photo-ar);
+      --fx: var(--photo-x);
+      --fy: var(--photo-y);
+    }
+  }
+
+  .annotated-photo__layer img {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
   .annotated-photo__fade {
     pointer-events: none;
     background: var(--fade-photo-edges);

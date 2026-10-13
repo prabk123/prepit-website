@@ -39,7 +39,7 @@ export default function LoggingSection() {
           id="logging-heading"
           size="section"
           title="The easiest logging you'll ever do."
-          lead="Describe it, snap it or say it. PrepIt checks official brand and restaurant sources, and nothing is saved until you confirm."
+          lead="Describe it, snap it or say it. PrepIt looks for official brand and restaurant figures first, and nothing is logged until you confirm."
         />
         <PointList layout="rows" points={WAYS} />
       </FeatureSplit>

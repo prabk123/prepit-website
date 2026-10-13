@@ -3,7 +3,7 @@ import PhotoBand from "@/components/ui/PhotoBand";
 import PointList from "@/components/ui/PointList";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { appCapture, appVideo } from "@/lib/captures";
-import { KITCHEN_SCENE } from "@/lib/lifestylePhotos";
+import { plansKitchen } from "@/content/lifestyle";
 
 const PLAN_POINTS = [
   { title: "Swap anything", detail: "Change a meal in chat" },
@@ -18,18 +18,12 @@ export default function PlansBand() {
       id="plans"
       labelledBy="plans-heading"
       analyticsName="plans"
-      photo={KITCHEN_SCENE.photo}
-      annotations={KITCHEN_SCENE.annotations}
-      placeholder={KITCHEN_SCENE.placeholder}
+      photo={plansKitchen.desktop}
+      phonePhoto={plansKitchen.mobile}
+      annotations={plansKitchen.annotations}
+      textSide={plansKitchen.textSide}
       media={
         <div className="flex items-start justify-center gap-4 lg:gap-5 [--device-w:260px] sm:[--device-w:240px] lg:[--device-w:clamp(220px,17vw,260px)]">
-          <DeviceFrame
-            className="hidden sm:block sm:mt-12"
-            capture={appCapture(
-              "13-grocery-list",
-              "This week's grocery list by aisle, with an estimated cost at the top",
-            )}
-          />
           <DeviceFrame
             video={appVideo("12-plan-week", "Asking for a week of meals and the plan being built")}
           />

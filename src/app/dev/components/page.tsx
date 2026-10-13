@@ -11,7 +11,7 @@ import Glow from "@/components/ui/Glow";
 import PhotoBand from "@/components/ui/PhotoBand";
 import PointList from "@/components/ui/PointList";
 import AnnotatedPhoto from "@/components/media/AnnotatedPhoto";
-import { HERO_SCENE, KITCHEN_SCENE } from "@/lib/lifestylePhotos";
+import { heroCafe, plansKitchen } from "@/content/lifestyle";
 import PricingCard from "@/components/ui/PricingCard";
 import QuoteCard from "@/components/ui/QuoteCard";
 import Section from "@/components/ui/Section";
@@ -232,9 +232,9 @@ export default function ComponentPreviewPage() {
           <PreviewLabel>AnnotatedPhoto (PRE-201): amber ring, line and glass label, drawn in on first view. Desktop only</PreviewLabel>
           <h2 id="annotation-sample" className="sr-only">Annotated photo</h2>
           <AnnotatedPhoto
-            photo={HERO_SCENE.photo}
-            annotations={HERO_SCENE.annotations}
-            placeholder={HERO_SCENE.placeholder}
+            photo={heroCafe.desktop}
+            phonePhoto={heroCafe.mobile}
+            annotations={heroCafe.annotations}
             className="aspect-[16/9] rounded-card"
           />
         </div>
@@ -242,12 +242,13 @@ export default function ComponentPreviewPage() {
 
       <PhotoBand
         labelledBy="band-sample"
-        photo={KITCHEN_SCENE.photo}
-        annotations={KITCHEN_SCENE.annotations}
-        placeholder={KITCHEN_SCENE.placeholder}
+        photo={plansKitchen.desktop}
+        phonePhoto={plansKitchen.mobile}
+        annotations={plansKitchen.annotations}
+        textSide={plansKitchen.textSide}
         media={<DeviceFrame width={260} capture={groceryCapture} />}
       >
-        <PreviewLabel>PhotoBand (PRE-201): full-bleed annotated photo, text on the left, phones rising from the bottom</PreviewLabel>
+        <PreviewLabel>PhotoBand (PRE-201): full-bleed annotated photo, text on the photo&apos;s clear side, phones under it</PreviewLabel>
         <SectionHeading
           size="section"
           title="Ask for a week of meals."
