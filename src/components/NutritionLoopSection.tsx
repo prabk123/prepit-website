@@ -140,7 +140,7 @@ export default function NutritionLoopSection() {
             id="nutrition-loop-subtitle"
             className="text-base font-medium leading-relaxed text-[var(--grey-60)] lg:text-lg lg:leading-[27px]"
           >
-            Every log makes your coach smarter. The loop is the product.
+            Every log makes your nutritionist smarter. The loop is the product.
           </p>
         </div>
 

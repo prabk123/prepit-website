@@ -44,6 +44,14 @@ type ChatMessage =
   | { role: "user"; text: string }
   | { role: "assistant"; text: string };
 
+/** The finished first conversation, shown before the animation starts. */
+function completedMessages(scenario: DemoScenario): ChatMessage[] {
+  return [
+    { role: "user", text: scenario.userMessage },
+    { role: "assistant", text: scenario.assistant },
+  ];
+}
+
 function PhoneShell({ children }: { children: React.ReactNode }) {
   return (
     <div
@@ -220,12 +228,16 @@ export default function AiChatPhoneDemo({ scenarios }: AiChatPhoneDemoProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const messagesScrollRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(false);
-  const [phase, setPhase] = useState<DemoPhase>("typing");
+  // Start on the finished first scenario so the phone is never blank before
+  // (or without) the animation.
+  const [phase, setPhase] = useState<DemoPhase>("hold");
   const [typedInput, setTypedInput] = useState("");
   const [streamedAssistant, setStreamedAssistant] = useState("");
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [showAction, setShowAction] = useState(false);
-  const [actionDone, setActionDone] = useState(false);
+  const [messages, setMessages] = useState<ChatMessage[]>(() =>
+    completedMessages(scenarios[0]),
+  );
+  const [showAction, setShowAction] = useState(Boolean(scenarios[0].actionType));
+  const [actionDone, setActionDone] = useState(true);
   const [fadeKey, setFadeKey] = useState(0);
   const [displayScenario, setDisplayScenario] = useState<DemoScenario>(scenarios[0]);
 
@@ -269,6 +281,9 @@ export default function AiChatPhoneDemo({ scenarios }: AiChatPhoneDemoProps) {
     let cancelled = false;
     let timeout: ReturnType<typeof setTimeout>;
     let scenarioIndex = 0;
+    // Each activation (including scrolling back in) starts on the finished
+    // first scenario, held, so the phone never comes back to a half-typed chat.
+    let skipFirstPlay = true;
 
     const wait = (ms: number) =>
       new Promise<void>((resolve) => {
@@ -279,6 +294,21 @@ export default function AiChatPhoneDemo({ scenarios }: AiChatPhoneDemoProps) {
 
     const runCycle = async () => {
       while (!cancelled) {
+        if (skipFirstPlay) {
+          skipFirstPlay = false;
+          setDisplayScenario(scenarios[0]);
+          setMessages(completedMessages(scenarios[0]));
+          setStreamedAssistant("");
+          setTypedInput("");
+          setShowAction(Boolean(scenarios[0].actionType));
+          setActionDone(true);
+          setPhase("hold");
+          await wait(HOLD_MS);
+          if (cancelled) return;
+          scenarioIndex = (scenarioIndex + 1) % scenarios.length;
+          continue;
+        }
+
         const current = scenarios[scenarioIndex];
         setDisplayScenario(current);
 
@@ -315,10 +345,7 @@ export default function AiChatPhoneDemo({ scenarios }: AiChatPhoneDemoProps) {
         }
 
         if (cancelled) return;
-        setMessages([
-          { role: "user", text: current.userMessage },
-          { role: "assistant", text: current.assistant },
-        ]);
+        setMessages(completedMessages(current));
         setStreamedAssistant("");
 
         if (current.actionType) {
