@@ -25,6 +25,9 @@ export const APP_STILLS = [
   "18-offline-water",
   "19-body-composition",
   "20-focus-picker",
+  // From the app's Tips and tricks guides (fresca_app assets/tips/steps).
+  "22-action-button-siri",
+  "23-home-screen-widgets",
 ] as const;
 
 export const APP_CLIPS = [
