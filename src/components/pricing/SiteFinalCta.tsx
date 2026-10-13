@@ -3,8 +3,12 @@
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
-/** Pages that end with their own download band (shared plans: "Make your own plan"). */
-const OWN_CLOSING_CTA_PREFIXES = ["/sharable/"];
+/**
+ * Pages that end with their own download band: shared plans ("Make your own
+ * plan") and each guide (the same band, counted per guide). The guides index
+ * keeps the site band.
+ */
+const OWN_CLOSING_CTA_PREFIXES = ["/sharable/", "/guides/"];
 
 /**
  * Shows the site's closing download section on every page except those that

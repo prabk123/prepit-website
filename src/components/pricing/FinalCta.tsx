@@ -8,8 +8,11 @@ import { TRIAL_DAYS } from "@/lib/pricing";
  * The site's one closing download section: full-bleed dark band, headline,
  * the trial line in the brand gradient, App Store button, a QR code on
  * desktop, and Home in a phone rising from the bottom edge.
+ *
+ * `trackingSource` lets a page that ends with its own copy (each guide) count
+ * its App Store taps separately; the site-wide band uses "final-cta".
  */
-export default function FinalCta() {
+export default function FinalCta({ trackingSource = "final-cta" }: { trackingSource?: string }) {
   return (
     <Section id="download" labelledBy="download-heading" analyticsName="final-cta">
       <div className="relative flex flex-col items-center gap-8 text-center">
@@ -22,7 +25,7 @@ export default function FinalCta() {
           </p>
         </div>
         <AppStoreCta
-          trackingSource="final-cta"
+          trackingSource={trackingSource}
           qrCaption="Scan with your iPhone camera"
           className="justify-center"
         />
