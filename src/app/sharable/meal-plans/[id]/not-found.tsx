@@ -1,6 +1,7 @@
 import Link from "next/link";
 import AppStoreCta from "@/components/ui/AppStoreCta";
 import SectionHeading from "@/components/ui/SectionHeading";
+import { TRIAL_NOTE } from "@/lib/pricing";
 
 /** A shared link whose plan was deleted, or a mistyped id. */
 export default function MealPlanNotFound() {
@@ -14,7 +15,7 @@ export default function MealPlanNotFound() {
         as="h1"
       />
       <div className="flex flex-col items-start gap-6">
-        <AppStoreCta trackingSource="shared-meal-plan-not-found" note="3 days free" />
+        <AppStoreCta trackingSource="shared-meal-plan-not-found" note={TRIAL_NOTE} />
         <Link
           href="/"
           className="text-body font-medium text-ink-secondary underline decoration-line-strong underline-offset-4 transition-colors hover:text-ink hover:decoration-ink-muted"

@@ -12,6 +12,7 @@ import PricingCard from "@/components/ui/PricingCard";
 import QuoteCard from "@/components/ui/QuoteCard";
 import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
+import { TRIAL_NOTE } from "@/lib/pricing";
 
 export const metadata: Metadata = {
   title: "Component preview",
@@ -142,7 +143,7 @@ export default function ComponentPreviewPage() {
             </p>
             <AppStoreCta
               trackingSource="dev-preview-hero"
-              note="3 days free"
+              note={TRIAL_NOTE}
               rating={sampleRating}
               qrCaption="Scan to get PrepIt on your iPhone"
             />
@@ -272,8 +273,8 @@ export default function ComponentPreviewPage() {
             id="pricing-sample"
           />
           <PricingCard
-            title="PrepIt"
-            price="3 days free, then $99.99 a year"
+            title="7 days free"
+            price="Then $99.99 a year or $14.99 a month"
             priceNote="That's $1.92 a week. Cancel anytime in the App Store."
             features={[
               "Unlimited logging by text, photo and Siri",
@@ -299,7 +300,7 @@ export default function ComponentPreviewPage() {
           <CtaBand
             id="cta-sample"
             title="Start feeling the difference."
-            line="Try PrepIt free for 3 days."
+            line="Try your nutritionist free for 7 days."
             cta={
               <AppStoreCta
                 trackingSource="dev-preview-final-cta"

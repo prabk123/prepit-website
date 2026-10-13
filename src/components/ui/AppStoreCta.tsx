@@ -8,7 +8,7 @@ type AppStoreCtaProps = {
   label?: string;
   /** `cream` on dark sections; `dark` on the cream pricing card. */
   variant?: "cream" | "dark";
-  /** Line under the button, e.g. "3 days free". */
+  /** Line under the button, e.g. "7 days free" (TRIAL_NOTE). */
   note?: string;
   /** App Store rating shown after the note. Use "placeholder" until the real figure is known. */
   rating?: { value: number | "placeholder"; count?: number };
@@ -66,7 +66,9 @@ export default function AppStoreCta({
           </p>
         )}
       </div>
-      {qrCaption && <AppStoreQr caption={qrCaption} className="hidden lg:flex" />}
+      {qrCaption && (
+        <AppStoreQr caption={qrCaption} trackingSource={`${trackingSource}-qr`} className="hidden lg:flex" />
+      )}
     </div>
   );
 }

@@ -5,7 +5,8 @@ import { Analytics } from "@vercel/analytics/next";
 import Script from "next/script";
 import localFont from "next/font/local";
 import NavigationWrapper from "@/components/NavigationWrapper";
-import DownloadCTA from "@/components/DownloadCTA";
+import FinalCta from "@/components/pricing/FinalCta";
+import SiteFinalCta from "@/components/pricing/SiteFinalCta";
 import Footer from "@/components/Footer";
 import SmartBanner from "@/components/SmartBanner";
 import FloatingGetAppButton from "@/components/FloatingGetAppButton";
@@ -200,7 +201,9 @@ export default function RootLayout({
             <SpeedInsights />
           </main>
 
-          <DownloadCTA />
+          <SiteFinalCta>
+            <FinalCta />
+          </SiteFinalCta>
           <Footer />
         </div>
         <SpeedInsights />

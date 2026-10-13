@@ -29,3 +29,13 @@ export function trackSharedMealPlanEvent(
 
   posthog.capture(event, { source: "shared-meal-plan", ...properties });
 }
+
+/** Custom PostHog event fired when a visitor opens an FAQ answer. */
+export const POSTHOG_FAQ_OPENED_EVENT = "faq_question_opened";
+
+/** `questionId` is the question's fixed slug, never anything the visitor typed. */
+export function trackFaqQuestionOpened(questionId: string, source: string) {
+  if (typeof window === "undefined" || !isPostHogEnabled()) return;
+
+  posthog.capture(POSTHOG_FAQ_OPENED_EVENT, { question_id: questionId, source });
+}
