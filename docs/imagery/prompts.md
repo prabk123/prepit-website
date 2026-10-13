@@ -59,7 +59,7 @@ Failed variations are dropped, with the reason noted in the Generations table. I
 | 7 | Honey light texture | Backgrounds for sections with no photo | None | Decorative, empty alt |
 | 8 | Cafe clip from the hero still | Homepage hero video option | Starts from the hero still | Failed (see Generations); not shipped |
 | 9 | Cooking clip: chicken, peppers and spinach in a cast-iron pan | Features (PRE-203), Plans | None | Plays through `LoopVideo` (`cookingClip` in `src/content/featureImagery.ts`, which holds all of shots 4 to 10; the homepage photos stay in `lifestyle.ts`) |
-| 10 | Voiceover and music bed for `21-walkthrough` | Homepage hero video (with sound) and App Store preview | None | Mixed onto the walkthrough as `public/app/21-walkthrough-narrated.mp4` and `.webm`: voice from 1 s, music ducked under the voice and faded out over the last 3 s. The silent loops are unchanged |
+| 10 | Voiceover and music bed for `21-walkthrough` | A "watch with sound" player: press to play, native controls, never autoplay | None | Captions in `21-walkthrough-narrated.vtt`, timed to the pauses in the voice. Mixed onto the walkthrough as `public/app/21-walkthrough-narrated.mp4` and `.webm`: voice from 1 s, music ducked under the voice and faded out over the last 3 s. The silent loops are unchanged |
 
 Flat-lay prompt (the oats one; the others swap the dish line):
 
@@ -81,7 +81,7 @@ All files go in `public/lifestyle/`. Paths are fixed, so pages can reference the
 | Gym bench | `signals-gym@1x/@2x` (same sizes) | `signals-gym-mobile@1x/@2x` |
 | Desk lunch | `widgets-desk@1x/@2x` (same sizes) | `widgets-desk-mobile@1x/@2x` |
 
-Flat-lays and the texture are 1280 x 720 only (`flatlay-oats`, `flatlay-wrap`, `flatlay-salmon`, `texture-honey`, `.avif` and `.webp`), the size the model made them, so there is no @2x. The cooking clip is `cooking.mp4` (H.264) and `cooking.webm` (VP9) at 1280 x 720, 8 s, no sound, with `cooking-poster.webp`.
+Flat-lays and the texture are 1280 x 720 only (`flatlay-oats`, `flatlay-wrap` and `flatlay-salmon` as `.avif` and `.webp`; `texture-honey` as `.webp` only, since AVIF smeared its grain into blocks), the size the model made them, so there is no @2x. The cooking clip is `cooking.mp4` (H.264) and `cooking.webm` (VP9) at 1280 x 720, 8 s, no sound, with `cooking-poster.webp`.
 
 The model renders at 2048 x 1152, so @2x is the full generated size rather than an upscale to 2880 x 1620, and the phone crop @2x is the full-height 922 x 1152 crop. Every file is under 120 KB (AVIF quality 52, WebP quality 76, made with sharp). Annotation anchors (percent of the desktop photo), their text, alt text, and which side the page text sits on are in `src/content/lifestyle.ts`.
 
@@ -94,8 +94,6 @@ The kitchen photo has the phone on the left, so the Plans section puts its text 
 | Cafe lunch | gpt-image-2 (ElevenLabs), 16:9, 2K, high | `public/app/01b-home-log-dark@2x.webp` at 0b935d8 | Not exposed by the model | 4 / 4 | 2 (generation `jotJjOLKcGI49OoGQevd`) | Generated on PrepIt's ElevenLabs workspace with paid credits (ElevenLabs grants commercial use on paid plans). No real people, brands or text beyond the app screen. |
 | Evening sofa | gpt-image-2, same settings | `public/app/02-chat-chart-dark@2x.webp` at 0b935d8 | Not exposed | 4 / 4 (all reproduce every word and number; the chart bars are shaped slightly differently from the capture, with no value labels on them) | 2 (`TjPqRlBc39Nt2mi3chOa`) | As above |
 | Kitchen shop | gpt-image-2, same settings | `public/app/13-grocery-list-dark@2x.webp` at 0b935d8 | Not exposed | 3 / 4 (variation 4 failed: the handset had an earpiece slot and camera dot, not a modern iPhone) | 2 (`RQN7u3H6TXqqctCBMfAS`) | As above |
-
-All 12 variations with their screen checks: [contact sheet](https://claude.ai/artifact/Ccqc5PkZZBRax3kMQtPPoT). Full-size originals are kept outside the repo. ElevenLabs flow `088lf68ZQahQ3mm7eg5x`.
 | Gym bench | gpt-image-2, 16:9, 2K, high | `public/app/01-home-dark@2x.webp` at 0b935d8 | Not exposed | 3 / 4 (variation 4 garbled the macros: "131/1S6g", "1S6/1S8g") | 1 | As above |
 | Desk lunch | gpt-image-2, 16:9, 2K, high, two references | `15-widget-signals-medium-dark@2x.webp` and `15-widget-today-plan-large-dark@2x.webp` at 0b935d8 | Not exposed | 2 / 4 (variations 2 and 4 lost the Signals widget's panel) | 1 | As above |
 | Flat-lay: oats | gpt-image-2, 16:9, 1K, medium (one 1K low draft first) | None | Not exposed | 2 / 2 | 2 (`EWhQnBkM3eEmsiDWCcMf`) | As above |
@@ -106,5 +104,7 @@ All 12 variations with their screen checks: [contact sheet](https://claude.ai/ar
 | Cooking clip | Veo 3.1 Fast, 8 s, 1080p, no audio | None | Not exposed | 1 / 1 | `i6dE8Sdn2OEA7obO7K8a` | As above |
 | Voiceover | eleven_v3, voice Cass | None | n/a | 2 (46.5 s and 45.9 s) | 1 (`sZM4Mf8hKxcug18sjYC6`) | As above |
 | Music bed | eleven_music_v2_5, instrumental, 54 s | None | n/a | 2 | 1 (`h7XB3xj324ridSyjJbGW`) | As above |
+
+Every variation (28 photos, 2 clips, 2 voiceovers and 2 music beds) with their screen checks: [contact sheet](https://claude.ai/artifact/Ccqc5PkZZBRax3kMQtPPoT). Full-size originals are kept outside the repo. ElevenLabs flow `088lf68ZQahQ3mm7eg5x`.
 
 `/dev/imagery` (local development and Vercel previews only, like `/dev/components`) shows shots 4 to 10 the way a page would use them, for checking in the browser.

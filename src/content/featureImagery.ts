@@ -86,12 +86,16 @@ export const widgetsDesk: FeaturePhoto = {
   textSide: "end",
 };
 
-/** A photo with no phone in it, at its native 1280 × 720 (no 2x upscale). */
-function still(name: string, alt: string): SectionPhoto {
+/**
+ * A photo with no phone in it, at its native 1280 × 720 (no 2x upscale), so
+ * it stays sharp up to 640 CSS px wide on a 2x screen. Set `sizes` when it is
+ * shown wider.
+ */
+function still(name: string, alt: string, { avif = true } = {}): SectionPhoto {
   const base = `/lifestyle/${name}`;
   return {
     src: `${base}.webp`,
-    avif: `${base}.avif 1280w`,
+    avif: avif ? `${base}.avif 1280w` : undefined,
     webp: `${base}.webp 1280w`,
     width: 1280,
     height: 720,
@@ -118,8 +122,12 @@ export const planFlatLays = {
   ),
 };
 
-/** Soft honey light on near-black, behind sections that have no photo. Decorative. */
-export const textureHoney = still("texture-honey", "");
+/**
+ * Soft honey light on near-black, behind sections that have no photo.
+ * Decorative. WebP only: AVIF smeared the grain into blocks. It is a soft
+ * blur, so stretching it full width is fine.
+ */
+export const textureHoney = still("texture-honey", "", { avif: false });
 
 /** Props for LoopVideo: chicken and vegetables cooking, no phone (Plans). */
 export const cookingClip = {
@@ -132,12 +140,17 @@ export const cookingClip = {
 };
 
 /**
- * The 54 s walkthrough with voiceover and music, for a hero video with sound
- * or the App Store preview. Starts muted like any autoplay; sound needs a tap.
+ * The 54 s walkthrough with voiceover and music, for a "watch with sound"
+ * player. Not for LoopVideo, which is muted only. The player contract:
+ * - never autoplays: the visitor presses play, with native controls;
+ * - `preload="none"` or `"metadata"`, showing the poster until then;
+ * - carries the captions track (WCAG 1.2.2).
+ * The silent loops (21-walkthrough.mp4/.webm) stay the autoplay version.
  */
 export const narratedWalkthrough = {
   mp4: "/app/21-walkthrough-narrated.mp4",
   webm: "/app/21-walkthrough-narrated.webm",
+  captions: "/app/21-walkthrough-narrated.vtt",
   poster: "/app/21-walkthrough-poster.webp",
   width: 804,
   height: 1748,

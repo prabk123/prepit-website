@@ -122,7 +122,7 @@ export default function ImageryPreviewPage() {
       </Section>
 
       <Section labelledBy="narrated">
-        <Label>Walkthrough with voiceover and music, with controls</Label>
+        <Label>Walkthrough with voiceover and music: press play, native controls, captions on</Label>
         <SectionHeading title="Narrated walkthrough" size="title" id="narrated" />
         <video
           controls
@@ -135,6 +135,7 @@ export default function ImageryPreviewPage() {
         >
           <source src={narratedWalkthrough.webm} type="video/webm" />
           <source src={narratedWalkthrough.mp4} type="video/mp4" />
+          <track kind="captions" src={narratedWalkthrough.captions} srcLang="en" label="English" default />
         </video>
       </Section>
     </div>
