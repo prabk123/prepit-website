@@ -12,7 +12,6 @@ export const HOME_SECTION_LINKS: HomeSectionLink[] = [
   { label: "Nutrition signals", href: "/#nutrition-signals" },
   { label: "AI Nutritionist", href: "/#ai-coach", inHeader: true },
   { label: "Trust", href: "/#trust" },
-  { label: "Goals", href: "/#goals" },
   { label: "FAQ", href: "/#faq", inHeader: true },
 ];
 
