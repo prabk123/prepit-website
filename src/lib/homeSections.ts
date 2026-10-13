@@ -6,12 +6,11 @@ export type HomeSectionLink = {
 };
 
 export const HOME_SECTION_LINKS: HomeSectionLink[] = [
-  { label: "Why PrepIt", href: "/#objection-mirror" },
-  { label: "How it works", href: "/#nutrition-loop", inHeader: true },
+  { label: "Your nutritionist", href: "/#nutritionist" },
   { label: "Logging", href: "/#logging" },
-  { label: "Nutrition signals", href: "/#nutrition-signals" },
-  { label: "AI Nutritionist", href: "/#ai-coach", inHeader: true },
-  { label: "Trust", href: "/#trust" },
+  { label: "Energy, Satiety and Mood", href: "/#signals" },
+  { label: "Meal plans", href: "/#plans" },
+  { label: "Features", href: "/#features", inHeader: true },
   { label: "Pricing", href: "/#pricing", inHeader: true },
   { label: "FAQ", href: "/#faq", inHeader: true },
 ];
@@ -19,3 +18,13 @@ export const HOME_SECTION_LINKS: HomeSectionLink[] = [
 export const HEADER_SECTION_LINKS = HOME_SECTION_LINKS.filter(
   (link) => link.inHeader,
 );
+
+/**
+ * Site pages in the header and footer beside the homepage sections. /guides
+ * and /about come with PRE-204.
+ */
+export const SITE_PAGE_LINKS: HomeSectionLink[] = [
+  { label: "Guides", href: "/guides" },
+  { label: "About", href: "/about" },
+  { label: "Contact", href: "/contact" },
+];

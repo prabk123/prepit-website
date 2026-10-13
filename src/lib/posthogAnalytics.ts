@@ -39,3 +39,31 @@ export function trackFaqQuestionOpened(questionId: string, source: string) {
 
   posthog.capture(POSTHOG_FAQ_OPENED_EVENT, { question_id: questionId, source });
 }
+
+/**
+ * Homepage scroll depth: fired once per page view when a section reaches the
+ * middle of the screen. The only property is the section's fixed name.
+ */
+export const POSTHOG_SECTION_VIEWED_EVENT = "home_section_viewed";
+
+export function trackSectionViewed(section: string) {
+  if (typeof window === "undefined" || !isPostHogEnabled()) return;
+
+  posthog.capture(POSTHOG_SECTION_VIEWED_EVENT, { section });
+}
+
+/**
+ * Fired once per page view the first time a capture video plays, whether it
+ * started itself in view (`auto`) or the visitor pressed play (`button`).
+ */
+export const POSTHOG_VIDEO_PLAYED_EVENT = "website_video_played";
+
+export function trackVideoPlayed(video: string, trigger: "auto" | "button") {
+  if (typeof window === "undefined" || !isPostHogEnabled()) return;
+
+  posthog.capture(POSTHOG_VIDEO_PLAYED_EVENT, {
+    video,
+    trigger,
+    path: window.location.pathname,
+  });
+}

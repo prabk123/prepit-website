@@ -10,8 +10,12 @@ type SectionHeadingProps = {
   title: ReactNode;
   /** The one supporting line. */
   lead?: ReactNode;
-  /** `hero` for the page's h1, `chapter` for section headlines, `title` for smaller blocks. */
-  size?: "hero" | "chapter" | "title";
+  /**
+   * `hero` for the page's h1, `chapter` for big chapter heads (bento, pricing,
+   * FAQ), `section` for mid-page sections beside a phone or over a photo,
+   * `title` for smaller blocks.
+   */
+  size?: "hero" | "chapter" | "section" | "title";
   as?: "h1" | "h2" | "h3";
   id?: string;
   align?: "start" | "center";
@@ -21,6 +25,7 @@ type SectionHeadingProps = {
 const titleSize = {
   hero: "text-hero",
   chapter: "text-chapter",
+  section: "text-section",
   title: "text-title",
 } as const;
 

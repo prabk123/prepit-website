@@ -6,7 +6,7 @@ import { FAQ_ITEMS, faqPageJsonLd } from "@/lib/faq";
 /** "Questions, answered.": the FAQ with FAQPage structured data that matches it. */
 export default function FaqSection() {
   return (
-    <Section id="faq" labelledBy="faq-heading">
+    <Section id="faq" labelledBy="faq-heading" analyticsName="faq">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqPageJsonLd()).replace(/</g, "\\u003c") }}

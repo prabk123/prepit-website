@@ -43,6 +43,13 @@
   --color-brand-orange: #f38c61;
   --color-brand-yellow: #f5cc77;
 
+  /* Photo annotations (D3): amber ring and leader line, dark glass label.
+     Amber is the one accent colour on photos. */
+  --color-annotation: #f5cc77;
+  --color-annotation-ring-fill: rgb(17 15 12 / 0.5);
+  --color-annotation-label: rgb(17 15 12 / 0.78);
+  --color-annotation-border: rgb(245 204 119 / 0.35);
+
   /* Hardware colours for <DeviceFrame> and the video button's backing. */
   --color-device-metal: #3c3c40;
   --color-device-metal-dark: #2a2a2d;
@@ -62,6 +69,11 @@
   --text-chapter--line-height: 1;
   --text-chapter--letter-spacing: -0.025em;
   --text-chapter--font-weight: 600;
+  /* Mid-page section headlines beside a phone or over a photo (D3 60 px). */
+  --text-section: clamp(36px, 28.6px + 1.9vw, 60px);
+  --text-section--line-height: 1;
+  --text-section--letter-spacing: -0.025em;
+  --text-section--font-weight: 600;
   --text-title: clamp(26px, 22.3px + 0.95vw, 36px);
   --text-title--line-height: 1.1;
   --text-title--letter-spacing: -0.02em;
@@ -90,6 +102,9 @@
   --radius-card: clamp(28px, 23.5px + 1.14vw, 40px);
   --radius-tile: 28px;
   --radius-control: 999px;
+  /* A Home Screen widget capture's corner, and a small icon tile. */
+  --radius-widget: 22px;
+  --radius-icon: 14px;
 
   /* Shadows. Cards are flat; phones float. */
   --shadow-phone: 0 40px 80px -24px rgb(0 0 0 / 0.7), 0 12px 24px -12px rgb(0 0 0 / 0.5);
@@ -97,6 +112,11 @@
   /* Motion: D3 has one moment only (photo labels drawing in, PRE-201).
      Nothing else on the page animates. */
   --ease-calm: cubic-bezier(0.22, 1, 0.36, 1);
+  /* Labels draw in one after another: line, then label, about a second for
+     a photo's set. Under reduced motion they are simply shown. */
+  --duration-annotation-line: 320ms;
+  --duration-annotation-label: 260ms;
+  --delay-annotation-step: 200ms;
 }
 
 /* Font families come from next/font variables set on <body>, so they are
@@ -118,9 +138,40 @@
   --glow-warm:
     radial-gradient(closest-side, rgb(243 140 97 / 0.32), transparent),
     radial-gradient(closest-side at 70% 65%, rgb(245 204 119 / 0.22), transparent);
+  /* Fades a full-bleed photo into the page at its top and bottom edges. */
+  --fade-photo-edges: linear-gradient(
+    180deg,
+    var(--color-page) 0%,
+    rgb(17 15 12 / 0) 14%,
+    rgb(17 15 12 / 0) 78%,
+    var(--color-page) 100%
+  );
   /* Dark gradient on the left of full-bleed photos, behind the text column. */
   --scrim-photo: linear-gradient(
     90deg,
+    rgb(17 15 12 / 0.92) 0%,
+    rgb(17 15 12 / 0.8) 45%,
+    rgb(17 15 12 / 0.15) 85%
+  );
+  /*
+   * Photo bands: dark behind the text column only, clear over the subject.
+   * `end` darkens the top right, for a text block above the groceries.
+   */
+  --scrim-band-start: linear-gradient(
+    90deg,
+    rgb(17 15 12 / 0.9) 0%,
+    rgb(17 15 12 / 0.72) 30%,
+    rgb(17 15 12 / 0) 55%
+  );
+  --scrim-band-end: radial-gradient(
+    ellipse 62% 72% at 84% 22%,
+    rgb(17 15 12 / 0.9) 0%,
+    rgb(17 15 12 / 0.72) 50%,
+    rgb(17 15 12 / 0) 100%
+  );
+  /* The same gradient from the right, for photos whose subject is on the left. */
+  --scrim-photo-end: linear-gradient(
+    270deg,
     rgb(17 15 12 / 0.92) 0%,
     rgb(17 15 12 / 0.8) 45%,
     rgb(17 15 12 / 0.15) 85%
