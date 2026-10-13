@@ -16,15 +16,15 @@ The palette is chosen to sit on the site's page colour `#110f0c` under the left-
 | -- | -- | -- | -- | -- |
 | 1 | Cafe lunch: hand holding a phone over a chicken, hummus and salad wrap on a wooden cafe table, flat white beside it | Hero, full width under the headline | `public/app/01b-home-log-dark` (the wrap at 12:30 PM in today's log) | 462 kcal, Chicken wrap with hummus and salad; 61 g protein; 150 g chicken breast; 60 g wholemeal tortilla |
 | 2 | Evening sofa: phone in hand, a bowl of Greek yogurt with raspberries on the arm of the sofa, cup of tea, warm lamp light | Ask anything (5), full bleed, text on the left | `public/app/02-chat-chart-dark` (protein chart in chat) | 168 kcal, Greek yogurt with raspberries; 13 g protein |
-| 3 | Kitchen shop: groceries just unpacked on a worktop (salmon fillet in paper, quinoa, cherry tomatoes, cucumber, red onion, oats), phone propped against a jar | Plans (10), full bleed, text on the left | `public/app/13-grocery-list-dark` | 130 g salmon fillet; 100 g quinoa; 454 kcal, Mediterranean salmon bowl with quinoa |
+| 3 | Kitchen shop: the groceries on the phone's list just unpacked on a worktop (wholemeal tortillas, eggs, feta, Greek yogurt, apples, avocados), phone propped against a jar | Plans (10), full bleed, text on the left | `public/app/13-grocery-list-dark` | 850 g Greek yogurt; 200 g eggs; 120 g wholemeal tortilla; Est. £48–£66 for the week |
 
-Annotation values (and the screens the phone shows) come from the `showcase-full-account` seed in `fresca_backend` (`src/dev/resetTestAccount/seeds.ts`, `SHOWCASE_WRAP`, `SHOWCASE_MED_SALMON` and the Greek yogurt snack), which is the account the PRE-198 captures were taken on, so the numbers on the photo match the numbers on the phone.
+The groceries in shot 3 are the items visible on the phone's list, so the photo and the screen agree. Annotation values (and the screens the phone shows) come from the `showcase-full-account` seed in `fresca_backend` (`src/dev/resetTestAccount/seeds.ts`, `SHOWCASE_WRAP`, `SHOWCASE_MED_SALMON` and the Greek yogurt snack), which is the account the PRE-198 captures were taken on, so the numbers on the photo match the numbers on the phone.
 
 The other scenes in the ticket (gym bench, desk with widgets, plan flat-lays, gradient textures, clips, walkthrough voiceover) follow once these three are picked, so the whole set is one shoot.
 
 ## Prompts
 
-Each prompt is the style guide above followed by the scene line, with the scene's capture attached as a reference image (the 2x dark WebP from `public/app/`). One generation per scene, four variations each, on an image model that takes reference images (Nano Banana or GPT Image; picked once the full connector shows which this workspace can run).
+Each prompt is the style guide above, the scene line, and a closing line naming the screen's key text and telling the model to reproduce the screenshot exactly, with the scene's capture attached as a reference image (the 2x dark WebP from `public/app/`). One generation per scene, four variations each, on an image model that takes reference images (Nano Banana or GPT Image; picked once the full connector shows which this workspace can run).
 
 ## Screen fidelity check
 
@@ -47,7 +47,7 @@ Failed variations are dropped, with the reason noted in the Generations table. I
 
 ### 3. Kitchen shop (Plans)
 
-> Wide 16:9 photograph of a home kitchen worktop just after a grocery shop, soft early evening daylight from a window on the right. On the right half, groceries laid out loosely: a salmon fillet in butcher's paper, a bag of quinoa, a punnet of cherry tomatoes, a cucumber, a red onion, a bag of rolled oats, a paper shopping bag behind them. An iPhone is propped upright against a glass jar among them, screen facing the camera almost square on. The left half of the frame is darker worktop and kitchen wall, softly out of focus. A hand reaching for the tomatoes at the edge of the frame.
+> Wide 16:9 photograph of a home kitchen worktop just after a grocery shop, soft early evening daylight from a window on the right. On the right half, the shop laid out loosely: a pack of wholemeal tortillas, a box of six eggs, a block of feta, a large plain tub of Greek yogurt, a few red apples and two avocados, a paper shopping bag behind them. An iPhone is propped upright against a glass jar among them, screen facing the camera almost square on. The left half of the frame is darker worktop and kitchen wall, softly out of focus. A hand reaching for the tomatoes at the edge of the frame.
 
 ## Output files
 
