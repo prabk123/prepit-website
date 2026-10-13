@@ -1,20 +1,17 @@
-import Image from "next/image";
-import Link from "next/link";
-
+/**
+ * Shared meal plans: the warm dark page (D3) under the site header, with room
+ * for the fixed navigation bar.
+ */
 export default function SharableMealPlanLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <div
-      className="flex min-h-screen flex-col"
-      style={{ background: "#F4F4F5" }}
-    >
-      {/* Page content */}
-      <main className="mx-auto w-full max-w-lg flex-1 px-4 py-4 mt-20">
+    <div className="w-full bg-page pt-16 text-ink lg:pt-[72px]">
+      <div className="mx-auto flex w-full max-w-content flex-col gap-8 px-gutter pb-section pt-8 lg:gap-10 lg:pt-12">
         {children}
-      </main>
+      </div>
     </div>
   );
 }

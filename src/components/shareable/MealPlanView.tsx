@@ -2,80 +2,60 @@
 
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import type { SharedMealPlan, PlanDay, MealSelection, UnitSystem } from "@/lib/types/meal-plan";
-import WeekCalendar, { getWeekDates } from "./WeekCalendar";
+import { planDayKey, planWeek } from "@/lib/plan-dates";
+import { SHARED_MEAL_PLAN_EVENTS, trackSharedMealPlanEvent } from "@/lib/posthogAnalytics";
+import WeekCalendar from "./WeekCalendar";
 import CalorieSummary from "./CalorieSummary";
 import RecipeCard from "./RecipeCard";
 import GroceryListSection from "./GroceryListSection";
 import RecipeDetailModal from "./RecipeDetailModal";
 import UnitSystemToggle from "./UnitSystemToggle";
 
-function toDateKey(date: Date): string {
-  return date.toISOString().split("T")[0];
-}
-
-function formatDateRange(days: PlanDay[]): string {
-  if (days.length === 0) return "";
-  const start = new Date(days[0].date);
-  const end = new Date(days[days.length - 1].date);
-  const fmt = (d: Date) =>
-    d.toLocaleDateString("en-US", { day: "numeric", month: "short" });
-  return `${fmt(start)} - ${fmt(end)}`;
-}
-
-function countRecipes(days: PlanDay[]): number {
-  const seen = new Set<string>();
-  for (const day of days) {
-    for (const meal of [day.breakfast, day.lunch, day.dinner, day.snack]) {
-      if (meal?.recipe?._id) seen.add(meal.recipe._id);
-    }
-  }
-  return seen.size;
-}
-
 interface MealPlanViewProps {
   plan: SharedMealPlan;
 }
 
+/**
+ * The interactive part of a shared plan: units, grocery list, the week strip
+ * and one day of meals at a time (swipe or pick a day). On wide screens the
+ * units and grocery list sit in a column beside the days.
+ */
 export default function MealPlanView({ plan }: MealPlanViewProps) {
   const [activeRecipe, setActiveRecipe] = useState<MealSelection | null>(null);
   const [unitSystem, setUnitSystem] = useState<UnitSystem>("imperial");
 
   const daysByDateKey = useMemo(() => {
     const map = new Map<string, number>();
-    for (let i = 0; i < plan.days.length; i++) {
-      map.set(toDateKey(new Date(plan.days[i].date)), i);
-    }
+    plan.days.forEach((day, i) => map.set(planDayKey(day.date), i));
     return map;
   }, [plan.days]);
 
-  const planDateSet = useMemo(
-    () => new Set(daysByDateKey.keys()),
-    [daysByDateKey]
-  );
+  const planDateSet = useMemo(() => new Set(daysByDateKey.keys()), [daysByDateKey]);
+  const weekDates = useMemo(() => planWeek(plan.days), [plan.days]);
 
-  const weekDates = useMemo(
-    () => getWeekDates(new Date(plan.days[0].date)),
-    [plan.days]
-  );
-
-  const firstDateKey = toDateKey(new Date(plan.days[0].date));
-  const [selectedDateKey, setSelectedDateKey] = useState(firstDateKey);
-
-  const selectedDayIndex = daysByDateKey.get(selectedDateKey) ?? 0;
+  const [selectedDateKey, setSelectedDateKey] = useState(() => planDayKey(plan.days[0].date));
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const dayRefs = useRef<(HTMLDivElement | null)[]>([]);
   const isScrollingProgrammatically = useRef(false);
 
-  const dateRange = formatDateRange(plan.days);
-  const recipeCount = countRecipes(plan.days);
+  const openRecipe = useCallback(
+    (selection: MealSelection, slot: string) => {
+      setActiveRecipe(selection);
+      trackSharedMealPlanEvent(SHARED_MEAL_PLAN_EVENTS.recipeOpened, {
+        plan_id: plan._id,
+        slot,
+      });
+    },
+    [plan._id],
+  );
 
   const scrollToDay = useCallback((index: number) => {
     const el = dayRefs.current[index];
     const container = scrollContainerRef.current;
     if (el && container) {
       isScrollingProgrammatically.current = true;
-      el.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "start" });
+      container.scrollTo({ left: el.offsetLeft - container.offsetLeft, behavior: "smooth" });
       setTimeout(() => {
         isScrollingProgrammatically.current = false;
       }, 500);
@@ -90,10 +70,10 @@ export default function MealPlanView({ plan }: MealPlanViewProps) {
         scrollToDay(idx);
       }
     },
-    [daysByDateKey, scrollToDay]
+    [daysByDateKey, scrollToDay],
   );
 
-  // Snap scroll observer - sync calendar when user swipes
+  // Keep the week strip in step when the visitor swipes between days.
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
@@ -105,13 +85,12 @@ export default function MealPlanView({ plan }: MealPlanViewProps) {
           if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
             const idx = dayRefs.current.indexOf(entry.target as HTMLDivElement);
             if (idx !== -1) {
-              const dateKey = toDateKey(new Date(plan.days[idx].date));
-              setSelectedDateKey(dateKey);
+              setSelectedDateKey(planDayKey(plan.days[idx].date));
             }
           }
         }
       },
-      { root: container, threshold: 0.5 }
+      { root: container, threshold: 0.5 },
     );
 
     for (const ref of dayRefs.current) {
@@ -122,53 +101,45 @@ export default function MealPlanView({ plan }: MealPlanViewProps) {
   }, [plan.days]);
 
   return (
-    <div className="flex flex-col gap-2">
-      {/* Header */}
-      <div className="px-0">
-        <h1
-          className="text-2xl font-semibold"
-          style={{ fontFamily: "var(--font-brand)" }}
+    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start lg:gap-8">
+      <div className="flex min-w-0 flex-col gap-4">
+        <div className="rounded-tile border border-line bg-surface p-4 sm:p-5">
+          <WeekCalendar
+            weekDates={weekDates}
+            planDateSet={planDateSet}
+            selectedDate={selectedDateKey}
+            onSelect={handleDaySelect}
+          />
+        </div>
+
+        {/* One day per panel; swipe or use the week strip. */}
+        <div
+          ref={scrollContainerRef}
+          className="flex snap-x snap-mandatory gap-4 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          aria-label="Meals by day"
         >
-          {dateRange}
-        </h1>
-        <p className="mt-1 text-sm" style={{ color: "#7A7A82" }}>
-          {recipeCount} recipes
-        </p>
+          {plan.days.map((day, index) => (
+            <div
+              key={day.date}
+              ref={(el) => {
+                dayRefs.current[index] = el;
+              }}
+              className="w-full shrink-0 snap-center"
+            >
+              <DayContent day={day} onRecipeTap={openRecipe} />
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* Unit toggle */}
-      <UnitSystemToggle value={unitSystem} onChange={setUnitSystem} />
-
-      {/* Grocery list */}
-      <GroceryListSection groceries={plan.groceries} days={plan.days} unitSystem={unitSystem} />
-
-      {/* Week calendar */}
-      <div className="rounded-2xl bg-white p-4">
-        <WeekCalendar
-          weekDates={weekDates}
-          planDateSet={planDateSet}
-          selectedDate={selectedDateKey}
-          onSelect={handleDaySelect}
+      <div className="flex flex-col gap-4 lg:sticky lg:top-28">
+        <UnitSystemToggle value={unitSystem} onChange={setUnitSystem} />
+        <GroceryListSection
+          planId={plan._id}
+          groceries={plan.groceries}
+          days={plan.days}
+          unitSystem={unitSystem}
         />
-      </div>
-
-      {/* Day content - horizontally scrollable */}
-      <div
-        ref={scrollContainerRef}
-        className="flex snap-x snap-mandatory gap-2 overflow-x-auto scrollbar-hide"
-        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-      >
-        {plan.days.map((day, index) => (
-          <div
-            key={day.date}
-            ref={(el) => {
-              dayRefs.current[index] = el;
-            }}
-            className="w-full shrink-0 snap-center"
-          >
-            <DayContent day={day} onRecipeTap={setActiveRecipe} />
-          </div>
-        ))}
       </div>
 
       {activeRecipe && (
@@ -188,40 +159,35 @@ function DayContent({
   onRecipeTap,
 }: {
   day: PlanDay;
-  onRecipeTap: (selection: MealSelection) => void;
+  onRecipeTap: (selection: MealSelection, slot: string) => void;
 }) {
   const meals = [
-    { label: "Breakfast", selection: day.breakfast },
-    { label: "Lunch", selection: day.lunch },
-    { label: "Dinner", selection: day.dinner },
-    { label: "Snacks", selection: day.snack },
-  ].filter((m) => m.selection !== null);
+    { slot: "breakfast", label: "Breakfast", selection: day.breakfast },
+    { slot: "lunch", label: "Lunch", selection: day.lunch },
+    { slot: "dinner", label: "Dinner", selection: day.dinner },
+    { slot: "snack", label: "Snacks", selection: day.snack },
+  ].filter(
+    (m): m is { slot: string; label: string; selection: MealSelection } => m.selection != null,
+  );
 
   return (
-    <div className="rounded-2xl bg-white p-4">
+    <div className="rounded-tile border border-line bg-surface p-4 sm:p-5">
       <CalorieSummary day={day} />
 
-      <div className="mt-4 flex flex-col gap-4">
-        {meals.map(({ label, selection }) => (
-          <div key={label}>
-            <p
-              className="mb-3 text-sm font-bold"
-              style={{ color: "#4D4D59" }}
-            >
-              {label}
-            </p>
+      <div className="mt-5 flex flex-col gap-5">
+        {meals.map(({ slot, label, selection }) => (
+          <div key={slot}>
+            <p className="mb-3 text-eyebrow font-medium uppercase text-ink-muted">{label}</p>
             <RecipeCard
-              recipe={selection!.recipe}
-              servings={selection!.servings}
-              onClick={() => onRecipeTap(selection!)}
+              recipe={selection.recipe}
+              servings={selection.servings}
+              onClick={() => onRecipeTap(selection, slot)}
             />
           </div>
         ))}
 
         {meals.length === 0 && (
-          <p className="py-8 text-center text-sm" style={{ color: "#A6A6AC" }}>
-            No meals planned for this day
-          </p>
+          <p className="py-8 text-center text-small text-ink-faint">No meals planned for this day</p>
         )}
       </div>
     </div>

@@ -1,5 +1,6 @@
+import { cache } from "react";
 import { ObjectId } from "mongodb";
-import { getDatabase } from "./mongodb";
+import { getSharedPlanFixture } from "./meal-plan-fixtures";
 import type { SharedMealPlan } from "./types/meal-plan";
 
 const RECIPE_PROJECTION = {
@@ -18,13 +19,36 @@ const RECIPE_PROJECTION = {
   sourceType: 1,
 };
 
-export async function getMealPlanById(
-  id: string
-): Promise<SharedMealPlan | null> {
-  if (!ObjectId.isValid(id)) {
-    return null;
-  }
+/**
+ * One shared plan by id, or null when the id is not a plan. Cached per
+ * request, so the page, its metadata and its preview image read Mongo once.
+ * A database failure is logged (plan id only) and rethrown, so the page shows
+ * its error state rather than "not found".
+ */
+export const getMealPlanById = cache(
+  async (id: string): Promise<SharedMealPlan | null> => {
+    if (!ObjectId.isValid(id)) {
+      return null;
+    }
 
+    const fixture = getSharedPlanFixture(id);
+    if (fixture) return fixture;
+
+    try {
+      return await loadMealPlan(id);
+    } catch (error) {
+      console.error("[shared-meal-plan] Failed to load plan", {
+        planId: id,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      throw error;
+    }
+  },
+);
+
+async function loadMealPlan(id: string): Promise<SharedMealPlan | null> {
+  // Imported here so a missing MONGODB_URI fails inside the logged try block.
+  const { getDatabase } = await import("./mongodb");
   const db = await getDatabase();
 
   const results = await db
@@ -145,6 +169,18 @@ export async function getMealPlanById(
   // Round-trip through JSON to strip ObjectId buffers and Date objects
   // so the data is safe to pass as props to client components
   const plan = JSON.parse(JSON.stringify(results[0])) as SharedMealPlan;
+
+  // A plan saved with no days unwinds to one empty day with no date.
+  plan.days = (plan.days ?? []).filter((day) => Boolean(day?.date));
+  plan.groceries = plan.groceries ?? [];
+  if (plan.days.length === 0) {
+    return null;
+  }
+
+  // $push keeps $unwind order, but sort by date so the strip and the swipe
+  // always agree.
+  plan.days.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
   const apiBaseUrl = process.env.PREPIT_API_BASE_URL || "";
 
   for (const day of plan.days) {
