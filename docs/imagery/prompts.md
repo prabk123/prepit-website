@@ -54,7 +54,7 @@ Failed variations are dropped, with the reason noted in the Generations table. I
 | # | Scene | Where it goes | Screen reference | Notes |
 | -- | -- | -- | -- | -- |
 | 4 | Gym bench: phone leaning on a gym bag, protein shake, towel | Features (PRE-203), Signals | `public/app/01-home-dark` | Annotations point at the phone (Energy 84, Satiety 96, Mood 87; 1,481 of 1,570 kcal), since nothing on the bench is logged |
-| 5 | Desk lunch: phone on a walnut stand showing widgets, lunch box, laptop | Features (PRE-203), Widgets tile | `15-widget-signals-medium-dark` and `15-widget-today-plan-large-dark` on a plain dark home screen | Phone on the left, so `textSide: "end"` and the mirrored scrim |
+| 5 | Desk lunch: phone on a walnut stand showing widgets, chicken and rice lunch box, laptop, status bar 12:41 | Features (PRE-203), Widgets tile | `15-widget-signals-medium-dark-green` and `15-widget-today-plan-large-dark-lunch` (a good day: all rings green, lunch logged) on a plain dark home screen | Phone on the left, so `textSide: "end"` and the mirrored scrim |
 | 6 | Overhead flat-lays: protein overnight oats with apple and cinnamon; chicken wrap with hummus and salad; Mediterranean salmon bowl with quinoa | Features (PRE-203), Plans; share images (PRE-206) | None | Meals from the showcase plan. Dark space on the left for text |
 | 7 | Honey light texture | Backgrounds for sections with no photo | None | Decorative, empty alt |
 | 8 | Cafe clip from the hero still | Homepage hero video option | Starts from the hero still | Failed (see Generations); not shipped |
@@ -95,7 +95,7 @@ The kitchen photo has the phone on the left, so the Plans section puts its text 
 | Evening sofa | gpt-image-2, same settings | `public/app/02-chat-chart-dark@2x.webp` at 0b935d8 | Not exposed | 4 / 4 (all reproduce every word and number; the chart bars are shaped slightly differently from the capture, with no value labels on them) | 2 (`TjPqRlBc39Nt2mi3chOa`) | As above |
 | Kitchen shop | gpt-image-2, same settings | `public/app/13-grocery-list-dark@2x.webp` at 0b935d8 | Not exposed | 3 / 4 (variation 4 failed: the handset had an earpiece slot and camera dot, not a modern iPhone) | 2 (`RQN7u3H6TXqqctCBMfAS`) | As above |
 | Gym bench | gpt-image-2, 16:9, 2K, high | `public/app/01-home-dark@2x.webp` at 0b935d8 | Not exposed | 3 / 4 (variation 4 garbled the macros: "131/1S6g", "1S6/1S8g") | 1 | As above |
-| Desk lunch | gpt-image-2, 16:9, 2K, high, two references | `15-widget-signals-medium-dark@2x.webp` and `15-widget-today-plan-large-dark@2x.webp` at 0b935d8 | Not exposed | 2 / 4 (variations 2 and 4 lost the Signals widget's panel) | 1 | As above |
+| Desk lunch | gpt-image-2, 16:9, 2K, high, two references | Mac captures `15-widget-signals-medium-dark-green.png` and `15-widget-today-plan-large-dark-lunch.png` (seeds `showcase-full-account` and `logged-breakfast-with-plan-today`) | Not exposed | 2 / 2 (every word, time and number matches; the first run, which showed a red Mood ring and lunch skipped, was replaced at Prabodh's request) | 2 (`TgBiTVTojgj3ZrgYAKIS`; its ring gaps match the capture more closely) | As above |
 | Flat-lay: oats | gpt-image-2, 16:9, 1K, medium (one 1K low draft first) | None | Not exposed | 2 / 2 | 2 (`EWhQnBkM3eEmsiDWCcMf`) | As above |
 | Flat-lay: wrap | Same | None | Not exposed | 2 / 2 | 1 (`7sVm97IyfvfBmglMzq8b`) | As above |
 | Flat-lay: salmon | Same | None | Not exposed | 2 / 2 | 1 (`qZtKTZKnddTQVSW6wf3a`) | As above |
@@ -105,6 +105,6 @@ The kitchen photo has the phone on the left, so the Plans section puts its text 
 | Voiceover | eleven_v3, voice Cass | None | n/a | 2 (46.5 s and 45.9 s) | 1 (`sZM4Mf8hKxcug18sjYC6`) | As above |
 | Music bed | eleven_music_v2_5, instrumental, 54 s | None | n/a | 2 | 1 (`h7XB3xj324ridSyjJbGW`) | As above |
 
-Every variation (28 photos, 2 clips, 2 voiceovers and 2 music beds) with their screen checks: [contact sheet](https://claude.ai/artifact/Ccqc5PkZZBRax3kMQtPPoT). Full-size originals are kept outside the repo. ElevenLabs flow `088lf68ZQahQ3mm7eg5x`.
+Every variation (30 photos, 2 clips, 2 voiceovers and 2 music beds) with their screen checks: [contact sheet](https://claude.ai/artifact/Ccqc5PkZZBRax3kMQtPPoT). Full-size originals are kept outside the repo. ElevenLabs flow `088lf68ZQahQ3mm7eg5x`.
 
 `/dev/imagery` (local development and Vercel previews only, like `/dev/components`) shows shots 4 to 10 the way a page would use them, for checking in the browser.

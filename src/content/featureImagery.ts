@@ -69,17 +69,18 @@ export const signalsGym: FeaturePhoto = {
 
 /**
  * Widgets tile. The phone is on the left, so the text sits on the right.
- * Annotation values on the phone: Energy 78, up 6 (about x 31%, y 22%) and
- * Snack, 3:30 PM, 210 kcal (about x 45%, y 51%).
+ * Annotation values on the phone: Energy 84, Satiety 96, Mood 87 (about
+ * x 26%, y 24%) and Lunch, 12:30 PM, Chicken and rice, Logged (about x 25%,
+ * y 50%).
  */
 export const widgetsDesk: FeaturePhoto = {
   ...phonePhoto(
     "widgets-desk",
     {
       desktop:
-        "A phone on a wooden stand beside a lunch box and a laptop shows PrepIt widgets: Energy 78, Satiety 52 and Mood 31, and today's plan with breakfast logged, lunch skipped and Log it on the snack and dinner.",
+        "A phone on a wooden stand beside a lunch box of chicken and rice and a laptop shows PrepIt widgets: Energy 84, Satiety 96 and Mood 87, and today's plan with breakfast and lunch logged and Log it on dinner.",
       mobile:
-        "A phone on a desk stand shows PrepIt widgets with today's signals and today's plan, with Log it on the snack and dinner.",
+        "A phone on a desk stand shows PrepIt widgets with Energy 84, Satiety 96 and Mood 87, and today's plan with breakfast and lunch logged.",
     },
     { position: "38% 50%", scrim: "end" },
   ),
