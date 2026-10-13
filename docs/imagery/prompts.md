@@ -20,7 +20,7 @@ The palette is chosen to sit on the site's page colour `#110f0c` under the left-
 
 The groceries in shot 3 are the items visible on the phone's list, so the photo and the screen agree. Annotation values (and the screens the phone shows) come from the `showcase-full-account` seed in `fresca_backend` (`src/dev/resetTestAccount/seeds.ts`, `SHOWCASE_WRAP` and `SHOWCASE_BERRY_YOGURT`; the grocery values are the list on the capture), which is the account the PRE-198 captures were taken on, so the numbers on the photo match the numbers on the phone.
 
-The other scenes in the ticket (gym bench, desk with widgets, plan flat-lays, gradient textures, clips, walkthrough voiceover) follow once these three are picked, so the whole set is one shoot.
+Shots 4 to 10 (below) are for the features page (PRE-203), sitewide backgrounds and the walkthrough video. They follow the same style guide. From shot 6 on, each shot has two variations, and shots with no phone screen run at 1K medium (textures at 1K low), because there is no text to read.
 
 ## Prompts
 
@@ -49,6 +49,26 @@ Failed variations are dropped, with the reason noted in the Generations table. I
 
 > Wide 16:9 photograph of a home kitchen worktop just after a grocery shop, soft early evening daylight from a window on the right. On the right half, the shop laid out loosely: a pack of wholemeal tortillas, a box of six eggs, a block of feta, a large plain tub of Greek yogurt, a few red apples and two avocados, a paper shopping bag behind them. An iPhone is propped upright against a glass jar among them, screen facing the camera almost square on. The left half of the frame is darker worktop and kitchen wall, softly out of focus. A hand reaching in from the right edge for an apple.
 
+## More scenes (features page and video)
+
+| # | Scene | Where it goes | Screen reference | Notes |
+| -- | -- | -- | -- | -- |
+| 4 | Gym bench: phone leaning on a gym bag, protein shake, towel | Features (PRE-203), Signals | `public/app/01-home-dark` | Annotations point at the phone (Energy 84, Satiety 96, Mood 87; 1,481 of 1,570 kcal), since nothing on the bench is logged |
+| 5 | Desk lunch: phone on a walnut stand showing widgets, chicken and rice lunch box, laptop, status bar 12:41 | Features (PRE-203), Widgets tile | `15-widget-signals-medium-dark-green` and `15-widget-today-plan-large-dark-lunch` (a good day: all rings green, lunch logged) on a plain dark home screen | Phone on the left, so `textSide: "end"` and the mirrored scrim |
+| 6 | Overhead flat-lays: protein overnight oats with apple and cinnamon; chicken wrap with hummus and salad; Mediterranean salmon bowl with quinoa | Features (PRE-203), Plans; share images (PRE-206) | None | Meals from the showcase plan. Dark space on the left for text |
+| 7 | Honey light texture | Backgrounds for sections with no photo | None | Decorative, empty alt |
+| 8 | Cafe clip from the hero still | Homepage hero video option | Starts from the hero still | Failed (see Generations); not shipped |
+| 9 | Cooking clip: chicken, peppers and spinach in a cast-iron pan | Features (PRE-203), Plans | None | Plays through `LoopVideo` (`cookingClip` in `src/content/featureImagery.ts`, which holds all of shots 4 to 10; the homepage photos stay in `lifestyle.ts`) |
+| 10 | Voiceover and music bed for `21-walkthrough` | A "watch with sound" player: press to play, native controls, never autoplay | None | Captions in `21-walkthrough-narrated.vtt`, timed to the pauses in the voice. Mixed onto the walkthrough as `public/app/21-walkthrough-narrated.mp4` and `.webm`: voice from 1 s, music ducked under the voice and faded out over the last 3 s. The silent loops are unchanged |
+
+Flat-lay prompt (the oats one; the others swap the dish line):
+
+> Overhead flat-lay food photograph shot straight down, warm low-key evening light from one side, deep walnut wood table, honey and amber highlights, soft shadows, subtle film grain. Centre-right: a ceramic bowl of protein overnight oats topped with diced red apple and a dusting of cinnamon, a spoon resting on a cream linen napkin, a few apple slices and a cinnamon stick beside it. Generous dark empty space on the left third of the frame. Editorial, natural, not glossy. No text, no logos, no packaging, no people, no hands.
+
+Voiceover script (read by the ElevenLabs library voice "Cass", eleven_v3):
+
+> This is PrepIt. Your nutritionist, always on. Open the app and your day is right there: energy, satiety and mood, worked out from what you actually ate. Tap Ask Nutritionist and just tell it what you had. "A handful of cucumber slices." Done, logged to the right time. Your log fills in through the day, every meal with its calories, protein, carbs and fat. Not sure what to have for dinner? Ask. It knows your targets, and it'll suggest something that fits. Tap Log it, and it's in. No barcodes. No guessing. Just a nutritionist in your pocket who knows what you've eaten. PrepIt. Try it free for seven days.
+
 ## Output files
 
 All files go in `public/lifestyle/`. Paths are fixed, so pages can reference them before the photos land.
@@ -58,6 +78,10 @@ All files go in `public/lifestyle/`. Paths are fixed, so pages can reference the
 | Cafe lunch | `hero-cafe@1x.{avif,webp}` 1440 x 810, `hero-cafe@2x.{avif,webp}` 2048 x 1152 | `hero-cafe-mobile@1x.{avif,webp}` 640 x 800, `hero-cafe-mobile@2x.{avif,webp}` 920 x 1150 |
 | Evening sofa | `nutritionist-evening@1x/@2x` (same sizes) | `nutritionist-evening-mobile@1x/@2x` |
 | Kitchen shop | `plans-kitchen@1x/@2x` (same sizes) | `plans-kitchen-mobile@1x/@2x` |
+| Gym bench | `signals-gym@1x/@2x` (same sizes) | `signals-gym-mobile@1x/@2x` |
+| Desk lunch | `widgets-desk@1x/@2x` (same sizes) | `widgets-desk-mobile@1x/@2x` |
+
+Flat-lays and the texture are 1280 x 720 only (`flatlay-oats`, `flatlay-wrap` and `flatlay-salmon` as `.avif` and `.webp`; `texture-honey` as `.webp` only, since AVIF smeared its grain into blocks), the size the model made them, so there is no @2x. The cooking clip is `cooking.mp4` (H.264) and `cooking.webm` (VP9) at 1280 x 720, 8 s, no sound, with `cooking-poster.webp`.
 
 The model renders at 2048 x 1152, so @2x is the full generated size rather than an upscale to 2880 x 1620, and the phone crop @2x is the full-height 922 x 1152 crop. Every file is under 120 KB (AVIF quality 52, WebP quality 76, made with sharp). Annotation anchors (percent of the desktop photo), their text, alt text, and which side the page text sits on are in `src/content/lifestyle.ts`.
 
@@ -70,5 +94,17 @@ The kitchen photo has the phone on the left, so the Plans section puts its text 
 | Cafe lunch | gpt-image-2 (ElevenLabs), 16:9, 2K, high | `public/app/01b-home-log-dark@2x.webp` at 0b935d8 | Not exposed by the model | 4 / 4 | 2 (generation `jotJjOLKcGI49OoGQevd`) | Generated on PrepIt's ElevenLabs workspace with paid credits (ElevenLabs grants commercial use on paid plans). No real people, brands or text beyond the app screen. |
 | Evening sofa | gpt-image-2, same settings | `public/app/02-chat-chart-dark@2x.webp` at 0b935d8 | Not exposed | 4 / 4 (all reproduce every word and number; the chart bars are shaped slightly differently from the capture, with no value labels on them) | 2 (`TjPqRlBc39Nt2mi3chOa`) | As above |
 | Kitchen shop | gpt-image-2, same settings | `public/app/13-grocery-list-dark@2x.webp` at 0b935d8 | Not exposed | 3 / 4 (variation 4 failed: the handset had an earpiece slot and camera dot, not a modern iPhone) | 2 (`RQN7u3H6TXqqctCBMfAS`) | As above |
+| Gym bench | gpt-image-2, 16:9, 2K, high | `public/app/01-home-dark@2x.webp` at 0b935d8 | Not exposed | 3 / 4 (variation 4 garbled the macros: "131/1S6g", "1S6/1S8g") | 1 | As above |
+| Desk lunch | gpt-image-2, 16:9, 2K, high, two references | Mac captures `15-widget-signals-medium-dark-green.png` and `15-widget-today-plan-large-dark-lunch.png` (seeds `showcase-full-account` and `logged-breakfast-with-plan-today`) | Not exposed | 2 / 2 (every word, time and number matches; the first run, which showed a red Mood ring and lunch skipped, was replaced at Prabodh's request) | 2 (`TgBiTVTojgj3ZrgYAKIS`; its ring gaps match the capture more closely) | As above |
+| Flat-lay: oats | gpt-image-2, 16:9, 1K, medium (one 1K low draft first) | None | Not exposed | 2 / 2 | 2 (`EWhQnBkM3eEmsiDWCcMf`) | As above |
+| Flat-lay: wrap | Same | None | Not exposed | 2 / 2 | 1 (`7sVm97IyfvfBmglMzq8b`) | As above |
+| Flat-lay: salmon | Same | None | Not exposed | 2 / 2 | 1 (`qZtKTZKnddTQVSW6wf3a`) | As above |
+| Texture | gpt-image-2, 16:9, 1K, low | None | Not exposed | 2 / 2 | 1 (`8EMhyFvEsRRF27BkpMiR`) | As above |
+| Cafe clip | Veo 3.1 Fast, 8 s, 1080p, no audio, start frame = the hero pick | Hero still | Not exposed | 0 / 1 (the model redraws the phone screen from the first frame: 00:41, 403 kcal, "solod", "respborrios") | None | As above |
+| Cooking clip | Veo 3.1 Fast, 8 s, 1080p, no audio | None | Not exposed | 1 / 1 | `i6dE8Sdn2OEA7obO7K8a` | As above |
+| Voiceover | eleven_v3, voice Cass | None | n/a | 2 (46.5 s and 45.9 s) | 1 (`sZM4Mf8hKxcug18sjYC6`) | As above |
+| Music bed | eleven_music_v2_5, instrumental, 54 s | None | n/a | 2 | 1 (`h7XB3xj324ridSyjJbGW`) | As above |
 
-All 12 variations with their screen checks: [contact sheet](https://claude.ai/artifact/Ccqc5PkZZBRax3kMQtPPoT). Full-size originals are kept outside the repo. ElevenLabs flow `088lf68ZQahQ3mm7eg5x`.
+Every variation (30 photos, 2 clips, 2 voiceovers and 2 music beds) with their screen checks: [contact sheet](https://claude.ai/artifact/Ccqc5PkZZBRax3kMQtPPoT). Full-size originals are kept outside the repo. ElevenLabs flow `088lf68ZQahQ3mm7eg5x`.
+
+`/dev/imagery` (local development and Vercel previews only, like `/dev/components`) shows shots 4 to 10 the way a page would use them, for checking in the browser.
