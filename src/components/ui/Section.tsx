@@ -13,6 +13,8 @@ export type SectionPhoto = {
   position?: string;
   /** Load eagerly at high priority, for a photo section at the top of a page. */
   priority?: boolean;
+  /** Side the dark gradient sits on, behind the text column. Defaults to `start`. */
+  scrim?: "start" | "end";
 };
 
 type SectionProps = {
@@ -63,7 +65,7 @@ export default function Section({
               style={{ objectPosition: photo.position }}
             />
           </picture>
-          <div aria-hidden className="section-photo-scrim absolute inset-0 -z-10" />
+          <div aria-hidden className={`${photo.scrim === "end" ? "section-photo-scrim-end" : "section-photo-scrim"} absolute inset-0 -z-10`} />
         </>
       )}
       <div className="mx-auto w-full max-w-content px-gutter py-section">{children}</div>

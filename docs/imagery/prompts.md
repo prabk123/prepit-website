@@ -24,7 +24,7 @@ The other scenes in the ticket (gym bench, desk with widgets, plan flat-lays, gr
 
 ## Prompts
 
-Each prompt is the style guide above, the scene line, and a closing line naming the screen's key text and telling the model to reproduce the screenshot exactly, with the scene's capture attached as a reference image (the 2x dark WebP from `public/app/`). One generation per scene, four variations each, on an image model that takes reference images (Nano Banana or GPT Image; picked once the full connector shows which this workspace can run).
+Each prompt is the style guide above, the scene line, and a closing line naming the screen's key text and telling the model to reproduce the screenshot exactly, with the scene's capture attached as a reference image (the 2x dark WebP from `public/app/`). One generation per scene, four variations each, on gpt-image-2 through ElevenLabs, which takes the capture as a reference image.
 
 ## Screen fidelity check
 
@@ -55,14 +55,20 @@ All files go in `public/lifestyle/`. Paths are fixed, so pages can reference the
 
 | Scene | Desktop (16:9) | Phone crop (4:5, the phone in the hand) |
 | -- | -- | -- |
-| Cafe lunch | `hero-cafe@1x.{avif,webp}` 1440 x 810, `hero-cafe@2x.{avif,webp}` 2880 x 1620 | `hero-cafe-mobile@1x.{avif,webp}` 640 x 800, `hero-cafe-mobile@2x.{avif,webp}` 1280 x 1600 |
+| Cafe lunch | `hero-cafe@1x.{avif,webp}` 1440 x 810, `hero-cafe@2x.{avif,webp}` 2048 x 1152 | `hero-cafe-mobile@1x.{avif,webp}` 640 x 800, `hero-cafe-mobile@2x.{avif,webp}` 920 x 1150 |
 | Evening sofa | `nutritionist-evening@1x/@2x` (same sizes) | `nutritionist-evening-mobile@1x/@2x` |
 | Kitchen shop | `plans-kitchen@1x/@2x` (same sizes) | `plans-kitchen-mobile@1x/@2x` |
 
-Each file is under 400 KB. Annotation positions (percent of the desktop photo), text and alt text will live in `src/content/lifestyle.ts`, added with the photos.
+The model renders at 2048 x 1152, so @2x is the full generated size rather than an upscale to 2880 x 1620, and the phone crop @2x is the full-height 922 x 1152 crop. Every file is under 120 KB (AVIF quality 52, WebP quality 76, made with sharp). Annotation anchors (percent of the desktop photo), their text, alt text, and which side the page text sits on are in `src/content/lifestyle.ts`.
+
+The kitchen photo has the phone on the left, so the Plans section puts its text on the right (`textSide: "end"`) with the mirrored scrim (`scrim: "end"` on the photo, token `--scrim-photo-end`). Its annotations sit low on the right, under the groceries, so the text block there belongs in the upper half.
 
 ## Generations
 
-| Scene | Model | Reference images | Seed | Variations passed / generated | Picked | Licence check |
+| Scene | Model | Reference image | Seed | Variations passed / generated | Picked | Licence check |
 | -- | -- | -- | -- | -- | -- | -- |
-| (filled in as each scene is generated) | | | | | | |
+| Cafe lunch | gpt-image-2 (ElevenLabs), 16:9, 2K, high | `public/app/01b-home-log-dark@2x.webp` at 0b935d8 | Not exposed by the model | 4 / 4 | 2 (generation `jotJjOLKcGI49OoGQevd`) | Generated on PrepIt's ElevenLabs workspace with paid credits (ElevenLabs grants commercial use on paid plans). No real people, brands or text beyond the app screen. |
+| Evening sofa | gpt-image-2, same settings | `public/app/02-chat-chart-dark@2x.webp` at 0b935d8 | Not exposed | 4 / 4 (all reproduce every word and number; the chart bars are shaped slightly differently from the capture, with no value labels on them) | 2 (`TjPqRlBc39Nt2mi3chOa`) | As above |
+| Kitchen shop | gpt-image-2, same settings | `public/app/13-grocery-list-dark@2x.webp` at 0b935d8 | Not exposed | 3 / 4 (variation 4 failed: the handset had an earpiece slot and camera dot, not a modern iPhone) | 2 (`RQN7u3H6TXqqctCBMfAS`) | As above |
+
+All 12 variations with their screen checks: [contact sheet](https://claude.ai/artifact/Ccqc5PkZZBRax3kMQtPPoT). Full-size originals are kept outside the repo. ElevenLabs flow `088lf68ZQahQ3mm7eg5x`.
