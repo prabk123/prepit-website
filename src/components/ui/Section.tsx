@@ -41,6 +41,7 @@ export default function Section({
   children,
 }: SectionProps) {
   const background = tone === "surface" ? "bg-surface" : "bg-page";
+  const scrim = photo?.scrim === "end" ? "section-photo-scrim-end" : "section-photo-scrim";
 
   return (
     <section
@@ -65,7 +66,7 @@ export default function Section({
               style={{ objectPosition: photo.position }}
             />
           </picture>
-          <div aria-hidden className={`${photo.scrim === "end" ? "section-photo-scrim-end" : "section-photo-scrim"} absolute inset-0 -z-10`} />
+          <div aria-hidden className={`${scrim} absolute inset-0 -z-10`} />
         </>
       )}
       <div className="mx-auto w-full max-w-content px-gutter py-section">{children}</div>

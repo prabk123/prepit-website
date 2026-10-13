@@ -9,7 +9,11 @@ import type { SectionPhoto } from "@/components/ui/Section";
  */
 
 export type PhotoAnnotation = {
-  /** Point on the photo the note refers to, as a percentage of the desktop image. */
+  /**
+   * Point on the photo the note refers to, as a percentage of the full 16:9
+   * desktop image. If the section crops the photo (object-cover with a
+   * different aspect ratio), map these through the same crop.
+   */
   x: number;
   y: number;
   /** Short amber note, one or two lines. Desktop only. */
@@ -28,7 +32,7 @@ export type LifestylePhoto = {
 
 function photo(
   name: string,
-  alt: string,
+  alt: { desktop: string; mobile: string },
   {
     position,
     priority,
@@ -43,7 +47,7 @@ function photo(
       webp: `${base}@1x.webp 1440w, ${base}@2x.webp 2048w`,
       width: 1440,
       height: 810,
-      alt,
+      alt: alt.desktop,
       position,
       priority,
       scrim,
@@ -54,7 +58,7 @@ function photo(
       webp: `${base}-mobile@1x.webp 640w, ${base}-mobile@2x.webp 920w`,
       width: 640,
       height: 800,
-      alt,
+      alt: alt.mobile,
       priority,
       scrim,
     },
@@ -64,7 +68,12 @@ function photo(
 export const heroCafe: LifestylePhoto = {
   ...photo(
     "hero-cafe",
-    "A hand holds a phone showing today's PrepIt log, with a chicken, hummus and salad wrap logged at 12:30 PM for 462 kcal, beside the same wrap and a flat white on a cafe table.",
+    {
+      desktop:
+        "A hand holds a phone showing today's PrepIt log, with a chicken, hummus and salad wrap logged at 12:30 PM for 462 kcal, beside the same wrap and a flat white on a cafe table.",
+      mobile:
+        "A hand holds a phone in a cafe, showing today's PrepIt log with a chicken, hummus and salad wrap logged at 12:30 PM for 462 kcal.",
+    },
     { position: "70% 50%", priority: true },
   ),
   textSide: "start",
@@ -78,7 +87,12 @@ export const heroCafe: LifestylePhoto = {
 export const nutritionistEvening: LifestylePhoto = {
   ...photo(
     "nutritionist-evening",
-    "On a sofa in the evening, a hand holds a phone showing a chat with the PrepIt nutritionist and a chart of protein per day against a 158 g target, next to a bowl of Greek yogurt with raspberries and a cup of tea.",
+    {
+      desktop:
+        "On a sofa in the evening, a hand holds a phone showing a chat with the PrepIt nutritionist and a chart of protein per day against a 158 g target, next to a bowl of Greek yogurt with raspberries and a cup of tea.",
+      mobile:
+        "In lamplight, a hand holds a phone showing a chat with the PrepIt nutritionist and a chart of protein per day against a 158 g target.",
+    },
     { position: "65% 50%" },
   ),
   textSide: "start",
@@ -90,7 +104,12 @@ export const nutritionistEvening: LifestylePhoto = {
 export const plansKitchen: LifestylePhoto = {
   ...photo(
     "plans-kitchen",
-    "A phone propped against a jar on a kitchen worktop shows the PrepIt grocery list for 13 to 19 October, estimated at £48 to £66, beside the same groceries just unpacked: tortillas, eggs, feta, Greek yogurt, apples and avocados.",
+    {
+      desktop:
+        "A phone propped against a jar on a kitchen worktop shows the PrepIt grocery list for 13 to 19 October, estimated at £48 to £66, beside the same groceries just unpacked: tortillas, eggs, feta, Greek yogurt, apples and avocados.",
+      mobile:
+        "A phone propped against a jar on a kitchen worktop shows the PrepIt grocery list for 13 to 19 October, estimated at £48 to £66.",
+    },
     { position: "40% 50%", scrim: "end" },
   ),
   // The phone is on the left of this photo, so the Plans text sits on the right.
@@ -98,8 +117,10 @@ export const plansKitchen: LifestylePhoto = {
   annotations: [
     { x: 38, y: 38, lines: ["Est. £48–£66 for the week"] },
     { x: 61, y: 63, lines: ["850 g Greek yogurt"] },
-    { x: 69, y: 70, lines: ["200 g eggs"] },
-    { x: 78, y: 88, lines: ["120 g wholemeal tortilla"] },
+    // The carton and the tortilla pack hold more than the list, so these two
+    // point at their rows on the phone rather than at the food.
+    { x: 44, y: 50, lines: ["120 g wholemeal tortilla"] },
+    { x: 44, y: 57, lines: ["200 g eggs"] },
   ],
 };
 
