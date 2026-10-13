@@ -28,6 +28,8 @@ export const APP_STILLS = [
   // From the app's Tips and tricks guides (fresca_app assets/tips/steps).
   "22-action-button-siri",
   "23-home-screen-widgets",
+  // A clean Home Screen (not in edit mode) with the Today's calories widget, for the widgets page.
+  "23b-home-screen-widgets",
 ] as const;
 
 export const APP_CLIPS = [

@@ -97,7 +97,7 @@ export const FEATURES: Record<FeatureSlug, FeatureMeta> = {
     eyebrow: "Widgets and Siri",
     heading: "PrepIt, without opening PrepIt.",
     lead: "Widgets on your Home Screen and Lock Screen, Siri, the Action button and Control Center. Log a meal or tick something off in a second.",
-    thumb: "23-home-screen-widgets",
+    thumb: "23b-home-screen-widgets",
   },
 };
 

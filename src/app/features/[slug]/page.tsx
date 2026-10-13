@@ -51,8 +51,8 @@ const PAGES: Record<FeatureSlug, { Body: ComponentType; hero: HeroMedia }> = {
     Body: WidgetsFeature,
     hero: {
       capture: appCapture(
-        "23-home-screen-widgets",
-        "An iPhone Home Screen with PrepIt's Meal plan widget showing dinner, a Korean beef rice bowl, with Skip and Log it",
+        "23b-home-screen-widgets",
+        "An iPhone Home Screen with PrepIt's Today's calories widget: 1,481 kcal eaten, 89 left of a 1,570 goal, On track",
       ),
     },
   },
