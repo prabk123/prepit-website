@@ -8,7 +8,7 @@ type AppStoreQrProps = {
   url?: string;
   /**
    * Makes the code a link to the listing too, for desktop visitors who click
-   * it instead of scanning. Sent with `app_store_click`, e.g. "home-final-cta-qr".
+   * it instead of scanning. Sent with `app_store_click`, e.g. "final-cta-qr".
    */
   trackingSource?: string;
   className?: string;

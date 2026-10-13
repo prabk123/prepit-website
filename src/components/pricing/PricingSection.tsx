@@ -19,7 +19,7 @@ export default function PricingSection() {
     <Section id="pricing" labelledBy="pricing-heading">
       <div className="grid items-center gap-stack lg:grid-cols-[minmax(0,1fr)_minmax(0,520px)] lg:gap-16">
         <SectionHeading
-          title="One plan. Your nutritionist, all year."
+          title="One app. Everything included."
           id="pricing-heading"
         />
         <PricingCard

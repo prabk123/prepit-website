@@ -53,7 +53,7 @@ function Question({
           <PlusMinus open={open} />
         </button>
       </h3>
-      <div id={panelId} role="region" aria-labelledby={buttonId} hidden={!open}>
+      <div id={panelId} hidden={!open}>
         <p className="max-w-[60ch] pb-6 text-body text-ink-muted text-pretty">{item.answer}</p>
       </div>
     </div>
@@ -62,8 +62,8 @@ function Question({
 
 /**
  * The FAQ list: real buttons with `aria-expanded`, so Tab, Enter and Space
- * work. Two columns from 1024 px. Answers stay in the page while closed, for
- * search engines and find in page.
+ * work. Two columns from 1024 px. Answers stay in the server-rendered HTML
+ * while closed, matching the FAQPage structured data.
  */
 export default function FaqAccordion({ items, trackingSource, defaultOpenId }: FaqAccordionProps) {
   const [openIds, setOpenIds] = useState<ReadonlySet<string>>(
