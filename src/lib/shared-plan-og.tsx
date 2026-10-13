@@ -11,7 +11,7 @@ export const sharedPlanOgAlt = "A PrepIt meal plan";
 const tokens = {
   page: "#110f0c",
   surfaceRaised: "#241d18",
-  line: "#3a3029",
+  lineStrong: "#3a3029",
   ink: "#f7f1e8",
   inkSecondary: "#e0d6c9",
   inkMuted: "#b8ad9f",
@@ -20,6 +20,8 @@ const tokens = {
 };
 
 const IMAGE_TIMEOUT_MS = 3000;
+// Recipe photos are a few hundred KB; anything far bigger is skipped.
+const IMAGE_MAX_BYTES = 5 * 1024 * 1024;
 
 async function readPublic(file: string): Promise<Buffer> {
   return readFile(path.join(process.cwd(), "public", file));
@@ -37,13 +39,19 @@ function dataUrl(bytes: ArrayBuffer | Buffer, type: string): string {
 async function loadMealPhoto(src: string, planId: string): Promise<string | null> {
   try {
     if (src.startsWith("/")) {
-      const type = src.endsWith(".png") ? "image/png" : "image/jpeg";
+      if (src.includes("..") || !/\.(jpe?g|png)$/i.test(src)) return null;
+      const type = src.toLowerCase().endsWith(".png") ? "image/png" : "image/jpeg";
       return dataUrl(await readPublic(src.slice(1)), type);
     }
     const response = await fetch(src, { signal: AbortSignal.timeout(IMAGE_TIMEOUT_MS) });
     const type = response.headers.get("content-type")?.split(";")[0] ?? "";
-    if (!response.ok || !["image/jpeg", "image/png"].includes(type)) return null;
-    return dataUrl(await response.arrayBuffer(), type);
+    const declared = Number(response.headers.get("content-length") ?? 0);
+    if (!response.ok || !["image/jpeg", "image/png"].includes(type) || declared > IMAGE_MAX_BYTES) {
+      return null;
+    }
+    const bytes = await response.arrayBuffer();
+    if (bytes.byteLength > IMAGE_MAX_BYTES) return null;
+    return dataUrl(bytes, type);
   } catch (error) {
     console.warn("[shared-meal-plan] Preview photo skipped", {
       planId,
@@ -130,7 +138,7 @@ export async function renderSharedPlanOg(id: string): Promise<ImageResponse> {
               width={358}
               height={358}
               alt=""
-              style={{ borderRadius: 40, objectFit: "cover", border: `2px solid ${tokens.line}` }}
+              style={{ borderRadius: 40, objectFit: "cover", border: `2px solid ${tokens.lineStrong}` }}
             />
           ) : (
             <div
@@ -139,7 +147,7 @@ export async function renderSharedPlanOg(id: string): Promise<ImageResponse> {
                 height: 358,
                 borderRadius: 40,
                 background: tokens.surfaceRaised,
-                border: `2px solid ${tokens.line}`,
+                border: `2px solid ${tokens.lineStrong}`,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",

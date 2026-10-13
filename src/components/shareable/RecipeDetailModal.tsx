@@ -138,15 +138,30 @@ export default function RecipeDetailModal({
               </button>
             </div>
 
-            <div role="tablist" aria-label="Recipe details" className="mt-5 flex border-b border-line">
+            <div
+              role="tablist"
+              aria-label="Recipe details"
+              className="mt-5 flex border-b border-line"
+              onKeyDown={(e) => {
+                if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+                e.preventDefault();
+                const index = tabs.findIndex((t) => t.id === activeTab);
+                const next = tabs[(index + (e.key === "ArrowRight" ? 1 : tabs.length - 1)) % tabs.length];
+                setActiveTab(next.id);
+                document.getElementById(`recipe-tab-${next.id}`)?.focus();
+              }}
+            >
               {tabs.map((tab) => {
                 const active = activeTab === tab.id;
                 return (
                   <button
                     key={tab.id}
+                    id={`recipe-tab-${tab.id}`}
                     type="button"
                     role="tab"
                     aria-selected={active}
+                    aria-controls="recipe-tabpanel"
+                    tabIndex={active ? 0 : -1}
                     onClick={() => setActiveTab(tab.id)}
                     className={`-mb-px flex-1 border-b-2 pb-3 text-center text-body transition-colors ${
                       active
@@ -160,7 +175,12 @@ export default function RecipeDetailModal({
               })}
             </div>
 
-            <div role="tabpanel" className="mt-4">
+            <div
+              id="recipe-tabpanel"
+              role="tabpanel"
+              aria-labelledby={`recipe-tab-${activeTab}`}
+              className="mt-4"
+            >
               {activeTab === "cooking" && (
                 <CookingTab
                   instructions={recipe.instructions ?? []}

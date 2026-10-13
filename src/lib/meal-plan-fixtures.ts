@@ -5,7 +5,7 @@ import type { Grocery, MealSelection, PlanDay, Recipe, SharedMealPlan } from "./
  * can be checked without a database. Production never serves them.
  *
  * - `FULL`: five days from next Monday with groceries, stored as UTC midnight
- *   like current app builds.
+ *   like current app builds. One recipe has a (placeholder) photo.
  * - `LEGACY`: three days stored as London local midnight (23:00 UTC the day
  *   before), with no groceries and an empty day, like plans shared from older
  *   app builds.
@@ -27,6 +27,7 @@ type RecipeSeed = Pick<Recipe, "title" | "description"> & {
   cook: number;
   ingredients: Recipe["ingredients"];
   steps: string[];
+  image?: string;
 };
 
 let recipeCount = 0;
@@ -37,7 +38,7 @@ function recipe(seed: RecipeSeed): Recipe {
     _id: `fixture-recipe-${recipeCount}`,
     title: seed.title,
     description: seed.description,
-    image: "",
+    image: seed.image ?? "",
     servings: 1,
     prep_time: seed.prep,
     cooking_time: seed.cook,
@@ -82,6 +83,9 @@ const millilitres = {
 const yogurt = recipe({
   title: "Greek yogurt with berries and granola",
   description: "Thick yogurt, mixed berries and a handful of granola.",
+  // A drawn placeholder (not a real photo), so the photo paths on the page
+  // and in the link preview are exercised. The other recipes have none.
+  image: "/dev-preview/meal-photo-placeholder.jpg",
   calories: 380,
   proteins: 24,
   carbs: 42,

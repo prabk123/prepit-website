@@ -11,10 +11,14 @@ type SheetProps = {
   children: (close: () => void) => ReactNode;
 };
 
+const FOCUSABLE =
+  'a[href], button:not([disabled]), input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])';
+
 /**
  * The shared plan's modal: a bottom sheet on phones and a centred card from
  * 640 px, on the raised surface. Escape, the backdrop and the close button
- * all dismiss it; page scroll is locked while it is open.
+ * all dismiss it; Tab stays inside it and page scroll is locked while it is
+ * open.
  */
 export default function Sheet({ label, onClose, children }: SheetProps) {
   const [visible, setVisible] = useState(false);
@@ -39,7 +43,26 @@ export default function Sheet({ label, onClose, children }: SheetProps) {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") close();
+      if (e.key === "Escape") {
+        close();
+        return;
+      }
+      if (e.key !== "Tab" || !panelRef.current) return;
+      const items = Array.from(panelRef.current.querySelectorAll<HTMLElement>(FOCUSABLE));
+      if (items.length === 0) {
+        e.preventDefault();
+        return;
+      }
+      const first = items[0];
+      const last = items[items.length - 1];
+      const active = document.activeElement;
+      if (e.shiftKey && (active === first || active === panelRef.current)) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && (active === last || !panelRef.current.contains(active))) {
+        e.preventDefault();
+        first.focus();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -49,7 +72,7 @@ export default function Sheet({ label, onClose, children }: SheetProps) {
     <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center sm:p-6" onClick={close}>
       <div
         aria-hidden
-        className="absolute inset-0 bg-overlay-strong transition-opacity duration-300"
+        className="absolute inset-0 bg-overlay-strong transition-opacity duration-300 motion-reduce:transition-none"
         style={{ opacity: visible ? 1 : 0 }}
       />
       <div
@@ -58,7 +81,7 @@ export default function Sheet({ label, onClose, children }: SheetProps) {
         aria-modal="true"
         aria-label={label}
         tabIndex={-1}
-        className="relative flex max-h-[92vh] w-full max-w-lg flex-col overflow-hidden rounded-t-tile border border-line bg-surface text-ink outline-none transition-all duration-300 ease-calm sm:max-h-[88vh] sm:rounded-tile"
+        className="relative flex max-h-[92vh] w-full max-w-lg flex-col overflow-hidden rounded-t-tile border border-line bg-surface text-ink outline-none transition-all duration-300 ease-calm motion-reduce:transition-none sm:max-h-[88vh] sm:rounded-tile"
         style={{
           transform: visible ? "translateY(0)" : "translateY(40px)",
           opacity: visible ? 1 : 0,
