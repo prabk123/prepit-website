@@ -8,6 +8,10 @@ import { BentoGrid, BentoTile } from "@/components/ui/Bento";
 import CtaBand from "@/components/ui/CtaBand";
 import FeatureSplit from "@/components/ui/FeatureSplit";
 import Glow from "@/components/ui/Glow";
+import PhotoBand from "@/components/ui/PhotoBand";
+import PointList from "@/components/ui/PointList";
+import AnnotatedPhoto from "@/components/media/AnnotatedPhoto";
+import { HERO_SCENE, KITCHEN_SCENE } from "@/lib/lifestylePhotos";
 import PricingCard from "@/components/ui/PricingCard";
 import QuoteCard from "@/components/ui/QuoteCard";
 import Section from "@/components/ui/Section";
@@ -220,6 +224,65 @@ export default function ComponentPreviewPage() {
             id="photo-sample"
             lead="Ask anything and get answers built on what you actually ate, any time of day."
           />
+        </div>
+      </Section>
+
+      <Section labelledBy="annotation-sample">
+        <div className="flex flex-col gap-stack">
+          <PreviewLabel>AnnotatedPhoto (PRE-201): amber ring, line and glass label, drawn in on first view. Desktop only</PreviewLabel>
+          <h2 id="annotation-sample" className="sr-only">Annotated photo</h2>
+          <AnnotatedPhoto
+            photo={HERO_SCENE.photo}
+            annotations={HERO_SCENE.annotations}
+            placeholder={HERO_SCENE.placeholder}
+            className="aspect-[16/9] rounded-card"
+          />
+        </div>
+      </Section>
+
+      <PhotoBand
+        labelledBy="band-sample"
+        photo={KITCHEN_SCENE.photo}
+        annotations={KITCHEN_SCENE.annotations}
+        placeholder={KITCHEN_SCENE.placeholder}
+        media={<DeviceFrame width={260} capture={groceryCapture} />}
+      >
+        <PreviewLabel>PhotoBand (PRE-201): full-bleed annotated photo, text on the left, phones rising from the bottom</PreviewLabel>
+        <SectionHeading
+          size="section"
+          title="Ask for a week of meals."
+          id="band-sample"
+          lead="Your nutritionist plans around your goals, tastes and budget."
+        />
+      </PhotoBand>
+
+      <Section labelledBy="points-sample">
+        <div className="flex flex-col gap-stack">
+          <PreviewLabel>PointList: columns, rows and stacked</PreviewLabel>
+          <h2 id="points-sample" className="sr-only">Point lists</h2>
+          <PointList
+            layout="columns"
+            points={[
+              { title: "Energy", detail: "Steady energy and focus today.", accent: "var(--color-energy)" },
+              { title: "Satiety", detail: "Staying in control around food.", accent: "var(--color-satiety)" },
+              { title: "Mood", detail: "A calm, steady day.", accent: "var(--color-mood)" },
+            ]}
+          />
+          <div className="grid gap-10 lg:grid-cols-2">
+            <PointList
+              layout="rows"
+              points={[
+                { title: "Type it", detail: "“chicken wrap and a flat white”" },
+                { title: "Snap it", detail: "A photo of your plate" },
+              ]}
+            />
+            <PointList
+              points={[
+                { title: "Checks in", detail: "One reply logs breakfast." },
+                { title: "Spots patterns", detail: "Suggests an easy fix." },
+              ]}
+            />
+          </div>
         </div>
       </Section>
 

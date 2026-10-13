@@ -25,6 +25,11 @@ type SectionProps = {
   photo?: SectionPhoto;
   /** id of the heading that names this section, for screen readers. */
   labelledBy?: string;
+  /**
+   * Fixed name sent with `home_section_viewed` when the section reaches the
+   * middle of the screen (needs <SectionViewTracker> on the page).
+   */
+  analyticsName?: string;
   className?: string;
   children: ReactNode;
 };
@@ -35,6 +40,7 @@ export default function Section({
   tone = "page",
   photo,
   labelledBy,
+  analyticsName,
   className,
   children,
 }: SectionProps) {
@@ -44,6 +50,7 @@ export default function Section({
     <section
       id={id}
       aria-labelledby={labelledBy}
+      data-section-name={analyticsName}
       className={`relative isolate w-full overflow-hidden ${background} text-ink ${className ?? ""}`}
     >
       {tone === "photo" && photo && (
