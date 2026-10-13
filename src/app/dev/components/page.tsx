@@ -201,7 +201,7 @@ export default function ComponentPreviewPage() {
               eyebrow="Logging"
               title="Log a meal in seconds."
               id="logging-sample"
-              lead="Type it, snap it or say it. PrepIt works out the calories and macros, and nothing is saved until you confirm."
+              lead="Type it, snap it or say it. PrepIt works out the calories and macros, and you can fix anything in one tap."
             />
           </FeatureSplit>
         </div>
@@ -279,7 +279,7 @@ export default function ComponentPreviewPage() {
             />
             <PointList
               points={[
-                { title: "Checks in", detail: "One reply logs breakfast." },
+                { title: "Checks in", detail: "Asks about a missed breakfast." },
                 { title: "Spots patterns", detail: "Suggests an easy fix." },
               ]}
             />

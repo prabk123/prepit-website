@@ -32,7 +32,7 @@ export const FAQ_ITEMS: FaqItem[] = [
     id: "logging-accuracy",
     question: "How accurate is the logging?",
     answer:
-      "Official sources first. PrepIt looks for the brand's or restaurant's own nutrition information before anything else, and only then uses other food databases. You can review and adjust every item before it's logged.",
+      "Official sources first. PrepIt looks for the brand's or restaurant's own nutrition information before anything else, and only then uses other food databases. Every estimate shows what it assumed, and you can adjust any item.",
   },
   {
     id: "energy-satiety-mood",

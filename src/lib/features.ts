@@ -44,17 +44,17 @@ export const FEATURES: Record<FeatureSlug, FeatureMeta> = {
     name: "Logging",
     title: "Log meals in seconds by typing, photo or Siri",
     description:
-      "Describe a meal in your own words, snap your plate or ask Siri. PrepIt checks official brand and restaurant figures first, and nothing is logged until you confirm.",
+      "Describe a meal in your own words, snap your plate or ask Siri. PrepIt checks official brand and restaurant figures first and shows what it assumed, so you can fix anything.",
     summary: "Type it, snap it or say it. Your nutritionist does the maths.",
     eyebrow: "Logging",
     heading: "The easiest logging you'll ever do.",
-    lead: "Describe it, snap it or say it. PrepIt does the research and the maths, and nothing is logged until you confirm.",
+    lead: "Describe it, snap it or say it. PrepIt does the research and the maths, and you can change anything in one tap.",
     thumb: "01b-home-log",
   },
   "nutrition-signals": {
     slug: "nutrition-signals",
     name: "Energy, Satiety and Mood",
-    title: "Energy, Satiety and Mood: how your food will make you feel",
+    title: "Energy, Satiety and Mood scores from your food",
     description:
       "PrepIt turns what you eat into three scores from 0 to 100: Energy, Satiety and Mood. Grounded in nutrition research and built from your food alone, no wearable needed.",
     summary: "Three scores that show how your food will make you feel.",
@@ -69,7 +69,7 @@ export const FEATURES: Record<FeatureSlug, FeatureMeta> = {
     title: "An AI nutritionist that knows your goals and your day",
     description:
       "Ask PrepIt's nutritionist anything. It knows your goals and what you ate, draws charts, logs meals from chat, answers voice notes and checks in with you every week.",
-    summary: "Ask anything. It knows your goals, your day and your last meal.",
+    summary: "Answers, charts and weekly check-ins from a nutritionist who knows your day.",
     eyebrow: "Your AI nutritionist",
     heading: "Ask anything. It knows your goals, your day and your last meal.",
     lead: "Answers in plain language, built on what you actually ate. And it doesn't wait for you to ask.",

@@ -13,7 +13,7 @@ const PHONE = "[--device-w:260px] sm:[--device-w:300px] lg:[--device-w:clamp(260
 const ALWAYS_ON = [
   {
     title: "Checks in",
-    detail: "Haven't logged breakfast by your usual time? It asks, and one reply logs it.",
+    detail: "Haven't logged breakfast by your usual time? It asks, and your reply becomes a meal to confirm.",
   },
   {
     title: "Spots patterns",
@@ -25,7 +25,7 @@ const ALWAYS_ON = [
   },
   {
     title: "Reminds you to weigh in",
-    detail: "When it's been a week, it asks, and a number logs your weight.",
+    detail: "When it's been a week, it asks. Reply with the number and confirm.",
   },
 ];
 
@@ -112,8 +112,8 @@ export default function NutritionistFeature() {
           />
           <PointList layout="columns" columns={4} points={ALWAYS_ON} />
           <p className="text-small text-ink-faint">
-            You can turn each kind of message off in Settings. It&apos;s a nutritionist, not a doctor, and it
-            will tell you when something needs a professional.
+            Missed-log nudges, pattern check-ins and weigh-in reminders each have a switch in Settings.
+            It&apos;s a nutritionist, not a doctor, and it will tell you when something needs a professional.
           </p>
         </div>
       </Section>

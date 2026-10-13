@@ -62,7 +62,7 @@ export default function LoggingFeature() {
         id="accuracy"
         tone="surface"
         title="Accurate, and always your call."
-        lead="PrepIt checks official brand and restaurant nutrition information first. Every estimate shows what it assumed and how confident it is, and nothing is logged until you're happy with it."
+        lead="PrepIt checks official brand and restaurant nutrition information first. Every estimate shows what it assumed and how confident it is, and you can change anything in one tap."
         media={
           <div className="relative">
             <Glow />
@@ -80,9 +80,9 @@ export default function LoggingFeature() {
           layout="rows"
           points={[
             { title: "Official sources first", detail: "Brand and restaurant figures" },
-            { title: "Shows its working", detail: "Every assumption, one tap to fix" },
+            { title: "Shows its working", detail: "What it assumed, and how confident it is" },
             { title: "Asks when it's unsure", detail: "“Dinner at a restaurant” gets a question" },
-            { title: "You confirm", detail: "Nothing is saved until it looks right" },
+            { title: "Easy to fix", detail: "Edit any item, or have it refined" },
           ]}
         />
       </FeatureBlock>

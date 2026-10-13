@@ -40,7 +40,7 @@ export default function LoggingSection() {
           id="logging-heading"
           size="section"
           title="The easiest logging you'll ever do."
-          lead="Describe it, snap it or say it. PrepIt looks for official brand and restaurant figures first, and nothing is logged until you confirm."
+          lead="Describe it, snap it or say it. PrepIt looks for official brand and restaurant figures first, and you can fix anything in one tap."
         />
         <PointList layout="rows" points={WAYS} />
         <TextLink href="/features/logging">More about logging</TextLink>
