@@ -59,7 +59,7 @@ Failed variations are dropped, with the reason noted in the Generations table. I
 | 7 | Honey light texture | Backgrounds for sections with no photo | None | Decorative, empty alt |
 | 8 | Cafe clip from the hero still | Homepage hero video option | Starts from the hero still | Failed (see Generations); not shipped |
 | 9 | Cooking clip: chicken, peppers and spinach in a cast-iron pan | Features (PRE-203), Plans | None | Plays through `LoopVideo` (`cookingClip` in `src/content/lifestyle.ts`) |
-| 10 | Voiceover and music bed for `21-walkthrough` | Homepage hero video and App Store preview | None | Raw audio kept in the project files until Prabodh picks; not mixed into the video in this PR |
+| 10 | Voiceover and music bed for `21-walkthrough` | Homepage hero video (with sound) and App Store preview | None | Mixed onto the walkthrough as `public/app/21-walkthrough-narrated.mp4`: voice from 1 s, music ducked under the voice and faded out over the last 3 s. The silent loops are unchanged |
 
 Flat-lay prompt (the oats one; the others swap the dish line):
 
@@ -104,5 +104,5 @@ All 12 variations with their screen checks: [contact sheet](https://claude.ai/ar
 | Texture | gpt-image-2, 16:9, 1K, low | None | Not exposed | 2 / 2 | 1 (`8EMhyFvEsRRF27BkpMiR`) | As above |
 | Cafe clip | Veo 3.1 Fast, 8 s, 1080p, no audio, start frame = the hero pick | Hero still | Not exposed | 0 / 1 (the model redraws the phone screen from the first frame: 00:41, 403 kcal, "solod", "respborrios") | None | As above |
 | Cooking clip | Veo 3.1 Fast, 8 s, 1080p, no audio | None | Not exposed | 1 / 1 | `i6dE8Sdn2OEA7obO7K8a` | As above |
-| Voiceover | eleven_v3, voice Cass | None | n/a | 2 (46.5 s and 45.9 s) | Waiting on Prabodh | As above |
-| Music bed | eleven_music_v2_5, instrumental, 54 s | None | n/a | 2 | Waiting on Prabodh | As above |
+| Voiceover | eleven_v3, voice Cass | None | n/a | 2 (46.5 s and 45.9 s) | 1 (`sZM4Mf8hKxcug18sjYC6`) | As above |
+| Music bed | eleven_music_v2_5, instrumental, 54 s | None | n/a | 2 | 1 (`h7XB3xj324ridSyjJbGW`) | As above |
