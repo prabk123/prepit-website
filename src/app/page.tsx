@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import SectionViewTracker from "@/components/analytics/SectionViewTracker";
 import AlwaysOnSection from "@/components/home/AlwaysOnSection";
+import ConsultationSection from "@/components/home/ConsultationSection";
 import EverythingElse from "@/components/home/EverythingElse";
 import HomeHero from "@/components/home/HomeHero";
 import LoggingSection from "@/components/home/LoggingSection";
+import LoopSection from "@/components/home/LoopSection";
 import NutritionistBand from "@/components/home/NutritionistBand";
 import PlansBand from "@/components/home/PlansBand";
 import ProofStrip from "@/components/home/ProofStrip";
@@ -57,6 +59,8 @@ export default function Home() {
       <ProofStrip />
       <WhyTrackersFail />
       <AlwaysOnSection />
+      <ConsultationSection />
+      <LoopSection />
       <LoggingSection />
       <SignalsSection />
       <NutritionistBand />

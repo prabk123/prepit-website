@@ -102,6 +102,9 @@
   --radius-card: clamp(28px, 23.5px + 1.14vw, 40px);
   --radius-tile: 28px;
   --radius-control: 999px;
+  /* A Home Screen widget capture's corner, and a small icon tile. */
+  --radius-widget: 22px;
+  --radius-icon: 14px;
 
   /* Shadows. Cards are flat; phones float. */
   --shadow-phone: 0 40px 80px -24px rgb(0 0 0 / 0.7), 0 12px 24px -12px rgb(0 0 0 / 0.5);

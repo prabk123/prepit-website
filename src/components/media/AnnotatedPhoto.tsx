@@ -88,8 +88,8 @@ export default function AnnotatedPhoto({
       data-annotations="static"
     >
       <picture>
-        {photo.avif && <source srcSet={photo.avif} type="image/avif" />}
-        {photo.webp && <source srcSet={photo.webp} type="image/webp" />}
+        {photo.avif && <source srcSet={photo.avif} sizes={photo.sizes ?? "100vw"} type="image/avif" />}
+        {photo.webp && <source srcSet={photo.webp} sizes={photo.sizes ?? "100vw"} type="image/webp" />}
         <img
           src={photo.src}
           alt={photo.alt ?? ""}

@@ -44,7 +44,7 @@ export default function NutritionistBand() {
         id="ask-heading"
         size="section"
         title="Ask anything. It knows your goals, your day and your last meal."
-        lead="Answers built on what you actually ate, any time of day. It can log, move or fix a meal, and set your goals, right from chat."
+        lead="Answers in plain language, built on what you actually ate. It can log, move or fix a meal, and set your goals, right from chat."
       />
       <PointList layout="rows" points={ASKS} />
     </PhotoBand>

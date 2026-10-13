@@ -5,8 +5,11 @@ import type { SectionPhoto } from "@/components/ui/Section";
  * Homepage lifestyle photos and their annotations (design D3).
  *
  * The photos are PLACEHOLDERS until PRE-199 delivers the real scenes under
- * public/lifestyle/. When a scene lands: swap `photo`, delete `placeholder`,
- * and move each annotation onto the food in the new photo. Annotation values
+ * public/lifestyle/. When a scene lands: export it at 800, 1600 and 2400 px
+ * wide as `<name>-<width>w.webp` (and `.avif`), point `photo` at
+ * `lifestylePhoto("<name>", ...)`, delete `placeholder`, and move each
+ * annotation onto the food in the new photo. Phones then load the 800 px file,
+ * not the desktop one. Annotation values
  * must come from a real log. These come from the PRE-198 captures (the
  * overnight oats breakfast in capture 05 and the grocery list in capture 13);
  * if the final scene shows a different meal, use that meal's real log instead.
@@ -18,12 +21,37 @@ type LifestyleScene = {
   annotations: PhotoAnnotation[];
 };
 
-const PLACEHOLDER = {
-  src: "/lifestyle/placeholder.webp",
-  webp: "/lifestyle/placeholder.webp",
+/**
+ * A full-bleed photo at several widths. `formats` lists the files that exist;
+ * the browser picks a width from the srcset and the photo's `sizes`.
+ */
+export function lifestylePhoto(
+  name: string,
+  { widths, width, height, formats = ["avif", "webp"] }: {
+    widths: number[];
+    /** Size of the largest file. */
+    width: number;
+    height: number;
+    formats?: ("avif" | "webp")[];
+  },
+): SectionPhoto {
+  const srcSet = (ext: string) => widths.map((w) => `/lifestyle/${name}-${w}w.${ext} ${w}w`).join(", ");
+  return {
+    src: `/lifestyle/${name}-${widths[widths.length - 1]}w.webp`,
+    avif: formats.includes("avif") ? srcSet("avif") : undefined,
+    webp: formats.includes("webp") ? srcSet("webp") : undefined,
+    sizes: "100vw",
+    width,
+    height,
+  };
+}
+
+const PLACEHOLDER = lifestylePhoto("placeholder", {
+  widths: [800, 1600],
   width: 1600,
   height: 900,
-} as const;
+  formats: ["webp"],
+});
 
 /** Hero: hand holding a phone over a meal at a cafe table (PRE-199 scene 1). */
 export const HERO_SCENE: LifestyleScene = {
@@ -51,6 +79,6 @@ export const KITCHEN_SCENE: LifestyleScene = {
   annotations: [
     { x: 60, y: 24, side: "right", value: "850 g", label: "Greek yogurt" },
     { x: 66, y: 46, side: "right", value: "200 g", label: "Eggs" },
-    { x: 58, y: 66, side: "right", value: "Est. £48–£66", label: "This week's shop" },
+    { x: 58, y: 66, side: "right", value: "450 g", label: "Apples" },
   ],
 };

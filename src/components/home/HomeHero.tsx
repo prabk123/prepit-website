@@ -33,7 +33,7 @@ export default function HomeHero() {
         </p>
         <h1 id="hero-heading" className="mt-4 font-display text-hero text-ink text-balance lg:mt-5">
           Not another tracker.
-          <span className="mt-3 block text-title text-ink-secondary lg:mt-5 lg:text-[60px] lg:leading-[1.02]">
+          <span className="mt-3 block text-title text-ink-secondary lg:mt-5 lg:text-section">
             A nutritionist that improves how you eat.
           </span>
         </h1>

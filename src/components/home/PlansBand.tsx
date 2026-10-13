@@ -8,7 +8,7 @@ import { KITCHEN_SCENE } from "@/lib/lifestylePhotos";
 const PLAN_POINTS = [
   { title: "Swap anything", detail: "Change a meal in chat" },
   { title: "One grocery list", detail: "By aisle, with an estimated cost" },
-  { title: "Weekly calorie pattern", detail: "More room on the days you need it" },
+  { title: "Weekly calorie pattern", detail: "More room when you need it" },
 ];
 
 /** "Plans that fit your week": meal plan, grocery list and weekly pattern, on the kitchen photo. */
@@ -27,7 +27,7 @@ export default function PlansBand() {
             className="hidden sm:block sm:mt-12"
             capture={appCapture(
               "13-grocery-list",
-              "This week's grocery list by aisle, with an estimated cost of £48 to £66",
+              "This week's grocery list by aisle, with an estimated cost at the top",
             )}
           />
           <DeviceFrame

@@ -32,7 +32,7 @@ function Widget({ capture }: { capture: ReturnType<typeof widgetCapture> }) {
         height={capture.height}
         loading="lazy"
         decoding="async"
-        className="h-auto w-full rounded-[22px] shadow-phone"
+        className="h-auto w-full rounded-widget shadow-phone"
       />
     </picture>
   );
@@ -40,7 +40,7 @@ function Widget({ capture }: { capture: ReturnType<typeof widgetCapture> }) {
 
 function Icon({ path }: { path: string }) {
   return (
-    <span className="flex h-12 w-12 items-center justify-center rounded-[14px] bg-surface-raised text-annotation">
+    <span className="flex h-12 w-12 items-center justify-center rounded-icon bg-surface-raised text-annotation">
       <svg viewBox="0 0 24 24" className="h-6 w-6" aria-hidden>
         <path d={path} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
       </svg>

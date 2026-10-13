@@ -10,12 +10,12 @@ import { appCapture } from "@/lib/captures";
 const SIGNALS = [
   {
     title: "Energy",
-    detail: "Steady energy and focus today, from meal timing, glycaemic load and how you spread your calories.",
+    detail: "Will you have steady energy and focus today? Built from meal timing, glycaemic load and how you spread your calories.",
     accent: "var(--color-energy)",
   },
   {
     title: "Satiety",
-    detail: "Staying in control around food, driven by protein, fibre and how processed your meals are.",
+    detail: "Will you stay in control around food? Driven by protein, fibre and how processed your meals are.",
     accent: "var(--color-satiety)",
   },
   {
