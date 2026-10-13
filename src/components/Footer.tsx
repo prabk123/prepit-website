@@ -50,6 +50,9 @@ export default function Footer() {
               <Link href="/" className="text-base hover:opacity-70">
                 Home
               </Link>
+              <Link href="/about" className="text-base hover:opacity-70">
+                About
+              </Link>
               {HOME_SECTION_LINKS.map((link) => (
                 <Link
                   key={link.href}
@@ -74,6 +77,9 @@ export default function Footer() {
               Support
             </h3>
             <div className="flex flex-col gap-4">
+              <Link href="/guides" className="text-base hover:opacity-70">
+                Guides
+              </Link>
               <Link href="/contact" className="text-base hover:opacity-70">
                 Contact
               </Link>
