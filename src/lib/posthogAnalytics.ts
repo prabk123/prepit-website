@@ -68,6 +68,19 @@ export function trackVideoPlayed(video: string, trigger: "auto" | "button") {
   });
 }
 
+/** Fired when a visitor lands on a URL with no page, to find broken links. */
+export const POSTHOG_PAGE_NOT_FOUND_EVENT = "page_not_found";
+
+/** `path` is the pathname only: no query string, which could carry anything. */
+export function trackPageNotFound(path: string) {
+  if (typeof window === "undefined" || !isPostHogEnabled()) return;
+
+  posthog.capture(POSTHOG_PAGE_NOT_FOUND_EVENT, {
+    path,
+    referrer_host: document.referrer ? new URL(document.referrer).host : null,
+  });
+}
+
 /** Fired on each contact or feedback form submit, to see send failures. */
 export const POSTHOG_CONTACT_FORM_EVENT = "contact_form_submitted";
 

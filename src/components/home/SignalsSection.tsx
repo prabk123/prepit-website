@@ -3,6 +3,7 @@ import DevicePair from "@/components/device/DevicePair";
 import FeatureSplit from "@/components/ui/FeatureSplit";
 import Glow from "@/components/ui/Glow";
 import PointList from "@/components/ui/PointList";
+import QuoteCard from "@/components/ui/QuoteCard";
 import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
 import TextLink from "@/components/ui/TextLink";
@@ -62,8 +63,14 @@ export default function SignalsSection() {
           />
         </FeatureSplit>
         <PointList layout="columns" points={SIGNALS} />
+        <QuoteCard
+          className="max-w-[760px]"
+          quote="Afternoon Energy looks soft. Your wrap and flat white are light on protein. A Greek yogurt now would help hold Satiety until dinner."
+          name="A next step, for example. Every log ends with one. No shame, no “cheat days”."
+        />
         <p className="text-small text-ink-faint">
           Grounded in published nutrition research. Estimates to guide your next meal, not a medical measurement.
+          And honest about confidence: when there isn&apos;t enough data, PrepIt says so.
         </p>
         <TextLink href="/features/nutrition-signals">More about Energy, Satiety and Mood</TextLink>
       </div>

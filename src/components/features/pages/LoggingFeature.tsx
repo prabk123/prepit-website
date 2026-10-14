@@ -42,7 +42,7 @@ export default function LoggingFeature() {
 
       <FeatureBlock
         id="snap-it"
-        reverse
+        layout="peek"
         title="Or just snap your plate."
         lead="Take a photo of your meal and PrepIt works out what's on it. Add a few words, like the restaurant or the portion, and it uses both."
         media={
@@ -118,6 +118,7 @@ export default function LoggingFeature() {
 
       <FeatureBlock
         id="offline"
+        layout="peek"
         tone="surface"
         title="No signal? Log anyway."
         lead="Meals, water, supplements and weight save on your phone with no signal. They send on their own when you're back, and nothing is logged twice."

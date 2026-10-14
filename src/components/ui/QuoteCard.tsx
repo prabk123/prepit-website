@@ -2,14 +2,14 @@ import Rating from "@/components/ui/Rating";
 
 type QuoteCardProps = {
   quote: string;
-  /** First name or initials, as the reviewer gave them. */
+  /** Who said it: a reviewer's first name or initials, or what an example quote is. */
   name: string;
   /** The review's star rating, when it came from the App Store. */
   stars?: number;
   className?: string;
 };
 
-/** One real review, quoted exactly. */
+/** One quote set as site copy: a real review quoted exactly, or an example from the app. */
 export default function QuoteCard({ quote, name, stars, className }: QuoteCardProps) {
   return (
     <figure
