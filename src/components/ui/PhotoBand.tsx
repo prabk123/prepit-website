@@ -23,12 +23,19 @@ type PhotoBandProps = {
    * overlap it, so the phone in the photo stays clear.
    */
   media?: ReactNode;
+  /**
+   * Points and a link set beside `media` under the photo, on the text's side,
+   * so the phones don't float next to an empty column. Keeps the text on the
+   * photo to a headline and one line.
+   */
+  aside?: ReactNode;
 };
 
 /**
  * D3's full-bleed photo section: an annotated lifestyle photo with the text on
- * a dark gradient at one side, and phones under it. Below 1024 px the photo
- * is a strip on top, with the text and phones under it.
+ * a dark gradient at one side, and phones under it beside any points. Below
+ * 1024 px the photo is a strip on top, with the text, points and phones under
+ * it.
  */
 export default function PhotoBand({
   id,
@@ -40,6 +47,7 @@ export default function PhotoBand({
   textSide = "start",
   children,
   media,
+  aside,
 }: PhotoBandProps) {
   const end = textSide === "end";
   return (
@@ -70,7 +78,15 @@ export default function PhotoBand({
           <div className="flex max-w-[460px] flex-col gap-8">{children}</div>
         </div>
       </AnnotatedPhoto>
-      {media && (
+      {media && aside && (
+        <div className="relative z-[4] mx-auto mt-10 grid w-full max-w-content items-center gap-stack px-gutter lg:grid-cols-2 lg:gap-x-12">
+          <div className={`flex w-full max-w-[460px] flex-col gap-8 ${end ? "lg:order-2 lg:justify-self-end" : ""}`}>
+            {aside}
+          </div>
+          <div className={`flex justify-center ${end ? "lg:order-1" : ""}`}>{media}</div>
+        </div>
+      )}
+      {media && !aside && (
         <div
           className={`relative z-[4] mx-auto mt-10 flex w-full max-w-content justify-center px-gutter ${
             end ? "" : "lg:justify-end"
