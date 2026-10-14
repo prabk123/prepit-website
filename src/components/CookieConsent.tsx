@@ -29,9 +29,10 @@ export default function CookieConsent() {
   useEffect(() => {
     if (!isAnalyticsEnabled()) return;
 
-    const isEu = readCookie(PREPIT_GEO_COOKIE) === "eu";
+    // No geo cookie counts as needing consent, like the proxy and PostHog.
+    const needsConsent = readCookie(PREPIT_GEO_COOKIE) !== "non-eu";
     const consent = readCookie(PREPIT_ANALYTICS_CONSENT_COOKIE);
-    setVisible(isEu && consent !== "granted" && consent !== "denied");
+    setVisible(needsConsent && consent !== "granted" && consent !== "denied");
   }, []);
 
   function acceptAnalytics() {
