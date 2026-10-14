@@ -9,10 +9,13 @@ import type { Grocery, MealSelection, PlanDay, Recipe, SharedMealPlan } from "./
  * - `LEGACY`: three days stored as London local midnight (23:00 UTC the day
  *   before), with no groceries and an empty day, like plans shared from older
  *   app builds.
+ * - `PENDING`: the `FULL` days, just saved, with the grocery list still being
+ *   built.
  */
 export const SHARED_PLAN_FIXTURE_IDS = {
   FULL: "0000000000000000000205a1",
   LEGACY: "0000000000000000000205a2",
+  PENDING: "0000000000000000000205a3",
 } as const;
 
 export const sharedPlanFixturesEnabled =
@@ -276,5 +279,8 @@ export function getSharedPlanFixture(id: string): SharedMealPlan | null {
   if (!sharedPlanFixturesEnabled) return null;
   if (id === SHARED_PLAN_FIXTURE_IDS.FULL) return fullPlan(id);
   if (id === SHARED_PLAN_FIXTURE_IDS.LEGACY) return legacyPlan(id);
+  if (id === SHARED_PLAN_FIXTURE_IDS.PENDING) {
+    return { ...fullPlan(id), groceries: [], groceriesPending: true };
+  }
   return null;
 }

@@ -46,6 +46,25 @@ export const getMealPlanById = cache(
   },
 );
 
+/**
+ * The app builds a plan's grocery list in the background after the plan is
+ * saved or changed (changes clear the list first). Older plans can have no
+ * list at all, so an empty list only means "almost ready" while the plan is
+ * being updated or was saved or changed in the last few minutes.
+ */
+const GROCERY_BUILD_WINDOW_MS = 15 * 60 * 1000;
+
+export function groceriesMayStillArrive(
+  { created, updating, lastUpdateAt }: { created?: string; updating?: boolean; lastUpdateAt?: string },
+  now = Date.now(),
+): boolean {
+  if (updating) return true;
+  return [created, lastUpdateAt].some((value) => {
+    const time = value ? new Date(value).getTime() : NaN;
+    return Number.isFinite(time) && now - time < GROCERY_BUILD_WINDOW_MS;
+  });
+}
+
 async function loadMealPlan(id: string): Promise<SharedMealPlan | null> {
   // Imported here so a missing MONGODB_URI fails inside the logged try block.
   const { getDatabase } = await import("./mongodb");
@@ -150,6 +169,9 @@ async function loadMealPlan(id: string): Promise<SharedMealPlan | null> {
           _id: "$_id",
           days: { $push: "$days" },
           groceries: { $first: "$groceries" },
+          created: { $first: "$created" },
+          updating: { $first: "$meta.updating" },
+          lastUpdateAt: { $first: "$meta.lastUpdate.at" },
         },
       },
       {
@@ -157,6 +179,9 @@ async function loadMealPlan(id: string): Promise<SharedMealPlan | null> {
           _id: { $toString: "$_id" },
           days: 1,
           groceries: 1,
+          created: 1,
+          updating: 1,
+          lastUpdateAt: 1,
         },
       },
     ])
@@ -168,11 +193,18 @@ async function loadMealPlan(id: string): Promise<SharedMealPlan | null> {
 
   // Round-trip through JSON to strip ObjectId buffers and Date objects
   // so the data is safe to pass as props to client components
-  const plan = JSON.parse(JSON.stringify(results[0])) as SharedMealPlan;
+  const { created, updating, lastUpdateAt, ...raw } = JSON.parse(JSON.stringify(results[0])) as SharedMealPlan & {
+    created?: string;
+    updating?: boolean;
+    lastUpdateAt?: string;
+  };
+  const plan: SharedMealPlan = raw;
 
   // A plan saved with no days unwinds to one empty day with no date.
   plan.days = (plan.days ?? []).filter((day) => Boolean(day?.date));
   plan.groceries = plan.groceries ?? [];
+  plan.groceriesPending =
+    plan.groceries.length === 0 && groceriesMayStillArrive({ created, updating, lastUpdateAt });
   if (plan.days.length === 0) {
     return null;
   }

@@ -13,6 +13,8 @@ import UnitSystemToggle from "./UnitSystemToggle";
 
 interface MealPlanViewProps {
   plan: SharedMealPlan;
+  /** Metric unless the visitor is in the US; the Units toggle changes it. */
+  defaultUnitSystem: UnitSystem;
 }
 
 /**
@@ -20,9 +22,21 @@ interface MealPlanViewProps {
  * and one day of meals at a time (swipe or pick a day). On wide screens the
  * units and grocery list sit in a column beside the days.
  */
-export default function MealPlanView({ plan }: MealPlanViewProps) {
+export default function MealPlanView({ plan, defaultUnitSystem }: MealPlanViewProps) {
   const [activeRecipe, setActiveRecipe] = useState<MealSelection | null>(null);
-  const [unitSystem, setUnitSystem] = useState<UnitSystem>("imperial");
+  const [unitSystem, setUnitSystem] = useState<UnitSystem>(defaultUnitSystem);
+
+  const changeUnitSystem = useCallback(
+    (system: UnitSystem) => {
+      if (system === unitSystem) return;
+      setUnitSystem(system);
+      trackSharedMealPlanEvent(SHARED_MEAL_PLAN_EVENTS.unitsChanged, {
+        plan_id: plan._id,
+        unit_system: system,
+      });
+    },
+    [plan._id, unitSystem],
+  );
 
   const daysByDateKey = useMemo(() => {
     const map = new Map<string, number>();
@@ -133,11 +147,11 @@ export default function MealPlanView({ plan }: MealPlanViewProps) {
       </div>
 
       <div className="flex flex-col gap-4 lg:sticky lg:top-28">
-        <UnitSystemToggle value={unitSystem} onChange={setUnitSystem} />
+        <UnitSystemToggle value={unitSystem} onChange={changeUnitSystem} />
         <GroceryListSection
           planId={plan._id}
           groceries={plan.groceries}
-          days={plan.days}
+          groceriesPending={plan.groceriesPending ?? false}
           unitSystem={unitSystem}
         />
       </div>
