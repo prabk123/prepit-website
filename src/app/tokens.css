@@ -37,6 +37,9 @@
   --color-satiety: #f38c61;
   --color-mood: #809ff9;
 
+  /* Form errors: a warm coral, 6.9:1 on surface. Text only, with the field. */
+  --color-error: #f2806f;
+
   /* Brand gradient stops (eyebrows, final CTA line, glows; never body text). */
   --color-brand-blue: #809ff9;
   --color-brand-purple: #d093d9;
