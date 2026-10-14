@@ -49,7 +49,9 @@ export const metadata: Metadata = {
  * The homepage (design D3, copy approved 13 Oct). Pricing and FAQ come from
  * PRE-202; the closing download section is added by the layout. PRE-238 took
  * out the loop and the trust row: the sections after them already say the
- * same, and the bento's last tile carries the privacy line.
+ * same. Their lines that appeared nowhere else moved: the example next step,
+ * "no cheat days" and "honest about confidence" to Signals, and the privacy
+ * line to the bento's last tile.
  */
 export default function Home() {
   return (

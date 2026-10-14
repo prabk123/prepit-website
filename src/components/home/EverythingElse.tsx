@@ -15,12 +15,15 @@ function PhonePeek({
   alt,
   crop = "top",
   height = "h-[240px]",
+  className = "[--device-w:260px]",
 }: {
   name: string;
   alt: string;
   crop?: "top" | "bottom";
   /** The visible part of the phone. */
   height?: string;
+  /** The phone's width, as `--device-w` classes. */
+  className?: string;
 }) {
   return (
     <div
@@ -28,7 +31,7 @@ function PhonePeek({
         crop === "top" ? "-mb-8 justify-start lg:-mb-10" : "justify-end"
       }`}
     >
-      <DeviceFrame className="[--device-w:260px]" capture={appCapture(name, alt)} />
+      <DeviceFrame className={className} capture={appCapture(name, alt)} />
     </div>
   );
 }
@@ -42,6 +45,9 @@ function Icon({ path }: { path: string }) {
     </span>
   );
 }
+
+/** Narrower phone beside the text in a row tile, so the text keeps about 230 px. */
+const ROW_PHONE = "[--device-w:260px] xl:[--device-w:210px]";
 
 const HEART = "M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10Z";
 const LOCK = "M7 11V8a5 5 0 0 1 10 0v3M6 11h12v9H6z";
@@ -87,10 +93,12 @@ export default function EverythingElse() {
           <BentoTile
             size="medium"
             layout="row"
+            rowFrom="xl"
             title="Works offline"
             media={
               <PhonePeek
                 name="18b-offline-waiting-list"
+                className={ROW_PHONE}
                 alt="Logs saved with no signal, waiting to send"
               />
             }
@@ -100,10 +108,12 @@ export default function EverythingElse() {
           <BentoTile
             size="medium"
             layout="row"
+            rowFrom="xl"
             title="Supplements"
             media={
               <PhonePeek
                 name="16b-supplements-screen"
+                className={ROW_PHONE}
                 alt="Today's supplements to tick off, and suggestions from your log"
               />
             }

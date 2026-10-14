@@ -17,8 +17,8 @@ function Column({ title, children }: { title: string; children: React.ReactNode 
 
 /**
  * The site footer (D3): dark, tagline, explore, feature pages, company and
- * legal links. Explore keeps the homepage sections that aren't feature pages,
- * so no feature is listed twice.
+ * legal links. Explore lists the same homepage sections as the header, so no
+ * feature is listed twice.
  */
 export default function Footer() {
   return (

@@ -23,9 +23,14 @@ type BentoTileProps = {
   size?: "large" | "medium" | "small";
   /**
    * `stack`: text, then the visual under it. `row`: the visual beside the
-   * text from 1024 px, for wide, short tiles (medium tiles and icon tiles).
+   * text, for wide, short tiles (medium tiles and icon tiles).
    */
   layout?: "stack" | "row";
+  /**
+   * Where `row` starts: 1024 px for small visuals (icons), 1280 px for a
+   * phone, so the text keeps a readable width beside it.
+   */
+  rowFrom?: "lg" | "xl";
   title: string;
   /** The one line under the title. */
   children: ReactNode;
@@ -39,6 +44,11 @@ type BentoTileProps = {
   className?: string;
 };
 
+const rowClass = {
+  lg: { tile: "lg:flex-row lg:items-center lg:gap-8", text: "lg:flex-1", media: "lg:shrink-0 lg:pt-0", end: "lg:self-end" },
+  xl: { tile: "xl:flex-row xl:items-center xl:gap-8", text: "xl:flex-1", media: "xl:shrink-0 xl:pt-0", end: "xl:self-end" },
+} as const;
+
 const span = {
   large: "sm:col-span-2 lg:row-span-2",
   medium: "sm:col-span-2",
@@ -48,6 +58,7 @@ const span = {
 export function BentoTile({
   size = "small",
   layout = "stack",
+  rowFrom = "lg",
   title,
   children,
   media,
@@ -56,18 +67,19 @@ export function BentoTile({
 }: BentoTileProps) {
   const row = layout === "row";
   const end = mediaAlign === "end";
+  const r = rowClass[rowFrom];
   const mediaPlacement = row
-    ? `pt-4 lg:shrink-0 lg:pt-0 ${end ? "lg:self-end" : ""}`
+    ? `pt-4 ${r.media} ${end ? r.end : ""}`
     : end
       ? "mt-auto pt-4"
       : "flex-1 items-center pt-4";
   return (
     <article
       className={`flex min-w-0 flex-1 flex-col gap-3 overflow-hidden rounded-tile border border-line bg-surface p-6 lg:p-8 ${
-        row ? "lg:flex-row lg:items-center lg:gap-8" : ""
+        row ? r.tile : ""
       } ${span[size]} ${className ?? ""}`}
     >
-      <div className="flex min-w-0 flex-col gap-3 lg:flex-1">
+      <div className={`flex min-w-0 flex-col gap-3 ${row ? r.text : ""}`}>
         <h3 className="font-display text-card-title text-ink">{title}</h3>
         <p className="text-body text-ink-muted">{children}</p>
       </div>
