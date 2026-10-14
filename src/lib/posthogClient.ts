@@ -23,8 +23,9 @@ const queue: PostHogCall[] = [];
 /** The latest idle wait after load before PostHog loads anyway. */
 const IDLE_TIMEOUT_MS = 4000;
 
+/** Only a known non-EU visitor skips consent; a missing or unknown region needs it (as in lib/geo). */
 function needsConsent(): boolean {
-  return readCookie(PREPIT_GEO_COOKIE) === "eu";
+  return readCookie(PREPIT_GEO_COOKIE) !== "non-eu";
 }
 
 function hasConsent(): boolean {
