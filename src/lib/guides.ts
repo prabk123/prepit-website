@@ -32,6 +32,11 @@ type GuideFrontmatter = {
   heroAlt: string;
   /** A still for the guide's card. Defaults to the hero, or its poster for a clip. */
   thumb?: string;
+  /**
+   * On phones the hero shows after this numbered list (1 = the first, the
+   * default). Use it when a later set of steps is the one the hero shows.
+   */
+  heroAfterSteps?: number;
   /** When the steps were last checked against the app, YYYY-MM-DD. */
   updated: string;
 };
@@ -65,15 +70,16 @@ type MdNode = { type: string; ordered?: boolean | null; children?: MdNode[] };
 
 /**
  * Puts a <GuideHero> (the header capture, shown on phones and tablets only)
- * straight after the guide's first numbered steps, so phones reach step 1
+ * straight after the guide's first numbered steps (or `heroAfterSteps`), so phones reach step 1
  * before the big phone. Reads `hero` and `heroAlt` from the frontmatter.
  */
 function remarkGuideHero() {
   return (tree: MdNode, file: { data: Record<string, unknown> }) => {
-    const { hero, heroAlt } = (file.data.matter ?? {}) as Partial<GuideFrontmatter>;
+    const { hero, heroAlt, heroAfterSteps = 1 } = (file.data.matter ?? {}) as Partial<GuideFrontmatter>;
     const children = tree.children ?? [];
     if (!hero || !heroAlt) return;
-    const firstSteps = children.findIndex((node) => node.type === "list" && node.ordered);
+    const stepLists = children.flatMap((node, i) => (node.type === "list" && node.ordered ? [i] : []));
+    const steps = stepLists[heroAfterSteps - 1] ?? stepLists[0] ?? -1;
     const heroNode = {
       type: "mdxJsxFlowElement",
       name: "GuideHero",
@@ -84,7 +90,7 @@ function remarkGuideHero() {
       children: [],
     };
     // Every guide has steps today; without them the capture opens the article.
-    children.splice(firstSteps === -1 ? 0 : firstSteps + 1, 0, heroNode);
+    children.splice(steps + 1, 0, heroNode);
   };
 }
 
