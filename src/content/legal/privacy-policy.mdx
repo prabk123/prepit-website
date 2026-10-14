@@ -10,33 +10,41 @@ PrepIt is an iPhone app and this website. Android is coming soon; this policy wi
 ## Summary
 
 - We use your data to run PrepIt: your nutritionist chat, food log, meal plans, check-ins and reminders.
-- Food, health and body data is sensitive. We only process it because you choose to give it to us, and you can delete it.
+- Food, health and body data is sensitive. We only process it because you choose to give it to us.
 - We use AI model providers to answer your messages, read meal photos and voice notes, and build plans. They process that data on our behalf.
-- We don't sell your data and we don't share your health data with advertisers.
-- Apple handles your payment. We never see your card details.
+- We don't sell your data, and we don't share your food, health or body data with advertisers.
+- Apple (or, for web purchases, Stripe) handles your payment. We never see your card details.
 
 ## What we collect
 
 ### Data you give us
 
-- **Account details:** your name and email address from Sign in with Apple or Google.
-- **Profile and goals:** age, sex, height, weight, body measurements, activity level, goals, dietary preferences, allergies and the answers you give during your consultation and weekly check-ins.
+- **Account details:** your name and email address from Sign in with Apple or Google. Before you sign in, onboarding uses an anonymous account that is linked to your sign-in afterwards.
+- **Profile and goals:** date of birth, sex, height, weight, body measurements, activity level, goals, dietary preferences, allergies and the answers you give during your consultation and weekly check-ins.
 - **What you log:** meals and drinks (typed, from photos, from Siri or the Action button, or from chat), water, supplements and weigh-ins.
 - **Meal photos:** photos you take or choose so PrepIt can work out what you ate.
-- **Voice notes and calls:** audio you record for the nutritionist, and the transcript we make from it. If you use a voice call with the nutritionist, the conversation is processed to answer you.
+- **Voice notes, dictation and calls:** audio you record for the nutritionist and the transcript we make from it, and voice calls with the nutritionist and their transcripts. When you dictate with the keyboard microphone, Apple's speech recognition turns your speech into text.
 - **Chat history:** the messages you send to and receive from the nutritionist, including reactions and replies, and any reports or feedback you send us from the app.
 - **Meal plans, recipes and grocery lists** you create or save, and meal plans you choose to share by link.
 
-### Data from connected services (only if you turn them on)
+### Data from Apple Health (only if you allow it)
 
-- **Apple Health:** if you allow it, PrepIt reads data such as active and resting energy, steps, workouts, heart rate, weight and body composition, and can write the meals, nutrients and weigh-ins you log back to Apple Health. You can change this at any time in the Health app. Apple Health data is never used for advertising or marketing.
-- **Strava:** if you connect it, we receive your activities to account for exercise.
+PrepIt reads data such as active and resting energy, steps, distance, flights climbed, workouts and their routes, heart rate, resting heart rate, height, weight and body composition. It can write the meals, nutrients, water and weigh-ins (including body fat and lean mass) you log back to Apple Health. Energy and workout data is sent to our servers so the nutritionist can account for your activity. You can change access at any time in the Health app. Apple Health data is never used for advertising or marketing.
 
 ### Data collected automatically
 
-- **Device and usage data:** device model, iOS and app version, time zone, language, notification token, crash reports, and how you use the app (for example which screens you open and which features you use).
-- **Subscription status:** whether you are in a free trial or subscribed, from Apple through our subscription provider. We don't receive your card details.
-- **Advertising measurement:** only if you allow tracking when iOS asks, we share limited events (such as starting a trial) with Meta to measure our ads.
+- **Device and usage data:** device model, iOS and app version, time zone, language, notification token, crash reports, and the screens you open and features you use.
+- **Session recordings:** for some sessions, our analytics provider (PostHog) records the app's screens, including the text and images on them, and the app's network requests, so we can see where people get stuck and fix bugs.
+- **Subscription status:** whether you are in a free trial or subscribed, from Apple or Stripe through our subscription provider (RevenueCat). We don't receive your card details.
+
+### Advertising measurement (Meta)
+
+We use Meta's tools to measure whether our ads lead to installs and subscriptions:
+
+- **In the app:** Meta's SDK receives app launches and in-app events, your PrepIt account ID and your email address (hashed on your device).
+- **From our servers:** when you start a trial, subscribe or are charged, we send Meta the event with your hashed email address, IP address and device details.
+
+This happens whether or not you allow tracking when iOS asks. Your answer to that prompt tells Meta whether it may use the data to track you across other companies' apps and websites. We never send Meta your food, health or body data, photos, voice notes or messages.
 
 ## How we use it and our legal basis
 
@@ -45,30 +53,34 @@ PrepIt is an iPhone app and this website. Android is coming soon; this policy wi
 | Provide PrepIt: your account, log, nutrition estimates, chat, plans, check-ins, reminders and widgets | Contract |
 | Process food, health and body data, meal photos and voice notes | Your explicit consent, which you give by entering or sharing it. You can withdraw it by deleting the data or your account |
 | Keep PrepIt secure, fix bugs and prevent abuse | Legitimate interests |
-| Understand how PrepIt is used and improve it | Legitimate interests, or consent where the law requires it |
+| Understand how PrepIt is used and improve it, including session recordings | Legitimate interests, or consent where the law requires it |
 | Send service emails and notifications you've turned on | Contract and legitimate interests. You can turn off notifications in Settings and unsubscribe from emails |
-| Measure our ads | Consent (the iOS tracking prompt) |
+| Measure our ads with Meta | Legitimate interests, or consent where the law requires it |
 | Keep records we must keep by law | Legal obligation |
 
 ## AI processing
 
-PrepIt's nutritionist, food recognition, transcription and meal planning use AI models run by third-party providers (such as OpenAI and Google, reached through OpenRouter, and Deepgram for speech). To answer you, we send them what the task needs, which can include your first name, goals, recent logs, meal photos, voice notes and messages. They process it on our behalf to produce a response.
+PrepIt's nutritionist, food recognition, transcription and meal planning use AI models run by third-party providers: Anthropic, OpenAI and Google (reached through OpenRouter), OpenAI directly for search embeddings, and Deepgram for speech. To answer you, we send them what the task needs. That can include your first name, age, sex, goals, latest weight, time zone, recent logs, Apple Health energy and workouts, meal photos, voice notes and messages. They process it on our behalf to produce a response.
+
+When the nutritionist searches the web to answer a question, the search query (with personal details removed) goes to OpenRouter's web search.
 
 AI answers can be wrong. PrepIt gives general nutrition guidance, not medical advice. See our [Terms and Conditions](/terms-and-conditions).
 
 ## Who we share data with
 
-We share personal data only with providers that help us run PrepIt, under contracts that limit how they can use it:
+We share personal data only with providers that help us run PrepIt:
 
-- **Hosting, storage and email:** Railway (servers and database), Amazon Web Services (photos and voice notes), Google Firebase (sign-in, notifications and crash reports), Brevo and PostHog (emails).
-- **AI and search:** OpenRouter and the model providers it connects to, Deepgram, Pinecone (food database search) and Tavily (web search for food nutrition information, which receives food names, not your account details).
-- **Subscriptions:** Apple and RevenueCat.
-- **Analytics and monitoring:** PostHog, Mixpanel, Google Analytics for Firebase and Axiom.
-- **Advertising measurement:** Meta, only if you allow tracking.
+- **Hosting, storage and email:** Railway (servers and database), Amazon Web Services (photos and voice notes), Google Firebase (sign-in, notifications and crash reports), Brevo (sign-in emails) and PostHog (product emails and notifications).
+- **AI and search:** OpenRouter and the model providers it connects to (including Anthropic, OpenAI and Google), OpenAI, Deepgram, Pinecone (food database search) and Tavily (web search for food nutrition information, which receives food names, not your account details).
+- **Maps:** Mapbox, which receives workout routes to draw route maps.
+- **Subscriptions and payments:** Apple, RevenueCat and, for web purchases, Stripe.
+- **Analytics and monitoring:** PostHog (including session recordings), Mixpanel, Google Analytics for Firebase and Axiom (server logs).
+- **Internal tools:** Slack, where our team receives problem reports you send from the app and account deletion notices, which include your name, email address and account ID.
+- **Advertising measurement:** Meta, as described above.
 - **People you choose:** if you share a meal plan link, anyone with the link can see that plan.
 - **The law:** if we are legally required to, or to protect our users' safety.
 
-We do not sell your personal data, and we do not share it for cross-context behavioural advertising except as described above with your permission.
+We do not sell your personal data.
 
 ## International transfers
 
@@ -76,7 +88,9 @@ Some of our providers process data outside the UK and EU, including in the Unite
 
 ## How long we keep it
 
-We keep your data while you have an account. When you delete your account in the app (Settings, then Account), it is scheduled for deletion and permanently deleted after a 30-day grace period, during which you can ask us to cancel the deletion. We may keep limited records for longer where the law requires it, for example for tax. Anonymous, aggregated usage statistics may be kept.
+We keep your data while you have an account. You can delete your account in the app: tap your profile picture, then **Account & Subscription**, then **Delete account**. Your account is closed straight away and scheduled for deletion. You have 30 days to change your mind by emailing support@tryprepit.app.
+
+After those 30 days we delete your profile, settings, logs, meals, plans, recipes, supplements, achievements and voice notes. Some data, including your chat history, check-ins and meal photos, is not yet removed automatically. Email support@tryprepit.app and we will delete it. We may keep limited records for longer where the law requires it, for example for tax.
 
 ## Your rights
 
@@ -90,7 +104,7 @@ We protect your data with encryption in transit, access controls and providers w
 
 ## Children
 
-PrepIt is not for children under 13, and we do not knowingly collect their data. If you think a child has given us data, email us and we will delete it.
+PrepIt is not intended for children under 13, and we do not knowingly collect their data. If you think a child has given us data, email us and we will delete it.
 
 ## Changes to this policy
 
