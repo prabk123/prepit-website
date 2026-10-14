@@ -46,6 +46,12 @@ NAME_BLURS = {
 }
 NAME_BOX_X, NAME_BOX_W, NAME_BOX_H = 728, 240, 86
 
+# Clips that open on an empty screen (an empty log, a blank Meal Plans list,
+# loading bubbles). Their poster, which is all a visitor sees under reduced
+# motion, in Low Power Mode and before playback, is the last frame instead:
+# the filled log, the finished plan, the answered chat (PRE-235).
+POSTER_FROM_END = ("03-log-typed", "04-log-photo", "08-chat-ask", "09-chat-log-it", "12-plan-week")
+
 # Videos that show the Home header somewhere, so the avatar is blurred throughout.
 AVATAR_VIDEOS = ("03-log-typed", "04-log-photo", "21-walkthrough")
 
@@ -147,7 +153,8 @@ def video(name: str) -> None:
                              "-movflags", "+faststart", base + ".mp4"], check=True)
     subprocess.run(common + ["-c:v", "libvpx-vp9", "-crf", "40", "-b:v", "0", "-row-mt", "1",
                              base + ".webm"], check=True)
-    subprocess.run(["ffmpeg", "-y", "-hide_banner", "-loglevel", "error", "-i", base + ".mp4",
+    seek = ["-sseof", "-0.1"] if name in POSTER_FROM_END else []
+    subprocess.run(["ffmpeg", "-y", "-hide_banner", "-loglevel", "error", *seek, "-i", base + ".mp4",
                     "-frames:v", "1", "-c:v", "libwebp", "-quality", "80", base + "-poster.webp"], check=True)
 
 
