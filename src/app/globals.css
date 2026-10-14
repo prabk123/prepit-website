@@ -64,6 +64,15 @@ html {
   }
 }
 
+/* Clash Display ships a very narrow space; open it up wherever the display
+   face is used, so "Set up" never reads as "Setup". */
+@layer base {
+  .font-display,
+  .photo-annotation__label b {
+    word-spacing: var(--word-spacing-display);
+  }
+}
+
 /* In a layer so Tailwind utilities passed as className still win. */
 @layer components {
   /* <Glow>: soft orange and amber light behind phones. */
