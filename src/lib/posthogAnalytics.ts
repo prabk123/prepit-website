@@ -1,14 +1,16 @@
-import { withPostHog } from "@/lib/posthogClient";
+import { withPostHog, withPostHogBeforeLeaving } from "@/lib/posthogClient";
 
 /** Custom PostHog event fired when a user taps an App Store download CTA. */
 export const POSTHOG_APP_STORE_EVENT = "app_store_click";
 
-export function trackPostHogAppStoreClick(source: string) {
-  // sendBeacon survives same-tab navigation to the App Store before the request
-  // completes. `now` loads PostHog at once if the idle load hasn't happened yet.
-  withPostHog(
-    (posthog) => posthog.capture(POSTHOG_APP_STORE_EVENT, { source }, { transport: "sendBeacon" }),
-    { now: true },
+/**
+ * Resolves once the event is sent, or after a short wait if PostHog is still
+ * loading, so a link can hold its navigation until then (see AppStoreLink).
+ */
+export function trackPostHogAppStoreClick(source: string): Promise<void> {
+  // sendBeacon survives same-tab navigation to the App Store before the request completes.
+  return withPostHogBeforeLeaving((posthog) =>
+    posthog.capture(POSTHOG_APP_STORE_EVENT, { source }, { transport: "sendBeacon" }),
   );
 }
 

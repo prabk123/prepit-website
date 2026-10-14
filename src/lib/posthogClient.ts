@@ -5,9 +5,9 @@ import { PREPIT_ANALYTICS_CONSENT_COOKIE, PREPIT_GEO_COOKIE, readCookie } from "
 /**
  * PostHog is about 190 KB of script, so it stays off the first paint: it loads
  * once the page has finished loading and the browser is idle, on the visitor's
- * first tap, key or scroll, or straight away when a call needs it now (an App
- * Store tap that is about to leave the page). Events captured before then wait
- * in a queue and are sent once it is ready.
+ * first tap, key or scroll, or straight away for an App Store tap that is about
+ * to leave the page. Events captured before then wait in a queue and are sent
+ * once it is ready.
  *
  * EU and UK visitors who haven't accepted analytics never load it, so nothing
  * runs or is stored for them until they accept in the cookie banner.
@@ -84,18 +84,41 @@ export function schedulePostHog() {
 
 /**
  * Run `call` with PostHog once it has loaded. Dropped when analytics is off or
- * the visitor hasn't consented. `now` loads it at once instead of waiting for
- * the idle load, for events sent just before the visitor leaves the page.
+ * the visitor hasn't consented.
  */
-export function withPostHog(call: PostHogCall, { now = false }: { now?: boolean } = {}) {
+export function withPostHog(call: PostHogCall) {
   if (!mayCapture()) return;
   if (instance) {
     call(instance);
     return;
   }
   queue.push(call);
-  if (now) void load();
-  else schedulePostHog();
+  schedulePostHog();
+}
+
+/** True while this visitor's events are allowed but PostHog hasn't loaded yet. */
+export function isPostHogPending(): boolean {
+  return mayCapture() && !instance;
+}
+
+/**
+ * Load PostHog and run `call`, resolving once it has run or after `timeoutMs`,
+ * whichever is first. For an event sent just before the page navigates away.
+ */
+export function withPostHogBeforeLeaving(call: PostHogCall, timeoutMs = 500): Promise<void> {
+  if (!mayCapture()) return Promise.resolve();
+  if (instance) {
+    call(instance);
+    return Promise.resolve();
+  }
+  const sent = new Promise<void>((resolve) => {
+    queue.push((posthog) => {
+      call(posthog);
+      resolve();
+    });
+  });
+  void load();
+  return Promise.race([sent, new Promise<void>((resolve) => setTimeout(resolve, timeoutMs))]);
 }
 
 /** The visitor accepted analytics in the cookie banner. */
