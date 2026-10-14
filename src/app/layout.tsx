@@ -8,9 +8,8 @@ import NavigationWrapper from "@/components/NavigationWrapper";
 import FinalCta from "@/components/pricing/FinalCta";
 import SiteFinalCta from "@/components/pricing/SiteFinalCta";
 import Footer from "@/components/Footer";
-import SmartBanner from "@/components/SmartBanner";
-import FloatingGetAppButton from "@/components/FloatingGetAppButton";
 import CookieConsent from "@/components/CookieConsent";
+import { APP_STORE_ID } from "@/lib/appStore";
 import "./globals.css";
 
 const dmSans = DM_Sans({
@@ -106,6 +105,12 @@ export const metadata: Metadata = {
     apple: "/logo.png",
   },
   manifest: "/manifest.json",
+  // Safari's Smart App Banner. It must be in the server HTML: Safari reads it
+  // on load and ignores a tag added later by JavaScript. Legal pages turn it
+  // off with `itunes: null`.
+  itunes: {
+    appId: APP_STORE_ID,
+  },
 };
 
 export default function RootLayout({
@@ -191,8 +196,6 @@ export default function RootLayout({
       <body
         className={`${dmSans.variable} ${brandFont.variable} ${prepitIcons.variable} antialiased`}
       >
-        <SmartBanner />
-        <FloatingGetAppButton />
         <div className="flex min-h-screen flex-col items-center bg-page">
           <NavigationWrapper />
 

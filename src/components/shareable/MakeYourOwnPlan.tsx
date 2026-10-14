@@ -3,8 +3,7 @@ import AppStoreCta from "@/components/ui/AppStoreCta";
 import CtaBand from "@/components/ui/CtaBand";
 import { TRIAL_NOTE } from "@/lib/pricing";
 
-// TODO(PRE-203): point at the meal plans feature page once it exists.
-export const MEAL_PLANS_PAGE_HREF = "/#ai-coach";
+export const MEAL_PLANS_PAGE_HREF = "/features/meal-plans";
 
 /** The closing band on a shared plan. */
 export default function MakeYourOwnPlan() {

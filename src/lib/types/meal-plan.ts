@@ -100,4 +100,9 @@ export interface SharedMealPlan {
   _id: string;
   days: PlanDay[];
   groceries: Grocery[];
+  /**
+   * True while the app is still building this plan's grocery list (a new or
+   * just-changed plan). An empty list on any other plan means it has none.
+   */
+  groceriesPending?: boolean;
 }

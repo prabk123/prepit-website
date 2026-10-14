@@ -26,7 +26,7 @@ export default function PricingSection() {
           className="justify-self-center lg:justify-self-end"
           title={`${TRIAL_DAYS} days free`}
           price={`Then ${PRICES.annual} a year or ${PRICES.monthly} a month`}
-          priceNote={`That's ${PRICES.annualPerWeek} a week, less than a coffee. Cancel anytime in the App Store.`}
+          priceNote={`That's ${PRICES.annualPerWeek} a week, less than a coffee. Cancel anytime in the App Store. Cancel at least 24 hours before your trial ends and you won't be charged.`}
           features={INCLUDED}
           cta={
             <AppStoreCta

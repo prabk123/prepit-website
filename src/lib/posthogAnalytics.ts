@@ -19,6 +19,9 @@ export const SHARED_MEAL_PLAN_EVENTS = {
   viewed: "shared_meal_plan_viewed",
   recipeOpened: "shared_meal_plan_recipe_opened",
   groceryListOpened: "shared_meal_plan_grocery_list_opened",
+  groceryListCopied: "shared_meal_plan_grocery_list_copied",
+  groceryListShared: "shared_meal_plan_grocery_list_shared",
+  unitsChanged: "shared_meal_plan_units_changed",
 } as const;
 
 export function trackSharedMealPlanEvent(
@@ -65,5 +68,18 @@ export function trackVideoPlayed(video: string, trigger: "auto" | "button") {
     video,
     trigger,
     path: window.location.pathname,
+  });
+}
+
+/** Fired when a visitor lands on a URL with no page, to find broken links. */
+export const POSTHOG_PAGE_NOT_FOUND_EVENT = "page_not_found";
+
+/** `path` is the pathname only: no query string, which could carry anything. */
+export function trackPageNotFound(path: string) {
+  if (typeof window === "undefined" || !isPostHogEnabled()) return;
+
+  posthog.capture(POSTHOG_PAGE_NOT_FOUND_EVENT, {
+    path,
+    referrer_host: document.referrer ? new URL(document.referrer).host : null,
   });
 }

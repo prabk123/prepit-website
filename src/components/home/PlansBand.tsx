@@ -24,6 +24,12 @@ export default function PlansBand() {
       annotations={plansKitchen.annotations}
       textSide={plansKitchen.textSide}
       scrimBehindText
+      aside={
+        <>
+          <PointList layout="rows" points={PLAN_POINTS} />
+          <TextLink href="/features/meal-plans">More about meal plans</TextLink>
+        </>
+      }
       media={
         <div className="flex items-start justify-center gap-4 lg:gap-5 [--device-w:260px] sm:[--device-w:240px] lg:[--device-w:clamp(220px,17vw,260px)]">
           <DeviceFrame
@@ -45,8 +51,6 @@ export default function PlansBand() {
         title="Ask for a week of meals. Get a plan built for you."
         lead="Your nutritionist plans around your goals, tastes and budget, then helps you stick to it."
       />
-      <PointList layout="rows" points={PLAN_POINTS} />
-      <TextLink href="/features/meal-plans">More about meal plans</TextLink>
     </PhotoBand>
   );
 }

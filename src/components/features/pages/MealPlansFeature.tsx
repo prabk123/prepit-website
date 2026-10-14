@@ -78,8 +78,8 @@ export default function MealPlansFeature() {
 
       <FeatureBlock
         id="grocery-list"
+        layout="peek"
         tone="surface"
-        reverse
         title="One grocery list, by aisle."
         lead="Everything for the week in one list, grouped by aisle, with an estimated cost and the cost per meal. Tick things off as you shop, or copy and share it."
         media={
