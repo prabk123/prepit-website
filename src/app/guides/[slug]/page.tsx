@@ -93,14 +93,21 @@ export default async function GuidePage({ params }: Props) {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
-      <Section labelledBy="guide-heading">
+      {/* Phones close the gap between the title and the guide, so step 1 starts on the first screen. */}
+      <Section labelledBy="guide-heading" className="max-lg:[&>div]:pb-stack">
+        {/*
+          * On phones and tablets the header is text only, so step 1 starts
+          * near the top; the same capture sits under the first steps instead
+          * (<GuideHero>, added by remarkGuideHero in lib/guides).
+          */}
         <FeatureSplit
           emphasis="text"
+          mediaClassName="max-lg:hidden"
           media={
             <div className="relative py-4">
               <Glow />
               <DeviceFrame
-                className="[--device-w:260px] sm:[--device-w:300px] lg:[--device-w:340px]"
+                className="[--device-w:340px]"
                 priority
                 {...guideHeroMedia(meta)}
               />
@@ -128,7 +135,7 @@ export default async function GuidePage({ params }: Props) {
         </FeatureSplit>
       </Section>
 
-      <Section tone="surface">
+      <Section tone="surface" className="max-lg:[&>div]:pt-stack">
         <article className="mx-auto max-w-[720px]">{content}</article>
       </Section>
 

@@ -11,7 +11,7 @@ const linkClass =
 const pillClass =
   "inline-flex h-11 items-center rounded-control bg-cream px-4 text-small font-medium text-on-cream transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cream";
 
-/** The site header (D3): warm dark glass bar, section links and "Get the app". */
+/** The site header (D3): solid warm dark bar (no text reads through it), section links and "Get the app". */
 export default function NavigationWrapper() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
@@ -68,7 +68,7 @@ export default function NavigationWrapper() {
       <nav
         ref={navRef}
         aria-label="Main"
-        className="fixed left-0 right-0 top-0 z-50 border-b border-line bg-overlay-strong backdrop-blur-md"
+        className="fixed left-0 right-0 top-0 z-50 border-b border-line bg-page"
       >
         <div className="mx-auto flex h-16 w-full max-w-content items-center justify-between px-gutter">
           <Link

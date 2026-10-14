@@ -15,7 +15,7 @@ type CtaBandProps = {
 export default function CtaBand({ title, line, cta, id, className }: CtaBandProps) {
   return (
     <div
-      className={`relative isolate flex flex-col items-start gap-8 overflow-hidden rounded-card border border-line bg-surface px-6 py-14 sm:px-10 lg:px-16 lg:py-20 ${className ?? ""}`}
+      className={`relative isolate flex flex-col items-start gap-8 overflow-hidden rounded-card border border-line bg-surface px-5 py-14 sm:px-10 lg:px-16 lg:py-20 ${className ?? ""}`}
     >
       <Glow style={{ left: "85%", top: "20%", width: "70%" }} />
       <div className="flex flex-col gap-4">

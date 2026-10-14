@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { getMealPlanById } from "@/lib/meal-plan";
 import { countRecipes, formatPlanRange } from "@/lib/plan-dates";
@@ -7,6 +8,7 @@ import MakeYourOwnPlan from "@/components/shareable/MakeYourOwnPlan";
 import SharedPlanBanner from "@/components/shareable/SharedPlanBanner";
 import SharedPlanViewTracker from "@/components/shareable/SharedPlanViewTracker";
 import { APP_STORE_ID } from "@/lib/appStore";
+import { defaultUnitSystemForCountry } from "@/lib/unit-conversion";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -48,6 +50,8 @@ export default async function SharableMealPlanPage({ params }: Props) {
   }
 
   const recipeCount = countRecipes(plan.days);
+  // Vercel sets the visitor's country; locally there is none, so Metric.
+  const defaultUnitSystem = defaultUnitSystemForCountry((await headers()).get("x-vercel-ip-country"));
 
   return (
     <>
@@ -56,6 +60,7 @@ export default async function SharableMealPlanPage({ params }: Props) {
         dayCount={plan.days.length}
         recipeCount={recipeCount}
         hasGroceries={plan.groceries.length > 0}
+        unitSystem={defaultUnitSystem}
       />
 
       <SharedPlanBanner />
@@ -68,7 +73,7 @@ export default async function SharableMealPlanPage({ params }: Props) {
         </p>
       </header>
 
-      <MealPlanView plan={plan} />
+      <MealPlanView plan={plan} defaultUnitSystem={defaultUnitSystem} />
 
       <MakeYourOwnPlan />
     </>
