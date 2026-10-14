@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
+import { CONTACT_HONEYPOT_FIELD, CONTACT_LIMITS } from "@/lib/contact";
 import { trackContactFormSubmitted } from "@/lib/posthogAnalytics";
 
 export type ContactKind = "contact" | "feedback";
@@ -17,11 +18,13 @@ function validate(values: Record<Field, string>): FieldErrors {
   if (!values.email.trim()) errors.email = "Enter your email address.";
   else if (!EMAIL_PATTERN.test(values.email.trim())) errors.email = "Enter an email address like name@example.com.";
   if (!values.message.trim()) errors.message = "Enter a message.";
+  else if (values.message.length > CONTACT_LIMITS.message)
+    errors.message = `Keep your message under ${CONTACT_LIMITS.message.toLocaleString("en-US")} characters.`;
   return errors;
 }
 
 const inputClass =
-  "w-full min-w-0 rounded-[16px] border bg-page px-4 text-body text-ink placeholder:text-ink-faint transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cream";
+  "w-full min-w-0 rounded-icon border bg-page px-4 text-body text-ink placeholder:text-ink-faint transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cream";
 
 function borderFor(error?: string) {
   return error ? "border-error" : "border-ink-faint hover:border-ink-muted";
@@ -48,6 +51,17 @@ export default function ContactForm({ kind }: { kind: ContactKind }) {
   const [status, setStatus] = useState<Status>("idle");
   const formRef = useRef<HTMLFormElement>(null);
   const sentRef = useRef<HTMLDivElement>(null);
+  const nameRef = useRef<HTMLInputElement>(null);
+  const focusNameOnReturn = useRef(false);
+
+  // "Send another message" removes the button it sits on, so focus would drop
+  // to the page; put it on Name instead.
+  useEffect(() => {
+    if (status === "idle" && focusNameOnReturn.current) {
+      focusNameOnReturn.current = false;
+      nameRef.current?.focus();
+    }
+  }, [status]);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     const name = e.target.name as Field;
@@ -77,6 +91,8 @@ export default function ContactForm({ kind }: { kind: ContactKind }) {
           email: values.email.trim(),
           message: values.message.trim(),
           type: kind,
+          [CONTACT_HONEYPOT_FIELD]:
+            formRef.current?.querySelector<HTMLInputElement>(`[name="${CONTACT_HONEYPOT_FIELD}"]`)?.value ?? "",
         }),
       });
 
@@ -122,7 +138,10 @@ export default function ContactForm({ kind }: { kind: ContactKind }) {
         </div>
         <button
           type="button"
-          onClick={() => setStatus("idle")}
+          onClick={() => {
+            focusNameOnReturn.current = true;
+            setStatus("idle");
+          }}
           className="inline-flex h-12 items-center rounded-control border border-line-strong px-6 text-body font-medium text-ink transition-colors hover:bg-surface-raised focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cream"
         >
           Send another message
@@ -134,15 +153,17 @@ export default function ContactForm({ kind }: { kind: ContactKind }) {
   const sending = status === "sending";
 
   return (
-    <form ref={formRef} onSubmit={handleSubmit} noValidate aria-labelledby="contact-heading" className={`${card} flex flex-col gap-6`}>
+    <form ref={formRef} onSubmit={handleSubmit} noValidate aria-labelledby="contact-heading" className={`${card} relative flex flex-col gap-6`}>
       <div className="flex flex-col gap-2">
         <label htmlFor="contact-name" className="text-small font-medium text-ink-secondary">
           Name
         </label>
         <input
+          ref={nameRef}
           id="contact-name"
           name="name"
           type="text"
+          maxLength={CONTACT_LIMITS.name}
           autoComplete="name"
           value={values.name}
           onChange={handleChange}
@@ -162,6 +183,7 @@ export default function ContactForm({ kind }: { kind: ContactKind }) {
           name="email"
           type="email"
           inputMode="email"
+          maxLength={CONTACT_LIMITS.email}
           autoComplete="email"
           value={values.email}
           onChange={handleChange}
@@ -180,14 +202,31 @@ export default function ContactForm({ kind }: { kind: ContactKind }) {
           id="contact-message"
           name="message"
           rows={6}
+          maxLength={CONTACT_LIMITS.message}
           value={values.message}
           onChange={handleChange}
           placeholder={isFeedback ? "What's working, what isn't, what you'd like next" : "How can we help?"}
           aria-invalid={errors.message ? true : undefined}
-          aria-describedby={errors.message ? "contact-message-error" : undefined}
+          aria-describedby={errors.message ? "contact-message-error contact-message-count" : "contact-message-count"}
           className={`${inputClass} resize-y py-3 ${borderFor(errors.message)}`}
         />
         <FieldError id="contact-message-error" message={errors.message} />
+        <p id="contact-message-count" className="text-small text-ink-faint tabular-nums">
+          {values.message.length.toLocaleString("en-US")} of {CONTACT_LIMITS.message.toLocaleString("en-US")} characters
+        </p>
+      </div>
+
+      {/* Spam trap: hidden from people and screen readers, left empty by them. */}
+      <div aria-hidden className="absolute -left-[9999px] h-px w-px overflow-hidden">
+        <label htmlFor={`contact-${CONTACT_HONEYPOT_FIELD}`}>Leave this empty</label>
+        <input
+          id={`contact-${CONTACT_HONEYPOT_FIELD}`}
+          name={CONTACT_HONEYPOT_FIELD}
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+          defaultValue=""
+        />
       </div>
 
       <div className="flex flex-col gap-4">
