@@ -22,16 +22,16 @@ Each file has:
 ```mdx
 ---
 title: "Your Title"
-effectiveDate: "December 17, 2025"
+effectiveDate: "14 October 2026"
 ---
 
-### 1. First Section
+## First section
 
 Your content here...
 
-### 2. Second Section
+### A sub-section
 
 More content...
 ```
 
-See the main `MDX_LEGAL_GUIDE.md` in the project root for full documentation.
+Use sentence-case `##` headings for sections and `###` under them, never skipping a level. Pages are styled by `src/components/legal/legalMdxComponents.tsx` (the guides' Markdown styles; tables scroll inside their own box on phones), so don't add inline styles or bold headings.
