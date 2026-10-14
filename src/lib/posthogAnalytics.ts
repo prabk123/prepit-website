@@ -67,3 +67,17 @@ export function trackVideoPlayed(video: string, trigger: "auto" | "button") {
     path: window.location.pathname,
   });
 }
+
+/** Fired on each contact or feedback form submit, to see send failures. */
+export const POSTHOG_CONTACT_FORM_EVENT = "contact_form_submitted";
+
+/** Only the form kind, the outcome and the HTTP status; never what was typed. */
+export function trackContactFormSubmitted(
+  kind: "contact" | "feedback",
+  outcome: "sent" | "failed" | "invalid",
+  status?: number,
+) {
+  if (typeof window === "undefined" || !isPostHogEnabled()) return;
+
+  posthog.capture(POSTHOG_CONTACT_FORM_EVENT, { kind, outcome, ...(status ? { status } : {}) });
+}
