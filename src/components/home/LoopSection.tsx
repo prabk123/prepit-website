@@ -36,8 +36,8 @@ export default function LoopSection() {
         <figure className="flex max-w-[760px] flex-col gap-4 rounded-tile border border-line bg-surface p-6 lg:p-8">
           <figcaption className="text-eyebrow font-medium uppercase text-annotation">A next step, for example</figcaption>
           <blockquote className="text-lead text-ink text-pretty">
-            “Afternoon Energy looks soft. Your wrap and flat white are light on protein. A Greek yogurt now would help
-            hold Satiety until dinner.”
+            “Afternoon Energy looks soft. Breakfast was light on protein. A Greek yogurt now would help hold Satiety
+            until dinner.”
           </blockquote>
         </figure>
       </div>
