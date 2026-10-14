@@ -9,6 +9,8 @@ type FeatureSplitProps = {
   reverse?: boolean;
   /** `text` gives the text column more room, for hero-size headlines. */
   emphasis?: "even" | "text";
+  /** Extra classes for the media column, for example `max-lg:hidden`. */
+  mediaClassName?: string;
   className?: string;
 };
 
@@ -18,6 +20,7 @@ export default function FeatureSplit({
   media,
   reverse,
   emphasis = "even",
+  mediaClassName,
   className,
 }: FeatureSplitProps) {
   const columns =
@@ -34,7 +37,9 @@ export default function FeatureSplit({
       <div className={`flex min-w-0 flex-col gap-8 ${reverse ? "lg:order-2" : ""}`}>
         {children}
       </div>
-      <div className={`relative flex min-w-0 justify-center ${reverse ? "lg:order-1" : ""}`}>
+      <div
+        className={`relative flex min-w-0 justify-center ${reverse ? "lg:order-1" : ""} ${mediaClassName ?? ""}`}
+      >
         {media}
       </div>
     </div>

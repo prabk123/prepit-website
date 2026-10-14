@@ -10,7 +10,7 @@ import { nutritionistEvening } from "@/content/lifestyle";
 const ASKS = [
   { title: "Charts on request", detail: "“Show my protein this week”" },
   { title: "Voice notes", detail: "Talk, and hear a spoken reply" },
-  { title: "You confirm", detail: "Every log, plan or goal change" },
+  { title: "You confirm", detail: "Every log, plan or goal change it makes from chat" },
 ];
 
 /** "Ask anything": the chat, on the evening photo. */
@@ -24,6 +24,12 @@ export default function NutritionistBand() {
       phonePhoto={nutritionistEvening.mobile}
       annotations={nutritionistEvening.annotations}
       textSide={nutritionistEvening.textSide}
+      aside={
+        <>
+          <PointList layout="rows" points={ASKS} />
+          <TextLink href="/features/ai-nutritionist">More about your nutritionist</TextLink>
+        </>
+      }
       media={
         <DevicePair className="[--device-w:260px] sm:[--device-w:290px] lg:[--device-w:clamp(260px,20vw,300px)]">
           <DeviceFrame
@@ -48,8 +54,6 @@ export default function NutritionistBand() {
         title="Ask anything. It knows your goals, your day and your last meal."
         lead="Answers in plain language, built on what you actually ate. It can log, move or fix a meal, and set your goals, right from chat."
       />
-      <PointList layout="rows" points={ASKS} />
-      <TextLink href="/features/ai-nutritionist">More about your nutritionist</TextLink>
     </PhotoBand>
   );
 }

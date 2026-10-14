@@ -8,8 +8,8 @@ interface UnitSystemToggleProps {
 }
 
 const OPTIONS: { value: UnitSystem; label: string }[] = [
-  { value: "imperial", label: "Imperial" },
   { value: "metric", label: "Metric" },
+  { value: "imperial", label: "Imperial" },
 ];
 
 export default function UnitSystemToggle({ value, onChange }: UnitSystemToggleProps) {
