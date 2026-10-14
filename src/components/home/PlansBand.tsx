@@ -23,6 +23,7 @@ export default function PlansBand() {
       phonePhoto={plansKitchen.mobile}
       annotations={plansKitchen.annotations}
       textSide={plansKitchen.textSide}
+      scrimBehindText
       aside={
         <>
           <PointList layout="rows" points={PLAN_POINTS} />
