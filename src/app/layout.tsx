@@ -9,6 +9,7 @@ import FinalCta from "@/components/pricing/FinalCta";
 import SiteFinalCta from "@/components/pricing/SiteFinalCta";
 import Footer from "@/components/Footer";
 import CookieConsent from "@/components/CookieConsent";
+import { PREPIT_ANALYTICS_CONSENT_COOKIE, PREPIT_GEO_COOKIE } from "@/lib/cookies";
 import { APP_STORE_ID } from "@/lib/appStore";
 import "./globals.css";
 
@@ -123,29 +124,28 @@ export default function RootLayout({
         />
         {metaPixelId && (
           <>
+            {/* In the UK and EEA (or when the region is unknown) the pixel only
+                loads after "Accept optional cookies"; CookieConsent calls
+                prepitLoadMetaPixel then. Cookie names are in src/lib/cookies.ts. */}
             <Script id="meta-pixel" strategy="afterInteractive">
               {`
-                !function(f,b,e,v,n,t,s)
-                {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-                n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-                if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-                n.queue=[];t=b.createElement(e);t.async=!0;
-                t.src=v;s=b.getElementsByTagName(e)[0];
-                s.parentNode.insertBefore(t,s)}(window, document,'script',
-                'https://connect.facebook.net/en_US/fbevents.js');
-                fbq('init', '${metaPixelId}');
-                fbq('track', 'PageView');
+                window.prepitLoadMetaPixel = function () {
+                  !function(f,b,e,v,n,t,s)
+                  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+                  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+                  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+                  n.queue=[];t=b.createElement(e);t.async=!0;
+                  t.src=v;s=b.getElementsByTagName(e)[0];
+                  s.parentNode.insertBefore(t,s)}(window, document,'script',
+                  'https://connect.facebook.net/en_US/fbevents.js');
+                  fbq('init', '${metaPixelId}');
+                  fbq('track', 'PageView');
+                };
+                var geo = (document.cookie.match(/(?:^|; )${PREPIT_GEO_COOKIE}=([^;]*)/) || [])[1];
+                var consent = (document.cookie.match(/(?:^|; )${PREPIT_ANALYTICS_CONSENT_COOKIE}=([^;]*)/) || [])[1];
+                if (geo === 'non-eu' || consent === 'granted') window.prepitLoadMetaPixel();
               `}
             </Script>
-            <noscript>
-              <img
-                height="1"
-                width="1"
-                style={{ display: "none" }}
-                src={`https://www.facebook.com/tr?id=${metaPixelId}&ev=PageView&noscript=1`}
-                alt=""
-              />
-            </noscript>
           </>
         )}
         <script

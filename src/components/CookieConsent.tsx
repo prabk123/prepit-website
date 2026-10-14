@@ -12,20 +12,33 @@ import {
   setClientCookie,
 } from "@/lib/cookies";
 
+declare global {
+  interface Window {
+    /** Defined by the Meta Pixel script in the root layout when a pixel id is set. */
+    prepitLoadMetaPixel?: () => void;
+  }
+}
+
+const buttonClass =
+  "inline-flex h-11 items-center justify-center rounded-control px-5 text-small font-medium transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cream";
+
+/** UK and EEA visitors choose here before optional cookies (PostHog, Meta Pixel) are set. */
 export default function CookieConsent() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     if (!isAnalyticsEnabled()) return;
 
-    const isEu = readCookie(PREPIT_GEO_COOKIE) === "eu";
+    // No geo cookie counts as needing consent, like the proxy and PostHog.
+    const needsConsent = readCookie(PREPIT_GEO_COOKIE) !== "non-eu";
     const consent = readCookie(PREPIT_ANALYTICS_CONSENT_COOKIE);
-    setVisible(isEu && consent !== "granted" && consent !== "denied");
+    setVisible(needsConsent && consent !== "granted" && consent !== "denied");
   }, []);
 
   function acceptAnalytics() {
     setClientCookie(PREPIT_ANALYTICS_CONSENT_COOKIE, "granted", COOKIE_MAX_AGE_ONE_YEAR);
     grantAnalyticsConsent();
+    window.prepitLoadMetaPixel?.();
     setVisible(false);
   }
 
@@ -42,12 +55,15 @@ export default function CookieConsent() {
       role="dialog"
       aria-live="polite"
       aria-label="Cookie consent"
-      className="fixed inset-x-4 bottom-4 z-50 mx-auto max-w-[720px] rounded-2xl border border-black/10 bg-white p-5 shadow-lg sm:inset-x-6"
+      className="fixed inset-x-4 bottom-4 z-50 mx-auto max-w-[720px] rounded-tile border border-line-strong bg-surface-raised p-5 text-ink [color-scheme:dark] shadow-phone sm:inset-x-6 sm:p-6"
     >
-      <p className="text-sm leading-relaxed text-black/80">
-        We use cookies and similar technologies to understand how our website is used and to
-        improve PrepIt. Analytics cookies are optional. See our{" "}
-        <Link href="/cookie-policy" className="underline underline-offset-2">
+      <p className="text-small text-ink-secondary text-pretty">
+        We use optional analytics and advertising cookies to see how our website is used and
+        whether our ads work. They stay off unless you accept. See our{" "}
+        <Link
+          href="/cookie-policy"
+          className="text-ink underline decoration-energy underline-offset-4 hover:text-energy"
+        >
           Cookie Policy
         </Link>
         .
@@ -56,14 +72,14 @@ export default function CookieConsent() {
         <button
           type="button"
           onClick={rejectAnalytics}
-          className="rounded-2xl border border-black/15 px-4 py-3 text-sm font-medium text-black transition-opacity hover:opacity-80"
+          className={`${buttonClass} border border-line-strong text-ink`}
         >
           Reject optional cookies
         </button>
         <button
           type="button"
           onClick={acceptAnalytics}
-          className="rounded-2xl bg-black px-4 py-3 text-sm font-medium text-white transition-opacity hover:opacity-80"
+          className={`${buttonClass} bg-cream text-on-cream`}
         >
           Accept optional cookies
         </button>
