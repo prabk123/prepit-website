@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { Grocery, UnitSystem } from "@/lib/types/meal-plan";
+import type { Grocery, PlanDay, UnitSystem } from "@/lib/types/meal-plan";
+import { formatPlanRange } from "@/lib/plan-dates";
 import { maybeConvert, formatCookQuantity } from "@/lib/unit-conversion";
 import { SHARED_MEAL_PLAN_EVENTS, trackSharedMealPlanEvent } from "@/lib/posthogAnalytics";
 import PrepItIcon from "./PrepItIcon";
@@ -10,6 +11,7 @@ import Sheet, { SheetCloseButton } from "./Sheet";
 interface GroceryListSectionProps {
   planId: string;
   groceries: Grocery[];
+  days: PlanDay[];
   /** The app is still building the list, so an empty one is not final. */
   groceriesPending: boolean;
   unitSystem: UnitSystem;
@@ -65,21 +67,26 @@ function itemName(item: Grocery): string {
   return item.trailing_text ? `${item.ingredient} ${item.trailing_text}` : item.ingredient;
 }
 
-/** Plain text for the clipboard or the share sheet: one line per item, grouped by category. */
-export function groceryListText(groceries: Grocery[], unitSystem: UnitSystem): string {
+/**
+ * Plain text for the clipboard or the share sheet, laid out like the app's
+ * own grocery list copy: dates, "Made with PrepIt", then items by category.
+ */
+export function groceryListText(groceries: Grocery[], days: PlanDay[], unitSystem: UnitSystem): string {
+  const range = formatPlanRange(days);
   const sections = groupByCategory(groceries).map(([category, items]) => {
     const lines = items.map((item) => {
       const qty = buildQuantityText(item, unitSystem);
-      return `- ${itemName(item)}${qty ? `, ${qty}` : ""}`;
+      return `  ${item.emoji ? `${item.emoji} ` : ""}${itemName(item)}${qty ? ` – ${qty}` : ""}`;
     });
     return [category, ...lines].join("\n");
   });
-  return ["Grocery list", ...sections].join("\n\n");
+  return [range ? `Grocery List for ${range}` : "Grocery List", "Made with PrepIt", ...sections].join("\n\n");
 }
 
 export default function GroceryListSection({
   planId,
   groceries,
+  days,
   groceriesPending,
   unitSystem,
 }: GroceryListSectionProps) {
@@ -140,6 +147,7 @@ export default function GroceryListSection({
         <GroceryModal
           planId={planId}
           groceries={groceries}
+          days={days}
           unitSystem={unitSystem}
           onClose={() => setShowModal(false)}
         />
@@ -175,11 +183,13 @@ const FOOTER_BUTTON =
 function GroceryModal({
   planId,
   groceries,
+  days,
   unitSystem,
   onClose,
 }: {
   planId: string;
   groceries: Grocery[];
+  days: PlanDay[];
   unitSystem: UnitSystem;
   onClose: () => void;
 }) {
@@ -195,7 +205,7 @@ function GroceryModal({
   const eventProperties = { plan_id: planId, item_count: groceries.length, unit_system: unitSystem };
 
   const copy = async () => {
-    const ok = await writeToClipboard(groceryListText(groceries, unitSystem));
+    const ok = await writeToClipboard(groceryListText(groceries, days, unitSystem));
     setCopyState(ok ? "copied" : "failed");
     if (ok) trackSharedMealPlanEvent(SHARED_MEAL_PLAN_EVENTS.groceryListCopied, eventProperties);
     clearTimeout(resetTimer.current);
@@ -204,7 +214,7 @@ function GroceryModal({
 
   const share = async () => {
     try {
-      await navigator.share({ title: "Grocery list", text: groceryListText(groceries, unitSystem) });
+      await navigator.share({ title: "Grocery list", text: groceryListText(groceries, days, unitSystem) });
       trackSharedMealPlanEvent(SHARED_MEAL_PLAN_EVENTS.groceryListShared, eventProperties);
     } catch {
       // Closing the share sheet rejects too; nothing to tell the visitor.

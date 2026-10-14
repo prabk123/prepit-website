@@ -151,6 +151,7 @@ export default function MealPlanView({ plan, defaultUnitSystem }: MealPlanViewPr
         <GroceryListSection
           planId={plan._id}
           groceries={plan.groceries}
+          days={plan.days}
           groceriesPending={plan.groceriesPending ?? false}
           unitSystem={unitSystem}
         />
