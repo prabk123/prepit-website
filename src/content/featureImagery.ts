@@ -139,20 +139,3 @@ export const cookingClip = {
   height: 720,
   label: "Sliced chicken, peppers and spinach cooking in a cast-iron pan.",
 };
-
-/**
- * The 54 s walkthrough with voiceover and music, for a "watch with sound"
- * player. Not for LoopVideo, which is muted only. The player contract:
- * - never autoplays: the visitor presses play, with native controls;
- * - `preload="none"` or `"metadata"`, showing the poster until then;
- * - carries the captions track (WCAG 1.2.2).
- * The silent loops (21-walkthrough.mp4/.webm) stay the autoplay version.
- */
-export const narratedWalkthrough = {
-  mp4: "/app/21-walkthrough-narrated.mp4",
-  webm: "/app/21-walkthrough-narrated.webm",
-  captions: "/app/21-walkthrough-narrated.vtt",
-  poster: "/app/21-walkthrough-poster.webp",
-  width: 804,
-  height: 1748,
-};

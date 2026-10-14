@@ -2,6 +2,7 @@ import DeviceFrame from "@/components/device/DeviceFrame";
 import AppStoreCta from "@/components/ui/AppStoreCta";
 import Glow from "@/components/ui/Glow";
 import Section from "@/components/ui/Section";
+import { appCapture } from "@/lib/captures";
 import { TRIAL_DAYS } from "@/lib/pricing";
 
 /**
@@ -34,12 +35,7 @@ export default function FinalCta({ trackingSource = "final-cta" }: { trackingSou
           <Glow style={{ top: "70%" }} />
           <DeviceFrame
             className="mx-auto [--device-w:280px] sm:[--device-w:340px] lg:[--device-w:400px]"
-            capture={{
-              src: "/app/01-home-dark@2x.webp",
-              avif: "/app/01-home-dark@2x.avif",
-              webp: "/app/01-home-dark@2x.webp",
-              alt: "PrepIt Home with today's Energy, Satiety and Mood",
-            }}
+            capture={appCapture("01-home", "PrepIt Home with today's Energy, Satiety and Mood")}
           />
         </div>
       </div>

@@ -6,7 +6,6 @@ import Section, { type SectionPhoto } from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
 import {
   cookingClip,
-  narratedWalkthrough,
   planFlatLays,
   signalsGym,
   textureHoney,
@@ -119,24 +118,6 @@ export default function ImageryPreviewPage() {
         <div className="mt-10 overflow-hidden rounded-card">
           <LoopVideo {...cookingClip} className="h-auto w-full" />
         </div>
-      </Section>
-
-      <Section labelledBy="narrated">
-        <Label>Walkthrough with voiceover and music: press play, native controls, captions on</Label>
-        <SectionHeading title="Narrated walkthrough" size="title" id="narrated" />
-        <video
-          controls
-          playsInline
-          preload="metadata"
-          poster={narratedWalkthrough.poster}
-          width={narratedWalkthrough.width}
-          height={narratedWalkthrough.height}
-          className="mx-auto mt-10 h-auto max-h-[80vh] w-auto max-w-full rounded-card"
-        >
-          <source src={narratedWalkthrough.webm} type="video/webm" />
-          <source src={narratedWalkthrough.mp4} type="video/mp4" />
-          <track kind="captions" src={narratedWalkthrough.captions} srcLang="en" label="English" default />
-        </video>
       </Section>
     </div>
   );

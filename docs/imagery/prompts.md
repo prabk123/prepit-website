@@ -59,7 +59,7 @@ Failed variations are dropped, with the reason noted in the Generations table. I
 | 7 | Honey light texture | Backgrounds for sections with no photo | None | Decorative, empty alt |
 | 8 | Cafe clip from the hero still | Homepage hero video option | Starts from the hero still | Failed (see Generations); not shipped |
 | 9 | Cooking clip: chicken, peppers and spinach in a cast-iron pan | Features (PRE-203), Plans | None | Plays through `LoopVideo` (`cookingClip` in `src/content/featureImagery.ts`, which holds all of shots 4 to 10; the homepage photos stay in `lifestyle.ts`) |
-| 10 | Voiceover and music bed for `21-walkthrough` | A "watch with sound" player: press to play, native controls, never autoplay | None | Captions in `21-walkthrough-narrated.vtt`, timed to the pauses in the voice. Mixed onto the walkthrough as `public/app/21-walkthrough-narrated.mp4` and `.webm`: voice from 1 s, music ducked under the voice and faded out over the last 3 s. The silent loops are unchanged |
+| 10 | Voiceover and music bed for `21-walkthrough` | A "watch with sound" player: press to play, native controls, never autoplay | None | Captions in `21-walkthrough-narrated.vtt`, timed to the pauses in the voice. Mixed onto the walkthrough as `public/app/21-walkthrough-narrated.mp4` and `.webm`: voice from 1 s, music ducked under the voice and faded out over the last 3 s. The silent loops are unchanged. The narrated files were removed from `public/app` in PRE-242 because no page used them; restore them from git history when a player is built |
 
 Flat-lay prompt (the oats one; the others swap the dish line):
 

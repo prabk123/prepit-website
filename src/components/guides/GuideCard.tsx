@@ -1,5 +1,5 @@
 import LinkCard from "@/components/ui/LinkCard";
-import { isAppClip, isAppStill } from "@/lib/appMedia";
+import { isAppClip, isAppStill } from "@/lib/captures";
 import type { GuideMeta } from "@/lib/guides";
 
 function thumbnail(hero: string) {

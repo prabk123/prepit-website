@@ -1,14 +1,15 @@
-import posthog from "posthog-js";
-import { isPostHogEnabled } from "@/lib/analytics";
+import { withPostHog } from "@/lib/posthogClient";
 
 /** Custom PostHog event fired when a user taps an App Store download CTA. */
 export const POSTHOG_APP_STORE_EVENT = "app_store_click";
 
 export function trackPostHogAppStoreClick(source: string) {
-  if (typeof window === "undefined" || !isPostHogEnabled()) return;
-
-  // sendBeacon survives same-tab navigation to the App Store before the request completes.
-  posthog.capture(POSTHOG_APP_STORE_EVENT, { source }, { transport: "sendBeacon" });
+  // sendBeacon survives same-tab navigation to the App Store before the request
+  // completes. `now` loads PostHog at once if the idle load hasn't happened yet.
+  withPostHog(
+    (posthog) => posthog.capture(POSTHOG_APP_STORE_EVENT, { source }, { transport: "sendBeacon" }),
+    { now: true },
+  );
 }
 
 /**
@@ -25,9 +26,7 @@ export function trackSharedMealPlanEvent(
   event: (typeof SHARED_MEAL_PLAN_EVENTS)[keyof typeof SHARED_MEAL_PLAN_EVENTS],
   properties: { plan_id: string } & Record<string, string | number | boolean>,
 ) {
-  if (typeof window === "undefined" || !isPostHogEnabled()) return;
-
-  posthog.capture(event, { source: "shared-meal-plan", ...properties });
+  withPostHog((posthog) => posthog.capture(event, { source: "shared-meal-plan", ...properties }));
 }
 
 /** Custom PostHog event fired when a visitor opens an FAQ answer. */
@@ -35,9 +34,7 @@ export const POSTHOG_FAQ_OPENED_EVENT = "faq_question_opened";
 
 /** `questionId` is the question's fixed slug, never anything the visitor typed. */
 export function trackFaqQuestionOpened(questionId: string, source: string) {
-  if (typeof window === "undefined" || !isPostHogEnabled()) return;
-
-  posthog.capture(POSTHOG_FAQ_OPENED_EVENT, { question_id: questionId, source });
+  withPostHog((posthog) => posthog.capture(POSTHOG_FAQ_OPENED_EVENT, { question_id: questionId, source }));
 }
 
 /**
@@ -47,9 +44,7 @@ export function trackFaqQuestionOpened(questionId: string, source: string) {
 export const POSTHOG_SECTION_VIEWED_EVENT = "home_section_viewed";
 
 export function trackSectionViewed(section: string) {
-  if (typeof window === "undefined" || !isPostHogEnabled()) return;
-
-  posthog.capture(POSTHOG_SECTION_VIEWED_EVENT, { section });
+  withPostHog((posthog) => posthog.capture(POSTHOG_SECTION_VIEWED_EVENT, { section }));
 }
 
 /**
@@ -59,11 +54,8 @@ export function trackSectionViewed(section: string) {
 export const POSTHOG_VIDEO_PLAYED_EVENT = "website_video_played";
 
 export function trackVideoPlayed(video: string, trigger: "auto" | "button") {
-  if (typeof window === "undefined" || !isPostHogEnabled()) return;
-
-  posthog.capture(POSTHOG_VIDEO_PLAYED_EVENT, {
-    video,
-    trigger,
-    path: window.location.pathname,
-  });
+  if (typeof window === "undefined") return;
+  // Read the path now: the event may wait in the queue until PostHog loads.
+  const path = window.location.pathname;
+  withPostHog((posthog) => posthog.capture(POSTHOG_VIDEO_PLAYED_EVENT, { video, trigger, path }));
 }
