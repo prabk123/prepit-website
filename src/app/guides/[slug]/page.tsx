@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import DeviceFrame from "@/components/device/DeviceFrame";
+import PreloadImage from "@/components/media/PreloadImage";
 import GuideCard from "@/components/guides/GuideCard";
 import FinalCta from "@/components/pricing/FinalCta";
 import FeatureSplit from "@/components/ui/FeatureSplit";
@@ -89,9 +90,22 @@ export default async function GuidePage({ params }: Props) {
     },
   ];
 
+  const heroMedia = guideHeroMedia(meta);
+
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      {/* The header phone shows on desktop only, so it isn't eager (a hidden eager
+          image still downloads on phones); preload it for desktop instead. */}
+      {heroMedia.capture?.avif && (
+        <PreloadImage
+          href={heroMedia.capture.src}
+          imageSrcSet={heroMedia.capture.avif}
+          type="image/avif"
+          media="(min-width: 1024px)"
+        />
+      )}
+      {heroMedia.video && <PreloadImage href={heroMedia.video.poster} media="(min-width: 1024px)" />}
 
       {/* Phones close the gap between the title and the guide, so step 1 starts on the first screen. */}
       <Section labelledBy="guide-heading" className="max-lg:[&>div]:pb-stack">
@@ -106,11 +120,7 @@ export default async function GuidePage({ params }: Props) {
           media={
             <div className="relative py-4">
               <Glow />
-              <DeviceFrame
-                className="[--device-w:340px]"
-                priority
-                {...guideHeroMedia(meta)}
-              />
+              <DeviceFrame className="[--device-w:340px]" {...heroMedia} />
             </div>
           }
         >

@@ -5,7 +5,7 @@ import { compileMDX } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
 import type DeviceFrame from "@/components/device/DeviceFrame";
 import { guideMdxComponents } from "@/components/guides/GuideBlocks";
-import { appCapture, appClip, isAppClip, isAppStill } from "@/lib/appMedia";
+import { appCapture, appVideo, isAppClip, isAppStill } from "@/lib/captures";
 
 const GUIDES_DIR = path.join(process.cwd(), "src/content/guides");
 
@@ -139,7 +139,7 @@ export function guideSectionTitle(id: GuideSectionId): string {
 export function guideHeroMedia(
   meta: GuideMeta,
 ): Pick<ComponentProps<typeof DeviceFrame>, "capture" | "video"> {
-  if (isAppClip(meta.hero)) return { video: appClip(meta.hero, meta.heroAlt) };
+  if (isAppClip(meta.hero)) return { video: appVideo(meta.hero, meta.heroAlt) };
   if (isAppStill(meta.hero)) return { capture: appCapture(meta.hero, meta.heroAlt) };
   return {};
 }

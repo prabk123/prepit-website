@@ -6,7 +6,7 @@ import FeatureSplit from "@/components/ui/FeatureSplit";
 import Glow from "@/components/ui/Glow";
 import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
-import { appCapture } from "@/lib/appMedia";
+import { appCapture } from "@/lib/captures";
 
 const title = "About PrepIt";
 const description =

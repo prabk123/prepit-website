@@ -1,5 +1,5 @@
-import { preload } from "react-dom";
 import AnnotatedPhoto from "@/components/media/AnnotatedPhoto";
+import PreloadImage from "@/components/media/PreloadImage";
 import AppStoreCta from "@/components/ui/AppStoreCta";
 import { heroCafe } from "@/content/lifestyle";
 import { TRIAL_DAYS } from "@/lib/pricing";
@@ -13,22 +13,6 @@ import { TRIAL_DAYS } from "@/lib/pricing";
  * first screen.
  */
 export default function HomeHero() {
-  // The photo is the LCP. Preload the crop and size this screen will pick, so
-  // it starts before the stylesheet and fonts are done.
-  for (const [photo, media] of [
-    [heroCafe.desktop, "(min-width: 1024px)"],
-    [heroCafe.mobile, "(max-width: 1023.98px)"],
-  ] as const) {
-    preload(photo.src, {
-      as: "image",
-      imageSrcSet: photo.avif,
-      imageSizes: photo.sizes,
-      type: "image/avif",
-      media,
-      fetchPriority: "high",
-    });
-  }
-
   return (
     <section
       id="hero"
@@ -36,6 +20,23 @@ export default function HomeHero() {
       data-section-name="hero"
       className="relative isolate w-full overflow-hidden bg-page pt-16 text-ink"
     >
+      {/* The photo is the LCP. Preload the crop and size this screen will pick,
+          so it starts before the stylesheet and fonts are done. */}
+      {(
+        [
+          [heroCafe.desktop, "(min-width: 1024px)"],
+          [heroCafe.mobile, "(max-width: 1023.98px)"],
+        ] as const
+      ).map(([photo, media]) => (
+        <PreloadImage
+          key={media}
+          href={photo.src}
+          imageSrcSet={photo.avif}
+          imageSizes={photo.sizes}
+          type="image/avif"
+          media={media}
+        />
+      ))}
       <div className="mx-auto grid w-full max-w-content gap-6 px-gutter pt-8 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-end lg:gap-10 lg:pt-10">
         <div>
           <p className="text-eyebrow font-medium uppercase">

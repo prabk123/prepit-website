@@ -1,6 +1,6 @@
 import type { ComponentProps } from "react";
-import { preload } from "react-dom";
 import DeviceFrame from "@/components/device/DeviceFrame";
+import PreloadImage from "@/components/media/PreloadImage";
 import AppStoreCta from "@/components/ui/AppStoreCta";
 import FeatureSplit from "@/components/ui/FeatureSplit";
 import Glow from "@/components/ui/Glow";
@@ -17,12 +17,11 @@ type FeatureHeroProps = {
 
 /** A feature page's header: h1, one line and the App Store button beside a phone. */
 export default function FeatureHero({ feature, media }: FeatureHeroProps) {
-  // A clip's poster is the LCP, but browsers fetch posters late and at low
-  // priority. Preload it so the first screen paints as fast as a still.
-  if (media.video) preload(media.video.poster, { as: "image", fetchPriority: "high" });
-
   return (
     <Section labelledBy="feature-heading">
+      {/* A clip's poster is the LCP, but browsers fetch posters late and at low
+          priority. Preload it so the first screen paints as fast as a still. */}
+      {media.video && <PreloadImage href={media.video.poster} />}
       <FeatureSplit
         emphasis="text"
         media={
