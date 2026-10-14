@@ -64,6 +64,21 @@ html {
   }
 }
 
+/* Clash Display ships a very narrow space; open it up wherever the display
+   face is used, so "Set up" never reads as "Setup". The wider gaps can leave
+   one word alone on a title's last line, so titles wrap "pretty" too
+   (headings with text-balance keep it: utilities win over this layer). */
+@layer base {
+  .font-display,
+  .photo-annotation__label b {
+    word-spacing: var(--word-spacing-display);
+  }
+
+  .font-display {
+    text-wrap: pretty;
+  }
+}
+
 /* In a layer so Tailwind utilities passed as className still win. */
 @layer components {
   /* <Glow>: soft orange and amber light behind phones. */
