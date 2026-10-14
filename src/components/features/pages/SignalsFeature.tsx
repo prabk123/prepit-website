@@ -94,7 +94,7 @@ export default function SignalsFeature() {
 
       <FeatureBlock
         id="your-week"
-        reverse
+        layout="peek"
         title="See what helped your week."
         lead="On Progress, What your food did shows the last 7 days of each score and what pushed it up or down, like protein at breakfast or fibre slipping."
         media={

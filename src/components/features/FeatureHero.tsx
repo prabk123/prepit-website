@@ -15,7 +15,7 @@ type FeatureHeroProps = {
   media: Pick<ComponentProps<typeof DeviceFrame>, "capture" | "video">;
 };
 
-/** A feature page's header: eyebrow, h1, one line and the App Store button beside a phone. */
+/** A feature page's header: h1, one line and the App Store button beside a phone. */
 export default function FeatureHero({ feature, media }: FeatureHeroProps) {
   // A clip's poster is the LCP, but browsers fetch posters late and at low
   // priority. Preload it so the first screen paints as fast as a still.
@@ -40,7 +40,6 @@ export default function FeatureHero({ feature, media }: FeatureHeroProps) {
           as="h1"
           id="feature-heading"
           size="section"
-          eyebrow={feature.eyebrow}
           title={feature.heading}
           lead={feature.lead}
         />
