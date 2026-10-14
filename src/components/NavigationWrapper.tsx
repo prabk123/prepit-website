@@ -48,8 +48,19 @@ export default function NavigationWrapper() {
       }
     };
 
+    // The drawer is lg:hidden, so close it if the window widens to desktop
+    // (rotation or resize); otherwise the Tab trap would outlive the menu.
+    const desktop = window.matchMedia("(min-width: 1024px)");
+    const onDesktop = (event: MediaQueryListEvent) => {
+      if (event.matches) setMobileMenuOpen(false);
+    };
+
     document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
+    desktop.addEventListener("change", onDesktop);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      desktop.removeEventListener("change", onDesktop);
+    };
   }, [mobileMenuOpen]);
 
   return (
