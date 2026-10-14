@@ -117,7 +117,7 @@ export default async function GuidePage({ params }: Props) {
           <nav aria-label="Breadcrumb">
             <Link
               href="/guides"
-              className="text-small font-medium text-ink-muted transition-colors hover:text-ink"
+              className="tap-target text-small font-medium text-ink-muted transition-colors hover:text-ink"
             >
               <span aria-hidden>←</span> All guides
             </Link>
@@ -145,7 +145,7 @@ export default async function GuidePage({ params }: Props) {
             <h2 id="more-guides-heading" className="font-display text-title text-ink">
               More guides
             </h2>
-            <Link href="/guides" className="text-small font-medium text-energy hover:text-ink">
+            <Link href="/guides" className="tap-target text-small font-medium text-energy hover:text-ink">
               See all guides <span aria-hidden>→</span>
             </Link>
           </div>

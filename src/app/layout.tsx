@@ -196,10 +196,16 @@ export default function RootLayout({
       <body
         className={`${dmSans.variable} ${brandFont.variable} ${prepitIcons.variable} antialiased`}
       >
+        <a
+          href="#main"
+          className="sr-only rounded-control bg-cream px-4 text-small font-medium text-on-cream focus:not-sr-only focus:fixed focus:left-4 focus:top-2.5 focus:z-[60] focus:inline-flex focus:h-11 focus:items-center focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cream"
+        >
+          Skip to content
+        </a>
         <div className="flex min-h-screen flex-col items-center bg-page">
           <NavigationWrapper />
 
-          <main className="w-full">
+          <main id="main" tabIndex={-1} className="w-full outline-none">
             {children}
             <SpeedInsights />
           </main>

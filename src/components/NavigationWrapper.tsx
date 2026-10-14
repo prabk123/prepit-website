@@ -2,29 +2,78 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import AppStoreLink from "@/components/AppStoreLink";
 import { HEADER_SECTION_LINKS, SITE_PAGE_LINKS } from "@/lib/homeSections";
 
 const linkClass =
   "text-small font-medium text-ink-muted transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cream";
 const pillClass =
-  "inline-flex h-10 items-center rounded-control bg-cream px-4 text-small font-medium text-on-cream transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cream";
+  "inline-flex h-11 items-center rounded-control bg-cream px-4 text-small font-medium text-on-cream transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cream";
 
 /** The site header (D3): solid warm dark bar (no text reads through it), section links and "Get the app". */
 export default function NavigationWrapper() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const navRef = useRef<HTMLElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const toggleRef = useRef<HTMLButtonElement>(null);
+
+  // While the mobile menu is open, Escape closes it and Tab cycles through the
+  // header and the menu only, not the page behind the backdrop.
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setMobileMenuOpen(false);
+        toggleRef.current?.focus();
+        return;
+      }
+      if (event.key !== "Tab") return;
+
+      const focusable = [navRef.current, menuRef.current]
+        .flatMap((root) => Array.from(root?.querySelectorAll<HTMLElement>("a[href], button") ?? []))
+        .filter((el) => el.getClientRects().length > 0);
+      if (focusable.length === 0) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const index = focusable.indexOf(document.activeElement as HTMLElement);
+      if (event.shiftKey && index <= 0) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && (index === -1 || index === focusable.length - 1)) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    // The drawer is lg:hidden, so close it if the window widens to desktop
+    // (rotation or resize); otherwise the Tab trap would outlive the menu.
+    const desktop = window.matchMedia("(min-width: 1024px)");
+    const onDesktop = (event: MediaQueryListEvent) => {
+      if (event.matches) setMobileMenuOpen(false);
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    desktop.addEventListener("change", onDesktop);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      desktop.removeEventListener("change", onDesktop);
+    };
+  }, [mobileMenuOpen]);
 
   return (
     <>
       <nav
+        ref={navRef}
         aria-label="Main"
         className="fixed left-0 right-0 top-0 z-50 border-b border-line bg-page"
       >
         <div className="mx-auto flex h-16 w-full max-w-content items-center justify-between px-gutter">
           <Link
             href="/"
-            className="flex items-center gap-2.5 text-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cream"
+            className="flex h-11 items-center gap-2.5 text-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cream"
           >
             <span className="relative h-8 w-8">
               <Image src="/logo.png" alt="" fill sizes="32px" className="object-contain" />
@@ -50,6 +99,7 @@ export default function NavigationWrapper() {
               Get the app
             </AppStoreLink>
             <button
+              ref={toggleRef}
               type="button"
               className="flex h-11 w-11 items-center justify-center text-ink focus-visible:outline-2 focus-visible:outline-cream"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -81,6 +131,7 @@ export default function NavigationWrapper() {
 
       {/* Mobile menu drawer */}
       <div
+        ref={menuRef}
         id="mobile-menu"
         hidden={!mobileMenuOpen}
         className="fixed left-0 right-0 top-16 z-40 border-b border-line bg-surface lg:hidden"
