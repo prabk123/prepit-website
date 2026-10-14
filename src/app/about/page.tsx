@@ -74,7 +74,6 @@ export default function AboutPage() {
           <SectionHeading
             as="h1"
             id="about-heading"
-            eyebrow="About PrepIt"
             title="A nutritionist for everyone who eats."
             lead="PrepIt knows what you ate, what you're aiming for and how your food is likely to make you feel. It checks in, spots patterns and tells you what to eat next, every day."
           />
@@ -144,21 +143,21 @@ export default function AboutPage() {
                 href="https://prepit.userjot.com/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-ink underline decoration-energy underline-offset-4 hover:text-energy"
+                className="text-ink underline decoration-ink-faint underline-offset-4 hover:decoration-ink"
               >
                 Share your feedback
               </a>{" "}
               or{" "}
               <Link
                 href="/contact"
-                className="text-ink underline decoration-energy underline-offset-4 hover:text-energy"
+                className="text-ink underline decoration-ink-faint underline-offset-4 hover:decoration-ink"
               >
                 get in touch
               </Link>
               . New to PrepIt? Start with the{" "}
               <Link
                 href="/guides"
-                className="text-ink underline decoration-energy underline-offset-4 hover:text-energy"
+                className="text-ink underline decoration-ink-faint underline-offset-4 hover:decoration-ink"
               >
                 guides
               </Link>

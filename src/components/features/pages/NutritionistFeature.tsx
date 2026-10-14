@@ -85,6 +85,7 @@ export default function NutritionistFeature() {
 
       <FeatureBlock
         id="voice-notes"
+        layout="peek"
         tone="surface"
         title="Talk, and hear a reply."
         lead="Send a voice note of up to two minutes, like on WhatsApp. Your nutritionist answers in its own voice, with the words written underneath, and any Log it card still appears under the reply."

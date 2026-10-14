@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import AppStoreLink from "@/components/AppStoreLink";
 import { FEATURE_SLUGS, FEATURES, featureHref } from "@/lib/features";
-import { HOME_SECTION_LINKS, SITE_PAGE_LINKS } from "@/lib/homeSections";
+import { HEADER_SECTION_LINKS, SITE_PAGE_LINKS } from "@/lib/homeSections";
 
 const linkClass = "text-body text-ink-muted transition-colors hover:text-ink";
 
@@ -15,7 +15,11 @@ function Column({ title, children }: { title: string; children: React.ReactNode 
   );
 }
 
-/** The site footer (D3): dark, tagline, explore, feature pages, company and legal links. */
+/**
+ * The site footer (D3): dark, tagline, explore, feature pages, company and
+ * legal links. Explore keeps the homepage sections that aren't feature pages,
+ * so no feature is listed twice.
+ */
 export default function Footer() {
   return (
     <footer className="w-full border-t border-line bg-page text-ink">
@@ -36,7 +40,7 @@ export default function Footer() {
               <Link href="/" className={linkClass}>
                 Home
               </Link>
-              {HOME_SECTION_LINKS.map((link) => (
+              {HEADER_SECTION_LINKS.map((link) => (
                 <Link key={link.href} href={link.href} className={linkClass}>
                   {link.label}
                 </Link>
