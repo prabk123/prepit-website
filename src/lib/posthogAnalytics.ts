@@ -5,7 +5,7 @@ import { isPostHogEnabled } from "@/lib/analytics";
 export const POSTHOG_APP_STORE_EVENT = "app_store_click";
 
 export function trackPostHogAppStoreClick(source: string) {
-  if (typeof window === "undefined" || !isPostHogEnabled() || !posthog.__loaded) return;
+  if (typeof window === "undefined" || !isPostHogEnabled()) return;
 
   // sendBeacon survives same-tab navigation to the App Store before the request completes.
   posthog.capture(POSTHOG_APP_STORE_EVENT, { source }, { transport: "sendBeacon" });
@@ -25,7 +25,7 @@ export function trackSharedMealPlanEvent(
   event: (typeof SHARED_MEAL_PLAN_EVENTS)[keyof typeof SHARED_MEAL_PLAN_EVENTS],
   properties: { plan_id: string } & Record<string, string | number | boolean>,
 ) {
-  if (typeof window === "undefined" || !isPostHogEnabled() || !posthog.__loaded) return;
+  if (typeof window === "undefined" || !isPostHogEnabled()) return;
 
   posthog.capture(event, { source: "shared-meal-plan", ...properties });
 }
@@ -35,7 +35,7 @@ export const POSTHOG_FAQ_OPENED_EVENT = "faq_question_opened";
 
 /** `questionId` is the question's fixed slug, never anything the visitor typed. */
 export function trackFaqQuestionOpened(questionId: string, source: string) {
-  if (typeof window === "undefined" || !isPostHogEnabled() || !posthog.__loaded) return;
+  if (typeof window === "undefined" || !isPostHogEnabled()) return;
 
   posthog.capture(POSTHOG_FAQ_OPENED_EVENT, { question_id: questionId, source });
 }
@@ -47,7 +47,7 @@ export function trackFaqQuestionOpened(questionId: string, source: string) {
 export const POSTHOG_SECTION_VIEWED_EVENT = "home_section_viewed";
 
 export function trackSectionViewed(section: string) {
-  if (typeof window === "undefined" || !isPostHogEnabled() || !posthog.__loaded) return;
+  if (typeof window === "undefined" || !isPostHogEnabled()) return;
 
   posthog.capture(POSTHOG_SECTION_VIEWED_EVENT, { section });
 }
@@ -59,7 +59,7 @@ export function trackSectionViewed(section: string) {
 export const POSTHOG_VIDEO_PLAYED_EVENT = "website_video_played";
 
 export function trackVideoPlayed(video: string, trigger: "auto" | "button") {
-  if (typeof window === "undefined" || !isPostHogEnabled() || !posthog.__loaded) return;
+  if (typeof window === "undefined" || !isPostHogEnabled()) return;
 
   posthog.capture(POSTHOG_VIDEO_PLAYED_EVENT, {
     video,

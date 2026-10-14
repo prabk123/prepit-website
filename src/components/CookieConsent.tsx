@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import posthog from "posthog-js";
 import { isAnalyticsEnabled } from "@/lib/analytics";
-import { initPostHog } from "@/lib/posthogInit";
 import {
   COOKIE_MAX_AGE_ONE_YEAR,
   PREPIT_ANALYTICS_CONSENT_COOKIE,
@@ -36,13 +36,15 @@ export default function CookieConsent() {
 
   function acceptAnalytics() {
     setClientCookie(PREPIT_ANALYTICS_CONSENT_COOKIE, "granted", COOKIE_MAX_AGE_ONE_YEAR);
-    initPostHog();
+    posthog.opt_in_capturing();
+    posthog.startSessionRecording();
     window.prepitLoadMetaPixel?.();
     setVisible(false);
   }
 
   function rejectAnalytics() {
     setClientCookie(PREPIT_ANALYTICS_CONSENT_COOKIE, "denied", COOKIE_MAX_AGE_ONE_YEAR);
+    posthog.opt_out_capturing();
     setVisible(false);
   }
 
