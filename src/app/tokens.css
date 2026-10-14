@@ -96,8 +96,9 @@
   --text-eyebrow--letter-spacing: 0.12em;
   --word-spacing-display: 0.08em;
 
-  /* Spacing. Sections 80 to 120 px apart; page gutter 20 to 64 px. */
-  --spacing-section: clamp(80px, 65.1px + 3.81vw, 120px);
+  /* Spacing. Each section is padded 64 to 96 px top and bottom, so two
+     sections sit 128 to 192 px apart; page gutter 20 to 64 px. */
+  --spacing-section: clamp(64px, 52.1px + 3.05vw, 96px);
   --spacing-gutter: clamp(20px, 3.7px + 4.19vw, 64px);
   --spacing-stack: clamp(32px, 24.6px + 1.9vw, 52px);
   --container-content: 1200px;
