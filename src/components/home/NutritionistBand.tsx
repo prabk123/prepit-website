@@ -10,7 +10,7 @@ import { nutritionistEvening } from "@/content/lifestyle";
 const ASKS = [
   { title: "Charts on request", detail: "“Show my protein this week”" },
   { title: "Voice notes", detail: "Talk, and hear a spoken reply" },
-  { title: "You confirm", detail: "Every change it makes from chat" },
+  { title: "You confirm", detail: "Every log, plan or goal change it makes from chat" },
 ];
 
 /** "Ask anything": the chat, on the evening photo. */

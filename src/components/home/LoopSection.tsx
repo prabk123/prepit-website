@@ -13,7 +13,7 @@ const STEPS = [
   },
   {
     title: "Adjust",
-    detail: "Every log comes with one clear next step, and your nutritionist when you want to go deeper.",
+    detail: "Your nutritionist suggests one clear next step when it matters, and is there when you want to go deeper.",
   },
 ];
 
@@ -36,8 +36,8 @@ export default function LoopSection() {
         <figure className="flex max-w-[760px] flex-col gap-4 rounded-tile border border-line bg-surface p-6 lg:p-8">
           <figcaption className="text-eyebrow font-medium uppercase text-annotation">A next step, for example</figcaption>
           <blockquote className="text-lead text-ink text-pretty">
-            “Afternoon Energy looks soft. Breakfast was light on protein. A Greek yogurt now would help hold Satiety
-            until dinner.”
+            “Your toast and jam breakfast was light on protein. Adding eggs or Greek yogurt at lunch would help hold
+            Satiety until dinner.”
           </blockquote>
         </figure>
       </div>
