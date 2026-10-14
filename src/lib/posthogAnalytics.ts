@@ -19,6 +19,9 @@ export const SHARED_MEAL_PLAN_EVENTS = {
   viewed: "shared_meal_plan_viewed",
   recipeOpened: "shared_meal_plan_recipe_opened",
   groceryListOpened: "shared_meal_plan_grocery_list_opened",
+  groceryListCopied: "shared_meal_plan_grocery_list_copied",
+  groceryListShared: "shared_meal_plan_grocery_list_shared",
+  unitsChanged: "shared_meal_plan_units_changed",
 } as const;
 
 export function trackSharedMealPlanEvent(
