@@ -90,14 +90,16 @@ export const widgetsDesk: FeaturePhoto = {
 /**
  * A photo with no phone in it, at its native 1280 × 720 (no 2x upscale), so
  * it stays sharp up to 640 CSS px wide on a 2x screen. Set `sizes` when it is
- * shown wider.
+ * shown wider. `small` adds a 768 px copy (`<name>-768`) for photos shown at
+ * phone width or in a three-up grid.
  */
-function still(name: string, alt: string, { avif = true } = {}): SectionPhoto {
+function still(name: string, alt: string, { avif = true, small = false } = {}): SectionPhoto {
   const base = `/lifestyle/${name}`;
+  const srcSet = (ext: string) => `${small ? `${base}-768.${ext} 768w, ` : ""}${base}.${ext} 1280w`;
   return {
     src: `${base}.webp`,
-    avif: avif ? `${base}.avif 1280w` : undefined,
-    webp: `${base}.webp 1280w`,
+    avif: avif ? srcSet("avif") : undefined,
+    webp: srcSet("webp"),
     width: 1280,
     height: 720,
     alt,
@@ -112,14 +114,17 @@ export const planFlatLays = {
   oats: still(
     "flatlay-oats",
     "A bowl of protein overnight oats topped with diced apple and cinnamon on a walnut table.",
+    { small: true },
   ),
   wrap: still(
     "flatlay-wrap",
     "A wholemeal chicken wrap with hummus and salad, cut in half, beside a dish of hummus.",
+    { small: true },
   ),
   salmon: still(
     "flatlay-salmon",
     "A Mediterranean salmon bowl with quinoa, tomatoes, olives, feta and a lemon wedge.",
+    { small: true },
   ),
 };
 

@@ -12,6 +12,9 @@ import { appCapture, widgetCapture } from "@/lib/captures";
 
 const PHONE = "[--device-w:260px] sm:[--device-w:300px] lg:[--device-w:clamp(260px,22vw,320px)]";
 
+// Three across from 640 px, else full width inside the page gutters (20 px on phones).
+const FLAT_LAY_SIZES = "(min-width: 640px) 33vw, calc(100vw - 40px)";
+
 const FLAT_LAYS: { photo: SectionPhoto; caption: string }[] = [
   { photo: planFlatLays.oats, caption: "Protein overnight oats" },
   { photo: planFlatLays.wrap, caption: "Chicken wrap with hummus" },
@@ -34,8 +37,8 @@ export default function MealPlansFeature() {
             {FLAT_LAYS.map(({ photo, caption }) => (
               <li key={caption} className="flex flex-col gap-3">
                 <picture>
-                  {photo.avif && <source srcSet={photo.avif} sizes="(min-width: 640px) 33vw, 100vw" type="image/avif" />}
-                  {photo.webp && <source srcSet={photo.webp} sizes="(min-width: 640px) 33vw, 100vw" type="image/webp" />}
+                  {photo.avif && <source srcSet={photo.avif} sizes={FLAT_LAY_SIZES} type="image/avif" />}
+                  {photo.webp && <source srcSet={photo.webp} sizes={FLAT_LAY_SIZES} type="image/webp" />}
                   <img
                     src={photo.src}
                     alt={photo.alt}
