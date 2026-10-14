@@ -23,6 +23,11 @@ type PhotoBandProps = {
    * overlap it, so the phone in the photo stays clear.
    */
   media?: ReactNode;
+  /**
+   * For an `end` photo that is bright behind the text: a stronger scrim that
+   * sits only behind the text block, instead of the soft top-right one.
+   */
+  scrimBehindText?: boolean;
 };
 
 /**
@@ -40,6 +45,7 @@ export default function PhotoBand({
   textSide = "start",
   children,
   media,
+  scrimBehindText = false,
 }: PhotoBandProps) {
   const end = textSide === "end";
   return (
@@ -58,16 +64,27 @@ export default function PhotoBand({
         stackOnPhones
         className="w-full lg:aspect-[1376/768] lg:max-h-[860px] lg:min-h-[640px]"
       >
-        <div
-          aria-hidden
-          className={`${end ? "photo-band-scrim-end" : "photo-band-scrim"} absolute inset-0 z-[1] max-lg:hidden`}
-        />
+        {!scrimBehindText && (
+          <div
+            aria-hidden
+            className={`${end ? "photo-band-scrim-end" : "photo-band-scrim"} absolute inset-0 z-[1] max-lg:hidden`}
+          />
+        )}
         <div
           className={`relative z-[3] mx-auto flex h-full w-full max-w-content px-gutter pt-[calc(var(--photo-strip-h)+1.5rem)] ${
             end ? "lg:items-start lg:justify-end lg:pt-16" : "items-center lg:py-16"
           }`}
         >
-          <div className="flex max-w-[460px] flex-col gap-8">{children}</div>
+          <div className="relative flex max-w-[460px] flex-col gap-8">
+            {/* Dark only behind the text, however tall it wraps, so the food around it stays lit. */}
+            {scrimBehindText && (
+              <div
+                aria-hidden
+                className="photo-band-scrim-text pointer-events-none absolute -inset-x-[40%] -inset-y-[24%] -z-10 max-lg:hidden"
+              />
+            )}
+            {children}
+          </div>
         </div>
       </AnnotatedPhoto>
       {media && (

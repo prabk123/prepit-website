@@ -155,8 +155,10 @@
   );
   /*
    * Photo bands: dark behind the text column only, clear over the subject.
-   * `end` darkens the top right, for a text block above the groceries.
-   * Both keep ink-muted text at 4.5:1 or better over the brightest part of
+   * `end` darkens the top right, for a text block above the subject.
+   * `text` sits only behind the text block (PhotoBand sizes it past the
+   * text), for an `end` photo that is bright there, so the food around it
+   * stays lit. All three keep ink-muted text at 4.5:1 or better over the brightest part of
    * the photo behind it, from 1024 to 1920 px (PRE-233).
    */
   --scrim-band-start: linear-gradient(
@@ -166,9 +168,15 @@
     rgb(17 15 12 / 0) 62%
   );
   --scrim-band-end: radial-gradient(
-    ellipse 56% 88% at 80% 30%,
-    rgb(17 15 12 / 0.92) 0%,
-    rgb(17 15 12 / 0.84) 55%,
+    ellipse 62% 72% at 84% 22%,
+    rgb(17 15 12 / 0.9) 0%,
+    rgb(17 15 12 / 0.72) 50%,
+    rgb(17 15 12 / 0) 100%
+  );
+  --scrim-band-text: radial-gradient(
+    closest-side,
+    rgb(17 15 12 / 0.94) 0%,
+    rgb(17 15 12 / 0.9) 75%,
     rgb(17 15 12 / 0) 100%
   );
   /* The same gradient from the right, for photos whose subject is on the left. */

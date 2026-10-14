@@ -23,6 +23,7 @@ export default function PlansBand() {
       phonePhoto={plansKitchen.mobile}
       annotations={plansKitchen.annotations}
       textSide={plansKitchen.textSide}
+      scrimBehindText
       media={
         <div className="flex items-start justify-center gap-4 lg:gap-5 [--device-w:260px] sm:[--device-w:240px] lg:[--device-w:clamp(220px,17vw,260px)]">
           <DeviceFrame
