@@ -37,6 +37,9 @@
   --color-satiety: #f38c61;
   --color-mood: #809ff9;
 
+  /* Form errors: a warm coral, 6.9:1 on surface. Text only, with the field. */
+  --color-error: #f2806f;
+
   /* Brand gradient stops (eyebrows, final CTA line, glows; never body text). */
   --color-brand-blue: #809ff9;
   --color-brand-purple: #d093d9;
@@ -60,7 +63,10 @@
   --color-overlay-strong: rgb(17 15 12 / 0.8);
 
   /* Type scale. Clash Display headlines (weight 600, tracking -0.025em),
-     DM Sans body. Hero 60 to 112 px, chapter heads 46 to 80 px. */
+     DM Sans body. Hero 60 to 112 px, chapter heads 46 to 80 px.
+     Clash's space is only 0.14em wide, so with tight tracking the gaps
+     between words nearly vanish; every Clash line adds
+     --word-spacing-display (see .font-display in globals.css). */
   --text-hero: clamp(60px, 37.7px + 5.71vw, 120px);
   --text-hero--line-height: 0.95;
   --text-hero--letter-spacing: -0.025em;
@@ -91,9 +97,11 @@
   --text-eyebrow: 13px;
   --text-eyebrow--line-height: 1.2;
   --text-eyebrow--letter-spacing: 0.12em;
+  --word-spacing-display: 0.08em;
 
-  /* Spacing. Sections 80 to 120 px apart; page gutter 20 to 64 px. */
-  --spacing-section: clamp(80px, 65.1px + 3.81vw, 120px);
+  /* Spacing. Each section is padded 64 to 96 px top and bottom, so two
+     sections sit 128 to 192 px apart; page gutter 20 to 64 px. */
+  --spacing-section: clamp(64px, 52.1px + 3.05vw, 96px);
   --spacing-gutter: clamp(20px, 3.7px + 4.19vw, 64px);
   --spacing-stack: clamp(32px, 24.6px + 1.9vw, 52px);
   --container-content: 1200px;
@@ -155,18 +163,28 @@
   );
   /*
    * Photo bands: dark behind the text column only, clear over the subject.
-   * `end` darkens the top right, for a text block above the groceries.
+   * `end` darkens the top right, for a text block above the subject.
+   * `text` sits only behind the text block (PhotoBand sizes it past the
+   * text), for an `end` photo that is bright there, so the food around it
+   * stays lit. All three keep ink-muted text at 4.5:1 or better over the brightest part of
+   * the photo behind it, from 1024 to 1920 px (PRE-233).
    */
   --scrim-band-start: linear-gradient(
     90deg,
-    rgb(17 15 12 / 0.9) 0%,
-    rgb(17 15 12 / 0.72) 30%,
-    rgb(17 15 12 / 0) 55%
+    rgb(17 15 12 / 0.94) 0%,
+    rgb(17 15 12 / 0.86) 40%,
+    rgb(17 15 12 / 0) 62%
   );
   --scrim-band-end: radial-gradient(
     ellipse 62% 72% at 84% 22%,
     rgb(17 15 12 / 0.9) 0%,
     rgb(17 15 12 / 0.72) 50%,
+    rgb(17 15 12 / 0) 100%
+  );
+  --scrim-band-text: radial-gradient(
+    closest-side,
+    rgb(17 15 12 / 0.94) 0%,
+    rgb(17 15 12 / 0.9) 75%,
     rgb(17 15 12 / 0) 100%
   );
   /* The same gradient from the right, for photos whose subject is on the left. */

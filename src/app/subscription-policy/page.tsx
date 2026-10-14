@@ -13,6 +13,8 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  // No Smart App Banner on legal pages.
+  itunes: null,
 };
 
 export default async function SubscriptionPolicyPage() {

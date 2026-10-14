@@ -83,13 +83,15 @@ export const plansKitchen: LifestylePhoto = {
   ),
   // The phone is on the left of this photo, so the Plans text sits on the right.
   textSide: "end",
-  // The text sits top right, so the labels stay in the lower third.
+  // The text column covers the top right down to about 77% of the photo at
+  // 1280 px, and from 1600 px the band crops the photo to about 10% to 90%.
+  // So the labels sit in the strip between, on the feta and the tortillas,
+  // clear of the text and the phone at every width they show (1280 up).
+  // scripts/check-photo-labels.mjs checks that. The packs hold more than this
+  // week's list, so the labels say the amount is the list's.
   annotations: [
-    { x: 62, y: 68, side: "right", length: 48, value: "850 g", label: "Greek yogurt" },
-    // The carton and the pack hold more than this week's list, so the labels
-    // say the amount is the list's.
-    { x: 69, y: 76, side: "left", length: 48, value: "200 g", label: "Eggs on the list" },
-    { x: 74, y: 90, side: "right", length: 48, value: "120 g", label: "Wholemeal tortilla on the list" },
+    { x: 57, y: 82, side: "right", length: 32, value: "60 g", label: "Feta on the list" },
+    { x: 76, y: 87, side: "right", length: 32, value: "120 g", label: "Wholemeal tortilla on the list" },
   ],
 };
 

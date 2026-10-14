@@ -23,12 +23,24 @@ type PhotoBandProps = {
    * overlap it, so the phone in the photo stays clear.
    */
   media?: ReactNode;
+  /**
+   * For an `end` photo that is bright behind the text: a stronger scrim that
+   * sits only behind the text block, instead of the soft top-right one.
+   */
+  scrimBehindText?: boolean;
+  /**
+   * Points and a link set beside `media` under the photo, on the text's side,
+   * so the phones don't float next to an empty column. Keeps the text on the
+   * photo to a headline and one line.
+   */
+  aside?: ReactNode;
 };
 
 /**
  * D3's full-bleed photo section: an annotated lifestyle photo with the text on
- * a dark gradient at one side, and phones under it. Below 1024 px the photo
- * is a strip on top, with the text and phones under it.
+ * a dark gradient at one side, and phones under it beside any points. Below
+ * 1024 px the photo is a strip on top, with the text, points and phones under
+ * it.
  */
 export default function PhotoBand({
   id,
@@ -40,6 +52,8 @@ export default function PhotoBand({
   textSide = "start",
   children,
   media,
+  scrimBehindText = false,
+  aside,
 }: PhotoBandProps) {
   const end = textSide === "end";
   return (
@@ -58,19 +72,38 @@ export default function PhotoBand({
         stackOnPhones
         className="w-full lg:aspect-[1376/768] lg:max-h-[860px] lg:min-h-[640px]"
       >
-        <div
-          aria-hidden
-          className={`${end ? "photo-band-scrim-end" : "photo-band-scrim"} absolute inset-0 z-[1] max-lg:hidden`}
-        />
+        {!scrimBehindText && (
+          <div
+            aria-hidden
+            className={`${end ? "photo-band-scrim-end" : "photo-band-scrim"} absolute inset-0 z-[1] max-lg:hidden`}
+          />
+        )}
         <div
           className={`relative z-[3] mx-auto flex h-full w-full max-w-content px-gutter pt-[calc(var(--photo-strip-h)+1.5rem)] ${
             end ? "lg:items-start lg:justify-end lg:pt-16" : "items-center lg:py-16"
           }`}
         >
-          <div className="flex max-w-[460px] flex-col gap-8">{children}</div>
+          <div className="relative flex max-w-[460px] flex-col gap-8">
+            {/* Dark only behind the text, however tall it wraps, so the food around it stays lit. */}
+            {scrimBehindText && (
+              <div
+                aria-hidden
+                className="photo-band-scrim-text pointer-events-none absolute -inset-x-[40%] -inset-y-[24%] -z-10 max-lg:hidden"
+              />
+            )}
+            {children}
+          </div>
         </div>
       </AnnotatedPhoto>
-      {media && (
+      {media && aside && (
+        <div className="relative z-[4] mx-auto mt-10 grid w-full max-w-content items-center gap-stack px-gutter lg:grid-cols-2 lg:gap-x-12">
+          <div className={`flex w-full max-w-[460px] flex-col gap-8 ${end ? "lg:order-2 lg:justify-self-end" : ""}`}>
+            {aside}
+          </div>
+          <div className={`flex justify-center ${end ? "lg:order-1" : ""}`}>{media}</div>
+        </div>
+      )}
+      {media && !aside && (
         <div
           className={`relative z-[4] mx-auto mt-10 flex w-full max-w-content justify-center px-gutter ${
             end ? "" : "lg:justify-end"

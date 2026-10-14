@@ -38,16 +38,36 @@ export function Shot({ name, alt, caption }: { name: string; alt: string; captio
 
   return (
     <Figure caption={caption}>
-      <DeviceFrame className="[--device-w:260px] sm:[--device-w:280px]" {...media} />
+      {/* 400 px on desktop puts the app's 12 pt text at about 11 px, readable without zooming. */}
+      <DeviceFrame
+        className="[--device-w:260px] sm:[--device-w:340px] lg:[--device-w:400px]"
+        {...media}
+      />
     </Figure>
   );
 }
 
-/** Two or three <Shot>s side by side on wider screens. */
+/**
+ * One to three <Shot>s. On desktop the row is wider than the 720 px reading
+ * column, so two full-size phones still fit side by side.
+ */
 export function Shots({ children }: { children: ReactNode }) {
   return (
-    <div className="my-12 flex flex-wrap items-start justify-center gap-x-10 gap-y-12">
+    <div className="my-12 flex flex-wrap items-start justify-center gap-x-10 gap-y-12 lg:relative lg:left-1/2 lg:w-[min(960px,calc(100vw-2*var(--spacing-gutter)))] lg:-translate-x-1/2">
       {children}
+    </div>
+  );
+}
+
+/**
+ * The guide's header capture, repeated under its first steps on phones and
+ * tablets, where the header leaves it out. Placed by remarkGuideHero in
+ * lib/guides; guide files don't use it directly.
+ */
+export function GuideHero({ name, alt }: { name: string; alt: string }) {
+  return (
+    <div className="my-12 lg:hidden">
+      <Shot name={name} alt={alt} />
     </div>
   );
 }
@@ -196,6 +216,7 @@ export const guideMdxComponents = {
   a: Anchor,
   Shot,
   Shots,
+  GuideHero,
   Widget,
   Tips,
   Tip,

@@ -12,6 +12,7 @@ All values are quoted strings except `order`.
 - `section`: `set-up`, `logging` or `more`, the same groups as Tips and tricks
 - `order`: position within the section
 - `hero` and `heroAlt`: a capture name from `public/app` (a still such as `13-grocery-list`, or a clip such as `03-log-typed`) for the header
+- `heroAfterSteps` (optional): on phones the hero shows after this numbered list, counting from 1 (default 1)
 - `thumb` (optional): a still for the card, when the hero is a clip or its top isn't telling
 - `updated`: `YYYY-MM-DD`, when the steps were last checked against the app
 

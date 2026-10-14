@@ -43,6 +43,7 @@ export default function WidgetsFeature() {
           <BentoGrid>
             <BentoTile
               size="large"
+              mediaAlign="center"
               title="Today's plan"
               media={
                 <div className="w-full max-w-[420px]">

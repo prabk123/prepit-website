@@ -2,27 +2,32 @@ import Image from "next/image";
 import Link from "next/link";
 import AppStoreLink from "@/components/AppStoreLink";
 import { FEATURE_SLUGS, FEATURES, featureHref } from "@/lib/features";
-import { HOME_SECTION_LINKS, SITE_PAGE_LINKS } from "@/lib/homeSections";
+import { HEADER_SECTION_LINKS, SITE_PAGE_LINKS } from "@/lib/homeSections";
 
-const linkClass = "text-body text-ink-muted transition-colors hover:text-ink";
+// 44px tall on phones so each link is a full tap target; tighter on desktop.
+const linkClass = "flex min-h-11 items-center text-body text-ink-muted transition-colors hover:text-ink lg:min-h-0";
 
 function Column({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-4">
       <h2 className="text-eyebrow font-medium uppercase text-ink-faint">{title}</h2>
-      <div className="flex flex-col gap-3">{children}</div>
+      <div className="flex flex-col lg:gap-3">{children}</div>
     </div>
   );
 }
 
-/** The site footer (D3): dark, tagline, explore, feature pages, company and legal links. */
+/**
+ * The site footer (D3): dark, tagline, explore, feature pages, company and
+ * legal links. Explore lists the same homepage sections as the header, so no
+ * feature is listed twice.
+ */
 export default function Footer() {
   return (
     <footer className="w-full border-t border-line bg-page text-ink">
       <div className="mx-auto flex w-full max-w-content flex-col gap-12 px-gutter py-16">
         <div className="flex flex-col gap-10 lg:flex-row lg:justify-between">
           <div className="flex flex-col gap-4">
-            <Link href="/" className="flex items-center gap-2.5">
+            <Link href="/" className="flex h-11 w-fit items-center gap-2.5">
               <span className="relative h-8 w-8">
                 <Image src="/logo.png" alt="" fill sizes="32px" className="object-contain" />
               </span>
@@ -36,7 +41,7 @@ export default function Footer() {
               <Link href="/" className={linkClass}>
                 Home
               </Link>
-              {HOME_SECTION_LINKS.map((link) => (
+              {HEADER_SECTION_LINKS.map((link) => (
                 <Link key={link.href} href={link.href} className={linkClass}>
                   {link.label}
                 </Link>

@@ -8,10 +8,9 @@ import NavigationWrapper from "@/components/NavigationWrapper";
 import FinalCta from "@/components/pricing/FinalCta";
 import SiteFinalCta from "@/components/pricing/SiteFinalCta";
 import Footer from "@/components/Footer";
-import SmartBanner from "@/components/SmartBanner";
-import FloatingGetAppButton from "@/components/FloatingGetAppButton";
 import CookieConsent from "@/components/CookieConsent";
 import { PREPIT_ANALYTICS_CONSENT_COOKIE, PREPIT_GEO_COOKIE } from "@/lib/cookies";
+import { APP_STORE_ID } from "@/lib/appStore";
 import "./globals.css";
 
 const dmSans = DM_Sans({
@@ -107,6 +106,12 @@ export const metadata: Metadata = {
     apple: "/logo.png",
   },
   manifest: "/manifest.json",
+  // Safari's Smart App Banner. It must be in the server HTML: Safari reads it
+  // on load and ignores a tag added later by JavaScript. Legal pages turn it
+  // off with `itunes: null`.
+  itunes: {
+    appId: APP_STORE_ID,
+  },
 };
 
 export default function RootLayout({
@@ -191,12 +196,16 @@ export default function RootLayout({
       <body
         className={`${dmSans.variable} ${brandFont.variable} ${prepitIcons.variable} antialiased`}
       >
-        <SmartBanner />
-        <FloatingGetAppButton />
+        <a
+          href="#main"
+          className="sr-only rounded-control bg-cream px-4 text-small font-medium text-on-cream focus:not-sr-only focus:fixed focus:left-4 focus:top-2.5 focus:z-[60] focus:inline-flex focus:h-11 focus:items-center focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cream"
+        >
+          Skip to content
+        </a>
         <div className="flex min-h-screen flex-col items-center bg-page">
           <NavigationWrapper />
 
-          <main className="w-full">
+          <main id="main" tabIndex={-1} className="w-full outline-none">
             {children}
             <SpeedInsights />
           </main>

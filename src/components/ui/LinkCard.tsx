@@ -47,7 +47,7 @@ export default function LinkCard({ href, title, summary, action, thumb, headingL
       <div className="flex flex-1 flex-col gap-3 p-6">
         <Heading className="font-display text-card-title text-ink text-balance">{title}</Heading>
         <p className="text-body text-ink-muted text-pretty">{summary}</p>
-        <span className="mt-auto pt-2 text-small font-medium text-energy">
+        <span className="mt-auto w-fit pt-2 text-small font-medium text-ink underline decoration-ink-faint underline-offset-4 transition-colors group-hover:decoration-ink">
           {action} <span aria-hidden>→</span>
         </span>
       </div>
