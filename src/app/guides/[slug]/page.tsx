@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import DeviceFrame from "@/components/device/DeviceFrame";
+import PreloadImage from "@/components/media/PreloadImage";
 import GuideCard from "@/components/guides/GuideCard";
 import FinalCta from "@/components/pricing/FinalCta";
 import FeatureSplit from "@/components/ui/FeatureSplit";
@@ -89,28 +90,44 @@ export default async function GuidePage({ params }: Props) {
     },
   ];
 
+  const heroMedia = guideHeroMedia(meta);
+
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      {/* The header phone shows on desktop only, so it isn't eager (a hidden eager
+          image still downloads on phones); preload it for desktop instead. */}
+      {heroMedia.capture?.avif && (
+        <PreloadImage
+          href={heroMedia.capture.src}
+          imageSrcSet={heroMedia.capture.avif}
+          type="image/avif"
+          media="(min-width: 1024px)"
+        />
+      )}
+      {heroMedia.video && <PreloadImage href={heroMedia.video.poster} media="(min-width: 1024px)" />}
 
-      <Section labelledBy="guide-heading">
+      {/* Phones close the gap between the title and the guide, so step 1 starts on the first screen. */}
+      <Section labelledBy="guide-heading" className="max-lg:[&>div]:pb-stack">
+        {/*
+          * On phones and tablets the header is text only, so step 1 starts
+          * near the top; the same capture sits under the first steps instead
+          * (<GuideHero>, added by remarkGuideHero in lib/guides).
+          */}
         <FeatureSplit
           emphasis="text"
+          mediaClassName="max-lg:hidden"
           media={
             <div className="relative py-4">
               <Glow />
-              <DeviceFrame
-                className="[--device-w:260px] sm:[--device-w:300px] lg:[--device-w:340px]"
-                priority
-                {...guideHeroMedia(meta)}
-              />
+              <DeviceFrame className="[--device-w:340px]" {...heroMedia} />
             </div>
           }
         >
           <nav aria-label="Breadcrumb">
             <Link
               href="/guides"
-              className="text-small font-medium text-ink-muted transition-colors hover:text-ink"
+              className="tap-target text-small font-medium text-ink-muted transition-colors hover:text-ink"
             >
               <span aria-hidden>←</span> All guides
             </Link>
@@ -128,7 +145,7 @@ export default async function GuidePage({ params }: Props) {
         </FeatureSplit>
       </Section>
 
-      <Section tone="surface">
+      <Section tone="surface" className="max-lg:[&>div]:pt-stack">
         <article className="mx-auto max-w-[720px]">{content}</article>
       </Section>
 
@@ -138,7 +155,7 @@ export default async function GuidePage({ params }: Props) {
             <h2 id="more-guides-heading" className="font-display text-title text-ink">
               More guides
             </h2>
-            <Link href="/guides" className="text-small font-medium text-energy hover:text-ink">
+            <Link href="/guides" className="tap-target text-small font-medium text-energy hover:text-ink">
               See all guides <span aria-hidden>→</span>
             </Link>
           </div>

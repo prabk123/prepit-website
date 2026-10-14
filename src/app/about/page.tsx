@@ -64,8 +64,8 @@ export default function AboutPage() {
                 className="[--device-w:260px] sm:[--device-w:300px] lg:[--device-w:340px]"
                 priority
                 capture={appCapture(
-                  "02-chat-chart",
-                  "PrepIt's nutritionist answering a question about protein with a chart of the last week",
+                  "01-home",
+                  "PrepIt's Home screen for today: Energy 84, Satiety 96 and Mood 87, 1,481 of 1,570 kcal eaten, water and the day's log",
                 )}
               />
             </div>

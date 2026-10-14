@@ -22,6 +22,9 @@ export const SHARED_MEAL_PLAN_EVENTS = {
   viewed: "shared_meal_plan_viewed",
   recipeOpened: "shared_meal_plan_recipe_opened",
   groceryListOpened: "shared_meal_plan_grocery_list_opened",
+  groceryListCopied: "shared_meal_plan_grocery_list_copied",
+  groceryListShared: "shared_meal_plan_grocery_list_shared",
+  unitsChanged: "shared_meal_plan_units_changed",
 } as const;
 
 export function trackSharedMealPlanEvent(
@@ -70,4 +73,18 @@ export function trackPageNotFound(path: string) {
   if (typeof window === "undefined") return;
   const referrer_host = document.referrer ? new URL(document.referrer).host : null;
   withPostHog((posthog) => posthog.capture(POSTHOG_PAGE_NOT_FOUND_EVENT, { path, referrer_host }));
+}
+
+/** Fired on each contact or feedback form submit, to see send failures. */
+export const POSTHOG_CONTACT_FORM_EVENT = "contact_form_submitted";
+
+/** Only the form kind, the outcome and the HTTP status; never what was typed. */
+export function trackContactFormSubmitted(
+  kind: "contact" | "feedback",
+  outcome: "sent" | "failed" | "invalid",
+  status?: number,
+) {
+  withPostHog((posthog) =>
+    posthog.capture(POSTHOG_CONTACT_FORM_EVENT, { kind, outcome, ...(status ? { status } : {}) }),
+  );
 }

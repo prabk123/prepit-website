@@ -1,13 +1,38 @@
 import { NextRequest, NextResponse } from "next/server";
+import { CONTACT_HONEYPOT_FIELD, CONTACT_LIMITS, escapeSlackText } from "@/lib/contact";
 
 export async function POST(request: NextRequest) {
   try {
-    const { name, email, message, type = "contact" } = await request.json();
+    const body = await request.json();
+    const { name, email, message, type = "contact" } = body;
+
+    // Only bots fill the hidden field: answer as if sent, post nothing.
+    if (body[CONTACT_HONEYPOT_FIELD]) {
+      console.warn("Contact form honeypot filled; submission dropped");
+      return NextResponse.json(
+        { success: true, message: "Message sent successfully" },
+        { status: 200 }
+      );
+    }
 
     // Validate required fields
     if (!name || !email || !message) {
       return NextResponse.json(
         { error: "All fields are required" },
+        { status: 400 }
+      );
+    }
+
+    if (
+      typeof name !== "string" ||
+      typeof email !== "string" ||
+      typeof message !== "string" ||
+      name.length > CONTACT_LIMITS.name ||
+      email.length > CONTACT_LIMITS.email ||
+      message.length > CONTACT_LIMITS.message
+    ) {
+      return NextResponse.json(
+        { error: "A field is too long" },
         { status: 400 }
       );
     }
@@ -51,11 +76,11 @@ export async function POST(request: NextRequest) {
           fields: [
             {
               type: "mrkdwn",
-              text: `*Name:*\n${name}`,
+              text: `*Name:*\n${escapeSlackText(name)}`,
             },
             {
               type: "mrkdwn",
-              text: `*Email:*\n${email}`,
+              text: `*Email:*\n${escapeSlackText(email)}`,
             },
           ],
         },
@@ -63,7 +88,7 @@ export async function POST(request: NextRequest) {
           type: "section",
           text: {
             type: "mrkdwn",
-            text: `*Message:*\n${message}`,
+            text: `*Message:*\n${escapeSlackText(message)}`,
           },
         },
         {

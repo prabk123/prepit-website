@@ -32,8 +32,25 @@
 
 }
 
-html {
-  scroll-behavior: smooth;
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/*
+ * Grows a short link's tap area to at least 44 x 44 px without changing the
+ * layout. Use it on standalone links, not on links stacked closer than 44 px.
+ */
+@utility tap-target {
+  position: relative;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset-block: min(0px, calc((100% - 44px) / 2));
+    inset-inline: min(0px, calc((100% - 44px) / 2));
+  }
 }
 
 /* Revamp helpers. Values come from tokens.css. */
@@ -95,6 +112,10 @@ html {
 
   .photo-band-scrim-end {
     background: var(--scrim-band-end);
+  }
+
+  .photo-band-scrim-text {
+    background: var(--scrim-band-text);
   }
 
   /*
@@ -377,8 +398,8 @@ html {
     z-index: 2;
     display: grid;
     place-items: center;
-    width: 36px;
-    height: 36px;
+    width: 44px;
+    height: 44px;
     border-radius: 999px;
     color: var(--color-ink);
     background: var(--color-overlay);

@@ -65,8 +65,8 @@ export default function SignalsSection() {
         <PointList layout="columns" points={SIGNALS} />
         <QuoteCard
           className="max-w-[760px]"
-          quote="Afternoon Energy looks soft. Your wrap and flat white are light on protein. A Greek yogurt now would help hold Satiety until dinner."
-          name="A next step, for example. Every log ends with one. No shame, no “cheat days”."
+          quote="Your toast and jam breakfast was light on protein. Adding eggs or Greek yogurt at lunch would help hold Satiety until dinner."
+          name="A next step, for example, when one would help. No shame, no “cheat days”."
         />
         <p className="text-small text-ink-faint">
           Grounded in published nutrition research. Estimates to guide your next meal, not a medical measurement.
