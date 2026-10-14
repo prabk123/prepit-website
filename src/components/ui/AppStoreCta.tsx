@@ -1,6 +1,5 @@
 import AppStoreLink from "@/components/AppStoreLink";
 import AppStoreQr from "@/components/ui/AppStoreQr";
-import Rating from "@/components/ui/Rating";
 
 type AppStoreCtaProps = {
   /** Sent with the `app_store_click` event, e.g. "home-hero". */
@@ -10,8 +9,6 @@ type AppStoreCtaProps = {
   variant?: "cream" | "dark";
   /** Line under the button, e.g. "7 days free" (TRIAL_NOTE). */
   note?: string;
-  /** App Store rating shown after the note. Use "placeholder" until the real figure is known. */
-  rating?: { value: number | "placeholder"; count?: number };
   /** Desktop only: a QR code beside the button with this caption. */
   qrCaption?: string;
   className?: string;
@@ -30,7 +27,7 @@ function AppleLogo() {
 
 /**
  * The one App Store call to action: a pill button that keeps AppStoreLink's
- * Meta Pixel and PostHog tracking, an optional trial and rating line, and an
+ * Meta Pixel and PostHog tracking, an optional trial line, and an
  * optional QR code for desktop visitors.
  */
 export default function AppStoreCta({
@@ -38,7 +35,6 @@ export default function AppStoreCta({
   label = "Download on the App Store",
   variant = "cream",
   note,
-  rating,
   qrCaption,
   className,
 }: AppStoreCtaProps) {
@@ -58,13 +54,7 @@ export default function AppStoreCta({
           <AppleLogo />
           {label}
         </AppStoreLink>
-        {(note || rating) && (
-          <p className={`flex flex-wrap items-center gap-x-2 text-small ${subtle}`}>
-            {note && <span>{note}</span>}
-            {note && rating && <span aria-hidden>·</span>}
-            {rating && <Rating value={rating.value} count={rating.count} />}
-          </p>
-        )}
+        {note && <p className={`text-small ${subtle}`}>{note}</p>}
       </div>
       {qrCaption && (
         <AppStoreQr caption={qrCaption} trackingSource={`${trackingSource}-qr`} className="hidden lg:flex" />

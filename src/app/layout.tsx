@@ -20,15 +20,9 @@ const dmSans = DM_Sans({
 });
 
 const brandFont = localFont({
-  src: "./fonts/ClashDisplay-Variable.ttf",
+  src: "./fonts/ClashDisplay-Variable.woff2",
   variable: "--font-brand",
   display: "swap",
-});
-
-const prepitIcons = localFont({
-  src: "./fonts/PrepItIcons.ttf",
-  variable: "--font-prepit-icons",
-  display: "block",
 });
 
 // Base URL - production URL
@@ -194,7 +188,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${dmSans.variable} ${brandFont.variable} ${prepitIcons.variable} antialiased`}
+        className={`${dmSans.variable} ${brandFont.variable} antialiased`}
       >
         <a
           href="#main"
@@ -207,7 +201,6 @@ export default function RootLayout({
 
           <main id="main" tabIndex={-1} className="w-full outline-none">
             {children}
-            <SpeedInsights />
           </main>
 
           <SiteFinalCta>

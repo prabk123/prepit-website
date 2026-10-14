@@ -90,14 +90,16 @@ export const widgetsDesk: FeaturePhoto = {
 /**
  * A photo with no phone in it, at its native 1280 × 720 (no 2x upscale), so
  * it stays sharp up to 640 CSS px wide on a 2x screen. Set `sizes` when it is
- * shown wider.
+ * shown wider. `small` adds a 768 px copy (`<name>-768`) for photos shown at
+ * phone width or in a three-up grid.
  */
-function still(name: string, alt: string, { avif = true } = {}): SectionPhoto {
+function still(name: string, alt: string, { avif = true, small = false } = {}): SectionPhoto {
   const base = `/lifestyle/${name}`;
+  const srcSet = (ext: string) => `${small ? `${base}-768.${ext} 768w, ` : ""}${base}.${ext} 1280w`;
   return {
     src: `${base}.webp`,
-    avif: avif ? `${base}.avif 1280w` : undefined,
-    webp: `${base}.webp 1280w`,
+    avif: avif ? srcSet("avif") : undefined,
+    webp: srcSet("webp"),
     width: 1280,
     height: 720,
     alt,
@@ -112,14 +114,17 @@ export const planFlatLays = {
   oats: still(
     "flatlay-oats",
     "A bowl of protein overnight oats topped with diced apple and cinnamon on a walnut table.",
+    { small: true },
   ),
   wrap: still(
     "flatlay-wrap",
     "A wholemeal chicken wrap with hummus and salad, cut in half, beside a dish of hummus.",
+    { small: true },
   ),
   salmon: still(
     "flatlay-salmon",
     "A Mediterranean salmon bowl with quinoa, tomatoes, olives, feta and a lemon wedge.",
+    { small: true },
   ),
 };
 
@@ -138,21 +143,4 @@ export const cookingClip = {
   width: 1280,
   height: 720,
   label: "Sliced chicken, peppers and spinach cooking in a cast-iron pan.",
-};
-
-/**
- * The 54 s walkthrough with voiceover and music, for a "watch with sound"
- * player. Not for LoopVideo, which is muted only. The player contract:
- * - never autoplays: the visitor presses play, with native controls;
- * - `preload="none"` or `"metadata"`, showing the poster until then;
- * - carries the captions track (WCAG 1.2.2).
- * The silent loops (21-walkthrough.mp4/.webm) stay the autoplay version.
- */
-export const narratedWalkthrough = {
-  mp4: "/app/21-walkthrough-narrated.mp4",
-  webm: "/app/21-walkthrough-narrated.webm",
-  captions: "/app/21-walkthrough-narrated.vtt",
-  poster: "/app/21-walkthrough-poster.webp",
-  width: 804,
-  height: 1748,
 };

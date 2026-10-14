@@ -1,14 +1,17 @@
-import posthog from "posthog-js";
-import { isPostHogEnabled } from "@/lib/analytics";
+import { withPostHog, withPostHogBeforeLeaving } from "@/lib/posthogClient";
 
 /** Custom PostHog event fired when a user taps an App Store download CTA. */
 export const POSTHOG_APP_STORE_EVENT = "app_store_click";
 
-export function trackPostHogAppStoreClick(source: string) {
-  if (typeof window === "undefined" || !isPostHogEnabled()) return;
-
+/**
+ * Resolves once the event is sent, or after a short wait if PostHog is still
+ * loading, so a link can hold its navigation until then (see AppStoreLink).
+ */
+export function trackPostHogAppStoreClick(source: string): Promise<void> {
   // sendBeacon survives same-tab navigation to the App Store before the request completes.
-  posthog.capture(POSTHOG_APP_STORE_EVENT, { source }, { transport: "sendBeacon" });
+  return withPostHogBeforeLeaving((posthog) =>
+    posthog.capture(POSTHOG_APP_STORE_EVENT, { source }, { transport: "sendBeacon" }),
+  );
 }
 
 /**
@@ -28,9 +31,7 @@ export function trackSharedMealPlanEvent(
   event: (typeof SHARED_MEAL_PLAN_EVENTS)[keyof typeof SHARED_MEAL_PLAN_EVENTS],
   properties: { plan_id: string } & Record<string, string | number | boolean>,
 ) {
-  if (typeof window === "undefined" || !isPostHogEnabled()) return;
-
-  posthog.capture(event, { source: "shared-meal-plan", ...properties });
+  withPostHog((posthog) => posthog.capture(event, { source: "shared-meal-plan", ...properties }));
 }
 
 /** Custom PostHog event fired when a visitor opens an FAQ answer. */
@@ -38,9 +39,7 @@ export const POSTHOG_FAQ_OPENED_EVENT = "faq_question_opened";
 
 /** `questionId` is the question's fixed slug, never anything the visitor typed. */
 export function trackFaqQuestionOpened(questionId: string, source: string) {
-  if (typeof window === "undefined" || !isPostHogEnabled()) return;
-
-  posthog.capture(POSTHOG_FAQ_OPENED_EVENT, { question_id: questionId, source });
+  withPostHog((posthog) => posthog.capture(POSTHOG_FAQ_OPENED_EVENT, { question_id: questionId, source }));
 }
 
 /**
@@ -50,9 +49,7 @@ export function trackFaqQuestionOpened(questionId: string, source: string) {
 export const POSTHOG_SECTION_VIEWED_EVENT = "home_section_viewed";
 
 export function trackSectionViewed(section: string) {
-  if (typeof window === "undefined" || !isPostHogEnabled()) return;
-
-  posthog.capture(POSTHOG_SECTION_VIEWED_EVENT, { section });
+  withPostHog((posthog) => posthog.capture(POSTHOG_SECTION_VIEWED_EVENT, { section }));
 }
 
 /**
@@ -62,13 +59,10 @@ export function trackSectionViewed(section: string) {
 export const POSTHOG_VIDEO_PLAYED_EVENT = "website_video_played";
 
 export function trackVideoPlayed(video: string, trigger: "auto" | "button") {
-  if (typeof window === "undefined" || !isPostHogEnabled()) return;
-
-  posthog.capture(POSTHOG_VIDEO_PLAYED_EVENT, {
-    video,
-    trigger,
-    path: window.location.pathname,
-  });
+  if (typeof window === "undefined") return;
+  // Read the path now: the event may wait in the queue until PostHog loads.
+  const path = window.location.pathname;
+  withPostHog((posthog) => posthog.capture(POSTHOG_VIDEO_PLAYED_EVENT, { video, trigger, path }));
 }
 
 /** Fired when a visitor lands on a URL with no page, to find broken links. */
@@ -76,12 +70,9 @@ export const POSTHOG_PAGE_NOT_FOUND_EVENT = "page_not_found";
 
 /** `path` is the pathname only: no query string, which could carry anything. */
 export function trackPageNotFound(path: string) {
-  if (typeof window === "undefined" || !isPostHogEnabled()) return;
-
-  posthog.capture(POSTHOG_PAGE_NOT_FOUND_EVENT, {
-    path,
-    referrer_host: document.referrer ? new URL(document.referrer).host : null,
-  });
+  if (typeof window === "undefined") return;
+  const referrer_host = document.referrer ? new URL(document.referrer).host : null;
+  withPostHog((posthog) => posthog.capture(POSTHOG_PAGE_NOT_FOUND_EVENT, { path, referrer_host }));
 }
 
 /** Fired on each contact or feedback form submit, to see send failures. */
@@ -93,7 +84,7 @@ export function trackContactFormSubmitted(
   outcome: "sent" | "failed" | "invalid",
   status?: number,
 ) {
-  if (typeof window === "undefined" || !isPostHogEnabled()) return;
-
-  posthog.capture(POSTHOG_CONTACT_FORM_EVENT, { kind, outcome, ...(status ? { status } : {}) });
+  withPostHog((posthog) =>
+    posthog.capture(POSTHOG_CONTACT_FORM_EVENT, { kind, outcome, ...(status ? { status } : {}) }),
+  );
 }

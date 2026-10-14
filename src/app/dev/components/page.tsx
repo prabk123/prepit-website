@@ -52,9 +52,6 @@ const loopVideo = {
   label: "PrepIt screens: a recipe, the grocery list and a plan day",
 };
 
-// Shows a visible [RATING] until Prabodh supplies the real figure.
-const sampleRating = { value: "placeholder" as const };
-
 const colours = [
   ["page", "bg-page"],
   ["surface", "bg-surface"],
@@ -148,7 +145,6 @@ export default function ComponentPreviewPage() {
             <AppStoreCta
               trackingSource="dev-preview-hero"
               note={TRIAL_NOTE}
-              rating={sampleRating}
               qrCaption="Scan to get PrepIt on your iPhone"
             />
           </div>

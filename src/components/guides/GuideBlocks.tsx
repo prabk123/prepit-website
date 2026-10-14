@@ -4,12 +4,12 @@ import DeviceFrame from "@/components/device/DeviceFrame";
 import { BentoTile } from "@/components/ui/Bento";
 import {
   appCapture,
-  appClip,
+  appVideo,
   appWidget,
   isAppClip,
   isAppStill,
   isAppWidget,
-} from "@/lib/appMedia";
+} from "@/lib/captures";
 
 /*
  * The building blocks guide MDX files can use, on top of plain Markdown.
@@ -32,7 +32,7 @@ function Figure({ caption, children }: { caption?: string; children: ReactNode }
 /** One app screen in a phone, from a still or a screen recording. */
 export function Shot({ name, alt, caption }: { name: string; alt: string; caption?: string }) {
   let media;
-  if (isAppClip(name)) media = { video: appClip(name, alt) };
+  if (isAppClip(name)) media = { video: appVideo(name, alt) };
   else if (isAppStill(name)) media = { capture: appCapture(name, alt) };
   else throw new Error(`Guide capture "${name}" is not in public/app`);
 
