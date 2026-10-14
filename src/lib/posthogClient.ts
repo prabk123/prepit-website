@@ -4,9 +4,10 @@ import { PREPIT_ANALYTICS_CONSENT_COOKIE, PREPIT_GEO_COOKIE, readCookie } from "
 
 /**
  * PostHog is about 190 KB of script, so it stays off the first paint: it loads
- * once the page has finished loading and the browser is idle, or straight away
- * when a call needs it now (an App Store tap that is about to leave the page).
- * Events captured before then wait in a queue and are sent once it is ready.
+ * once the page has finished loading and the browser is idle, on the visitor's
+ * first tap, key or scroll, or straight away when a call needs it now (an App
+ * Store tap that is about to leave the page). Events captured before then wait
+ * in a queue and are sent once it is ready.
  *
  * EU and UK visitors who haven't accepted analytics never load it, so nothing
  * runs or is stored for them until they accept in the cookie banner.
@@ -72,6 +73,12 @@ export function schedulePostHog() {
 
   if (document.readyState === "complete") whenIdle();
   else window.addEventListener("load", whenIdle, { once: true });
+
+  // A visitor who starts using the page before then gets it straight away, so
+  // their events (an App Store tap above all) are less likely to be lost.
+  for (const event of ["pointerdown", "keydown", "scroll"] as const) {
+    window.addEventListener(event, () => void load(), { once: true, passive: true });
+  }
 }
 
 /**
