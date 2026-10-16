@@ -24,12 +24,12 @@ const SPEAKS_UP = [
   },
   {
     quote:
-      "Over the past few weeks protein has been a little low. Most of the gap is at dinner, which averages about 20g. Two easy fixes that don't change what you cook: a bigger portion of the protein you already have at dinner, or a pot of Greek yogurt after dinner. Want to try one?",
+      "Over the past few weeks protein has been a little low: under your target on 15 of 19 logged days, about 85g a day against 120g. Most of the gap is at dinner, which averages about 20g. Two easy fixes that don't change what you cook: a bigger portion of the protein you already have at dinner, or a pot of Greek yogurt after dinner. Want to try one?",
     name: "When the same gap shows up three weeks running",
   },
   {
     quote:
-      "Tuesdays and Wednesdays have run about 500 kcal over your goal in most of the last four weeks, while the rest of the week sits close to it. That's completely normal when some days are busier or more social.",
+      "Tuesdays and Wednesdays have run about 500 kcal over your goal in most of the last four weeks, while the rest of the week sits close to it. That's completely normal when some days are busier or more social. Want to give Tuesdays and Wednesdays more room and take a little off the other days? Your week would still add up to the same total.",
     name: "When the same days keep going over, with a plan to give them more room",
   },
 ];
@@ -58,7 +58,7 @@ export default function NutritionistFeature() {
           </div>
           <p className="text-small text-ink-faint">
             It sends one of these at most once a day, and only when it&apos;s useful. Missed-log nudges, pattern
-            check-ins and weigh-in reminders each have a switch in Settings.
+            check-ins, weekly calorie pattern ideas and weigh-in reminders each have a switch in Settings.
           </p>
         </div>
       </Section>
@@ -136,7 +136,7 @@ export default function NutritionistFeature() {
         }
       >
         <p className="max-w-[56ch] text-body text-ink-muted text-pretty">
-          Anything it changes for you from chat shows up as a card first, and nothing is saved until you tap it.
+          Any log, plan or goal change it makes from chat shows up as a card first, and nothing is saved until you tap it.
         </p>
       </FeatureBlock>
 

@@ -127,7 +127,7 @@ export default function SignalsFeature() {
             id="no-wearable-heading"
             size="section"
             title="No ring. No watch. No glucose monitor."
-            lead="Everything starts from what you eat, so there's nothing to wear or charge. Connect Apple Health and it also sees your workouts, so it can tell a hungry gym day from a hungry rest day."
+            lead="Everything starts from what you eat, so there's nothing to wear or charge. Connect Apple Health and your nutritionist also sees your workouts, so it can tell a hungry gym day from a hungry rest day."
           />
           <p className="max-w-[60ch] text-body text-ink-muted text-pretty">
             The scores are built on published nutrition research. They&apos;re estimates to guide your next meal,

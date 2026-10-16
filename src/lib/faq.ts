@@ -55,7 +55,7 @@ export const FAQ_ITEMS: FaqItem[] = [
     id: "logging-accuracy",
     question: "How accurate is the logging?",
     answer:
-      "For a branded or restaurant food, PrepIt looks for the official nutrition figures first, and only then uses other food data. Every meal shows what it assumed and how confident it is, and you can change any item.",
+      "For a branded or restaurant food, PrepIt looks for the official nutrition figures first, and only then uses other food data. Typed and photo meals show what it assumed and how confident it is, and you can change any item.",
   },
   {
     id: "energy-satiety-mood",
@@ -68,7 +68,7 @@ export const FAQ_ITEMS: FaqItem[] = [
     id: "nutritionist",
     question: "What can I ask my nutritionist?",
     answer:
-      "Anything about your food and your week: what to have for dinner, why you're hungry by 4pm, how to fit in a takeaway. It draws charts of your trends, runs your consultation and weekly check-in, plans meals, and logs, moves or fixes meals for you. Anything it changes from chat shows up as a card first, and nothing is saved until you tap it.",
+      "Anything about your food and your week: what to have for dinner, why you're hungry by 4pm, how to fit in a takeaway. It draws charts of your trends, runs your consultation and weekly check-in, plans meals, and logs, moves or fixes meals for you. Any log, plan or goal change it makes from chat shows up as a card first, and nothing is saved until you tap it.",
   },
   {
     id: "messages",
@@ -80,7 +80,7 @@ export const FAQ_ITEMS: FaqItem[] = [
     id: "wearable",
     question: "Do I need a watch, a ring or a glucose monitor?",
     answer:
-      "No. Everything starts from what you eat. Connect Apple Health and it also sees your workouts, so it can tell a hungry gym day from a hungry rest day, but it's never required.",
+      "No. Everything starts from what you eat. Connect Apple Health and your nutritionist also sees your workouts, so it can tell a hungry gym day from a hungry rest day, but it's never required.",
   },
   {
     id: "privacy",
