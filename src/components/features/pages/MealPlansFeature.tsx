@@ -3,7 +3,6 @@ import WidgetImage from "@/components/device/WidgetImage";
 import FeatureBlock from "@/components/features/FeatureBlock";
 import LoopVideo from "@/components/media/LoopVideo";
 import Glow from "@/components/ui/Glow";
-import PointList from "@/components/ui/PointList";
 import Section, { type SectionPhoto } from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
 import TextLink from "@/components/ui/TextLink";
@@ -21,7 +20,7 @@ const FLAT_LAYS: { photo: SectionPhoto; caption: string }[] = [
   { photo: planFlatLays.salmon, caption: "Mediterranean salmon bowl" },
 ];
 
-/** /features/meal-plans: plans, swaps, grocery lists with estimates, the weekly calorie pattern. */
+/** /features/meal-plans: how it plans, swaps, grocery lists with estimates, the weekly calorie pattern. */
 export default function MealPlansFeature() {
   return (
     <>
@@ -31,7 +30,7 @@ export default function MealPlansFeature() {
             id="how-it-plans-heading"
             size="section"
             title="It asks first, then plans."
-            lead="Which days to plan, meals to leave out, snacks, your grocery budget and how much variety you want. Then you review the week, day by day, before you confirm."
+            lead="Your nutritionist asks which days to cover, which meals to leave out, whether you want snacks, your grocery budget and how much variety you like. Then you look over the week, day by day, before you confirm it."
           />
           <ul className="grid gap-4 sm:grid-cols-3 lg:gap-5">
             {FLAT_LAYS.map(({ photo, caption }) => (
@@ -59,8 +58,8 @@ export default function MealPlansFeature() {
 
       <FeatureBlock
         id="swaps"
-        title="Swap anything in chat."
-        lead="Don't fancy Tuesday's dinner? Ask for something else and your nutritionist changes it, and the grocery list with it. Every meal comes with its nutrition and cooking steps."
+        title="Don't fancy it? Swap it."
+        lead="Not in the mood for Tuesday's dinner? Ask for something else and your nutritionist changes it, and the grocery list with it."
         media={
           <LoopVideo
             {...cookingClip}
@@ -69,14 +68,10 @@ export default function MealPlansFeature() {
           />
         }
       >
-        <PointList
-          layout="rows"
-          points={[
-            { title: "Up to 7 days", detail: "Starting today if you like" },
-            { title: "Built for your goal", detail: "Calories, protein and your tastes" },
-            { title: "Swap any meal", detail: "Just ask in chat" },
-          ]}
-        />
+        <p className="max-w-[56ch] text-body text-ink-muted text-pretty">
+          Plans cover up to 7 days, starting today if you like, and every meal is built around your calories,
+          protein and tastes. Each one comes with its nutrition and cooking steps.
+        </p>
       </FeatureBlock>
 
       <FeatureBlock
@@ -84,7 +79,7 @@ export default function MealPlansFeature() {
         layout="peek"
         tone="surface"
         title="One grocery list, by aisle."
-        lead="Everything for the week in one list, grouped by aisle, with an estimated cost and the cost per meal. Tick things off as you shop, or copy and share it."
+        lead="Everything for the week in one list, grouped by aisle, with an estimated cost and the cost per meal. Tick things off as you shop, or share it with whoever's doing the shop."
         media={
           <div className="relative">
             <Glow />
@@ -106,7 +101,7 @@ export default function MealPlansFeature() {
       <FeatureBlock
         id="weekly-pattern"
         title="More room on the days you need it."
-        lead="Client dinners on Tuesdays? A weekly calorie pattern gives those days more and takes a little off the rest, so the week adds up to the same total. Your nutritionist can suggest one from your log."
+        lead="Client dinners on Tuesdays? Your nutritionist notices the days you always go over and suggests giving them more room, with a little less on the rest. Your week still adds up to the same total."
         media={
           <div className="relative">
             <Glow />
@@ -120,14 +115,10 @@ export default function MealPlansFeature() {
           </div>
         }
       >
-        <PointList
-          layout="rows"
-          points={[
-            { title: "Same weekly total", detail: "More on some days, less on others" },
-            { title: "Any goal", detail: "Losing, maintaining or gaining" },
-            { title: "Change any day", detail: "In Nutrition & Goals" },
-          ]}
-        />
+        <p className="max-w-[56ch] text-body text-ink-muted text-pretty">
+          It works whether you&apos;re losing, maintaining or gaining, and you can change any day yourself in
+          Nutrition &amp; Goals.
+        </p>
       </FeatureBlock>
 
       <FeatureBlock
@@ -135,7 +126,7 @@ export default function MealPlansFeature() {
         tone="surface"
         reverse
         title="Today's plan on your Home Screen."
-        lead="The Today's plan widget lists every meal for the day. Log it or Skip each one right from the widget, without opening PrepIt."
+        lead="The Today's plan widget lists every meal for the day. Tap Log it or Skip right on the widget, without opening PrepIt."
         media={
           <div className="w-full max-w-[420px]">
             <WidgetImage
