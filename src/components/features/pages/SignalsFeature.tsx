@@ -4,6 +4,7 @@ import FeatureBlock from "@/components/features/FeatureBlock";
 import Glow from "@/components/ui/Glow";
 import PhotoBand from "@/components/ui/PhotoBand";
 import PointList from "@/components/ui/PointList";
+import QuoteCard from "@/components/ui/QuoteCard";
 import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
 import TextLink from "@/components/ui/TextLink";
@@ -16,24 +17,28 @@ const DRIVERS = [
   {
     title: "Energy",
     detail:
-      "Will you have steady energy and focus today? Built from how close you are to your calorie goal, protein in the morning, sugar against other carbs, glycaemic load and how you spread your meals.",
+      "Will you hit a slump mid-afternoon? It looks at how close you are to your calorie goal, protein in the morning, sugar against other carbs, glycaemic load and how you spread your meals.",
     accent: "var(--color-energy)",
   },
   {
     title: "Satiety",
     detail:
-      "Will you stay in control around food? Driven by protein, fibre and how processed your meals are.",
+      "Will you stay full until your next meal, or find yourself at the biscuit tin? It looks at protein, fibre and how processed your meals are.",
     accent: "var(--color-satiety)",
   },
   {
     title: "Mood",
     detail:
-      "How well did yesterday's food set you up for a calm, steady day? Built from yesterday's full log.",
+      "Will today feel calm and steady? It reads yesterday's whole day, because that's the food that shapes how you feel this morning.",
     accent: "var(--color-mood)",
   },
 ];
 
-/** /features/nutrition-signals: Energy, Satiety and Mood, what drives each, research grounding, no wearable. */
+/**
+ * /features/nutrition-signals: standout 2, "how your food will make you
+ * feel". The rings, a worked example of a reason and a next step, what moves
+ * each score, the week view, and no wearable.
+ */
 export default function SignalsFeature() {
   return (
     <>
@@ -47,15 +52,8 @@ export default function SignalsFeature() {
         <SectionHeading
           id="at-a-glance-heading"
           size="section"
-          title="Read your day at a glance."
-          lead="Three rings on Home, each from 0 to 100. Green, amber or red tells you how today is going before you've finished it."
-        />
-        <PointList
-          layout="rows"
-          points={[
-            { title: "Energy and Satiety", detail: "Update as you log today" },
-            { title: "Mood", detail: "Reads yesterday's full log" },
-          ]}
+          title="One look tells you how today is going."
+          lead="Three rings on Home, each from 0 to 100. Green, amber or red tells you how today is shaping up before you've finished it, while there's still time to change dinner."
         />
       </PhotoBand>
 
@@ -74,8 +72,8 @@ export default function SignalsFeature() {
       <FeatureBlock
         id="every-meal"
         tone="surface"
-        title="Every meal shows what it did."
-        lead="Open any meal to see how it moved Energy, Satiety and Mood, with a short tip for next time. Tap a ring on Home to see how the day's score was worked out."
+        title="Every score comes with a reason."
+        lead="Tap a ring to see what moved it, like a breakfast light on protein or a long gap between meals. Open any meal to see what it did to each score, and what to try next time."
         media={
           <div className="relative">
             <Glow />
@@ -89,6 +87,10 @@ export default function SignalsFeature() {
           </div>
         }
       >
+        <QuoteCard
+          quote="Your toast and jam breakfast was light on protein. Adding eggs or Greek yogurt at lunch would help hold Satiety until dinner."
+          name="A next step, for example. No shame, no “cheat days”."
+        />
         <TextLink href="/guides/energy-satiety-and-mood">Guide: read your Energy, Satiety and Mood</TextLink>
       </FeatureBlock>
 
@@ -96,7 +98,7 @@ export default function SignalsFeature() {
         id="your-week"
         layout="peek"
         title="See what helped your week."
-        lead="On Progress, What your food did shows the last 7 days of each score and what pushed it up or down, like protein at breakfast or fibre slipping."
+        lead="On Progress, What your food did shows the last 7 days of each score and what pushed it up or down, like protein at breakfast helping, or fibre slipping."
         media={
           <div className="relative">
             <Glow />
@@ -125,19 +127,12 @@ export default function SignalsFeature() {
             id="no-wearable-heading"
             size="section"
             title="No ring. No watch. No glucose monitor."
-            lead="Everything comes from what you log. Apple Health can bring in your activity and weight, but it's never required."
+            lead="Everything starts from what you eat, so there's nothing to wear or charge. Connect Apple Health and it also sees your workouts, so it can tell a hungry gym day from a hungry rest day."
           />
-          <PointList
-            layout="columns"
-            points={[
-              { title: "From your food", detail: "Just what you log. Nothing to wear or charge." },
-              { title: "Research-based", detail: "Built on published nutrition research." },
-              {
-                title: "A guide, not a diagnosis",
-                detail: "Estimates to guide your next meal, not a medical measurement.",
-              },
-            ]}
-          />
+          <p className="max-w-[60ch] text-body text-ink-muted text-pretty">
+            The scores are built on published nutrition research. They&apos;re estimates to guide your next meal,
+            not a medical measurement, and when there isn&apos;t enough to go on, PrepIt says so.
+          </p>
           <TextLink href="/research#scores">How the scores are built, with sources</TextLink>
         </div>
       </Section>
