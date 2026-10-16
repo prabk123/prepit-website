@@ -33,7 +33,7 @@ const DRIVERS = [
     detail:
       "Will today feel calm and steady? It reads yesterday's whole day, because that's the food that shapes how you feel this morning.",
     accent: "var(--color-mood)",
-    capture: appCapture("01-home", "Home with Mood at 87 beside Energy and Satiety"),
+    capture: appCapture("06c-signal-mood", "Mood at 87, with how yesterday's log shaped it: no ultra-processed food"),
   },
 ];
 

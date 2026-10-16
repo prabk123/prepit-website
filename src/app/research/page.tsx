@@ -51,8 +51,8 @@ const POINT_CAPTURES: Record<string, DeviceCapture> = {
     "Protein overnight oats with apple and cinnamon: 357 calories, 34 g protein, and each ingredient with its own calories and macros",
   ),
   guidance: appCapture(
-    "16b-supplements-screen",
-    "The Supplements screen: today's Vitamin D and Magnesium, the supplements you track, and Suggested for you",
+    "16c-supplements-suggested",
+    "Suggested for you: Vitamin D and Vitamin B12, each with the NHS reference amount, your log's average and its NHS source",
   ),
 };
 
