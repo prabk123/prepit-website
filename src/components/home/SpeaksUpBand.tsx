@@ -4,7 +4,7 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import SwipeRow from "@/components/ui/SwipeRow";
 import TextLink from "@/components/ui/TextLink";
 import { nutritionistEvening } from "@/content/lifestyle";
-import { proteinShort, weeklyPattern, weighIn } from "@/content/nutritionistMessages";
+import { proteinShort, weighIn } from "@/content/nutritionistMessages";
 
 /**
  * Standout 1, first half: the nutritionist speaks up on its own. Three of the
@@ -39,7 +39,7 @@ export default function SpeaksUpBand() {
             desktop="scroll"
             itemClassName="w-[82%] max-w-[340px] lg:w-[340px]"
           >
-            {[proteinShort, weeklyPattern, weighIn].map((message) => (
+            {[proteinShort, weighIn].map((message) => (
               <ChatCapture key={message.caption} {...message} />
             ))}
           </SwipeRow>
