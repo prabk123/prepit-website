@@ -11,9 +11,10 @@ export type FaqItem = {
 };
 
 /**
- * The FAQ answers the objections the homepage raises (PRE-279), in the same
- * voice. The visible accordion and the FAQPage structured data both read this
- * list, so they always match.
+ * The FAQ sits under the homepage's questions section, so it covers what that
+ * section doesn't (price, trial, logging, scores, messages) in the same voice.
+ * The visible accordion and the FAQPage structured data both read this list, so
+ * they always match.
  */
 export const FAQ_ITEMS: FaqItem[] = [
   {
@@ -33,22 +34,10 @@ export const FAQ_ITEMS: FaqItem[] = [
       "A tracker records what you ate and leaves the rest to you. PrepIt's nutritionist uses it. It notices patterns, like protein running low at dinner or the same days going over, messages you before you slip, and tells you the one thing to change first.",
   },
   {
-    id: "quit-trackers",
-    question: "I've quit trackers before. Will logging be a chore?",
+    id: "medical",
+    question: "Can it help with a medical condition?",
     answer:
-      "Most people quit because logging takes too long. Here you type “two eggs and buttered toast”, snap your plate, or press the Action button and say it. It's on your log straight away, and the numbers fill in a few seconds later.",
-  },
-  {
-    id: "real-nutritionist",
-    question: "Is it a real nutritionist?",
-    answer:
-      "It's an AI nutritionist, not a person. It learns how you eat in a short consultation, remembers your goals and what you told it last week, and coaches the way good nutritionists do. It isn't a doctor: it won't diagnose anything, and for anything medical it points you to your GP, a pharmacist or a registered dietitian.",
-  },
-  {
-    id: "advice-quality",
-    question: "Is the advice any good?",
-    answer:
-      "Every reply starts from what you've actually eaten and from nutrition science and public health guidance. Its numbers come from official brand and restaurant figures where they exist, and it tells you when it's unsure.",
+      "It gives nutrition guidance, not medical advice. It won't diagnose anything or suggest a supplement dose beyond the public reference amount, and when something needs a professional it says so and points you to your GP, a pharmacist or a registered dietitian.",
     link: { href: RESEARCH_PAGE_HREF, label: "How your nutritionist decides what to say" },
   },
   {
@@ -78,15 +67,9 @@ export const FAQ_ITEMS: FaqItem[] = [
   },
   {
     id: "wearable",
-    question: "Do I need a watch, a ring or a glucose monitor?",
+    question: "What does connecting Apple Health add?",
     answer:
-      "No. Everything starts from what you eat. Connect Apple Health and your nutritionist also sees your workouts, so it can tell a hungry gym day from a hungry rest day, but it's never required.",
-  },
-  {
-    id: "privacy",
-    question: "Is my data private?",
-    answer:
-      "Your logs and goals are yours. PrepIt doesn't sell your personal or health data, and you can delete your account at any time.",
+      "It's optional. Once it's connected, your nutritionist also sees your workouts, so it can tell a hungry gym day from a hungry rest day.",
   },
   {
     id: "devices",
