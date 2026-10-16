@@ -18,7 +18,7 @@ const QUESTIONS = [
   {
     question: "“Is the advice any good?”",
     answer:
-      "It's built on nutrition science and public health guidance, and it tells you when it's unsure. For anything medical, it points you to your GP, a pharmacist or a registered dietitian.",
+      "It's built on nutrition science and public health guidance, and it knows its limits: for anything medical, it points you to your GP, a pharmacist or a registered dietitian.",
   },
   {
     question: "“Is my data safe?”",

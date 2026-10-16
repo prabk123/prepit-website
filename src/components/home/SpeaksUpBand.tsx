@@ -26,7 +26,7 @@ export default function SpeaksUpBand() {
             days keep running over, it tells you, with a fix that fits how you already eat.
           </p>
           <p className="text-body text-ink-secondary text-pretty">
-            Reply with a tap, or in your own words. Nothing changes until you say so.
+            Reply with a tap, or in your own words. Any change to your log, plan or goals waits for your OK.
           </p>
           <TextLink href="/features/ai-nutritionist">More about your nutritionist</TextLink>
         </>
