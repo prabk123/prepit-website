@@ -386,6 +386,15 @@
     }
   }
 
+  /* <SiteFinalCta>: a wrapper only; hidden on pages with their own App Store button. */
+  .site-final-cta {
+    display: contents;
+  }
+
+  body:has([data-hide-site-final-cta]) .site-final-cta {
+    display: none;
+  }
+
   /* <LoopVideo>: the clip plus its pause/play button. */
   .loop-video {
     position: relative;
@@ -415,6 +424,13 @@
     -webkit-backdrop-filter: blur(8px);
     cursor: pointer;
     transition: background 150ms ease;
+  }
+
+  /* Under a DeviceFrame: below the phone, lined up with its right edge. */
+  .loop-video__toggle--outside {
+    position: static;
+    margin-top: 12px;
+    margin-left: auto;
   }
 
   .loop-video__toggle:hover {

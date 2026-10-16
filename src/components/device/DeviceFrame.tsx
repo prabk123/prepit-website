@@ -1,5 +1,9 @@
 import type { CSSProperties, ReactNode } from "react";
-import LoopVideo, { type LoopVideoProps } from "@/components/media/LoopVideo";
+import LoopVideo, {
+  LoopVideoToggle,
+  LoopVideoToggleScope,
+  type LoopVideoProps,
+} from "@/components/media/LoopVideo";
 
 /** Full-resolution iPhone 17 Pro capture size. */
 export const CAPTURE_WIDTH = 1206;
@@ -83,7 +87,7 @@ export default function DeviceFrame({
     ...(tilt ? { "--device-tilt": `${tilt}deg` } : {}),
   } as CSSProperties;
 
-  return (
+  const frame = (
     <div className={`device-frame ${className ?? ""}`} style={style}>
       <div className="device-frame__shell">
         <span aria-hidden className="device-frame__button device-frame__button--action" />
@@ -102,6 +106,11 @@ export default function DeviceFrame({
           </div>
         </div>
       </div>
+      {/* A clip's pause/play button sits under the phone, clear of the app's
+          own controls (the + button, Ask Nutritionist, the chat camera). */}
+      {video && <LoopVideoToggle />}
     </div>
   );
+
+  return video ? <LoopVideoToggleScope>{frame}</LoopVideoToggleScope> : frame;
 }
