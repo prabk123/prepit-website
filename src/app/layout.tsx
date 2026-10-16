@@ -192,7 +192,7 @@ export default function RootLayout({
       >
         <a
           href="#main"
-          className="sr-only rounded-control bg-cream px-4 text-small font-medium text-on-cream focus:not-sr-only focus:fixed focus:left-4 focus:top-2.5 focus:z-[60] focus:inline-flex focus:h-11 focus:items-center focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cream"
+          className="sr-only rounded-control bg-accent px-4 text-small font-medium text-on-accent focus:not-sr-only focus:fixed focus:left-4 focus:top-2.5 focus:z-[60] focus:inline-flex focus:h-11 focus:items-center focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus"
         >
           Skip to content
         </a>

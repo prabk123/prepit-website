@@ -22,7 +22,7 @@ export default function CalorieSummary({ day }: CalorieSummaryProps) {
 
   return (
     <div className="flex items-center gap-4 rounded-2xl bg-surface-raised p-4">
-      <PrepItIcon name="fire" size={30} className="text-satiety" />
+      <PrepItIcon name="fire" size={30} className="text-accent-text" />
       <div className="flex-1">
         <p className="text-small text-ink-muted">{formatLongDay(day.date)}</p>
         <p className="mt-0.5 font-display text-card-title text-ink">

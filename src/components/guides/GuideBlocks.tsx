@@ -140,8 +140,8 @@ export function Example({
           <dd className="text-body text-ink-secondary">“{vague}”</dd>
           <dd className="text-small text-ink-muted">{vagueNote}</dd>
         </div>
-        <div className="flex flex-col gap-1 rounded-2xl border border-energy/40 bg-page p-4">
-          <dt className="text-eyebrow font-medium uppercase text-energy">Specific</dt>
+        <div className="flex flex-col gap-1 rounded-2xl border border-accent/40 bg-page p-4">
+          <dt className="text-eyebrow font-medium uppercase text-accent-text">Specific</dt>
           <dd className="text-body text-ink">“{specific}”</dd>
           <dd className="text-small text-ink-muted">{specificNote}</dd>
         </div>
@@ -157,7 +157,7 @@ export function Examples({ children }: { children: ReactNode }) {
 /** A short aside, for version requirements and the like. */
 export function Note({ children }: { children: ReactNode }) {
   return (
-    <p className="my-6 border-l-2 border-energy pl-4 text-body text-ink-muted [&_strong]:text-ink-secondary">
+    <p className="my-6 border-l-2 border-accent pl-4 text-body text-ink-muted [&_strong]:text-ink-secondary">
       {children}
     </p>
   );
@@ -166,7 +166,7 @@ export function Note({ children }: { children: ReactNode }) {
 function Anchor({ href = "", children, ...props }: ComponentPropsWithoutRef<"a">) {
   if (href.startsWith("/")) {
     return (
-      <Link href={href} className="text-ink underline decoration-energy underline-offset-4 hover:text-energy" {...props}>
+      <Link href={href} className="text-ink underline decoration-accent underline-offset-4 hover:text-accent-text" {...props}>
         {children}
       </Link>
     );
@@ -176,7 +176,7 @@ function Anchor({ href = "", children, ...props }: ComponentPropsWithoutRef<"a">
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="text-ink underline decoration-energy underline-offset-4 hover:text-energy"
+      className="text-ink underline decoration-accent underline-offset-4 hover:text-accent-text"
       {...props}
     >
       {children}
@@ -186,7 +186,7 @@ function Anchor({ href = "", children, ...props }: ComponentPropsWithoutRef<"a">
 
 /**
  * Markdown elements in the D3 type scale. Numbered lists are the guide's
- * steps, so they get amber step numbers.
+ * steps, so they get orange step numbers.
  */
 export const guideMdxComponents = {
   h2: (props: ComponentPropsWithoutRef<"h2">) => (
@@ -200,13 +200,13 @@ export const guideMdxComponents = {
   ),
   ul: (props: ComponentPropsWithoutRef<"ul">) => (
     <ul
-      className="my-6 flex flex-col gap-3 text-lead text-ink-secondary [&>li]:relative [&>li]:pl-6 [&>li]:before:absolute [&>li]:before:left-0 [&>li]:before:top-[0.7em] [&>li]:before:size-1.5 [&>li]:before:rounded-full [&>li]:before:bg-energy"
+      className="my-6 flex flex-col gap-3 text-lead text-ink-secondary [&>li]:relative [&>li]:pl-6 [&>li]:before:absolute [&>li]:before:left-0 [&>li]:before:top-[0.7em] [&>li]:before:size-1.5 [&>li]:before:rounded-full [&>li]:before:bg-accent"
       {...props}
     />
   ),
   ol: (props: ComponentPropsWithoutRef<"ol">) => (
     <ol
-      className="my-8 flex flex-col gap-5 text-lead text-ink-secondary [counter-reset:step] [&>li]:relative [&>li]:min-h-9 [&>li]:pl-14 [&>li]:pt-1 [&>li]:[counter-increment:step] [&>li]:before:absolute [&>li]:before:left-0 [&>li]:before:top-0 [&>li]:before:flex [&>li]:before:size-9 [&>li]:before:items-center [&>li]:before:justify-center [&>li]:before:rounded-full [&>li]:before:border [&>li]:before:border-energy/50 [&>li]:before:font-display [&>li]:before:text-body [&>li]:before:text-energy [&>li]:before:content-[counter(step)]"
+      className="my-8 flex flex-col gap-5 text-lead text-ink-secondary [counter-reset:step] [&>li]:relative [&>li]:min-h-9 [&>li]:pl-14 [&>li]:pt-1 [&>li]:[counter-increment:step] [&>li]:before:absolute [&>li]:before:left-0 [&>li]:before:top-0 [&>li]:before:flex [&>li]:before:size-9 [&>li]:before:items-center [&>li]:before:justify-center [&>li]:before:rounded-full [&>li]:before:border [&>li]:before:border-accent/50 [&>li]:before:font-display [&>li]:before:text-body [&>li]:before:text-accent-text [&>li]:before:content-[counter(step)]"
       {...props}
     />
   ),

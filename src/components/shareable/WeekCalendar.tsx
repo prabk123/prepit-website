@@ -45,7 +45,7 @@ export default function WeekCalendar({
             disabled={!inPlan}
             aria-label={label}
             aria-pressed={inPlan ? selected : undefined}
-            className="flex flex-col items-center gap-1.5 rounded-control focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cream disabled:cursor-default disabled:opacity-35"
+            className="flex flex-col items-center gap-1.5 rounded-control focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:cursor-default disabled:opacity-35"
           >
             <span
               className={`text-small ${selected ? "font-medium text-ink" : "text-ink-muted"}`}
@@ -55,7 +55,7 @@ export default function WeekCalendar({
             <span className="relative flex flex-col items-center">
               <span
                 className={`flex h-11 w-11 items-center justify-center rounded-control text-lead transition-colors sm:h-12 sm:w-12 ${
-                  selected ? "bg-cream font-medium text-on-cream" : "text-ink"
+                  selected ? "bg-accent font-medium text-on-accent" : "text-ink"
                 }`}
               >
                 {date.getUTCDate()}

@@ -58,7 +58,7 @@ export default async function ContactPage({
                 Prefer email? Write to{" "}
                 <a
                   href={`mailto:${SUPPORT_EMAIL}`}
-                  className="font-medium text-ink underline decoration-line-strong underline-offset-4 transition-colors hover:decoration-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cream"
+                  className="font-medium text-ink underline decoration-line-strong underline-offset-4 transition-colors hover:decoration-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus"
                 >
                   {SUPPORT_EMAIL}
                 </a>

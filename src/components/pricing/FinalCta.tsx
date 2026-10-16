@@ -6,7 +6,7 @@ import { appCapture } from "@/lib/captures";
 import { TRIAL_DAYS } from "@/lib/pricing";
 
 /**
- * The site's one closing download section: full-bleed dark band, headline,
+ * The site's one closing download section, one of its two dark bands: headline,
  * the trial line in the brand gradient, App Store button, a QR code on
  * desktop, and Home in a phone rising from the bottom edge.
  *
@@ -15,7 +15,7 @@ import { TRIAL_DAYS } from "@/lib/pricing";
  */
 export default function FinalCta({ trackingSource = "final-cta" }: { trackingSource?: string }) {
   return (
-    <Section id="download" labelledBy="download-heading" analyticsName="final-cta">
+    <Section id="download" tone="dark" labelledBy="download-heading" analyticsName="final-cta">
       <div className="relative flex flex-col items-center gap-8 text-center">
         <div className="flex flex-col items-center gap-5">
           <h2 id="download-heading" className="font-display text-chapter text-ink text-balance">
@@ -35,7 +35,7 @@ export default function FinalCta({ trackingSource = "final-cta" }: { trackingSou
           <Glow style={{ top: "70%" }} />
           <DeviceFrame
             className="mx-auto [--device-w:280px] sm:[--device-w:340px] lg:[--device-w:400px]"
-            capture={appCapture("01-home", "PrepIt Home with today's Energy, Satiety and Mood")}
+            capture={appCapture("01-home", "PrepIt Home with today's Energy, Satiety and Mood", "dark")}
           />
         </div>
       </div>

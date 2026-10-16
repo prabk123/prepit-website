@@ -155,7 +155,7 @@ export default async function GuidePage({ params }: Props) {
             <h2 id="more-guides-heading" className="font-display text-title text-ink">
               More guides
             </h2>
-            <Link href="/guides" className="tap-target text-small font-medium text-energy hover:text-ink">
+            <Link href="/guides" className="tap-target text-small font-medium text-accent-text hover:text-ink">
               See all guides <span aria-hidden>→</span>
             </Link>
           </div>

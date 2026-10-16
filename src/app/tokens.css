@@ -1,57 +1,77 @@
 /*
- * PrepIt website design tokens: direction D3, "annotated plates" (PRE-197,
- * chosen 12 Oct 2026). The marketing site is dark only.
+ * PrepIt website design tokens. Light-led since PRE-276 (16 Oct 2026), with
+ * the app's own light palette (fresca_app lib/theme/prep_it_colors.dart) and
+ * its calories orange as the one accent. Two sections are dark bands (the
+ * research section and the closing download section): they add `theme-dark`
+ * (see the end of this file), which swaps the same tokens for dark values.
  *
- * Every colour, type, spacing, radius, shadow, glow and motion value for the
- * revamp lives in this file, so a palette or scale change is a one-file edit.
- * Tailwind turns each `--color-*`, `--text-*`, `--spacing-*`, `--radius-*`,
- * `--shadow-*` and `--container-*` into utilities (`bg-page`, `text-ink`,
- * `text-chapter`, `py-section`, `rounded-card`, `max-w-content`, …).
+ * Every colour, type, spacing, radius, shadow, glow and motion value lives in
+ * this file, so a palette or scale change is a one-file edit. Tailwind turns
+ * each `--color-*`, `--text-*`, `--spacing-*`, `--radius-*`, `--shadow-*` and
+ * `--container-*` into utilities (`bg-page`, `text-ink`, `text-chapter`,
+ * `py-section`, `rounded-card`, `max-w-content`, …). Colour utilities read the
+ * variables at use, so `theme-dark` re-colours everything inside it.
  *
  * Fluid values scale linearly from a 390 px phone to a 1440 px desktop.
+ * Contrast (WCAG AA, 4.5:1 for text) is noted beside each text colour.
  */
 
 @theme static {
-  /* Surfaces: warm near-black, never pure black. */
-  --color-page: #110f0c;
-  --color-surface: #1a1612;
-  --color-surface-raised: #241d18;
-  --color-line: #2a241e;
-  --color-line-strong: #3a3029;
+  /* Surfaces: the app's light grey page and white cards. */
+  --color-page: #f4f4f5;
+  --color-surface: #ffffff;
+  /* A card or chip inside a white card. */
+  --color-surface-raised: #f4f4f5;
+  --color-line: #e4e4e7;
+  --color-line-strong: #d4d4d8;
 
-  /* Text: cream and soft beige, never pure white. */
-  --color-ink: #f7f1e8;
-  --color-ink-secondary: #e0d6c9;
-  --color-ink-muted: #b8ad9f;
-  /* Faint is the lowest tone that still passes AA everywhere:
-     5.6:1 on page, 5.2:1 on surface, 4.7:1 on surface-raised. */
-  --color-ink-faint: #93877a;
+  /* Text. Ink 15.5:1 on page; secondary (body) 7.6:1; muted 6.0:1;
+     faint is the lowest tone that still passes AA: 5.0:1 on page,
+     5.5:1 on white. */
+  --color-ink: #1a1a2e;
+  --color-ink-secondary: #4d4d59;
+  --color-ink-muted: #5c5c68;
+  --color-ink-faint: #686872;
 
-  /* Cream buttons and the cream pricing card, with near-black text on them. */
-  --color-cream: #f7f1e8;
-  --color-on-cream: #110f0c;
-  --color-on-cream-muted: #5c5148;
+  /* The app's calories orange: a fill for buttons and highlights, always
+     with ink on it (5.8:1). Never as small text on light; use accent-text. */
+  --color-accent: #ff644f;
+  --color-on-accent: #1a1a2e;
+  /* Secondary text on an orange fill, 5.3:1. */
+  --color-on-accent-muted: #3d1a14;
+  /* Orange text and link underlines on light: 5.5:1 on white, 5.0:1 on page. */
+  --color-accent-text: #b24637;
+  /* Keyboard focus rings. */
+  --color-focus: #1a1a2e;
+  /* QR codes stay dark on white in every band, so every camera reads them. */
+  --color-qr-bg: #ffffff;
+  --color-qr-ink: #1a1a2e;
 
-  /* The app's Energy, Satiety and Mood signal colours. */
+  /* The app's Energy, Satiety and Mood signal colours. Fills and dots only;
+     they are too light for text on the light page. */
   --color-energy: #f5cc77;
   --color-satiety: #f38c61;
   --color-mood: #809ff9;
 
-  /* Form errors: a warm coral, 6.9:1 on surface. Text only, with the field. */
-  --color-error: #f2806f;
+  /* Form errors: 6.6:1 on white. Text only, with the field. */
+  --color-error: #b42318;
 
-  /* Brand gradient stops (eyebrows, final CTA line, glows; never body text). */
-  --color-brand-blue: #809ff9;
-  --color-brand-purple: #d093d9;
-  --color-brand-orange: #f38c61;
-  --color-brand-yellow: #f5cc77;
+  /* Brand gradient stops (eyebrows, the trial line; never body text). The
+     light-page stops are darker shades of the app gradient, each 5:1 or more
+     on page; theme-dark puts the app's own pastel stops back. */
+  --color-brand-blue: #3d5bd9;
+  --color-brand-purple: #9b3fa8;
+  --color-brand-orange: #b24637;
+  --color-brand-yellow: #8a5a00;
 
-  /* Photo annotations (D3): amber ring and leader line, dark glass label.
-     Amber is the one accent colour on photos. */
-  --color-annotation: #f5cc77;
-  --color-annotation-ring-fill: rgb(17 15 12 / 0.5);
-  --color-annotation-label: rgb(17 15 12 / 0.78);
-  --color-annotation-border: rgb(245 204 119 / 0.35);
+  /* Photo annotations: orange ring and leader line, white glass label with
+     ink text and the figure in accent-text. */
+  --color-annotation: #ff644f;
+  --color-annotation-ring-fill: rgb(255 255 255 / 0.55);
+  --color-annotation-label: rgb(255 255 255 / 0.9);
+  --color-annotation-border: rgb(255 100 79 / 0.45);
+  --color-annotation-ink: #1a1a2e;
+  --color-annotation-value: #b24637;
 
   /* Hardware colours for <DeviceFrame> and the video button's backing. */
   --color-device-metal: #3c3c40;
@@ -59,35 +79,39 @@
   --color-device-metal-edge: #8a8a8f;
   --color-device-bezel: #050505;
   --color-device-button: #6e6e73;
-  --color-overlay: rgb(17 15 12 / 0.6);
-  --color-overlay-strong: rgb(17 15 12 / 0.8);
+  --color-overlay: rgb(26 26 46 / 0.45);
+  --color-overlay-strong: rgb(26 26 46 / 0.7);
+  /* The video pause button sits on the app screen, so it keeps a dark glass. */
+  --color-video-toggle: rgb(24 24 27 / 0.6);
+  --color-video-toggle-strong: rgb(24 24 27 / 0.8);
+  --color-video-toggle-ink: #f4f4f5;
 
-  /* Type scale. Clash Display headlines (weight 600, tracking -0.025em),
-     DM Sans body. Hero 60 to 112 px, chapter heads 46 to 80 px.
-     Clash's space is only 0.14em wide, so with tight tracking the gaps
-     between words nearly vanish; every Clash line adds
+  /* Type scale. Clash Display headlines at weight 500 (calmer than D3's
+     600), tracking -0.01em, DM Sans body. Only the hero goes big: 44 to 76
+     px, chapter heads 36 to 56 px.
+     Clash's space is only 0.14em wide, so every Clash line adds
      --word-spacing-display (see .font-display in globals.css). */
-  --text-hero: clamp(60px, 37.7px + 5.71vw, 120px);
-  --text-hero--line-height: 0.95;
-  --text-hero--letter-spacing: -0.025em;
-  --text-hero--font-weight: 600;
-  --text-chapter: clamp(46px, 33.4px + 3.24vw, 80px);
-  --text-chapter--line-height: 1;
-  --text-chapter--letter-spacing: -0.025em;
-  --text-chapter--font-weight: 600;
-  /* Mid-page section headlines beside a phone or over a photo (D3 60 px). */
-  --text-section: clamp(36px, 28.6px + 1.9vw, 60px);
-  --text-section--line-height: 1;
-  --text-section--letter-spacing: -0.025em;
-  --text-section--font-weight: 600;
-  --text-title: clamp(26px, 22.3px + 0.95vw, 36px);
-  --text-title--line-height: 1.1;
-  --text-title--letter-spacing: -0.02em;
-  --text-title--font-weight: 600;
-  --text-card-title: 22px;
-  --text-card-title--line-height: 1.2;
-  --text-card-title--letter-spacing: -0.01em;
-  --text-card-title--font-weight: 600;
+  --text-hero: clamp(44px, 32.1px + 3.05vw, 76px);
+  --text-hero--line-height: 1.04;
+  --text-hero--letter-spacing: -0.01em;
+  --text-hero--font-weight: 500;
+  --text-chapter: clamp(36px, 28.6px + 1.9vw, 56px);
+  --text-chapter--line-height: 1.08;
+  --text-chapter--letter-spacing: -0.01em;
+  --text-chapter--font-weight: 500;
+  /* Mid-page section headlines beside a phone or over a photo. */
+  --text-section: clamp(30px, 25.5px + 1.14vw, 42px);
+  --text-section--line-height: 1.1;
+  --text-section--letter-spacing: -0.01em;
+  --text-section--font-weight: 500;
+  --text-title: clamp(24px, 22.5px + 0.38vw, 28px);
+  --text-title--line-height: 1.15;
+  --text-title--letter-spacing: -0.005em;
+  --text-title--font-weight: 500;
+  --text-card-title: 21px;
+  --text-card-title--line-height: 1.25;
+  --text-card-title--letter-spacing: 0em;
+  --text-card-title--font-weight: 500;
   --text-lead: clamp(18px, 17.3px + 0.19vw, 20px);
   --text-lead--line-height: 1.5;
   --text-body: 17px;
@@ -115,9 +139,9 @@
   --radius-icon: 14px;
 
   /* Shadows. Cards are flat; phones float. */
-  --shadow-phone: 0 40px 80px -24px rgb(0 0 0 / 0.7), 0 12px 24px -12px rgb(0 0 0 / 0.5);
+  --shadow-phone: 0 40px 80px -28px rgb(26 26 46 / 0.35), 0 12px 24px -12px rgb(26 26 46 / 0.2);
 
-  /* Motion: D3 has one moment only (photo labels drawing in, PRE-201).
+  /* Motion: one moment only (photo labels drawing in, PRE-201).
      Nothing else on the page animates. */
   --ease-calm: cubic-bezier(0.22, 1, 0.36, 1);
   /* Labels draw in one after another: line, then label, about a second for
@@ -134,7 +158,9 @@
   --font-body: var(--font-dm-sans), system-ui, sans-serif;
 }
 
-:root {
+:root,
+.theme-dark {
+  /* Declared again on .theme-dark so the stops resolve to its colours. */
   --gradient-brand: linear-gradient(
     90deg,
     var(--color-brand-blue) 0%,
@@ -142,24 +168,32 @@
     var(--color-brand-orange) 63%,
     var(--color-brand-yellow) 97.5%
   );
-  /* Soft orange and amber glow behind phones. */
-  --glow-warm:
-    radial-gradient(closest-side, rgb(243 140 97 / 0.32), transparent),
-    radial-gradient(closest-side at 70% 65%, rgb(245 204 119 / 0.22), transparent);
   /* Fades a full-bleed photo into the page at its top and bottom edges. */
   --fade-photo-edges: linear-gradient(
     180deg,
     var(--color-page) 0%,
-    rgb(17 15 12 / 0) 14%,
-    rgb(17 15 12 / 0) 78%,
+    transparent 14%,
+    transparent 78%,
     var(--color-page) 100%
   );
+}
+
+:root {
+  /* Soft orange light behind phones, kept faint on the light page. */
+  --glow-warm:
+    radial-gradient(closest-side, rgb(255 100 79 / 0.16), transparent),
+    radial-gradient(closest-side at 70% 65%, rgb(245 204 119 / 0.18), transparent);
+  /*
+   * Text set over a lifestyle photo stays light on a dark gradient: the
+   * photos are dark, so the text block on them takes `theme-dark` (or
+   * `theme-dark-lg` where the text only sits on the photo from 1024 px).
+   */
   /* Dark gradient on the left of full-bleed photos, behind the text column. */
   --scrim-photo: linear-gradient(
     90deg,
-    rgb(17 15 12 / 0.92) 0%,
-    rgb(17 15 12 / 0.8) 45%,
-    rgb(17 15 12 / 0.15) 85%
+    rgb(24 24 27 / 0.92) 0%,
+    rgb(24 24 27 / 0.8) 45%,
+    rgb(24 24 27 / 0.15) 85%
   );
   /*
    * Photo bands: dark behind the text column only, clear over the subject.
@@ -171,27 +205,84 @@
    */
   --scrim-band-start: linear-gradient(
     90deg,
-    rgb(17 15 12 / 0.94) 0%,
-    rgb(17 15 12 / 0.86) 40%,
-    rgb(17 15 12 / 0) 62%
+    rgb(24 24 27 / 0.94) 0%,
+    rgb(24 24 27 / 0.86) 40%,
+    rgb(24 24 27 / 0) 62%
   );
   --scrim-band-end: radial-gradient(
     ellipse 62% 72% at 84% 22%,
-    rgb(17 15 12 / 0.9) 0%,
-    rgb(17 15 12 / 0.72) 50%,
-    rgb(17 15 12 / 0) 100%
+    rgb(24 24 27 / 0.9) 0%,
+    rgb(24 24 27 / 0.72) 50%,
+    rgb(24 24 27 / 0) 100%
   );
   --scrim-band-text: radial-gradient(
     closest-side,
-    rgb(17 15 12 / 0.94) 0%,
-    rgb(17 15 12 / 0.9) 75%,
-    rgb(17 15 12 / 0) 100%
+    rgb(24 24 27 / 0.94) 0%,
+    rgb(24 24 27 / 0.9) 75%,
+    rgb(24 24 27 / 0) 100%
   );
   /* The same gradient from the right, for photos whose subject is on the left. */
   --scrim-photo-end: linear-gradient(
     270deg,
-    rgb(17 15 12 / 0.92) 0%,
-    rgb(17 15 12 / 0.8) 45%,
-    rgb(17 15 12 / 0.15) 85%
+    rgb(24 24 27 / 0.92) 0%,
+    rgb(24 24 27 / 0.8) 45%,
+    rgb(24 24 27 / 0.15) 85%
   );
+}
+
+/*
+ * Dark bands (the research section and the closing download section), and
+ * text set on a photo. The same token names with dark values, so components
+ * need no dark variants. Ink 16:1 on page; muted 6.2:1 and faint 5.2:1 on
+ * surface-raised; accent-text 7.7:1 on page.
+ */
+@layer base {
+  .theme-dark {
+    color-scheme: dark;
+    --color-page: #18181b;
+    --color-surface: #202024;
+    --color-surface-raised: #27272a;
+    --color-line: #2e2e33;
+    --color-line-strong: #3f3f46;
+    --color-ink: #f4f4f5;
+    --color-ink-secondary: #d4d4d8;
+    --color-ink-muted: #a6a6ac;
+    --color-ink-faint: #9898a0;
+    --color-accent-text: #ff8a78;
+    --color-focus: #f4f4f5;
+    --color-error: #f2806f;
+    --color-brand-blue: #809ff9;
+    --color-brand-purple: #d093d9;
+    --color-brand-orange: #f38c61;
+    --color-brand-yellow: #f5cc77;
+    --glow-warm:
+      radial-gradient(closest-side, rgb(255 100 79 / 0.3), transparent),
+      radial-gradient(closest-side at 70% 65%, rgb(245 204 119 / 0.2), transparent);
+    --shadow-phone: 0 40px 80px -24px rgb(0 0 0 / 0.7), 0 12px 24px -12px rgb(0 0 0 / 0.5);
+  }
+
+  @media (min-width: 1024px) {
+    .theme-dark-lg {
+      color-scheme: dark;
+      --color-ink: #f4f4f5;
+      --color-ink-secondary: #d4d4d8;
+      --color-ink-muted: #a6a6ac;
+      --color-ink-faint: #9898a0;
+      --color-line: #2e2e33;
+      --color-line-strong: #3f3f46;
+      --color-accent-text: #ff8a78;
+      --color-focus: #f4f4f5;
+      --color-brand-blue: #809ff9;
+      --color-brand-purple: #d093d9;
+      --color-brand-orange: #f38c61;
+      --color-brand-yellow: #f5cc77;
+      --gradient-brand: linear-gradient(
+        90deg,
+        var(--color-brand-blue) 0%,
+        var(--color-brand-purple) 31%,
+        var(--color-brand-orange) 63%,
+        var(--color-brand-yellow) 97.5%
+      );
+    }
+  }
 }

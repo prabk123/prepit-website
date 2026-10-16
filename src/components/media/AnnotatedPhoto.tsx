@@ -13,7 +13,7 @@ export type PhotoAnnotation = {
   /** Leader line length in px (default 72). */
   length?: number;
   /**
-   * The amber figure, e.g. "34 g protein". Must come from a real logged meal
+   * The highlighted figure, e.g. "34 g protein". Must come from a real logged meal
    * (a PRE-198 capture or a real log), never made up.
    */
   value: string;
@@ -67,7 +67,7 @@ function Sources({ photo, media }: { photo: SectionPhoto; media?: string }) {
 
 /**
  * A lifestyle photo labelled the way PrepIt reads a plate (design D3): an
- * amber ring on the food, a thin leader line and a dark glass label. On first
+ * orange ring on the food, a thin leader line and a white glass label. On first
  * view the labels draw in one after another (line, then label). With reduced
  * motion, or before JavaScript runs, they are simply shown.
  *

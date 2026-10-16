@@ -118,7 +118,7 @@ export default function GroceryListSection({
             item_count: groceries.length,
           });
         }}
-        className="flex w-full items-center gap-3 rounded-tile border border-line bg-surface p-4 text-left transition-colors hover:bg-surface-raised focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cream sm:p-5"
+        className="flex w-full items-center gap-3 rounded-tile border border-line bg-surface p-4 text-left transition-colors hover:bg-surface-raised focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus sm:p-5"
       >
         <PrepItIcon name="cart" size={24} className="text-ink" />
         <div className="flex-1">
@@ -178,7 +178,7 @@ async function writeToClipboard(text: string): Promise<boolean> {
 type CopyState = "idle" | "copied" | "failed";
 
 const FOOTER_BUTTON =
-  "flex h-12 flex-1 items-center justify-center gap-2 rounded-control bg-surface-raised px-4 text-body font-medium text-ink transition-colors hover:bg-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cream";
+  "flex h-12 flex-1 items-center justify-center gap-2 rounded-control bg-surface-raised px-4 text-body font-medium text-ink transition-colors hover:bg-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus";
 
 function GroceryModal({
   planId,

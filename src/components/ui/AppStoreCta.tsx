@@ -5,8 +5,8 @@ type AppStoreCtaProps = {
   /** Sent with the `app_store_click` event, e.g. "home-hero". */
   trackingSource: string;
   label?: string;
-  /** `cream` on dark sections; `dark` on the cream pricing card. */
-  variant?: "cream" | "dark";
+  /** `accent`: the orange button, everywhere by default. `ink`: an ink button, for a spot beside another orange button. */
+  variant?: "accent" | "ink";
   /** Line under the button, e.g. "7 days free" (TRIAL_NOTE). */
   note?: string;
   /** Desktop only: a QR code beside the button with this caption. */
@@ -33,16 +33,16 @@ function AppleLogo() {
 export default function AppStoreCta({
   trackingSource,
   label = "Download on the App Store",
-  variant = "cream",
+  variant = "accent",
   note,
   qrCaption,
   className,
 }: AppStoreCtaProps) {
   const button =
-    variant === "cream"
-      ? "bg-cream text-on-cream focus-visible:outline-cream"
-      : "bg-on-cream text-cream focus-visible:outline-on-cream";
-  const subtle = variant === "cream" ? "text-ink-muted" : "text-on-cream-muted";
+    variant === "accent"
+      ? "bg-accent text-on-accent focus-visible:outline-focus"
+      : "bg-ink text-page focus-visible:outline-focus";
+  const subtle = "text-ink-muted";
 
   return (
     <div className={`flex flex-wrap items-center gap-x-10 gap-y-6 ${className ?? ""}`}>
