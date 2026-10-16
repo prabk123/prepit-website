@@ -101,7 +101,7 @@ export default function LoggingFeature() {
       >
         <p className="max-w-[56ch] text-body text-ink-muted text-pretty">
           Put the same action on the Action button and logging is one press and a sentence. You can also add a Log
-          a meal button to your Lock Screen or Control Center (iOS 18 or later).
+          a meal button to your Lock Screen or Control Centre (iOS 18 or later).
         </p>
         <TextLink href="/features/widgets-and-siri">More about widgets and Siri</TextLink>
       </FeatureBlock>

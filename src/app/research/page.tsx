@@ -47,8 +47,8 @@ const POINT_CAPTURES: Record<string, DeviceCapture> = {
     "Energy at 84, with how it's shaped: calorie fit against what's expected by now, and meal spread",
   ),
   numbers: appCapture(
-    "05b-meal-detail-scrolled",
-    "A logged meal's items with their calories and macros, and how it was calculated: high confidence, from the description and typical values",
+    "05-meal-detail",
+    "Protein overnight oats with apple and cinnamon: 357 calories, 34 g protein, and each ingredient with its own calories and macros",
   ),
   guidance: appCapture(
     "16b-supplements-screen",

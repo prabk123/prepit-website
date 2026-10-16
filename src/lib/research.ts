@@ -178,9 +178,9 @@ export const RESEARCH_POINTS: ResearchPoint[] = [
     id: "numbers",
     title: "Its numbers come from real sources",
     summary:
-      "Official figures for branded and restaurant food first, and USDA reference portions when you don't give an amount.",
+      "Branded and restaurant food uses the official figures. Everyday foods use USDA nutrient data.",
     detail:
-      "For branded and restaurant food it looks for the official nutrition figures first. When you don't give an amount, it uses typical portions from USDA reference data. Typed and photo logs show how sure it is and what it assumed, and if a meal is too vague, it asks.",
+      "For branded and restaurant food it uses the official nutrition figures. For everyday foods, the nutrients come from USDA FoodData Central. When you don't give an amount, it assumes a typical portion and says so on the meal, along with how sure it is. If a meal is too vague, it asks.",
     sources: [
       {
         citation: "U.S. Department of Agriculture. FoodData Central.",

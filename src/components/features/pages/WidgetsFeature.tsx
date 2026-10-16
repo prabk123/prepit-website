@@ -13,7 +13,7 @@ import { appCapture, widgetCapture } from "@/lib/captures";
 
 const PHONE = "[--device-w:260px] sm:[--device-w:300px] lg:[--device-w:clamp(260px,22vw,320px)]";
 
-/** /features/widgets-and-siri: Home Screen and Lock Screen widgets, Siri, the Action button and Control Center. */
+/** /features/widgets-and-siri: Home Screen and Lock Screen widgets, Siri, the Action button and Control Centre. */
 const ONE_PRESS = [
   {
     title: "Action button",
@@ -32,9 +32,9 @@ const ONE_PRESS = [
     ),
   },
   {
-    title: "Control Center",
+    title: "Control Centre",
     detail: "Add the Log a meal control. One tap opens Log Meal, ready to type or talk.",
-    capture: appCapture("26c-control-centre", "Control Center with PrepIt's Log a meal control added"),
+    capture: appCapture("26c-control-centre", "Control Centre with PrepIt's Log a meal control added"),
   },
 ];
 

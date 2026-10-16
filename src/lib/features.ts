@@ -93,7 +93,7 @@ export const FEATURES: Record<FeatureSlug, FeatureMeta> = {
     name: "Widgets and Siri",
     title: "iPhone widgets, Siri and the Action button",
     description:
-      "Log a meal with Siri, the Action button or Control Center, and add water, tick supplements or log a planned meal from a widget without opening PrepIt.",
+      "Log a meal with Siri, the Action button or Control Centre, and add water, tick supplements or log a planned meal from a widget without opening PrepIt.",
     summary: "Log a meal or tick something off without opening the app.",
     heading: "PrepIt, without opening PrepIt.",
     lead: "The less effort logging takes, the better your nutritionist's advice gets. Press the Action button, ask Siri or tap a widget, and it's done.",

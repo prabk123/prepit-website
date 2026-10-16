@@ -130,8 +130,8 @@ export default function AboutPage() {
               rowFrom="xl"
               title="You stay in control"
               media={
-                // The top of the screen only: the Log it card under a voice note.
-                <div className="mx-auto h-[300px] w-[240px] overflow-hidden xl:h-[280px]">
+                // The top of the screen only, down to the Log it card under a voice note.
+                <div className="mx-auto h-[400px] w-[240px] overflow-hidden">
                   <DeviceFrame
                     className="[--device-w:240px]"
                     capture={appCapture(
