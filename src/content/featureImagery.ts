@@ -130,20 +130,6 @@ export const planFlatLays = {
 };
 
 /**
- * Dark band photos for the light site (PRE-282). Each is dark on the left,
- * where the band's text sits. No phone screen.
- */
-export const researchStill = still(
-  "research-table",
-  "Whole foods on a dark stone worktop: salmon, eggs, oats, lentils, spinach, berries, walnuts, olive oil and yogurt.",
-);
-export const downloadStill = still(
-  "download-evening",
-  "A phone lies face down on the arm of a sofa in the evening, beside a cup of tea and a bowl of berries.",
-  { small: true },
-);
-
-/**
  * Soft honey light on near-black, behind sections that have no photo.
  * Decorative. WebP only: AVIF smeared the grain into blocks. It is a soft
  * blur, so stretching it full width is fine.
@@ -159,3 +145,17 @@ export const cookingClip = {
   height: 720,
   label: "Sliced chicken, peppers and spinach cooking in a cast-iron pan.",
 };
+
+/**
+ * Dark band photos for the light site (PRE-282). Each is dark on the left,
+ * where the band's text sits. No phone screen.
+ */
+export const researchStill = still(
+  "research-table",
+  "Whole foods on a dark stone worktop: salmon, eggs, oats, lentils, spinach, berries, walnuts, olive oil and yogurt.",
+);
+export const downloadStill = still(
+  "download-evening",
+  "A phone lies face down on the arm of a sofa in the evening, beside a cup of tea and a bowl of berries.",
+  { small: true },
+);
