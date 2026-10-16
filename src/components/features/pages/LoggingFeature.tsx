@@ -61,7 +61,7 @@ export default function LoggingFeature() {
         id="accuracy"
         tone="surface"
         title="Close to the truth, and easy to fix."
-        lead="For a branded or restaurant food, PrepIt looks for the official figures first. Typed and photo meals show what it assumed and how confident it is, so you can see where a number came from."
+        lead="Branded and restaurant food starts from the official figures. Typed and photo meals show what PrepIt assumed and how sure it is."
         media={
           <div className="relative">
             <Glow />

@@ -5,6 +5,7 @@ import Glow from "@/components/ui/Glow";
 import QuoteCard from "@/components/ui/QuoteCard";
 import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
+import SwipeRow from "@/components/ui/SwipeRow";
 import TextLink from "@/components/ui/TextLink";
 import { appCapture, appVideo } from "@/lib/captures";
 import { RESEARCH_PAGE_HREF } from "@/lib/research";
@@ -51,11 +52,12 @@ export default function NutritionistFeature() {
             title="It speaks up before you slip."
             lead="A good nutritionist doesn't wait for your next appointment to mention what they've noticed. Neither does yours. These are real messages it sends on its own."
           />
-          <div className="grid gap-4 lg:grid-cols-3 lg:gap-5">
+          {/* One row you swipe on phones, not a stack (PRE-285). */}
+          <SwipeRow label="Messages your nutritionist sends on its own" itemClassName="w-[82%] max-w-[360px] lg:flex-1">
             {SPEAKS_UP.map((message) => (
-              <QuoteCard key={message.name} quote={message.quote} name={message.name} />
+              <QuoteCard key={message.name} className="w-full" quote={message.quote} name={message.name} />
             ))}
-          </div>
+          </SwipeRow>
           <p className="text-small text-ink-faint">
             It sends one of these at most once a day, and only when it&apos;s useful. Missed-log nudges, pattern
             check-ins, weekly calorie pattern ideas and weigh-in reminders each have a switch in Settings.
@@ -67,7 +69,7 @@ export default function NutritionistFeature() {
         id="consultation"
         reverse
         title="It gets to know you first."
-        lead="You start with a short consultation about how you eat now. Once it has seen a few days of your meals, your nutritionist tells you what it noticed and agrees one thing to change first."
+        lead="It starts with a short consultation about how you eat now. After a few days of meals, it tells you what it noticed and agrees one thing to change first."
         media={
           <div className="relative">
             <Glow />
@@ -103,7 +105,7 @@ export default function NutritionistFeature() {
         id="charts"
         tone="surface"
         title="Ask it anything about your week."
-        lead="What to have for dinner, why you're hungry by 4pm, how to fit in a takeaway. It answers from what you actually ate, and when a picture says it faster, it draws a chart right in the chat."
+        lead="What to have for dinner, why you're hungry by 4pm, how to fit in a takeaway. It answers from what you actually ate, with a chart when that's quicker."
         media={
           <div className="relative">
             <Glow />
@@ -124,7 +126,7 @@ export default function NutritionistFeature() {
         id="log-it"
         reverse
         title="Tell it what you had. It does the rest."
-        lead="Mention a meal in chat and it prepares a Log it card with the calories and macros worked out. It can also move a meal to another day, fix an amount or change your calorie, macro and water goals."
+        lead="Mention a meal and it prepares a Log it card with the calories and macros worked out. It can also move a meal, fix an amount or change your goals."
         media={
           <div className="relative">
             <Glow />

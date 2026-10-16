@@ -30,6 +30,10 @@ export const APP_STILLS = [
   "23-home-screen-widgets",
   // A clean Home Screen (not in edit mode) with the Today's calories widget, for the widgets page.
   "23b-home-screen-widgets",
+  // Also from Tips and tricks: Log a meal on the Action button, the Lock Screen and in Control Centre (PRE-285).
+  "26-action-button-shortcut",
+  "26b-lock-screen-control",
+  "26c-control-centre",
 ] as const;
 
 export const APP_CLIPS = [

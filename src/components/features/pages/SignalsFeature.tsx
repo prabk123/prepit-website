@@ -1,9 +1,9 @@
 import DeviceFrame from "@/components/device/DeviceFrame";
 import DevicePair from "@/components/device/DevicePair";
 import FeatureBlock from "@/components/features/FeatureBlock";
+import CaptureRow from "@/components/ui/CaptureRow";
 import Glow from "@/components/ui/Glow";
 import PhotoBand from "@/components/ui/PhotoBand";
-import PointList from "@/components/ui/PointList";
 import QuoteCard from "@/components/ui/QuoteCard";
 import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
@@ -13,24 +13,28 @@ import { appCapture } from "@/lib/captures";
 
 const PHONE = "[--device-w:260px] sm:[--device-w:300px] lg:[--device-w:clamp(260px,22vw,320px)]";
 
+// Each score under its own screen, so this isn't a text-only stretch on phones (PRE-285).
 const DRIVERS = [
   {
     title: "Energy",
     detail:
       "Will you hit a slump mid-afternoon? It looks at how close you are to your calorie goal, protein in the morning, sugar against other carbs, glycaemic load and how you spread your meals.",
     accent: "var(--color-energy)",
+    capture: appCapture("06-signal-energy", "Energy at 84, with how it's shaped: calorie fit and meal spread"),
   },
   {
     title: "Satiety",
     detail:
       "Will you stay full until your next meal, or find yourself at the biscuit tin? It looks at protein, fibre and how processed your meals are.",
     accent: "var(--color-satiety)",
+    capture: appCapture("06b-signal-satiety", "Satiety at 96, with how it's shaped: protein and fibre"),
   },
   {
     title: "Mood",
     detail:
       "Will today feel calm and steady? It reads yesterday's whole day, because that's the food that shapes how you feel this morning.",
     accent: "var(--color-mood)",
+    capture: appCapture("01-home", "Home with Mood at 87 beside Energy and Satiety"),
   },
 ];
 
@@ -53,7 +57,7 @@ export default function SignalsFeature() {
           id="at-a-glance-heading"
           size="section"
           title="One look tells you how today is going."
-          lead="Three rings on Home, each from 0 to 100. Green, amber or red tells you how today is shaping up before you've finished it, while there's still time to change dinner."
+          lead="Three rings on Home, each from 0 to 100. Green, amber or red shows how today is going while there's still time to change dinner."
         />
       </PhotoBand>
 
@@ -65,7 +69,7 @@ export default function SignalsFeature() {
             title="What moves each score."
             lead="Not just how much you ate, but what, and when."
           />
-          <PointList layout="columns" points={DRIVERS} />
+          <CaptureRow label="What moves each score" items={DRIVERS} />
         </div>
       </Section>
 
@@ -73,7 +77,7 @@ export default function SignalsFeature() {
         id="every-meal"
         tone="surface"
         title="Every score comes with a reason."
-        lead="Tap a ring to see what moved it, like a breakfast light on protein or a long gap between meals. Open any meal to see what it did to each score, and what to try next time."
+        lead="Tap a ring to see what moved it, like a breakfast light on protein. Open any meal to see what it did to each score."
         media={
           <div className="relative">
             <Glow />
@@ -127,7 +131,7 @@ export default function SignalsFeature() {
             id="no-wearable-heading"
             size="section"
             title="No ring. No watch. No glucose monitor."
-            lead="Everything starts from what you eat, so there's nothing to wear or charge. Connect Apple Health and your nutritionist also sees your workouts, so it can tell a hungry gym day from a hungry rest day."
+            lead="Everything starts from what you eat, so there's nothing to wear or charge. Connect Apple Health and it can tell a hungry gym day from a hungry rest day."
           />
           <p className="max-w-[60ch] text-body text-ink-muted text-pretty">
             The scores are built on published nutrition research. They&apos;re estimates to guide your next meal,

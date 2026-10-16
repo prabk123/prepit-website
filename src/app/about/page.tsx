@@ -75,33 +75,40 @@ export default function AboutPage() {
             as="h1"
             id="about-heading"
             title="A nutritionist for everyone who eats."
-            lead="PrepIt knows what you ate, what you're aiming for and how your food is likely to make you feel. It checks in, spots patterns and tells you what to eat next, every day."
+            lead="PrepIt knows what you ate, what you're aiming for and how your food is likely to make you feel, and tells you what to eat next."
           />
         </FeatureSplit>
       </Section>
 
       <Section tone="surface" labelledBy="why-heading">
-        <div className="mx-auto flex max-w-[720px] flex-col gap-8">
+        {/* Beside a real chat, so the story isn't a wall of text on phones (PRE-285). */}
+        <FeatureSplit
+          reverse
+          media={
+            <div className="relative">
+              <Glow />
+              <DeviceFrame
+                className="[--device-w:240px] sm:[--device-w:280px] lg:[--device-w:300px]"
+                capture={appCapture(
+                  "02-chat-chart",
+                  "The nutritionist noticing that last week's toast and jam breakfast came before the 3pm dip, then charting protein per day",
+                )}
+              />
+            </div>
+          }
+        >
           <SectionHeading id="why-heading" size="title" title="Why PrepIt exists" />
           <div className="flex flex-col gap-5 text-lead text-ink-secondary text-pretty">
             <p>
-              Tracking always starts well. Then it gets annoying. You search databases, guess
-              portions and hit your numbers, and you still feel tired, hungry and foggy without
-              knowing why. Most apps stop there. “You didn’t eat enough protein.” Fine, but what
-              should you eat tonight?
+              Tracking always starts well. Then it gets annoying. You hit your numbers and still feel tired, hungry and
+              foggy without knowing why. “You didn’t eat enough protein.” Fine, but what should you eat tonight?
             </p>
             <p>
-              A good nutritionist does the part that matters. They look at your whole day, notice
-              the patterns you can’t see, and give you one clear thing to try next. They check in
-              when you go quiet and adjust when life gets in the way. Very few people have one.
-            </p>
-            <p>
-              PrepIt is built to be that nutritionist, always on and in your pocket. Logging is
-              only how it learns, so we made it take seconds: type it, snap it or say it. Everything
-              else goes into helping you eat a little better this week than last.
+              A good nutritionist notices the patterns you can’t see and gives you one clear thing to try next. Very few
+              people have one. PrepIt is built to be that nutritionist, always on and in your pocket.
             </p>
           </div>
-        </div>
+        </FeatureSplit>
       </Section>
 
       <Section labelledBy="principles-heading">
@@ -117,7 +124,24 @@ export default function AboutPage() {
                 {principle.body}
               </BentoTile>
             ))}
-            <BentoTile size="medium" title="You stay in control">
+            <BentoTile
+              size="medium"
+              layout="row"
+              rowFrom="xl"
+              title="You stay in control"
+              media={
+                // The top of the screen only: the Log it card under a voice note.
+                <div className="mx-auto h-[300px] w-[240px] overflow-hidden xl:h-[280px]">
+                  <DeviceFrame
+                    className="[--device-w:240px]"
+                    capture={appCapture(
+                      "10-voice-note",
+                      "A chicken burrito bowl the nutritionist heard in a voice note, as a card with a Log it button",
+                    )}
+                  />
+                </div>
+              }
+            >
               Your nutritionist can log, move or fix a meal, plan your week and change your goals,
               but any log, plan or goal change it makes shows up as a card first, and nothing is saved until you tap it.
             </BentoTile>

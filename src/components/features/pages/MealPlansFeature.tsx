@@ -30,7 +30,7 @@ export default function MealPlansFeature() {
             id="how-it-plans-heading"
             size="section"
             title="It asks first, then plans."
-            lead="Your nutritionist asks which days to cover, which meals to leave out, whether you want snacks, your grocery budget and how much variety you like. Then you look over the week, day by day, before you confirm it."
+            lead="It asks which days to cover, which meals to leave out, snacks, your budget and how much variety you like. Then you check the week, day by day, before you confirm."
           />
           <ul className="grid gap-4 sm:grid-cols-3 lg:gap-5">
             {FLAT_LAYS.map(({ photo, caption }) => (
@@ -79,7 +79,7 @@ export default function MealPlansFeature() {
         layout="peek"
         tone="surface"
         title="One grocery list, by aisle."
-        lead="Everything for the week in one list, grouped by aisle, with an estimated cost and the cost per meal. Tick things off as you shop, or share it with whoever's doing the shop."
+        lead="One list for the week, grouped by aisle, with an estimated cost. Tick things off as you shop, or share it with whoever's doing the shop."
         media={
           <div className="relative">
             <Glow />
@@ -101,7 +101,7 @@ export default function MealPlansFeature() {
       <FeatureBlock
         id="weekly-pattern"
         title="More room on the days you need it."
-        lead="Client dinners on Tuesdays? Your nutritionist notices the days you always go over and suggests giving them more room, with a little less on the rest. Your week still adds up to the same total."
+        lead="Client dinners on Tuesdays? Your nutritionist spots the days you always go over and suggests more room there and a little less on the rest, for the same weekly total."
         media={
           <div className="relative">
             <Glow />
