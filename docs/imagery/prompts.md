@@ -108,3 +108,27 @@ The kitchen photo has the phone on the left, so the Plans section puts its text 
 Every variation (30 photos, 2 clips, 2 voiceovers and 2 music beds) with their screen checks: [contact sheet](https://claude.ai/artifact/Ccqc5PkZZBRax3kMQtPPoT). Full-size originals are kept outside the repo. ElevenLabs flow `088lf68ZQahQ3mm7eg5x`.
 
 `/dev/imagery` (local development and Vercel previews only, like `/dev/components`) shows shots 4 to 10 the way a page would use them, for checking in the browser.
+
+## Light site regeneration (PRE-282)
+
+The light redesign (PRE-276) made the dark PRE-199 photos look out of place, so every photo above was made again for a bright, daylight look, with the phone screens generated from the **light** app captures. The file names stay the same, so pages pick the new photos up without code changes. Three new photos were added for the redesigned homepage (PRE-277).
+
+Style guide pasted into every prompt:
+
+> Editorial lifestyle photograph for a bright, modern health app website. Shot on a 35 mm lens at f/2.8, soft natural daylight, airy and clean: white walls, pale oak and white surfaces, linen, warm neutral whites, soft gentle shadows, true-to-life colour with a slight warm tint. No dark moody grade, no heavy vignette, no film grain. People appear only as hands or an out-of-focus figure in the background: no faces. The phone is a modern iPhone (thin even black bezels, Dynamic Island, no home button). No logos, no brand names, no other text.
+
+The two dark bands (research and download) use a dark stone or evening scene instead, with dark space on the left for the band's text and no readable screen.
+
+| File | Scene | Reference image | Variations passed / generated | Picked |
+| -- | -- | -- | -- | -- |
+| `hero-cafe` | Hand holding the phone at a bright window table, apple and almonds, water | `public/app/02-chat-chart-light@2x.webp` | 2 / 2 | 1 (`2IxM9qKS57kFMQybEREx`) |
+| `nutritionist-evening` (standout: speaks up) | Hand holding the phone in a bright kitchen, yogurt and berries, coffee, keys; out-of-focus figure from behind | Mac capture `24-nudge-weekly-pattern-light.png` (seed `calorie-banking-suggestion-sent`), in `docs/imagery/references/` | 2 / 2 (every word of the message and card matches) | 1 (`ptRlZmd6GxPJCRr3Bziu`) |
+| `lunch-rings` (new, standout: how food makes you feel) | Hand holding the phone beside a chicken, quinoa and pepper bowl | `public/app/01-home-light@2x.webp` | 2 / 2 | 1 (`CEOjUPfVfTaaBrgz2jMn`) |
+| `plans-kitchen` | Phone against a jar, groceries unpacked | `public/app/13-grocery-list-light@2x.webp` | 2 / 2 | 1 (`LptQo1yFT2RyzvM5VvPX`) |
+| `signals-gym` | Phone against a bottle in a bright home gym, towel, banana, smoothie | `public/app/06-signal-energy-light@2x.webp` | 2 / 2 | 1 (`lUj0DGmuc8qwNEeGdj5K`) |
+| `widgets-desk` | Phone on a stand after lunch, empty lunch box, laptop | Mac captures `15-widget-signals-medium-light-green.png` and `15-widget-today-plan-large-light-lunch.png`, in `docs/imagery/references/` | 2 / 2 on the second run. The first run (`yWkBuNtNXqnqvnW70s9d`) failed 0 / 2: its prompt and references disagreed on the ring numbers and colours | 2 (`z2HWMQpjNYtTPdK4420O`) |
+| `research-table` (new) | Whole foods on dark stone | None (1K, medium) | 2 / 2 | 1 (`vRpFwqdCO9i9zZOt88oX`) |
+| `download-evening` (new) | Phone face down on a sofa arm in the evening, tea, berries | None (1K, medium) | 2 / 2 | 2 (`rSGmvHjfPXpjeP2ssKms`) |
+| `flatlay-oats`, `flatlay-wrap`, `flatlay-salmon` | Overhead on pale oak and linen | None (1K, medium) | 2 / 2 each | 1 each (`OZa2Sr0ob2qwrkHgG9pj`, `FZPHEPBCcEu1EydAYtnT`, `K0rkdnHCOpJPrTbeoePu`) |
+
+Phone shots are gpt-image-2 at 16:9, 2K, high; the rest are 1K, medium. Sizes, quality settings and the 120 KB cap are the same as above; `research-table` is 1280 x 720 and `download-evening` also has a `-768` copy. The texture and the cooking clip were not remade. ElevenLabs flow `wg5id7jXorT57941lgwt`. About 20,700 credits in all, including the failed widgets run.
