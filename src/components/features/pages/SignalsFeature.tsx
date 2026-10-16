@@ -4,7 +4,6 @@ import FeatureBlock from "@/components/features/FeatureBlock";
 import CaptureRow from "@/components/ui/CaptureRow";
 import Glow from "@/components/ui/Glow";
 import PhotoBand from "@/components/ui/PhotoBand";
-import QuoteCard from "@/components/ui/QuoteCard";
 import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
 import TextLink from "@/components/ui/TextLink";
@@ -91,10 +90,6 @@ export default function SignalsFeature() {
           </div>
         }
       >
-        <QuoteCard
-          quote="Your toast and jam breakfast was light on protein. Adding eggs or Greek yogurt at lunch would help hold Satiety until dinner."
-          name="A next step, for example. No shame, no “cheat days”."
-        />
         <TextLink href="/guides/energy-satiety-and-mood">Guide: read your Energy, Satiety and Mood</TextLink>
       </FeatureBlock>
 

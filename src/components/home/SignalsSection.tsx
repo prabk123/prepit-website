@@ -1,10 +1,8 @@
-import ChatPanel from "@/components/ui/ChatPanel";
 import FeatureSplit from "@/components/ui/FeatureSplit";
 import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
 import TextLink from "@/components/ui/TextLink";
 import { lunchRings } from "@/content/lifestyle";
-import { satietyNextStep } from "@/content/nutritionistMessages";
 
 const SIGNAL_DOTS = [
   { name: "Energy", color: "var(--color-energy)" },
@@ -13,8 +11,8 @@ const SIGNAL_DOTS = [
 ];
 
 /**
- * Standout 2: how your food will make you feel. One score opened with its
- * reasons, and one worked next step.
+ * Standout 2: how your food will make you feel: the three rings on a real
+ * Home screen, beside the lunch behind them.
  */
 export default function SignalsSection() {
   return (
@@ -60,11 +58,7 @@ export default function SignalsSection() {
         <p className="max-w-[46ch] text-body text-ink-secondary text-pretty">
           Each is a score from 0 to 100, worked out from your food alone. Tap one to see what moved it.
         </p>
-        <ChatPanel
-          className="max-w-[480px]"
-          messages={[satietyNextStep]}
-          caption="An example next step. Estimates to guide your next meal, not a medical measurement."
-        />
+        <p className="text-small text-ink-faint">Estimates to guide your next meal, not a medical measurement.</p>
         <TextLink href="/features/nutrition-signals">More about Energy, Satiety and Mood</TextLink>
       </FeatureSplit>
     </Section>

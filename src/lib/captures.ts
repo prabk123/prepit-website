@@ -116,6 +116,28 @@ export function appVideo(name: string, label: string): Omit<LoopVideoProps, "cla
   };
 }
 
+/**
+ * Crops of a chat capture: one message and its replies without the phone
+ * around it, at their 2x pixel size (scripts/process-app-captures.py CROPS).
+ */
+export const CHAT_CROPS = {
+  "25-nudge-missed-breakfast-crop": { width: 804, height: 713 },
+  "25b-nudge-protein-crop": { width: 804, height: 1113 },
+  // Stops inside its Weekly calorie pattern card; ChatCapture fades it out.
+  "24-nudge-weekly-pattern-crop": { width: 804, height: 1107 },
+  "24b-nudge-weigh-in-crop": { width: 804, height: 707 },
+} as const;
+
+export function chatCrop(name: keyof typeof CHAT_CROPS, alt: string) {
+  return {
+    src: `/app/${name}-light@2x.webp`,
+    avif: srcSet(name, "avif", "light"),
+    webp: srcSet(name, "webp", "light"),
+    alt,
+    ...CHAT_CROPS[name],
+  };
+}
+
 /** Home Screen widget captures (not phone screens), with their pixel size at 2x. */
 export function widgetCapture(name: string, alt: string, width: number, height: number, mode: CaptureMode = "light") {
   return {

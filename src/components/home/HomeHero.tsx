@@ -1,14 +1,14 @@
 import AnnotatedPhoto from "@/components/media/AnnotatedPhoto";
 import PreloadImage from "@/components/media/PreloadImage";
 import AppStoreCta from "@/components/ui/AppStoreCta";
-import ChatPanel from "@/components/ui/ChatPanel";
+import ChatCapture from "@/components/ui/ChatCapture";
 import { heroCafe } from "@/content/lifestyle";
 import { missedBreakfast } from "@/content/nutritionistMessages";
 import { TRIAL_DAYS } from "@/lib/pricing";
 
 /**
  * The promise, then a real moment: the nutritionist's own missed-breakfast
- * message beside the headline on desktop (under the button on phones), then
+ * message, cropped from the app (PRE-283), beside the headline on desktop (under the button on phones), then
  * the annotated cafe photo, whose phone shows today's log. On a 390 x 844
  * phone the headline, line and button fit the first screen.
  */
@@ -51,7 +51,11 @@ export default function HomeHero() {
           </p>
           <AppStoreCta trackingSource="home-hero" note={`${TRIAL_DAYS} days free. Cancel anytime.`} />
         </div>
-        <ChatPanel messages={[missedBreakfast]} />
+        <ChatCapture
+          className="mx-auto max-w-[400px] lg:mx-0"
+          capture={missedBreakfast.capture}
+          caption={`${missedBreakfast.caption}.`}
+        />
       </div>
 
       <AnnotatedPhoto

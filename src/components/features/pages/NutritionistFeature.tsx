@@ -1,39 +1,17 @@
 import DeviceFrame from "@/components/device/DeviceFrame";
 import DevicePair from "@/components/device/DevicePair";
 import FeatureBlock from "@/components/features/FeatureBlock";
+import ChatCapture from "@/components/ui/ChatCapture";
 import Glow from "@/components/ui/Glow";
-import QuoteCard from "@/components/ui/QuoteCard";
 import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
 import SwipeRow from "@/components/ui/SwipeRow";
 import TextLink from "@/components/ui/TextLink";
+import { missedBreakfast, proteinShort, weeklyPattern, weighIn } from "@/content/nutritionistMessages";
 import { appCapture, appVideo } from "@/lib/captures";
 import { RESEARCH_PAGE_HREF } from "@/lib/research";
 
 const PHONE = "[--device-w:260px] sm:[--device-w:300px] lg:[--device-w:clamp(260px,22vw,320px)]";
-
-/**
- * Messages the nutritionist sends on its own, worded as the app sends them
- * (fresca_backend src/services/proactiveNudges.ts). The numbers in the second
- * and third are an example person's.
- */
-const SPEAKS_UP = [
-  {
-    quote:
-      "I can't see any breakfast log today. Drop me a quick voice note when you get the chance if you had something, or let me know if you skipped it :)",
-    name: "When breakfast isn't logged by your usual time",
-  },
-  {
-    quote:
-      "Over the past few weeks protein has been a little low: under your target on 15 of 19 logged days, about 85g a day against 120g. Most of the gap is at dinner, which averages about 20g. Two easy fixes that don't change what you cook: a bigger portion of the protein you already have at dinner, or a pot of Greek yogurt after dinner. Want to try one?",
-    name: "When the same gap shows up three weeks running",
-  },
-  {
-    quote:
-      "Tuesdays and Wednesdays have run about 500 kcal over your goal in most of the last four weeks, while the rest of the week sits close to it. That's completely normal when some days are busier or more social. Want to give Tuesdays and Wednesdays more room and take a little off the other days? Your week would still add up to the same total.",
-    name: "When the same days keep going over, with a plan to give them more room",
-  },
-];
 
 /**
  * /features/ai-nutritionist: standout 1, "knows you and speaks up". It leads
@@ -52,10 +30,14 @@ export default function NutritionistFeature() {
             title="It speaks up before you slip."
             lead="A good nutritionist doesn't wait for your next appointment to mention what they've noticed. Neither does yours. These are real messages it sends on its own."
           />
-          {/* One row you swipe on phones, not a stack (PRE-285). */}
-          <SwipeRow label="Messages your nutritionist sends on its own" itemClassName="w-[82%] max-w-[360px] lg:flex-1">
-            {SPEAKS_UP.map((message) => (
-              <QuoteCard key={message.name} className="w-full" quote={message.quote} name={message.name} />
+          {/* Real messages cropped from the app's chat (PRE-283), one row you swipe on phones (PRE-285). */}
+          <SwipeRow
+            label="Messages your nutritionist sends on its own"
+            itemClassName="w-[82%] max-w-[340px] lg:max-w-none lg:flex-1"
+            className="lg:items-start"
+          >
+            {[missedBreakfast, proteinShort, weeklyPattern, weighIn].map((message) => (
+              <ChatCapture key={message.caption} {...message} />
             ))}
           </SwipeRow>
           <p className="text-small text-ink-faint">

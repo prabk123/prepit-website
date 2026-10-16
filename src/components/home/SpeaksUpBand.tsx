@@ -1,4 +1,4 @@
-import ChatPanel from "@/components/ui/ChatPanel";
+import ChatCapture from "@/components/ui/ChatCapture";
 import PhotoBand from "@/components/ui/PhotoBand";
 import SectionHeading from "@/components/ui/SectionHeading";
 import SwipeRow from "@/components/ui/SwipeRow";
@@ -8,8 +8,9 @@ import { proteinShort, weeklyPattern, weighIn } from "@/content/nutritionistMess
 
 /**
  * Standout 1, first half: the nutritionist speaks up on its own. Three of the
- * messages it sends unasked, in its own words, on the evening photo. On
- * phones they are one row you swipe, not a stack (PRE-284).
+ * messages it sends unasked, cropped from the app's chat (PRE-283), on the
+ * evening photo. They are one row you swipe, on phones and in the desktop
+ * column alike (PRE-284).
  */
 export default function SpeaksUpBand() {
   return (
@@ -33,13 +34,17 @@ export default function SpeaksUpBand() {
       }
       media={
         <figure className="flex w-full min-w-0 max-w-[480px] flex-col gap-4">
-          <SwipeRow label="Messages your nutritionist sends on its own" desktop="stack">
+          <SwipeRow
+            label="Messages your nutritionist sends on its own"
+            desktop="scroll"
+            itemClassName="w-[82%] max-w-[340px] lg:w-[340px]"
+          >
             {[proteinShort, weeklyPattern, weighIn].map((message) => (
-              <ChatPanel key={message.text} messages={[message]} />
+              <ChatCapture key={message.caption} {...message} />
             ))}
           </SwipeRow>
           <figcaption className="text-small text-ink-faint">
-            Messages your nutritionist sends on its own, in its own words. The numbers are examples.
+            Real messages from the app. Swipe for more.
           </figcaption>
         </figure>
       }

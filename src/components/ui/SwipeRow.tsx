@@ -6,9 +6,10 @@ type SwipeRowProps = {
   children: ReactNode;
   /**
    * From 1024 px: `stack` lays the items one under another, `row` side by
-   * side. Below 1024 px they are always one row you swipe.
+   * side, `scroll` keeps the swipe inside its column. Below 1024 px they are
+   * always one row you swipe.
    */
-  desktop?: "stack" | "row";
+  desktop?: "stack" | "row" | "scroll";
   /** Width of each item on phones; the next one peeks in so it reads as swipeable. */
   itemClassName?: string;
   className?: string;
@@ -26,17 +27,21 @@ export default function SwipeRow({
   itemClassName = "w-[82%] max-w-[360px]",
   className,
 }: SwipeRowProps) {
-  const desktopList = desktop === "stack" ? "lg:flex-col" : "lg:justify-center";
+  const scroll = desktop === "scroll";
+  const desktopList = scroll
+    ? "lg:mx-0 lg:scroll-px-0 lg:px-0"
+    : `lg:mx-0 lg:snap-none lg:overflow-visible lg:px-0 lg:pb-0 ${desktop === "stack" ? "lg:flex-col" : "lg:justify-center"}`;
+  const desktopItem = scroll ? "" : "lg:w-auto lg:max-w-none lg:shrink";
   return (
     <ul
       aria-label={label}
       tabIndex={0}
-      className={`swipe-row -mx-gutter flex snap-x snap-mandatory scroll-px-gutter gap-4 overflow-x-auto px-gutter pb-2 lg:mx-0 lg:snap-none lg:overflow-visible lg:px-0 lg:pb-0 ${desktopList} ${
+      className={`swipe-row -mx-gutter flex snap-x snap-mandatory scroll-px-gutter gap-4 overflow-x-auto px-gutter pb-2 ${desktopList} ${
         className ?? ""
       }`}
     >
       {Children.toArray(children).map((child, index) => (
-        <li key={index} className={`flex shrink-0 snap-start lg:w-auto lg:max-w-none lg:shrink ${itemClassName}`}>
+        <li key={index} className={`flex shrink-0 snap-start ${desktopItem} ${itemClassName}`}>
           {child}
         </li>
       ))}
