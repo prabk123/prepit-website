@@ -1,7 +1,9 @@
+import BandPhoto from "@/components/ui/BandPhoto";
 import PointList from "@/components/ui/PointList";
 import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
 import TextLink from "@/components/ui/TextLink";
+import { researchStill } from "@/content/featureImagery";
 import { RESEARCH_PAGE_HREF, RESEARCH_POINTS } from "@/lib/research";
 
 /**
@@ -13,6 +15,7 @@ import { RESEARCH_PAGE_HREF, RESEARCH_POINTS } from "@/lib/research";
 export default function ResearchSection() {
   return (
     <Section id="how-it-decides" tone="dark" labelledBy="research-heading" analyticsName="research">
+      <BandPhoto photo={researchStill} />
       <div className="flex flex-col gap-stack">
         <SectionHeading
           id="research-heading"

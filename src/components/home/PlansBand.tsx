@@ -17,7 +17,7 @@ export default function PlansBand() {
       phonePhoto={plansKitchen.mobile}
       annotations={plansKitchen.annotations}
       textSide={plansKitchen.textSide}
-      scrimBehindText
+      textOnBrightPhoto
       aside={
         <>
           <p className="text-body text-ink-secondary text-pretty">

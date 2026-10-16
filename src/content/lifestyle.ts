@@ -2,7 +2,8 @@ import type { PhotoAnnotation } from "@/components/media/AnnotatedPhoto";
 import type { SectionPhoto } from "@/components/ui/Section";
 
 /**
- * Lifestyle photos for the homepage (PRE-199). Each is a generated photo in
+ * Lifestyle photos for the homepage (PRE-199, relit for the light site in
+ * PRE-282). Each is a generated photo in
  * which the phone shows a real app capture; see docs/imagery/prompts.md.
  *
  * Annotation values come from the same logged day the phone shows (the
@@ -54,25 +55,44 @@ function photo(
 export const heroCafe: LifestylePhoto = {
   ...photo(
     "hero-cafe",
-    "A hand holds a phone showing today's PrepIt log, with a chicken, hummus and salad wrap logged at 12:30 PM for 462 kcal, beside the same wrap and a flat white on a cafe table.",
+    "At a bright table by a window, a hand holds a phone showing a chat with the PrepIt nutritionist and a chart of protein per day against a 158 g target, beside a glass of water and a plate of apple slices and almonds.",
     { position: "60% 50%", priority: true },
   ),
   textSide: "start",
-  annotations: [
-    { x: 46, y: 52, side: "left", length: 96, value: "462 kcal", label: "Chicken wrap with hummus and salad" },
-    { x: 42, y: 66, side: "left", length: 120, value: "61 g protein", label: "In the wrap" },
-    { x: 43, y: 82, side: "left", length: 120, value: "150 g", label: "Chicken breast" },
-  ],
+  // Nothing on the table is logged, so the label points at the chart on the
+  // phone: the dashed line is the showcase account's 158 g protein target.
+  annotations: [{ x: 61, y: 55, side: "left", length: 96, value: "158 g", label: "Daily protein target" }],
 };
 
 export const nutritionistEvening: LifestylePhoto = {
   ...photo(
     "nutritionist-evening",
-    "On a sofa in the evening, a hand holds a phone showing a chat with the PrepIt nutritionist and a chart of protein per day against a 158 g target, next to a bowl of Greek yogurt with raspberries and a cup of tea.",
+    "In a bright kitchen, a hand holds a phone showing a message from the PrepIt nutritionist: Tuesdays and Wednesdays have run about 520 kcal over goal, with a weekly calorie pattern that gives those days 2,250 kcal and the rest 1,620 kcal, keeping the weekly total at 12,600 kcal.",
     { position: "65% 50%" },
   ),
   textSide: "start",
-  annotations: [{ x: 88, y: 86, side: "left", length: 48, value: "13 g protein", label: "Greek yogurt with raspberries" }],
+  // Values from the weekly calorie pattern card on the phone. The labels sit
+  // to the right of the phone, over the hand, so they stay clear of the text.
+  annotations: [
+    { x: 76, y: 58, side: "right", length: 32, value: "2,250 kcal", label: "Tuesday" },
+    { x: 76, y: 77, side: "right", length: 32, value: "12,600 kcal", label: "Each week" },
+  ],
+};
+
+/**
+ * Standout: how food makes you feel. Lunch in front of the phone's Home
+ * screen. The bowl is not on the log, so labels should point at the phone:
+ * Energy 84, Satiety 96, Mood 87 (rings at about x 75%, y 31%) and 1,481 of
+ * 1,570 kcal eaten (about x 72%, y 43%).
+ */
+export const lunchRings: LifestylePhoto = {
+  ...photo(
+    "lunch-rings",
+    "A hand holds a phone showing PrepIt's Home screen with Energy 84, Satiety 96 and Mood 87 and 1,481 of 1,570 kcal eaten, beside a bowl of sliced chicken, quinoa, roasted peppers and salad.",
+    { position: "65% 50%" },
+  ),
+  textSide: "start",
+  annotations: [{ x: 70, y: 31, side: "left", length: 96, value: "Energy 84", label: "Satiety 96, Mood 87" }],
 };
 
 export const plansKitchen: LifestylePhoto = {
@@ -81,18 +101,12 @@ export const plansKitchen: LifestylePhoto = {
     "A phone propped against a jar on a kitchen worktop shows the PrepIt grocery list for 13 to 19 October with its estimated cost, beside the same groceries just unpacked: tortillas, eggs, feta, Greek yogurt, apples and avocados.",
     { position: "40% 50%" },
   ),
-  // The phone is on the left of this photo, so the Plans text sits on the right.
+  // The phone is left of centre in this photo, so the Plans text sits on the right.
   textSide: "end",
-  // The text column covers the top right down to about 77% of the photo at
-  // 1280 px, and from 1600 px the band crops the photo to about 10% to 90%.
-  // So the labels sit in the strip between, on the feta and the tortillas,
-  // clear of the text and the phone at every width they show (1280 up).
-  // scripts/check-photo-labels.mjs checks that. The packs hold more than this
-  // week's list, so the labels say the amount is the list's.
-  annotations: [
-    { x: 57, y: 82, side: "right", length: 32, value: "60 g", label: "Feta on the list" },
-    { x: 76, y: 87, side: "right", length: 32, value: "120 g", label: "Wholemeal tortilla on the list" },
-  ],
+  // The label sits on the avocados below the phone, clear of the text column
+  // on the right. scripts/check-photo-labels.mjs checks that. The avocados
+  // are more than this week's list, so the label says the amount is the list's.
+  annotations: [{ x: 33, y: 86, side: "right", length: 32, value: "140 g", label: "Avocado on the list" }],
 };
 
-export const lifestylePhotos = { heroCafe, nutritionistEvening, plansKitchen };
+export const lifestylePhotos = { heroCafe, nutritionistEvening, lunchRings, plansKitchen };

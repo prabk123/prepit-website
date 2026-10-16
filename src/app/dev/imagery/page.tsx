@@ -6,12 +6,15 @@ import Section, { type SectionPhoto } from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
 import {
   cookingClip,
+  downloadStill,
   planFlatLays,
+  researchStill,
   signalsGym,
   textureHoney,
   widgetsDesk,
   type FeaturePhoto,
 } from "@/content/featureImagery";
+import { lunchRings } from "@/content/lifestyle";
 
 export const metadata: Metadata = {
   title: "Imagery preview",
@@ -93,6 +96,20 @@ export default function ImageryPreviewPage() {
 
       <PhotoSection photo={signalsGym} id="gym" eyebrow="Signals" title="Know how your food made you feel." />
       <PhotoSection photo={widgetsDesk} id="desk" eyebrow="Widgets" title="Your day on your home screen." />
+      <PhotoSection photo={lunchRings} id="lunch" eyebrow="Signals" title="See how your food makes you feel." />
+
+      {[
+        { photo: researchStill, id: "research", label: "Research band, 1280 × 720" },
+        { photo: downloadStill, id: "download", label: "Download band, 1280 × 720" },
+      ].map(({ photo, id, label }) => (
+        <section key={id} aria-labelledby={id} className="relative isolate overflow-hidden bg-page">
+          <Picture photo={photo} className="absolute inset-0 -z-10 h-full w-full object-cover" />
+          <div className="mx-auto w-full max-w-content px-gutter py-section">
+            <Label>{label}</Label>
+            <SectionHeading title="A dark band on this photo" size="title" id={id} />
+          </div>
+        </section>
+      ))}
 
       <Section labelledBy="flatlays">
         <Label>Plan flat-lays, 1280 × 720</Label>
