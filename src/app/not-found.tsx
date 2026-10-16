@@ -37,7 +37,7 @@ export default function NotFound() {
             <Link href="/" className={linkPill}>
               Go to the homepage
             </Link>
-            <Link href="/#features" className={linkPill}>
+            <Link href="/#nutritionist" className={linkPill}>
               Features
             </Link>
             <Link href="/guides" className={linkPill}>

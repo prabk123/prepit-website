@@ -137,6 +137,10 @@
   /* A Home Screen widget capture's corner, and a small icon tile. */
   --radius-widget: 22px;
   --radius-icon: 14px;
+  /* A chat bubble, as in the app's Nutritionist chat (the corner by the
+     sender's side is tighter). */
+  --radius-bubble: 24px;
+  --radius-bubble-tail: 6px;
 
   /* Shadows. Cards are flat; phones float. */
   --shadow-phone: 0 40px 80px -28px rgb(26 26 46 / 0.35), 0 12px 24px -12px rgb(26 26 46 / 0.2);

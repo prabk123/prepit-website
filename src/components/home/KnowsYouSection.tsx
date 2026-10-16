@@ -2,21 +2,17 @@ import DeviceFrame from "@/components/device/DeviceFrame";
 import DevicePair from "@/components/device/DevicePair";
 import FeatureSplit from "@/components/ui/FeatureSplit";
 import Glow from "@/components/ui/Glow";
-import PointList from "@/components/ui/PointList";
 import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { appCapture } from "@/lib/captures";
 
-const PERSONAL = [
-  { title: "Consultation", detail: "Pick your main focus, like protein at breakfast or evening snacking." },
-  { title: "Weekly check-in", detail: "Each week, a short report on how it went and one focus for the next." },
-  { title: "It remembers", detail: "Your focus, your notes and what you told it last week shape what it says next." },
-];
-
-/** "A plan for you, not for everyone": the consultation and weekly check-in. */
-export default function ConsultationSection() {
+/**
+ * Standout 1, second half: how it gets to know you. The consultation's focus
+ * picker and a weekly check-in report.
+ */
+export default function KnowsYouSection() {
   return (
-    <Section id="consultation" labelledBy="consultation-heading" analyticsName="consultation">
+    <Section id="consultation" labelledBy="knows-you-heading" analyticsName="knows-you">
       <FeatureSplit
         media={
           <div className="relative">
@@ -40,12 +36,15 @@ export default function ConsultationSection() {
         }
       >
         <SectionHeading
-          id="consultation-heading"
+          id="knows-you-heading"
           size="section"
-          title="A plan for you, not for everyone."
-          lead="Start with a short consultation. Your nutritionist learns how you eat, agrees one or two things to focus on, and builds every reply around them."
+          title="It gets to know you first."
+          lead="A short consultation about how you eat now ends with one or two things to focus on, like protein at breakfast or the evening snacking."
         />
-        <PointList points={PERSONAL} />
+        <p className="max-w-[46ch] text-body text-ink-secondary text-pretty">
+          Every week, a check-in looks back at how it went and picks the one thing to change next. It remembers your
+          goals, your notes and what you told it last week, so every reply starts from you.
+        </p>
       </FeatureSplit>
     </Section>
   );
