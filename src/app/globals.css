@@ -108,6 +108,10 @@
     background: var(--scrim-band-text);
   }
 
+  .photo-band-wash-text {
+    background: var(--wash-band-text);
+  }
+
   /*
    * <DeviceFrame>: iPhone 17 Pro drawn in CSS. Every measurement is a share of
    * the frame width (cqw), so one set of proportions covers 260 to 420 px.
