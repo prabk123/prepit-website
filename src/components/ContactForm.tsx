@@ -142,7 +142,7 @@ export default function ContactForm({ kind }: { kind: ContactKind }) {
             focusNameOnReturn.current = true;
             setStatus("idle");
           }}
-          className="inline-flex h-12 items-center rounded-control border border-line-strong px-6 text-body font-medium text-ink transition-colors hover:bg-surface-raised focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus"
+          className="inline-flex h-12 items-center rounded-button border border-line-strong px-6 text-body font-bold text-ink transition-colors hover:bg-surface-raised focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus"
         >
           Send another message
         </button>
@@ -233,7 +233,7 @@ export default function ContactForm({ kind }: { kind: ContactKind }) {
         <button
           type="submit"
           disabled={sending}
-          className="inline-flex h-14 w-full items-center justify-center rounded-control bg-accent px-7 text-body font-medium text-on-accent transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus disabled:opacity-60 sm:w-fit"
+          className="inline-flex h-14 w-full items-center justify-center rounded-button bg-primary px-7 text-body font-bold text-on-primary transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus disabled:opacity-60 sm:w-fit"
         >
           {sending ? "Sending…" : isFeedback ? "Send feedback" : "Send message"}
         </button>

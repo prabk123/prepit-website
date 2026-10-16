@@ -20,7 +20,7 @@ declare global {
 }
 
 const buttonClass =
-  "inline-flex h-11 items-center justify-center rounded-control px-5 text-small font-medium transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus";
+  "inline-flex h-11 items-center justify-center rounded-button px-5 text-small font-bold transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus";
 
 /** UK and EEA visitors choose here before optional cookies (PostHog, Meta Pixel) are set. */
 export default function CookieConsent() {
@@ -79,7 +79,7 @@ export default function CookieConsent() {
         <button
           type="button"
           onClick={acceptAnalytics}
-          className={`${buttonClass} bg-accent text-on-accent`}
+          className={`${buttonClass} bg-primary text-on-primary`}
         >
           Accept optional cookies
         </button>

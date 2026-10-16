@@ -33,12 +33,15 @@
   --color-ink-muted: #5c5c68;
   --color-ink-faint: #686872;
 
-  /* The app's calories orange: a fill for buttons and highlights, always
-     with ink on it (5.8:1). Never as small text on light; use accent-text. */
+  /* Primary buttons and selected controls, as the app's primary button:
+     black with white text on light, white with black text on dark. */
+  --color-primary: #000000;
+  --color-on-primary: #ffffff;
+
+  /* The app's calories orange, for accents only (bullets, rules, underlines,
+     highlights), never a primary action. Never as small text on light; use
+     accent-text. */
   --color-accent: #ff644f;
-  --color-on-accent: #1a1a2e;
-  /* Secondary text on an orange fill, 5.3:1. */
-  --color-on-accent-muted: #3d1a14;
   /* Orange text and link underlines on light: 5.5:1 on white, 5.0:1 on page. */
   --color-accent-text: #b24637;
   /* Keyboard focus rings. */
@@ -134,6 +137,8 @@
   --radius-card: clamp(28px, 23.5px + 1.14vw, 40px);
   --radius-tile: 28px;
   --radius-control: 999px;
+  /* Text buttons, as the app's Button (16 px corners). */
+  --radius-button: 16px;
   /* A Home Screen widget capture's corner, and a small icon tile. */
   --radius-widget: 22px;
   --radius-icon: 14px;
@@ -252,6 +257,8 @@
     --color-ink-faint: #9898a0;
     --color-accent-text: #ff8a78;
     --color-focus: #f4f4f5;
+    --color-primary: #ffffff;
+    --color-on-primary: #000000;
     --color-error: #f2806f;
     --color-brand-blue: #809ff9;
     --color-brand-purple: #d093d9;
@@ -274,6 +281,8 @@
       --color-line-strong: #3f3f46;
       --color-accent-text: #ff8a78;
       --color-focus: #f4f4f5;
+      --color-primary: #ffffff;
+      --color-on-primary: #000000;
       --color-brand-blue: #809ff9;
       --color-brand-purple: #d093d9;
       --color-brand-orange: #f38c61;
