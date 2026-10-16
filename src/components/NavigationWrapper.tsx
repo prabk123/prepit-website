@@ -9,7 +9,7 @@ import { HEADER_SECTION_LINKS, SITE_PAGE_LINKS } from "@/lib/homeSections";
 const linkClass =
   "text-small font-medium text-ink-muted transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus";
 const pillClass =
-  "inline-flex h-11 items-center rounded-control bg-accent px-4 text-small font-medium text-on-accent transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus";
+  "inline-flex h-11 items-center rounded-button bg-primary px-4 text-small font-bold text-on-primary transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus";
 
 /** The site header: solid light bar (no text reads through it), section links and "Get the app". */
 export default function NavigationWrapper() {

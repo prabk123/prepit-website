@@ -62,6 +62,7 @@ const colours = [
   ["ink-secondary", "bg-ink-secondary"],
   ["ink-muted", "bg-ink-muted"],
   ["ink-faint", "bg-ink-faint"],
+  ["primary", "bg-primary"],
   ["accent", "bg-accent"],
   ["accent-text", "bg-accent-text"],
   ["energy", "bg-energy"],

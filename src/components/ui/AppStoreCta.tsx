@@ -41,7 +41,7 @@ export default function AppStoreCta({
       <div className="flex flex-col items-start gap-3">
         <AppStoreLink
           trackingSource={trackingSource}
-          className={`inline-flex h-14 items-center gap-2.5 whitespace-nowrap rounded-control px-5 text-body font-medium transition-opacity max-[374px]:gap-2 max-[374px]:px-4 max-[374px]:text-small sm:px-7 hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-4 bg-accent text-on-accent focus-visible:outline-focus`}
+          className={`inline-flex h-14 items-center gap-2.5 whitespace-nowrap rounded-button px-5 text-body font-bold transition-opacity max-[374px]:gap-2 max-[374px]:px-4 max-[374px]:text-small sm:px-7 hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-4 bg-primary text-on-primary focus-visible:outline-focus`}
         >
           <AppleLogo />
           {label}
