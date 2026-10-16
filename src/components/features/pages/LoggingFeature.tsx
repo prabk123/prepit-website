@@ -1,13 +1,16 @@
 import DeviceFrame from "@/components/device/DeviceFrame";
 import FeatureBlock from "@/components/features/FeatureBlock";
 import Glow from "@/components/ui/Glow";
-import PointList from "@/components/ui/PointList";
 import TextLink from "@/components/ui/TextLink";
 import { appCapture, appVideo } from "@/lib/captures";
 
 const PHONE = "[--device-w:260px] sm:[--device-w:300px] lg:[--device-w:clamp(260px,22vw,320px)]";
 
-/** /features/logging: typing, photo, Siri and the Action button, accuracy and confirmation, offline. */
+/**
+ * /features/logging: the answer to "I've quit trackers before". Typing,
+ * photo, Siri and the Action button, accuracy, offline. Typed, photo and Siri
+ * meals go on the log straight away; only chat cards wait for a tap.
+ */
 export default function LoggingFeature() {
   return (
     <>
@@ -15,7 +18,7 @@ export default function LoggingFeature() {
         id="type-it"
         tone="surface"
         title="Type it like you'd text a friend."
-        lead="“Chicken wrap, an apple and a flat white” is enough. Add the brand, the restaurant, the size or what was in it, and the estimate gets sharper."
+        lead="“Chicken wrap, an apple and a flat white” is enough. It's on your log straight away, and the calories and macros fill in a few seconds later."
         media={
           <div className="relative">
             <Glow />
@@ -29,14 +32,10 @@ export default function LoggingFeature() {
           </div>
         }
       >
-        <PointList
-          layout="rows"
-          points={[
-            { title: "Your own words", detail: "No database to search" },
-            { title: "Or say it", detail: "Tap the mic and talk" },
-            { title: "Any meal", detail: "Home-cooked, takeaway or a restaurant" },
-          ]}
-        />
+        <p className="max-w-[56ch] text-body text-ink-muted text-pretty">
+          There&apos;s no database to search and no barcode to find. A couple of extra words, like how much, how it
+          was cooked or the brand, get the numbers much closer to the truth. Rather talk? Tap the mic and say it.
+        </p>
         <TextLink href="/guides/describe-meals-accurately">Guide: describe meals accurately</TextLink>
       </FeatureBlock>
 
@@ -44,7 +43,7 @@ export default function LoggingFeature() {
         id="snap-it"
         layout="peek"
         title="Or just snap your plate."
-        lead="Take a photo of your meal and PrepIt works out what's on it. Add a few words, like the restaurant or the portion, and it uses both."
+        lead="Take a photo and PrepIt works out what's on the plate. Add a few words, like the restaurant or the portion, and it uses both."
         media={
           <div className="relative">
             <Glow />
@@ -61,8 +60,8 @@ export default function LoggingFeature() {
       <FeatureBlock
         id="accuracy"
         tone="surface"
-        title="Accurate, and always your call."
-        lead="PrepIt checks official brand and restaurant nutrition information first. Every estimate shows what it assumed and how confident it is, and you can change anything in one tap."
+        title="Close to the truth, and easy to fix."
+        lead="For a branded or restaurant food, PrepIt looks for the official figures first. Typed and photo meals show what it assumed and how confident it is, so you can see where a number came from."
         media={
           <div className="relative">
             <Glow />
@@ -76,22 +75,17 @@ export default function LoggingFeature() {
           </div>
         }
       >
-        <PointList
-          layout="rows"
-          points={[
-            { title: "Official sources first", detail: "Brand and restaurant figures" },
-            { title: "Shows its working", detail: "What it assumed, and how confident it is" },
-            { title: "Asks when it's unsure", detail: "“Dinner at a restaurant” gets a question" },
-            { title: "Easy to fix", detail: "Edit any item, or have it refined" },
-          ]}
-        />
+        <p className="max-w-[56ch] text-body text-ink-muted text-pretty">
+          When it&apos;s unsure, it asks. “Dinner at a restaurant” gets a quick question from your nutritionist, so
+          your day stays accurate. And if something looks off, you can edit any item or ask for it to be refined.
+        </p>
       </FeatureBlock>
 
       <FeatureBlock
         id="siri"
         reverse
-        title="No app to open."
-        lead="Say “Hey Siri, log a meal in PrepIt”. Siri asks what you ate and when, and it's logged. Put the same action on the Action button, or a Log a meal button on your Lock Screen."
+        title="Log it without opening the app."
+        lead="Say “Hey Siri, log a meal in PrepIt”. Siri asks what you ate and when, and it's on your log. There's nothing to set up."
         media={
           <div className="relative">
             <Glow />
@@ -105,14 +99,10 @@ export default function LoggingFeature() {
           </div>
         }
       >
-        <PointList
-          layout="rows"
-          points={[
-            { title: "Siri", detail: "No setup needed" },
-            { title: "Action button", detail: "Press and hold, then say it" },
-            { title: "Lock Screen and Control Center", detail: "iOS 18 or later" },
-          ]}
-        />
+        <p className="max-w-[56ch] text-body text-ink-muted text-pretty">
+          Put the same action on the Action button and logging is one press and a sentence. You can also add a Log
+          a meal button to your Lock Screen or Control Center (iOS 18 or later).
+        </p>
         <TextLink href="/features/widgets-and-siri">More about widgets and Siri</TextLink>
       </FeatureBlock>
 
@@ -121,7 +111,7 @@ export default function LoggingFeature() {
         layout="peek"
         tone="surface"
         title="No signal? Log anyway."
-        lead="Meals, water, supplements and weight save on your phone with no signal. They send on their own when you're back, and nothing is logged twice."
+        lead="On a train or a flight, meals, water, supplements and weight save on your phone. They send on their own when you're back, and nothing is logged twice."
         media={
           <div className="relative">
             <Glow />

@@ -28,7 +28,7 @@ export default function WidgetsFeature() {
           id="your-day-heading"
           size="section"
           title="Your day, on your Home Screen."
-          lead="Today's scores, plan, water and streak at a glance, and buttons that do the job right on the widget."
+          lead="See how today is going every time you unlock your phone: your scores, your plan, your water and your streak. The buttons do the job right on the widget."
         />
       </PhotoBand>
 
@@ -137,7 +137,7 @@ export default function WidgetsFeature() {
         id="siri"
         tone="surface"
         title="“Hey Siri, log a meal in PrepIt.”"
-        lead="Siri asks what you ate and when you had it, and logs it without opening the app. There's nothing to set up. Say “Log lunch in PrepIt” and it skips the time question."
+        lead="Siri asks what you ate and when you had it, and it's on your log without opening the app. There's nothing to set up."
         media={
           <div className="relative">
             <Glow />
@@ -151,13 +151,10 @@ export default function WidgetsFeature() {
           </div>
         }
       >
-        <PointList
-          layout="rows"
-          points={[
-            { title: "Siri", detail: "“Log what I ate in PrepIt” works too" },
-            { title: "Shortcuts and Spotlight", detail: "The same Log a meal action" },
-          ]}
-        />
+        <p className="max-w-[56ch] text-body text-ink-muted text-pretty">
+          Say “Log lunch in PrepIt” and it skips the time question. The same Log a meal action is in Shortcuts and
+          Spotlight too.
+        </p>
       </FeatureBlock>
 
       <Section id="one-press" labelledBy="one-press-heading">
