@@ -1,18 +1,12 @@
 import DeviceFrame from "@/components/device/DeviceFrame";
+import Glow from "@/components/ui/Glow";
 import PhotoBand from "@/components/ui/PhotoBand";
-import PointList from "@/components/ui/PointList";
 import SectionHeading from "@/components/ui/SectionHeading";
 import TextLink from "@/components/ui/TextLink";
-import { appCapture, appVideo } from "@/lib/captures";
+import { appVideo } from "@/lib/captures";
 import { plansKitchen } from "@/content/lifestyle";
 
-const PLAN_POINTS = [
-  { title: "Swap anything", detail: "Change a meal in chat" },
-  { title: "One grocery list", detail: "By aisle, with an estimated cost" },
-  { title: "Weekly calorie pattern", detail: "More room when you need it" },
-];
-
-/** "Plans that fit your week": meal plan, grocery list and weekly pattern, on the kitchen photo. */
+/** "Your week, planned": the meal plan, with its grocery list in the kitchen photo. */
 export default function PlansBand() {
   return (
     <PhotoBand
@@ -26,21 +20,19 @@ export default function PlansBand() {
       scrimBehindText
       aside={
         <>
-          <PointList layout="rows" points={PLAN_POINTS} />
+          <p className="text-body text-ink-secondary text-pretty">
+            Your nutritionist plans around your goals, the food you like and your budget. Want a different dinner on
+            Thursday? Ask, and it swaps it.
+          </p>
           <TextLink href="/features/meal-plans">More about meal plans</TextLink>
         </>
       }
       media={
-        <div className="flex items-start justify-center gap-4 lg:gap-5 [--device-w:260px] sm:[--device-w:240px] lg:[--device-w:clamp(220px,17vw,260px)]">
+        <div className="relative">
+          <Glow />
           <DeviceFrame
+            className="[--device-w:260px] sm:[--device-w:300px] lg:[--device-w:clamp(260px,22vw,320px)]"
             video={appVideo("12-plan-week", "Asking for a week of meals and the plan being built")}
-          />
-          <DeviceFrame
-            className="hidden sm:block sm:mt-24"
-            capture={appCapture(
-              "14-weekly-pattern",
-              "A weekly calorie pattern with more room on Tuesday and Wednesday, same weekly total",
-            )}
           />
         </div>
       }
@@ -48,8 +40,8 @@ export default function PlansBand() {
       <SectionHeading
         id="plans-heading"
         size="section"
-        title="Ask for a week of meals. Get a plan built for you."
-        lead="Your nutritionist plans around your goals, tastes and budget, then helps you stick to it."
+        title="Your week, planned."
+        lead="Ask for a week of meals. You get a plan built for you and one grocery list, sorted by aisle."
       />
     </PhotoBand>
   );

@@ -1,16 +1,16 @@
 import AnnotatedPhoto from "@/components/media/AnnotatedPhoto";
 import PreloadImage from "@/components/media/PreloadImage";
 import AppStoreCta from "@/components/ui/AppStoreCta";
+import ChatPanel from "@/components/ui/ChatPanel";
 import { heroCafe } from "@/content/lifestyle";
+import { missedBreakfast } from "@/content/nutritionistMessages";
 import { TRIAL_DAYS } from "@/lib/pricing";
 
 /**
- * Headline first, then the supporting line and App Store button, then the
- * annotated cafe photo, whose phone shows today's log. On desktop the line and
- * button sit beside the headline, so at 1440 x 900 the photo fills the lower
- * part of the first screen. Phones get the 4:5 crop around the phone; on a
- * 390 x 844 phone the headline, button and the top of that photo fit the
- * first screen.
+ * The promise, then a real moment: the nutritionist's own missed-breakfast
+ * message beside the headline on desktop (under the button on phones), then
+ * the annotated cafe photo, whose phone shows today's log. On a 390 x 844
+ * phone the headline, line and button fit the first screen.
  */
 export default function HomeHero() {
   return (
@@ -37,25 +37,21 @@ export default function HomeHero() {
           media={media}
         />
       ))}
-      <div className="mx-auto grid w-full max-w-content gap-6 px-gutter pt-8 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-end lg:gap-10 lg:pt-10">
-        <div>
+      <div className="mx-auto grid w-full max-w-content gap-10 px-gutter pt-8 lg:grid-cols-[minmax(0,1fr)_400px] lg:items-center lg:gap-16 lg:pt-12">
+        <div className="flex flex-col gap-6 lg:gap-8">
           <p className="text-eyebrow font-medium uppercase">
-            <span className="text-gradient-brand">Your personal AI nutritionist</span>
+            <span className="text-gradient-brand">Your AI nutritionist</span>
           </p>
-          <h1 id="hero-heading" className="mt-4 font-display text-hero text-ink text-balance lg:mt-5">
-            Not another tracker.
-            <span className="mt-3 block text-title text-ink-secondary lg:mt-5 lg:text-section">
-              A nutritionist that improves how you eat.
-            </span>
+          <h1 id="hero-heading" className="font-display text-hero text-ink text-balance">
+            The nutritionist that notices.
           </h1>
-        </div>
-        <div className="flex flex-col gap-6 lg:gap-8 lg:pb-2">
-          <p className="max-w-[46ch] text-lead text-ink-secondary text-pretty">
-            PrepIt knows what you ate, what you&apos;re aiming for and how your food will make you feel.
-            It checks in, spots patterns and tells you what to eat next, every day.
+          <p className="max-w-[44ch] text-lead text-ink-secondary text-pretty">
+            Tell PrepIt what you eat. It spots what&apos;s behind the 3pm slump and the evening snacking, and
+            tells you the one thing to change first.
           </p>
           <AppStoreCta trackingSource="home-hero" note={`${TRIAL_DAYS} days free. Cancel anytime.`} />
         </div>
+        <ChatPanel messages={[missedBreakfast]} />
       </div>
 
       <AnnotatedPhoto

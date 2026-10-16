@@ -5,7 +5,7 @@ export type HomeSectionLink = {
 
 /** Homepage sections in the header and the footer's Explore column. */
 export const HEADER_SECTION_LINKS: HomeSectionLink[] = [
-  { label: "Features", href: "/#features" },
+  { label: "Features", href: "/#nutritionist" },
   { label: "Pricing", href: "/#pricing" },
   { label: "FAQ", href: "/#faq" },
 ];
