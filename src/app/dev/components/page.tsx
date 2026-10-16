@@ -62,7 +62,9 @@ const colours = [
   ["ink-secondary", "bg-ink-secondary"],
   ["ink-muted", "bg-ink-muted"],
   ["ink-faint", "bg-ink-faint"],
-  ["cream", "bg-cream"],
+  ["primary", "bg-primary"],
+  ["accent", "bg-accent"],
+  ["accent-text", "bg-accent-text"],
   ["energy", "bg-energy"],
   ["satiety", "bg-satiety"],
   ["mood", "bg-mood"],
@@ -89,7 +91,7 @@ export default function ComponentPreviewPage() {
   if (!previewEnabled) notFound();
 
   return (
-    <div className="bg-page pt-16 text-ink [color-scheme:dark] lg:pt-[72px]">
+    <div className="bg-page pt-16 text-ink lg:pt-[72px]">
       <Section labelledBy="preview-title">
         <SectionHeading
           eyebrow="Website revamp · dev only"
@@ -225,7 +227,7 @@ export default function ComponentPreviewPage() {
 
       <Section labelledBy="annotation-sample">
         <div className="flex flex-col gap-stack">
-          <PreviewLabel>AnnotatedPhoto (PRE-201): amber ring, line and glass label, drawn in on first view. Desktop only</PreviewLabel>
+          <PreviewLabel>AnnotatedPhoto (PRE-201): orange ring, line and white glass label, drawn in on first view. Desktop only</PreviewLabel>
           <h2 id="annotation-sample" className="sr-only">Annotated photo</h2>
           <AnnotatedPhoto
             photo={heroCafe.desktop}
@@ -347,7 +349,6 @@ export default function ComponentPreviewPage() {
               <AppStoreCta
                 trackingSource="dev-preview-pricing"
                 label="Start your free trial"
-                variant="dark"
               />
             }
           />

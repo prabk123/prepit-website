@@ -13,7 +13,7 @@ const INCLUDED = [
   "Widgets and offline logging",
 ];
 
-/** The price and free trial, outside the FAQ: heading on the left, cream card on the right. */
+/** The price and free trial, outside the FAQ: heading on the left, pricing card on the right. */
 export default function PricingSection() {
   return (
     <Section id="pricing" labelledBy="pricing-heading" analyticsName="pricing">
@@ -32,7 +32,6 @@ export default function PricingSection() {
             <AppStoreCta
               trackingSource="home-pricing"
               label="Start your free trial"
-              variant="dark"
             />
           }
           finePrint="Prices in US dollars. The App Store shows the price for your country."

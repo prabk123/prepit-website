@@ -54,7 +54,7 @@ export default function RecipeCard({ recipe, servings, onClick }: RecipeCardProp
     <button
       type="button"
       onClick={onClick}
-      className="group flex w-full items-center gap-4 rounded-2xl text-left focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cream"
+      className="group flex w-full items-center gap-4 rounded-2xl text-left focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus"
     >
       <div className="relative h-[72px] w-[72px] shrink-0 overflow-hidden rounded-2xl">
         <RecipeThumb recipe={recipe} sizes="72px" iconSize={26} />
@@ -66,7 +66,7 @@ export default function RecipeCard({ recipe, servings, onClick }: RecipeCardProp
         </p>
         <div className="mt-1 flex items-center gap-4">
           {calories > 0 && (
-            <span className="flex items-center gap-1 text-small font-medium text-satiety">
+            <span className="flex items-center gap-1 text-small font-medium text-accent-text">
               <PrepItIcon name="fire" size={14} />
               {calories.toLocaleString("en-GB")} cal
             </span>

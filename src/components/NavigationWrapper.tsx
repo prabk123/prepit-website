@@ -7,11 +7,11 @@ import AppStoreLink from "@/components/AppStoreLink";
 import { HEADER_SECTION_LINKS, SITE_PAGE_LINKS } from "@/lib/homeSections";
 
 const linkClass =
-  "text-small font-medium text-ink-muted transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cream";
+  "text-small font-medium text-ink-muted transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus";
 const pillClass =
-  "inline-flex h-11 items-center rounded-control bg-cream px-4 text-small font-medium text-on-cream transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cream";
+  "inline-flex h-11 items-center rounded-button bg-primary px-4 text-small font-bold text-on-primary transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus";
 
-/** The site header (D3): solid warm dark bar (no text reads through it), section links and "Get the app". */
+/** The site header: solid light bar (no text reads through it), section links and "Get the app". */
 export default function NavigationWrapper() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
@@ -73,7 +73,7 @@ export default function NavigationWrapper() {
         <div className="mx-auto flex h-16 w-full max-w-content items-center justify-between px-gutter">
           <Link
             href="/"
-            className="flex h-11 items-center gap-2.5 text-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cream"
+            className="flex h-11 items-center gap-2.5 text-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus"
           >
             <span className="relative h-8 w-8">
               <Image src="/logo.png" alt="" fill sizes="32px" className="object-contain" />
@@ -101,7 +101,7 @@ export default function NavigationWrapper() {
             <button
               ref={toggleRef}
               type="button"
-              className="flex h-11 w-11 items-center justify-center text-ink focus-visible:outline-2 focus-visible:outline-cream"
+              className="flex h-11 w-11 items-center justify-center text-ink focus-visible:outline-2 focus-visible:outline-focus"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
               aria-expanded={mobileMenuOpen}

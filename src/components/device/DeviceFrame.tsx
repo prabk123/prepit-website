@@ -15,7 +15,7 @@ export type CaptureSources = {
   src: string;
 };
 
-/** A real app capture. The site is dark only, so use the app's dark-mode captures. */
+/** A real app capture: the app's light-mode set on light pages (see appCapture). */
 export type DeviceCapture = CaptureSources & { alt: string };
 
 type DeviceFrameProps = {

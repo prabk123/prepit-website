@@ -25,7 +25,7 @@ export default function LinkCard({ href, title, summary, action, thumb, headingL
   return (
     <Link
       href={href}
-      className="group flex min-w-0 flex-col overflow-hidden rounded-tile border border-line bg-surface transition-colors hover:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cream"
+      className="group flex min-w-0 flex-col overflow-hidden rounded-tile border border-line bg-surface transition-colors hover:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus"
     >
       {thumb && (
         <div aria-hidden className="relative h-44 overflow-hidden bg-surface-raised px-10 pt-8">
