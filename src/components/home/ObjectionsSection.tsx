@@ -2,33 +2,27 @@ import DeviceFrame from "@/components/device/DeviceFrame";
 import Glow from "@/components/ui/Glow";
 import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
+import SwipeRow from "@/components/ui/SwipeRow";
 import { appVideo } from "@/lib/captures";
 
+// Three questions in a line or two each (PRE-284). Whether the advice is any
+// good is the research band's job, and the watch question is on the Energy,
+// Satiety and Mood page.
 const QUESTIONS = [
   {
     question: "“I've quit trackers before.”",
     answer:
-      "Most people quit because logging is a chore. Here you type “two eggs and buttered toast”, snap your plate, or press the Action button and say it. It's on your log straight away, and easy to fix if it's off.",
+      "Most people quit because logging is a chore. Here you type “two eggs and buttered toast”, snap your plate, or press the Action button and say it. It's on your log straight away.",
   },
   {
-    question: "“Do I need a watch or a ring?”",
+    question: "“Is this a real nutritionist?”",
     answer:
-      "No. Everything starts from what you eat: no ring, no watch, no glucose monitor. Connect Apple Health if you like, and it brings in your activity and weight too.",
-  },
-  {
-    question: "“Is the advice any good?”",
-    answer:
-      "It's built on nutrition science and public health guidance, and it knows its limits: for anything medical, it points you to your GP, a pharmacist or a registered dietitian.",
+      "It's an AI nutritionist that works the way a good one does: a first consultation, one thing to focus on, and a check-in every week. It isn't a person or a doctor, and says so when you need one.",
   },
   {
     question: "“Is my data safe?”",
     answer:
       "Your logs and goals are yours. We don't sell your personal or health data, and you can delete your account from the app at any time.",
-  },
-  {
-    question: "“Is this a real nutritionist?”",
-    answer:
-      "It's an AI nutritionist that works the way a good one does: a first consultation, one thing to focus on, and a check-in every week. It isn't a person or a doctor, and it says so when something needs one.",
   },
 ];
 
@@ -49,14 +43,18 @@ export default function ObjectionsSection() {
             lead="So here's what people ask before they try PrepIt."
             className="max-w-[760px]"
           />
-          <dl className="flex flex-col border-b border-line">
+          {/* Cards you swipe on phones, ruled rows beside the phone from 1024 px (PRE-284). */}
+          <SwipeRow label="Questions people ask" desktop="stack" className="lg:gap-0 lg:border-b lg:border-line">
             {QUESTIONS.map((item) => (
-              <div key={item.question} className="grid gap-2 border-t border-line py-6 lg:py-7">
-                <dt className="font-display text-card-title text-ink">{item.question}</dt>
-                <dd className="max-w-[58ch] text-body text-ink-secondary text-pretty">{item.answer}</dd>
+              <div
+                key={item.question}
+                className="flex w-full flex-col gap-2 rounded-card border border-line bg-surface-raised p-5 lg:rounded-none lg:border-x-0 lg:border-b-0 lg:bg-transparent lg:px-0 lg:py-7"
+              >
+                <h3 className="font-display text-card-title text-ink">{item.question}</h3>
+                <p className="max-w-[58ch] text-body text-ink-secondary text-pretty">{item.answer}</p>
               </div>
             ))}
-          </dl>
+          </SwipeRow>
         </div>
         <div className="relative flex justify-center lg:sticky lg:top-28">
           <Glow />

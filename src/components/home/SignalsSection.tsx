@@ -58,8 +58,7 @@ export default function SignalsSection() {
           ))}
         </ul>
         <p className="max-w-[46ch] text-body text-ink-secondary text-pretty">
-          Each one is a score from 0 to 100, worked out from your food alone. Tap it to see what moved it, and when a
-          change would help, your nutritionist tells you what to eat next.
+          Each is a score from 0 to 100, worked out from your food alone. Tap one to see what moved it.
         </p>
         <ChatPanel
           className="max-w-[480px]"

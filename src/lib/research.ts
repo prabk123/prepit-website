@@ -25,14 +25,19 @@ export type ResearchPoint = {
   /** Fixed slug, also the anchor on /research. Never change one. */
   id: string;
   title: string;
-  /** The line on the homepage band. */
+  /** The fuller line, on /research. */
   detail: string;
+  /** One short line for the homepage band (PRE-284), for the points in HOME_RESEARCH_POINT_IDS. */
+  summary?: string;
   /** A little more on /research, above the sources. */
   more?: string;
   sources: ResearchSource[];
 };
 
 export const RESEARCH_PAGE_HREF = "/research";
+
+/** The three points the homepage band shows (PRE-284); /research has all six. */
+export const HOME_RESEARCH_POINT_IDS = ["scores", "numbers", "limits"] as const;
 
 export const RESEARCH_POINTS: ResearchPoint[] = [
   {
@@ -65,6 +70,8 @@ export const RESEARCH_POINTS: ResearchPoint[] = [
   {
     id: "scores",
     title: "Its scores come from nutrition science",
+    summary:
+      "Energy, Satiety and Mood weigh what nutrition science links to how you feel: glycaemic load, protein, fibre and how processed your food is.",
     detail:
       "Energy weighs things like glycaemic load, how much sugar you eat, protein in the morning and how you spread your meals. Satiety weighs protein, fibre and how processed your food is, using the NOVA scale researchers use to grade processing. Mood looks at your whole previous day.",
     more: "Each score blends a handful of factors from your log. Energy: whether you've eaten enough for the time of day, sugar compared with other carbs, glycaemic load, protein in the morning, how your meals are spread and front-loaded, and whether you had breakfast. Satiety: protein, fibre, energy density, how processed your food is and the gaps between meals. Mood reads yesterday's processing, fruit and veg, fibre, sugar, alcohol and any big calorie deficit. The scores are estimates to guide your next meal, not a medical measurement.",
@@ -170,6 +177,8 @@ export const RESEARCH_POINTS: ResearchPoint[] = [
   {
     id: "numbers",
     title: "Its numbers come from real sources",
+    summary:
+      "Official figures for branded and restaurant food first, and USDA reference portions when you don't give an amount.",
     detail:
       "For branded and restaurant food it looks for the official nutrition figures first. When you don't give an amount, it uses typical portions from USDA reference data. Typed and photo logs show how sure it is and what it assumed, and if a meal is too vague, it asks.",
     sources: [
@@ -217,6 +226,8 @@ export const RESEARCH_POINTS: ResearchPoint[] = [
   {
     id: "limits",
     title: "It knows its limits",
+    summary:
+      "It won't diagnose anything or go past public reference doses, and points you to your GP when something is medical.",
     detail:
       "It won't diagnose anything, and it never recommends or changes a dose beyond the public reference amount. For anything medical, or a question about your dose, it points you to your GP, a pharmacist or a registered dietitian.",
     sources: [],

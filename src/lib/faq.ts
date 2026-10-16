@@ -31,13 +31,13 @@ export const FAQ_ITEMS: FaqItem[] = [
     id: "different-from-tracker",
     question: "How is PrepIt different from a calorie tracker?",
     answer:
-      "A tracker records what you ate and leaves the rest to you. PrepIt's nutritionist uses it. It notices patterns, like protein running low at dinner or the same days going over, messages you before you slip, and tells you the one thing to change first.",
+      "A tracker records what you ate and leaves the rest to you. PrepIt's nutritionist uses it: it notices patterns, like protein running low at dinner, messages you before you slip, and tells you the one thing to change first.",
   },
   {
     id: "medical",
     question: "Can it help with a medical condition?",
     answer:
-      "It gives nutrition guidance, not medical advice. It won't diagnose anything or suggest a supplement dose beyond the public reference amount, and when something needs a professional it says so and points you to your GP, a pharmacist or a registered dietitian.",
+      "It gives nutrition guidance, not medical advice. It won't diagnose anything or suggest a dose beyond the public reference amount, and points you to your GP, a pharmacist or a registered dietitian when you need one.",
     link: { href: RESEARCH_PAGE_HREF, label: "How your nutritionist decides what to say" },
   },
   {
@@ -50,14 +50,14 @@ export const FAQ_ITEMS: FaqItem[] = [
     id: "energy-satiety-mood",
     question: "What are Energy, Satiety and Mood?",
     answer:
-      "Three scores from 0 to 100 that show how your food is likely to make you feel: whether you'll dip mid-afternoon, stay full until your next meal, and feel steady tomorrow. Energy and Satiety move as you log today; Mood reads yesterday's whole day. Each one comes with the reason and what to try next.",
+      "Three scores from 0 to 100 that show how your food is likely to make you feel: whether you'll dip mid-afternoon, stay full until your next meal, and feel steady tomorrow. Each one comes with the reason.",
     link: { href: RESEARCH_PAGE_HREF, label: "The research behind the scores" },
   },
   {
     id: "nutritionist",
     question: "What can I ask my nutritionist?",
     answer:
-      "Anything about your food and your week: what to have for dinner, why you're hungry by 4pm, how to fit in a takeaway. It draws charts of your trends, runs your consultation and weekly check-in, plans meals, and logs, moves or fixes meals for you. Any log, plan or goal change it makes from chat shows up as a card first, and nothing is saved until you tap it.",
+      "Anything about your food and your week: what to have for dinner, why you're hungry by 4pm, how to fit in a takeaway. It also plans meals and logs or fixes them for you. A change it makes from chat shows up as a card, saved only when you tap it.",
   },
   {
     id: "messages",
