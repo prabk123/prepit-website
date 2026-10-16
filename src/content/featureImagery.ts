@@ -50,17 +50,17 @@ function phonePhoto(
 
 /**
  * Signals section. Nothing on the bench is logged, so annotations should point
- * at the phone: Energy 84, Satiety 96, Mood 87 (rings at about x 61%, y 34%)
- * and 1,481 of 1,570 kcal, On track (about x 58%, y 44%).
+ * at the phone: the Energy 84 ring (about x 73%, y 37%) and Calorie fit,
+ * 1481 / 1322 kcal expected, +22 (about x 72%, y 66%).
  */
 export const signalsGym: FeaturePhoto = {
   ...phonePhoto(
     "signals-gym",
     {
       desktop:
-        "A phone leans on a gym bag beside a protein shake on a wooden bench, showing PrepIt's Home screen with Energy 84, Satiety 96 and Mood 87, and 1,481 of 1,570 kcal eaten.",
+        "In a bright home gym, a phone leans on a water bottle beside a towel, a banana and a smoothie, showing PrepIt's Energy screen at 84 and how it's shaped: calorie fit and meal spread.",
       mobile:
-        "A phone on a gym bench shows PrepIt's Home screen with Energy 84, Satiety 96 and Mood 87.",
+        "A phone on a bench shows PrepIt's Energy screen at 84 and how it's shaped.",
     },
     { position: "62% 50%" },
   ),
@@ -70,19 +70,19 @@ export const signalsGym: FeaturePhoto = {
 /**
  * Widgets tile. The phone is on the left, so the text sits on the right.
  * Annotation values on the phone: Energy 84, Satiety 96, Mood 87 (about
- * x 26%, y 24%) and Lunch, 12:30 PM, Chicken and rice, Logged (about x 25%,
- * y 50%).
+ * x 27%, y 22%) and Lunch, 12:30 PM, Chicken and rice, Logged (about x 27%,
+ * y 51%).
  */
 export const widgetsDesk: FeaturePhoto = {
   ...phonePhoto(
     "widgets-desk",
     {
       desktop:
-        "A phone on a wooden stand beside a lunch box of chicken and rice and a laptop shows PrepIt widgets: Energy 84, Satiety 96 and Mood 87, and today's plan with breakfast and lunch logged and Log it on dinner.",
+        "A phone on a wooden stand beside a finished lunch box, a glass of water and a laptop shows PrepIt widgets: Energy 84, Satiety 96 and Mood 87, and today's plan with breakfast and lunch logged and Log it on dinner.",
       mobile:
         "A phone on a desk stand shows PrepIt widgets with Energy 84, Satiety 96 and Mood 87, and today's plan with breakfast and lunch logged.",
     },
-    { position: "38% 50%", scrim: "end" },
+    { position: "30% 50%", scrim: "end" },
   ),
   textSide: "end",
 };
@@ -108,17 +108,18 @@ function still(name: string, alt: string, { avif = true, small = false } = {}): 
 
 /**
  * Overhead flat-lays of meals from the showcase plan, for the Plans section
- * and the share images (PRE-206). Each leaves dark space on the left for text.
+ * and the share images (PRE-206). Each leaves light oak space on the left for
+ * text.
  */
 export const planFlatLays = {
   oats: still(
     "flatlay-oats",
-    "A bowl of protein overnight oats topped with diced apple and cinnamon on a walnut table.",
+    "A bowl of protein overnight oats topped with diced apple and cinnamon on a pale oak table.",
     { small: true },
   ),
   wrap: still(
     "flatlay-wrap",
-    "A wholemeal chicken wrap with hummus and salad, cut in half, beside a dish of hummus.",
+    "A wholemeal wrap of spinach, cucumber and avocado, cut in half, beside a dish of hummus.",
     { small: true },
   ),
   salmon: still(
@@ -144,3 +145,18 @@ export const cookingClip = {
   height: 720,
   label: "Sliced chicken, peppers and spinach cooking in a cast-iron pan.",
 };
+
+/**
+ * Dark band photos for the light site (PRE-282). Each is dark on the left,
+ * where the band's text sits. No phone screen.
+ */
+export const researchStill = still(
+  "research-table",
+  "Whole foods on a dark stone worktop: salmon, eggs, oats, lentils, spinach, berries, walnuts, olive oil and yogurt.",
+  { small: true },
+);
+export const downloadStill = still(
+  "download-evening",
+  "A phone lies face down on the arm of a sofa in the evening, beside a cup of tea and a bowl of berries.",
+  { small: true },
+);

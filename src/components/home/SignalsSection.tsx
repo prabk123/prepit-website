@@ -1,12 +1,10 @@
-import DeviceFrame from "@/components/device/DeviceFrame";
 import ChatPanel from "@/components/ui/ChatPanel";
 import FeatureSplit from "@/components/ui/FeatureSplit";
-import Glow from "@/components/ui/Glow";
 import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
 import TextLink from "@/components/ui/TextLink";
+import { lunchRings } from "@/content/lifestyle";
 import { satietyNextStep } from "@/content/nutritionistMessages";
-import { appCapture } from "@/lib/captures";
 
 const SIGNAL_DOTS = [
   { name: "Energy", color: "var(--color-energy)" },
@@ -24,16 +22,25 @@ export default function SignalsSection() {
       <FeatureSplit
         reverse
         media={
-          <div className="relative">
-            <Glow />
-            <DeviceFrame
-              className="[--device-w:260px] sm:[--device-w:300px] lg:[--device-w:clamp(260px,22vw,320px)]"
-              capture={appCapture(
-                "06-signal-energy",
-                "Energy at 84, with what shaped it: calorie fit, meal spread and timing",
-              )}
+          // The lunch photo's 4:5 crop around the phone (PRE-282): Home with
+          // Energy 84, Satiety 96 and Mood 87 beside the meal behind them.
+          <picture>
+            {lunchRings.mobile.avif && (
+              <source srcSet={lunchRings.mobile.avif} sizes="(min-width: 1024px) 460px, 100vw" type="image/avif" />
+            )}
+            {lunchRings.mobile.webp && (
+              <source srcSet={lunchRings.mobile.webp} sizes="(min-width: 1024px) 460px, 100vw" type="image/webp" />
+            )}
+            <img
+              src={lunchRings.mobile.src}
+              alt={lunchRings.desktop.alt ?? ""}
+              width={lunchRings.mobile.width}
+              height={lunchRings.mobile.height}
+              loading="lazy"
+              decoding="async"
+              className="mx-auto h-auto w-full max-w-[460px] rounded-card"
             />
-          </div>
+          </picture>
         }
       >
         <SectionHeading

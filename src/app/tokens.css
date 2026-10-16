@@ -232,6 +232,16 @@
     rgb(24 24 27 / 0.9) 75%,
     rgb(24 24 27 / 0) 100%
   );
+  /*
+   * Light wash behind dark text on a bright, plain part of a photo (the
+   * Plans kitchen's white wall, PRE-282), so no dark scrim is needed.
+   */
+  --wash-band-text: radial-gradient(
+    closest-side,
+    color-mix(in srgb, var(--color-page) 80%, transparent) 0%,
+    color-mix(in srgb, var(--color-page) 60%, transparent) 70%,
+    transparent 100%
+  );
   /* The same gradient from the right, for photos whose subject is on the left. */
   --scrim-photo-end: linear-gradient(
     270deg,
