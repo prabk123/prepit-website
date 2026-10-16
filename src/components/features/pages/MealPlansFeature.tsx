@@ -87,7 +87,7 @@ export default function MealPlansFeature() {
               className={PHONE}
               capture={appCapture(
                 "13-grocery-list",
-                "A grocery list for 13 to 19 October, estimated at £48 to £66, grouped into bakery, dairy and fresh produce",
+                "A grocery list for 17 to 23 October, estimated at £48 to £66, grouped into bakery, dairy and fresh produce",
               )}
             />
           </div>

@@ -31,7 +31,7 @@ export default function PlansBand() {
           <Glow />
           <DeviceFrame
             className="[--device-w:260px] sm:[--device-w:300px] lg:[--device-w:clamp(260px,22vw,320px)]"
-            video={appVideo("12-plan-week", "Asking for a week of meals and the plan being built")}
+            video={appVideo("12-plan-week", "Scrolling a week of planned meals, each with a photo of the dish")}
           />
         </div>
       }
