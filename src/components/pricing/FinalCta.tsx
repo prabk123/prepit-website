@@ -1,7 +1,9 @@
 import DeviceFrame from "@/components/device/DeviceFrame";
 import AppStoreCta from "@/components/ui/AppStoreCta";
+import BandPhoto from "@/components/ui/BandPhoto";
 import Glow from "@/components/ui/Glow";
 import Section from "@/components/ui/Section";
+import { downloadStill } from "@/content/featureImagery";
 import { appCapture } from "@/lib/captures";
 import { TRIAL_DAYS } from "@/lib/pricing";
 
@@ -16,6 +18,7 @@ import { TRIAL_DAYS } from "@/lib/pricing";
 export default function FinalCta({ trackingSource = "final-cta" }: { trackingSource?: string }) {
   return (
     <Section id="download" tone="dark" labelledBy="download-heading" analyticsName="final-cta">
+      <BandPhoto photo={downloadStill} position="center" phone="none" text="centre" />
       <div className="relative flex flex-col items-center gap-8 text-center">
         <div className="flex flex-col items-center gap-5">
           <h2 id="download-heading" className="font-display text-chapter text-ink text-balance">

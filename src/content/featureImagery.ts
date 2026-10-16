@@ -119,7 +119,7 @@ export const planFlatLays = {
   ),
   wrap: still(
     "flatlay-wrap",
-    "A wholemeal chicken wrap with hummus and salad, cut in half, beside a dish of hummus.",
+    "A wholemeal wrap of spinach, cucumber and avocado, cut in half, beside a dish of hummus.",
     { small: true },
   ),
   salmon: still(
@@ -153,6 +153,7 @@ export const cookingClip = {
 export const researchStill = still(
   "research-table",
   "Whole foods on a dark stone worktop: salmon, eggs, oats, lentils, spinach, berries, walnuts, olive oil and yogurt.",
+  { small: true },
 );
 export const downloadStill = still(
   "download-evening",

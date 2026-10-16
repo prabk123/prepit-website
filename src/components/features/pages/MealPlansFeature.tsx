@@ -16,7 +16,7 @@ const FLAT_LAY_SIZES = "(min-width: 640px) 33vw, calc(100vw - 40px)";
 
 const FLAT_LAYS: { photo: SectionPhoto; caption: string }[] = [
   { photo: planFlatLays.oats, caption: "Protein overnight oats" },
-  { photo: planFlatLays.wrap, caption: "Chicken wrap with hummus" },
+  { photo: planFlatLays.wrap, caption: "Hummus and salad wrap" },
   { photo: planFlatLays.salmon, caption: "Mediterranean salmon bowl" },
 ];
 
