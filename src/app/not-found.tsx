@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 };
 
 const linkPill =
-  "inline-flex h-14 items-center rounded-control border border-line-strong px-7 text-body font-medium text-ink transition-colors hover:bg-surface-raised focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cream";
+  "inline-flex h-14 items-center rounded-control border border-line-strong px-7 text-body font-medium text-ink transition-colors hover:bg-surface-raised focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus";
 
 /**
  * Any URL with no page, including a mistyped feature or guide slug. Those

@@ -5,8 +5,6 @@ type AppStoreCtaProps = {
   /** Sent with the `app_store_click` event, e.g. "home-hero". */
   trackingSource: string;
   label?: string;
-  /** `cream` on dark sections; `dark` on the cream pricing card. */
-  variant?: "cream" | "dark";
   /** Line under the button, e.g. "7 days free" (TRIAL_NOTE). */
   note?: string;
   /** Desktop only: a QR code beside the button with this caption. */
@@ -33,28 +31,22 @@ function AppleLogo() {
 export default function AppStoreCta({
   trackingSource,
   label = "Download on the App Store",
-  variant = "cream",
   note,
   qrCaption,
   className,
 }: AppStoreCtaProps) {
-  const button =
-    variant === "cream"
-      ? "bg-cream text-on-cream focus-visible:outline-cream"
-      : "bg-on-cream text-cream focus-visible:outline-on-cream";
-  const subtle = variant === "cream" ? "text-ink-muted" : "text-on-cream-muted";
 
   return (
     <div className={`flex flex-wrap items-center gap-x-10 gap-y-6 ${className ?? ""}`}>
       <div className="flex flex-col items-start gap-3">
         <AppStoreLink
           trackingSource={trackingSource}
-          className={`inline-flex h-14 items-center gap-2.5 whitespace-nowrap rounded-control px-5 text-body font-medium transition-opacity max-[374px]:gap-2 max-[374px]:px-4 max-[374px]:text-small sm:px-7 hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-4 ${button}`}
+          className={`inline-flex h-14 items-center gap-2.5 whitespace-nowrap rounded-button px-5 text-body font-bold transition-opacity max-[374px]:gap-2 max-[374px]:px-4 max-[374px]:text-small sm:px-7 hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-4 bg-primary text-on-primary focus-visible:outline-focus`}
         >
           <AppleLogo />
           {label}
         </AppStoreLink>
-        {note && <p className={`text-small ${subtle}`}>{note}</p>}
+        {note && <p className="text-small text-ink-muted">{note}</p>}
       </div>
       {qrCaption && (
         <AppStoreQr caption={qrCaption} trackingSource={`${trackingSource}-qr`} className="hidden lg:flex" />

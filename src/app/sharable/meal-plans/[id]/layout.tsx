@@ -9,7 +9,7 @@ const prepitIcons = localFont({
 });
 
 /**
- * Shared meal plans: the warm dark page (D3) under the site header, with room
+ * Shared meal plans: the light page under the site header, with room
  * for the fixed navigation bar.
  */
 export default function SharableMealPlanLayout({

@@ -100,7 +100,7 @@ export function SheetCloseButton({ onClick, className }: { onClick: () => void; 
       type="button"
       onClick={onClick}
       aria-label="Close"
-      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-control bg-surface-raised text-ink transition-colors hover:bg-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cream ${className ?? ""}`}
+      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-control bg-surface-raised text-ink transition-colors hover:bg-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus ${className ?? ""}`}
     >
       <PrepItIcon name="close" size={18} />
     </button>

@@ -13,13 +13,13 @@ export const legalMdxComponents = {
   ),
   ul: (props: ComponentPropsWithoutRef<"ul">) => (
     <ul
-      className="my-5 flex flex-col gap-2.5 text-body text-ink-secondary [&>li]:relative [&>li]:pl-6 [&>li]:before:absolute [&>li]:before:left-0 [&>li]:before:top-[0.7em] [&>li]:before:size-1.5 [&>li]:before:rounded-full [&>li]:before:bg-energy"
+      className="my-5 flex flex-col gap-2.5 text-body text-ink-secondary [&>li]:relative [&>li]:pl-6 [&>li]:before:absolute [&>li]:before:left-0 [&>li]:before:top-[0.7em] [&>li]:before:size-1.5 [&>li]:before:rounded-full [&>li]:before:bg-accent"
       {...props}
     />
   ),
   ol: (props: ComponentPropsWithoutRef<"ol">) => (
     <ol
-      className="my-6 flex flex-col gap-4 text-body text-ink-secondary [counter-reset:step] [&>li]:relative [&>li]:min-h-8 [&>li]:pl-12 [&>li]:pt-1 [&>li]:[counter-increment:step] [&>li]:before:absolute [&>li]:before:left-0 [&>li]:before:top-0 [&>li]:before:flex [&>li]:before:size-8 [&>li]:before:items-center [&>li]:before:justify-center [&>li]:before:rounded-full [&>li]:before:border [&>li]:before:border-energy/50 [&>li]:before:font-display [&>li]:before:text-small [&>li]:before:text-energy [&>li]:before:content-[counter(step)]"
+      className="my-6 flex flex-col gap-4 text-body text-ink-secondary [counter-reset:step] [&>li]:relative [&>li]:min-h-8 [&>li]:pl-12 [&>li]:pt-1 [&>li]:[counter-increment:step] [&>li]:before:absolute [&>li]:before:left-0 [&>li]:before:top-0 [&>li]:before:flex [&>li]:before:size-8 [&>li]:before:items-center [&>li]:before:justify-center [&>li]:before:rounded-full [&>li]:before:border [&>li]:before:border-accent/50 [&>li]:before:font-display [&>li]:before:text-small [&>li]:before:text-accent-text [&>li]:before:content-[counter(step)]"
       {...props}
     />
   ),

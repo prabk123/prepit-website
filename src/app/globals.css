@@ -2,25 +2,8 @@
 @import "./tokens.css";
 
 :root {
-  /* The site is dark only (D3), so form controls and scrollbars are too. */
-  color-scheme: dark;
-
-  /* PrepIt Design System Colors */
-  --lime-30: #e9f8b2;
-  --grey-5: #f4f4f5;
-  --grey-10: #e9e9ea;
-  --grey-40: #a6a6ac;
-  --grey-60: #7a7a82;
-  --grey-80: #4d4d59;
-  --coral-100: #ff644f;
-  --black-100: #000000;
-  --white-100: #ffffff;
-
-  /* Gradient colors for AI badge */
-  --gradient-blue: #809ff9;
-  --gradient-purple: #d093d9;
-  --gradient-orange: #f38c61;
-  --gradient-yellow: #f5cc77;
+  /* The site is light-led; dark bands set their own (tokens.css, .theme-dark). */
+  color-scheme: light;
 }
 
 @theme inline {
@@ -89,7 +72,7 @@
 
 /* In a layer so Tailwind utilities passed as className still win. */
 @layer components {
-  /* <Glow>: soft orange and amber light behind phones. */
+  /* <Glow>: soft orange light behind phones. */
   .glow-warm {
     pointer-events: none;
     background: var(--glow-warm);
@@ -112,6 +95,13 @@
 
   .photo-band-scrim-end {
     background: var(--scrim-band-end);
+  }
+
+  /* The text-side scrims fade out where the photo fades into the light page,
+     so the band has no hard dark edge at its top and bottom. */
+  .photo-band-scrim,
+  .photo-band-scrim-end {
+    mask-image: var(--mask-photo-edges);
   }
 
   .photo-band-scrim-text {
@@ -235,7 +225,7 @@
     margin-top: calc(var(--device-w, 320px) * 0.18);
   }
 
-  /* <AnnotatedPhoto>: amber ring, leader line and dark glass label (D3). */
+  /* <AnnotatedPhoto>: orange ring, leader line and white glass label. */
   /*
    * <AnnotatedPhoto>: the media box is a size container, and the layer inside
    * is sized and placed like object-fit: cover with object-position. The
@@ -319,16 +309,16 @@
     background: var(--color-annotation-label);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    color: var(--color-ink);
+    color: var(--color-annotation-ink);
     font-size: var(--text-small);
     line-height: 1.2;
   }
 
   .photo-annotation__label b {
     margin-right: 2px;
-    color: var(--color-annotation);
+    color: var(--color-annotation-value);
     font-family: var(--font-brand), system-ui, sans-serif;
-    font-weight: 600;
+    font-weight: 500;
   }
 
   .photo-annotation[data-side="right"] .photo-annotation__line {
@@ -401,8 +391,8 @@
     width: 44px;
     height: 44px;
     border-radius: 999px;
-    color: var(--color-ink);
-    background: var(--color-overlay);
+    color: var(--color-video-toggle-ink);
+    background: var(--color-video-toggle);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     cursor: pointer;
@@ -410,11 +400,11 @@
   }
 
   .loop-video__toggle:hover {
-    background: var(--color-overlay-strong);
+    background: var(--color-video-toggle-strong);
   }
 
   .loop-video__toggle:focus-visible {
-    outline: 2px solid var(--color-ink);
+    outline: 2px solid var(--color-focus);
     outline-offset: 2px;
   }
 }

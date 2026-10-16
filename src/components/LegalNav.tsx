@@ -8,7 +8,7 @@ const legalPages = [
   { title: "Subscriptions", href: "/subscription-policy" },
 ];
 
-/** Links between the legal pages, as pills; the current page is cream. */
+/** Links between the legal pages, as pills; the current page is orange. */
 export default function LegalNav({ currentPath }: { currentPath: string }) {
   return (
     <nav aria-label="Legal pages">
@@ -20,9 +20,9 @@ export default function LegalNav({ currentPath }: { currentPath: string }) {
               <Link
                 href={page.href}
                 aria-current={current ? "page" : undefined}
-                className={`inline-flex h-11 items-center rounded-control px-4 text-small font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cream ${
+                className={`inline-flex h-11 items-center rounded-control px-4 text-small font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus ${
                   current
-                    ? "bg-cream text-on-cream"
+                    ? "border border-primary bg-primary text-on-primary"
                     : "border border-line-strong text-ink-muted hover:text-ink"
                 }`}
               >

@@ -32,8 +32,8 @@ export default function UnitSystemToggle({ value, onChange }: UnitSystemTogglePr
               role="radio"
               aria-checked={selected}
               onClick={() => onChange(option.value)}
-              className={`rounded-control px-4 py-1.5 text-small font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cream ${
-                selected ? "bg-cream text-on-cream" : "text-ink-muted hover:text-ink"
+              className={`rounded-control border px-4 py-1.5 text-small font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus ${
+                selected ? "border-primary bg-primary text-on-primary" : "border-transparent text-ink-muted hover:text-ink"
               }`}
             >
               {option.label}
