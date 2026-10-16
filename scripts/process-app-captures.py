@@ -62,13 +62,14 @@ WIDTHS = {"1x": 402, "2x": 804}
 
 # Crops of a still, for a real message shown without the phone around it:
 # output name -> (source still, top, bottom) in 1206x2622 pixels. The
-# nudges from the NEW divider to their last reply; the weekly pattern one stops
+# nudges from the top of the bubble (the unread NEW divider above it is left
+# out) to their last reply; the weekly pattern one stops
 # inside its card, which the site fades out (PRE-283).
 CROPS = {
-    "25-nudge-missed-breakfast-crop-light": ("25-nudge-missed-breakfast-light", 1430, 2500),
-    "25b-nudge-protein-crop-light": ("25b-nudge-protein-light", 830, 2500),
-    "24-nudge-weekly-pattern-crop-light": ("24-nudge-weekly-pattern-light", 470, 2130),
-    "24b-nudge-weigh-in-crop-light": ("24b-nudge-weigh-in-light", 1440, 2500),
+    "25-nudge-missed-breakfast-crop-light": ("25-nudge-missed-breakfast-light", 1486, 2500),
+    "25b-nudge-protein-crop-light": ("25b-nudge-protein-light", 886, 2500),
+    "24-nudge-weekly-pattern-crop-light": ("24-nudge-weekly-pattern-light", 526, 2130),
+    "24b-nudge-weigh-in-crop-light": ("24b-nudge-weigh-in-light", 1496, 2500),
 }
 
 # Screen recordings (and frames taken from them) include the Dynamic Island,

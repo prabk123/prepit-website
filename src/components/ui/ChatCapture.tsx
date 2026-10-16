@@ -19,7 +19,7 @@ export default function ChatCapture({ capture, caption, priority, fade, classNam
   return (
     <figure className={`flex w-full min-w-0 flex-col gap-3 ${className ?? ""}`}>
       <div
-        className={`overflow-hidden rounded-card border border-line bg-[#f4f4f5] ${
+        className={`overflow-hidden rounded-card border border-line bg-app-chat ${
           fade ? "[mask-image:linear-gradient(to_bottom,black_75%,transparent)]" : ""
         }`}
       >

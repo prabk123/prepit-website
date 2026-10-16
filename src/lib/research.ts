@@ -178,10 +178,15 @@ export const RESEARCH_POINTS: ResearchPoint[] = [
     id: "numbers",
     title: "Its numbers come from real sources",
     summary:
-      "Branded and restaurant food uses the official figures. Everyday foods use USDA nutrient data.",
+      "Branded and restaurant food starts from the brand's own figures where they exist. Everyday foods use standard food composition tables.",
     detail:
-      "For branded and restaurant food it uses the official nutrition figures. For everyday foods, the nutrients come from USDA FoodData Central. When you don't give an amount, it assumes a typical portion and says so on the meal, along with how sure it is. If a meal is too vague, it asks.",
+      "For branded and restaurant food it looks for the brand's own nutrition figures first. Everyday foods are estimated from standard food composition tables, such as the UK's CoFID and USDA FoodData Central, which is why a meal can say it uses typical UK values. When you don't give an amount, it assumes a typical portion and says so on the meal, along with how sure it is. If a meal is too vague, it asks.",
     sources: [
+      {
+        citation: "Public Health England. McCance and Widdowson's Composition of Foods Integrated Dataset (CoFID).",
+        where: "GOV.UK",
+        url: "https://www.gov.uk/government/publications/composition-of-foods-integrated-dataset-cofid",
+      },
       {
         citation: "U.S. Department of Agriculture. FoodData Central.",
         where: "USDA Agricultural Research Service",

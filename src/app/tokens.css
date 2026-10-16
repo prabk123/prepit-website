@@ -46,6 +46,10 @@
   --color-accent-text: #b24637;
   /* Keyboard focus rings. */
   --color-focus: #1a1a2e;
+  /* The app's light chat background, behind real chat captures (PRE-283).
+     Matches the captures' own pixels and stays light in every band. */
+  --color-app-chat: #f4f4f5;
+
   /* QR codes stay dark on white in every band, so every camera reads them. */
   --color-qr-bg: #ffffff;
   --color-qr-ink: #1a1a2e;

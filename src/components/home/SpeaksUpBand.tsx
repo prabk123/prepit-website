@@ -44,7 +44,8 @@ export default function SpeaksUpBand() {
             ))}
           </SwipeRow>
           <figcaption className="text-small text-ink-faint">
-            Real messages from the app. Swipe for more.
+            Real messages from the app. <span className="lg:hidden">Swipe for more.</span>
+            <span className="hidden lg:inline">Scroll sideways for more.</span>
           </figcaption>
         </figure>
       }

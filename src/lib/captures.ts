@@ -123,11 +123,11 @@ export function appVideo(name: string, label: string): Omit<LoopVideoProps, "cla
  * around it, at their 2x pixel size (scripts/process-app-captures.py CROPS).
  */
 export const CHAT_CROPS = {
-  "25-nudge-missed-breakfast-crop": { width: 804, height: 713 },
-  "25b-nudge-protein-crop": { width: 804, height: 1113 },
+  "25-nudge-missed-breakfast-crop": { width: 804, height: 676 },
+  "25b-nudge-protein-crop": { width: 804, height: 1076 },
   // Stops inside its Weekly calorie pattern card; ChatCapture fades it out.
-  "24-nudge-weekly-pattern-crop": { width: 804, height: 1107 },
-  "24b-nudge-weigh-in-crop": { width: 804, height: 707 },
+  "24-nudge-weekly-pattern-crop": { width: 804, height: 1069 },
+  "24b-nudge-weigh-in-crop": { width: 804, height: 669 },
 } as const;
 
 export function chatCrop(name: keyof typeof CHAT_CROPS, alt: string) {
