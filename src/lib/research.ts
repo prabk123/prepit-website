@@ -66,8 +66,8 @@ export const RESEARCH_POINTS: ResearchPoint[] = [
     id: "scores",
     title: "Its scores come from nutrition science",
     detail:
-      "Energy weighs glycaemic load, protein in the morning and how you spread your meals. Satiety weighs protein, fibre and how processed your food is, using the NOVA scale researchers use to grade processing. Mood looks at your whole previous day.",
-    more: "Each score blends a handful of factors from your log. Mood reads yesterday's processing, fruit and veg, fibre, sugar and alcohol. The scores are estimates to guide your next meal, not a medical measurement.",
+      "Energy weighs things like glycaemic load, how much sugar you eat, protein in the morning and how you spread your meals. Satiety weighs protein, fibre and how processed your food is, using the NOVA scale researchers use to grade processing. Mood looks at your whole previous day.",
+    more: "Each score blends a handful of factors from your log. Energy: whether you've eaten enough for the time of day, sugar compared with other carbs, glycaemic load, protein in the morning, how your meals are spread and front-loaded, and whether you had breakfast. Satiety: protein, fibre, energy density, how processed your food is and the gaps between meals. Mood reads yesterday's processing, fruit and veg, fibre, sugar, alcohol and any big calorie deficit. The scores are estimates to guide your next meal, not a medical measurement.",
     sources: [
       {
         citation: "Jenkins DJA, et al. (1981). Glycemic index of foods: a physiological basis for carbohydrate exchange.",
@@ -88,7 +88,7 @@ export const RESEARCH_POINTS: ResearchPoint[] = [
         topic: "Energy",
       },
       {
-        citation: "Leidy HJ, et al. (2013). Beneficial effects of a higher-protein breakfast on appetite and energy intake regulation.",
+        citation: "Leidy HJ, et al. (2013). Beneficial effects of a higher-protein breakfast on the appetitive, hormonal, and neural signals controlling energy intake regulation…",
         where: "American Journal of Clinical Nutrition",
         url: "https://doi.org/10.3945/ajcn.112.053116",
         topic: "Energy",
@@ -171,7 +171,7 @@ export const RESEARCH_POINTS: ResearchPoint[] = [
     id: "numbers",
     title: "Its numbers come from real sources",
     detail:
-      "For branded and restaurant food it looks for the official nutrition figures first. When you don't give an amount, it uses typical portions from USDA reference data. Every food shows how sure it is and what it assumed, and if a meal is too vague, it asks.",
+      "For branded and restaurant food it looks for the official nutrition figures first. When you don't give an amount, it uses typical portions from USDA reference data. Typed and photo logs show how sure it is and what it assumed, and if a meal is too vague, it asks.",
     sources: [
       {
         citation: "U.S. Department of Agriculture. FoodData Central.",
@@ -184,8 +184,8 @@ export const RESEARCH_POINTS: ResearchPoint[] = [
     id: "guidance",
     title: "It follows public health guidance",
     detail:
-      "Supplement and water amounts come from the NHS, the European Food Safety Authority (EFSA) and the US National Institutes of Health.",
-    more: "When it suggests a supplement, it only quotes the public amount for adults. Your water goal starts from EFSA's adequate intake unless you set your own.",
+      "Supplement and water amounts come from public health bodies such as the NHS, the European Food Safety Authority (EFSA) and the US National Institutes of Health.",
+    more: "When it suggests a supplement, it only uses the public reference amount for adults, never more. Your water goal starts from EFSA's adequate intake unless you set your own.",
     sources: [
       {
         citation: "NHS. Vitamins and minerals.",
@@ -196,6 +196,11 @@ export const RESEARCH_POINTS: ResearchPoint[] = [
         citation: "NIH Office of Dietary Supplements. Dietary supplement fact sheets.",
         where: "ods.od.nih.gov",
         url: "https://ods.od.nih.gov/factsheets/list-all/",
+      },
+      {
+        citation: "CDC. Folic acid.",
+        where: "Centers for Disease Control and Prevention",
+        url: "https://www.cdc.gov/folic-acid/about/index.html",
       },
       {
         citation: "EFSA. (2017). Dietary reference values for nutrients: summary report.",
@@ -213,7 +218,7 @@ export const RESEARCH_POINTS: ResearchPoint[] = [
     id: "limits",
     title: "It knows its limits",
     detail:
-      "It won't diagnose anything or suggest a dose. For anything medical, it points you to your GP, a pharmacist or a registered dietitian.",
+      "It won't diagnose anything, and it never recommends or changes a dose beyond the public reference amount. For anything medical, or a question about your dose, it points you to your GP, a pharmacist or a registered dietitian.",
     sources: [],
   },
 ];
