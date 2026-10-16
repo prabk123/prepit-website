@@ -52,7 +52,7 @@ const PAGES: Record<FeatureSlug, { Body: ComponentType; hero: HeroMedia }> = {
     hero: {
       capture: appCapture(
         "23b-home-screen-widgets",
-        "An iPhone Home Screen with PrepIt's Today's calories widget: 1,481 kcal eaten, 89 left of a 1,570 goal, On track",
+        "An iPhone Home Screen with PrepIt's Today's calories widget: 1,485 kcal eaten, 85 left of a 1,570 goal, On track",
       ),
     },
   },
