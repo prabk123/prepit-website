@@ -71,10 +71,11 @@ export const nutritionistEvening: LifestylePhoto = {
     { position: "65% 50%" },
   ),
   textSide: "start",
-  // Values from the weekly calorie pattern card on the phone.
+  // Values from the weekly calorie pattern card on the phone. The labels sit
+  // to the right of the phone, over the hand, so they stay clear of the text.
   annotations: [
-    { x: 59, y: 58, side: "left", length: 96, value: "2,250 kcal", label: "Tuesday, with more room" },
-    { x: 59, y: 77, side: "left", length: 96, value: "12,600 kcal", label: "Weekly total, unchanged" },
+    { x: 76, y: 58, side: "right", length: 32, value: "2,250 kcal", label: "Tuesday" },
+    { x: 76, y: 77, side: "right", length: 32, value: "12,600 kcal", label: "Each week" },
   ],
 };
 
