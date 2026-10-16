@@ -8,11 +8,12 @@
  * Facts are checked against the app and fresca_backend docs/product-help.
  */
 
+/** Site order: the two standouts first, as on the homepage, then the rest. */
 export const FEATURE_SLUGS = [
-  "logging",
-  "nutrition-signals",
   "ai-nutritionist",
+  "nutrition-signals",
   "meal-plans",
+  "logging",
   "widgets-and-siri",
 ] as const;
 
@@ -32,64 +33,70 @@ export type FeatureMeta = {
   heading: string;
   /** The line under the h1. */
   lead: string;
-  /** A dark-mode still from public/app for the related-features card. */
+  /** A still from public/app for the related-features card. */
   thumb: string;
 };
 
+/*
+ * Copy is in the lifecycle-email voice (PRE-279): the reader's day first,
+ * then how PrepIt does it. Keep the shared phrases the same on every page:
+ * "your nutritionist", "one thing to change", "Energy, Satiety and Mood",
+ * "7 days free".
+ */
 export const FEATURES: Record<FeatureSlug, FeatureMeta> = {
-  logging: {
-    slug: "logging",
-    name: "Logging",
-    title: "Log meals in seconds by typing, photo or Siri",
+  "ai-nutritionist": {
+    slug: "ai-nutritionist",
+    name: "Your nutritionist",
+    title: "An AI nutritionist that knows you and speaks up",
     description:
-      "Describe a meal in your own words, snap your plate or ask Siri. PrepIt checks official brand and restaurant figures first and shows what it assumed, so you can fix anything.",
-    summary: "Type it, snap it or say it. Your nutritionist does the maths.",
-    heading: "The easiest logging you'll ever do.",
-    lead: "Describe it, snap it or say it. PrepIt does the research and the maths, and you can change anything in one tap.",
-    thumb: "01b-home-log",
+      "PrepIt's nutritionist learns how you eat, agrees one thing to change first, and messages you when it spots a pattern. Ask it anything, any time.",
+    summary: "It learns how you eat, and speaks up before you slip.",
+    heading: "A nutritionist that knows you and speaks up.",
+    lead: "It learns how you eat, agrees one thing to change first, and messages you when it spots something. You don't have to remember to ask.",
+    thumb: "02-chat-chart",
   },
   "nutrition-signals": {
     slug: "nutrition-signals",
     name: "Energy, Satiety and Mood",
-    title: "Energy, Satiety and Mood scores from your food",
+    title: "Energy, Satiety and Mood: how your food will make you feel",
     description:
-      "PrepIt turns what you eat into three scores from 0 to 100: Energy, Satiety and Mood. Grounded in nutrition research and built from your food alone, no wearable needed.",
-    summary: "Three scores that show how your food will make you feel.",
-    heading: "Calories tell you what you ate. PrepIt tells you how you'll feel.",
-    lead: "Three scores from 0 to 100, built from your food alone. No ring, no watch, no glucose monitor.",
+      "Calories say what you ate. Energy, Satiety and Mood say whether you'll dip at 3pm, stay full until dinner and feel steady tomorrow, with the reason and what to try next.",
+    summary: "Know how your food will make you feel, and why.",
+    heading: "Know how your food will make you feel.",
+    lead: "Calories say what you ate. Energy, Satiety and Mood say whether you'll dip at 3pm, stay full until dinner and feel steady tomorrow, from your food alone.",
     thumb: "06-signal-energy",
-  },
-  "ai-nutritionist": {
-    slug: "ai-nutritionist",
-    name: "Your AI nutritionist",
-    title: "An AI nutritionist that knows your goals and your day",
-    description:
-      "Ask PrepIt's nutritionist anything. It knows your goals and what you ate, draws charts, logs meals from chat, answers voice notes and checks in with you every week.",
-    summary: "Answers, charts and weekly check-ins from a nutritionist who knows your day.",
-    heading: "Ask anything. It knows your goals, your day and your last meal.",
-    lead: "Answers in plain language, built on what you actually ate. And it doesn't wait for you to ask.",
-    thumb: "02-chat-chart",
   },
   "meal-plans": {
     slug: "meal-plans",
     name: "Meal plans",
     title: "Meal plans with a grocery list and cost estimate",
     description:
-      "Ask for a week of meals and PrepIt plans around your goals, tastes and budget, with one grocery list by aisle, an estimated cost and a weekly calorie pattern.",
-    summary: "A week of meals built for you, with one grocery list.",
-    heading: "Ask for a week of meals. Get a plan built for you.",
-    lead: "Your nutritionist plans around your goals, tastes and budget, then helps you stick to it.",
+      "Ask your nutritionist for a week of meals. It plans around your goals, tastes and budget, swaps anything you don't fancy and builds one grocery list by aisle.",
+    summary: "Ask for a week of meals. Get the plan and the shopping list.",
+    heading: "Your week, planned in one chat.",
+    lead: "Tell your nutritionist which days to cover and what you'd rather avoid. It plans the meals around your goals and builds the grocery list for you.",
     thumb: "13-grocery-list",
+  },
+  logging: {
+    slug: "logging",
+    name: "Logging",
+    title: "Log meals in your own words, by photo or with Siri",
+    description:
+      "Type what you ate like a text, snap your plate or ask Siri. It's on your log straight away, checked against official brand and restaurant figures first.",
+    summary: "Type it, snap it or say it. It's on your log straight away.",
+    heading: "Logging that doesn't feel like a chore.",
+    lead: "Most people quit tracking because logging takes too long. Here you type “two eggs and buttered toast”, snap your plate or say it to Siri, and it's on your log straight away.",
+    thumb: "01b-home-log",
   },
   "widgets-and-siri": {
     slug: "widgets-and-siri",
     name: "Widgets and Siri",
     title: "iPhone widgets, Siri and the Action button",
     description:
-      "Log a meal with Siri, the Action button or Control Center, and add water, tick supplements and log planned meals from widgets without opening PrepIt.",
-    summary: "Log and tick things off without opening the app.",
+      "Log a meal with Siri, the Action button or Control Center, and add water, tick supplements or log a planned meal from a widget without opening PrepIt.",
+    summary: "Log a meal or tick something off without opening the app.",
     heading: "PrepIt, without opening PrepIt.",
-    lead: "Widgets on your Home Screen and Lock Screen, Siri, the Action button and Control Center. Log a meal or tick something off in a second.",
+    lead: "The less effort logging takes, the better your nutritionist's advice gets. Press the Action button, ask Siri or tap a widget, and it's done.",
     thumb: "23b-home-screen-widgets",
   },
 };

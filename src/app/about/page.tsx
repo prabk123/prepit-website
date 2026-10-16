@@ -119,7 +119,7 @@ export default function AboutPage() {
             ))}
             <BentoTile size="medium" title="You stay in control">
               Your nutritionist can log, move or fix a meal, plan your week and change your goals,
-              but you confirm every log, plan or goal change before it’s saved.
+              but any log, plan or goal change it makes shows up as a card first, and nothing is saved until you tap it.
             </BentoTile>
             <BentoTile size="medium" title="A nutritionist, not a doctor">
               PrepIt gives nutrition guidance, not medical advice, and will tell you when something
