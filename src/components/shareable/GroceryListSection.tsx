@@ -178,7 +178,7 @@ async function writeToClipboard(text: string): Promise<boolean> {
 type CopyState = "idle" | "copied" | "failed";
 
 const FOOTER_BUTTON =
-  "flex h-12 flex-1 items-center justify-center gap-2 rounded-control bg-surface-raised px-4 text-body font-medium text-ink transition-colors hover:bg-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus";
+  "flex h-12 flex-1 items-center justify-center gap-2 rounded-button bg-surface-raised px-4 text-body font-bold text-ink transition-colors hover:bg-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus";
 
 function GroceryModal({
   planId,
