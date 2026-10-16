@@ -52,7 +52,7 @@ const principles = [
 
 export default function AboutPage() {
   return (
-    <div className="w-full bg-page pt-16 text-ink [color-scheme:dark] lg:pt-[72px]">
+    <div className="w-full bg-page pt-16 text-ink lg:pt-[72px]">
       {/* A lifestyle photo from PRE-199 can replace the phone here once it is ready. */}
       <Section labelledBy="about-heading">
         <FeatureSplit

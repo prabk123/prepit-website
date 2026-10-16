@@ -24,7 +24,7 @@ function validate(values: Record<Field, string>): FieldErrors {
 }
 
 const inputClass =
-  "w-full min-w-0 rounded-icon border bg-page px-4 text-body text-ink placeholder:text-ink-faint transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cream";
+  "w-full min-w-0 rounded-icon border bg-page px-4 text-body text-ink placeholder:text-ink-faint transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus";
 
 function borderFor(error?: string) {
   return error ? "border-error" : "border-ink-faint hover:border-ink-muted";
@@ -121,7 +121,7 @@ export default function ContactForm({ kind }: { kind: ContactKind }) {
   if (status === "sent") {
     return (
       <div ref={sentRef} tabIndex={-1} role="status" className={`${card} flex flex-col items-start gap-6 outline-none`}>
-        <span aria-hidden className="flex h-12 w-12 items-center justify-center rounded-control bg-surface-raised text-energy">
+        <span aria-hidden className="flex h-12 w-12 items-center justify-center rounded-control bg-surface-raised text-accent-text">
           <svg width="20" height="16" viewBox="0 0 15 12" fill="none">
             <path d="M1.5 6L5.5 10L13.5 1.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
@@ -142,7 +142,7 @@ export default function ContactForm({ kind }: { kind: ContactKind }) {
             focusNameOnReturn.current = true;
             setStatus("idle");
           }}
-          className="inline-flex h-12 items-center rounded-control border border-line-strong px-6 text-body font-medium text-ink transition-colors hover:bg-surface-raised focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cream"
+          className="inline-flex h-12 items-center rounded-button border border-line-strong px-6 text-body font-bold text-ink transition-colors hover:bg-surface-raised focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus"
         >
           Send another message
         </button>
@@ -233,7 +233,7 @@ export default function ContactForm({ kind }: { kind: ContactKind }) {
         <button
           type="submit"
           disabled={sending}
-          className="inline-flex h-14 w-full items-center justify-center rounded-control bg-cream px-7 text-body font-medium text-on-cream transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cream disabled:opacity-60 sm:w-fit"
+          className="inline-flex h-14 w-full items-center justify-center rounded-button bg-primary px-7 text-body font-bold text-on-primary transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus disabled:opacity-60 sm:w-fit"
         >
           {sending ? "Sending…" : isFeedback ? "Send feedback" : "Send message"}
         </button>

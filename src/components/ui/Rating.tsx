@@ -18,7 +18,7 @@ function Star({ fill }: { fill: number }) {
         <path d="M8 1.2l2.1 4.3 4.7.7-3.4 3.3.8 4.7L8 12l-4.2 2.2.8-4.7L1.2 6.2l4.7-.7z" fill="currentColor" />
       </svg>
       <span className="absolute inset-0 overflow-hidden" style={{ width: `${fill * 100}%` }}>
-        <svg viewBox="0 0 16 16" className="h-4 w-4 text-energy">
+        <svg viewBox="0 0 16 16" className="h-4 w-4 text-accent-text">
           <path d="M8 1.2l2.1 4.3 4.7.7-3.4 3.3.8 4.7L8 12l-4.2 2.2.8-4.7L1.2 6.2l4.7-.7z" fill="currentColor" />
         </svg>
       </span>

@@ -16,7 +16,7 @@ export default function MealPlanError({ reset }: { error: Error; reset: () => vo
       <button
         type="button"
         onClick={reset}
-        className="inline-flex h-14 w-fit items-center rounded-control bg-cream px-7 text-body font-medium text-on-cream transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cream"
+        className="inline-flex h-14 w-fit items-center rounded-button bg-primary px-7 text-body font-bold text-on-primary transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus"
       >
         Try again
       </button>

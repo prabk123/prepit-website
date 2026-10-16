@@ -47,7 +47,7 @@ function Question({
           aria-expanded={open}
           aria-controls={panelId}
           onClick={onToggle}
-          className="flex w-full items-center justify-between gap-6 py-5 text-left text-lead font-medium text-ink transition-colors hover:text-ink-secondary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cream"
+          className="flex w-full items-center justify-between gap-6 py-5 text-left text-lead font-medium text-ink transition-colors hover:text-ink-secondary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus"
         >
           {item.question}
           <PlusMinus open={open} />

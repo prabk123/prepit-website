@@ -66,20 +66,41 @@ export function isAppWidget(name: string): name is AppWidget {
   return name in APP_WIDGETS;
 }
 
-/** `1x, 2x` sources for a dark-mode capture, so 1x screens get the smaller file. */
-function darkSrcSet(name: string, ext: "avif" | "webp") {
-  return `/app/${name}-dark@1x.${ext} 1x, /app/${name}-dark@2x.${ext} 2x`;
+/** The app's light or dark capture set. Light pages use light; dark bands may use dark. */
+export type CaptureMode = "light" | "dark";
+
+/**
+ * Stills that only exist in dark mode: the clean Home Screen was captured on
+ * a dark wallpaper only. They show dark wherever they are used.
+ */
+const DARK_ONLY = new Set<string>(["23b-home-screen-widgets"]);
+
+function modeFor(name: string, mode: CaptureMode): CaptureMode {
+  return DARK_ONLY.has(name) ? "dark" : mode;
+}
+
+/** `1x, 2x` sources for a capture, so 1x screens get the smaller file. */
+function srcSet(name: string, ext: "avif" | "webp", mode: CaptureMode) {
+  const m = modeFor(name, mode);
+  return `/app/${name}-${m}@1x.${ext} 1x, /app/${name}-${m}@2x.${ext} 2x`;
+}
+
+/** The 1x files of a still, for small card thumbnails. */
+export function captureThumb(name: string, mode: CaptureMode = "light") {
+  const m = modeFor(name, mode);
+  return { avif: `/app/${name}-${m}@1x.avif`, webp: `/app/${name}-${m}@1x.webp` };
 }
 
 /**
- * Real app captures from PRE-198, in public/app. The site is dark only, so
- * these always use the app's dark-mode set, at 1x or 2x by screen density.
+ * Real app captures from PRE-198, in public/app, at 1x or 2x by screen
+ * density. The site is light-led, so these use the app's light-mode set
+ * unless a dark band asks for `dark`.
  */
-export function appCapture(name: string, alt: string): DeviceCapture {
+export function appCapture(name: string, alt: string, mode: CaptureMode = "light"): DeviceCapture {
   return {
-    src: `/app/${name}-dark@2x.webp`,
-    avif: darkSrcSet(name, "avif"),
-    webp: darkSrcSet(name, "webp"),
+    src: `/app/${name}-${modeFor(name, mode)}@2x.webp`,
+    avif: srcSet(name, "avif", mode),
+    webp: srcSet(name, "webp", mode),
     alt,
   };
 }
@@ -90,7 +111,10 @@ export function appCapture(name: string, alt: string): DeviceCapture {
  */
 const MP4_ONLY = new Set(["03-log-typed", "08-chat-ask", "12-plan-week", "21-walkthrough"]);
 
-/** Screen recordings are 804 x 1748, recorded in dark mode. */
+/**
+ * Screen recordings are 804 x 1748. They were recorded in dark mode only
+ * (there are no light recordings yet), so they show the dark app.
+ */
 export function appVideo(name: string, label: string): Omit<LoopVideoProps, "className"> {
   return {
     mp4: `/app/${name}.mp4`,
@@ -104,11 +128,11 @@ export function appVideo(name: string, label: string): Omit<LoopVideoProps, "cla
 }
 
 /** Home Screen widget captures (not phone screens), with their pixel size at 2x. */
-export function widgetCapture(name: string, alt: string, width: number, height: number) {
+export function widgetCapture(name: string, alt: string, width: number, height: number, mode: CaptureMode = "light") {
   return {
-    src: `/app/${name}-dark@2x.webp`,
-    avif: darkSrcSet(name, "avif"),
-    webp: darkSrcSet(name, "webp"),
+    src: `/app/${name}-${modeFor(name, mode)}@2x.webp`,
+    avif: srcSet(name, "avif", mode),
+    webp: srcSet(name, "webp", mode),
     alt,
     width,
     height,
@@ -116,10 +140,10 @@ export function widgetCapture(name: string, alt: string, width: number, height: 
 }
 
 /** A widget render, without a phone around it. */
-export function appWidget(name: AppWidget) {
+export function appWidget(name: AppWidget, mode: CaptureMode = "light") {
   return {
-    avif: `/app/${name}-dark@2x.avif`,
-    webp: `/app/${name}-dark@2x.webp`,
+    avif: `/app/${name}-${modeFor(name, mode)}@2x.avif`,
+    webp: `/app/${name}-${modeFor(name, mode)}@2x.webp`,
     ...APP_WIDGETS[name],
   };
 }

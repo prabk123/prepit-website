@@ -82,7 +82,7 @@ export default function ImageryPreviewPage() {
   if (!previewEnabled) notFound();
 
   return (
-    <div className="bg-page pt-16 text-ink [color-scheme:dark] lg:pt-[72px]">
+    <div className="bg-page pt-16 text-ink lg:pt-[72px]">
       <Section labelledBy="imagery-title">
         <SectionHeading
           eyebrow="PRE-199 · dev only"

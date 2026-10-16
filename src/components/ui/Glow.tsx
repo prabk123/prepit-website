@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 
 /**
- * Soft orange and amber light behind a phone, centred in its `relative`
+ * Soft orange light behind a phone, centred in its `relative`
  * parent. Pass `style` (left, top, width) to move it.
  */
 export default function Glow({ className, style }: { className?: string; style?: CSSProperties }) {

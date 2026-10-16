@@ -20,7 +20,7 @@ declare global {
 }
 
 const buttonClass =
-  "inline-flex h-11 items-center justify-center rounded-control px-5 text-small font-medium transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cream";
+  "inline-flex h-11 items-center justify-center rounded-button px-5 text-small font-bold transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus";
 
 /** UK and EEA visitors choose here before optional cookies (PostHog, Meta Pixel) are set. */
 export default function CookieConsent() {
@@ -55,14 +55,14 @@ export default function CookieConsent() {
       role="dialog"
       aria-live="polite"
       aria-label="Cookie consent"
-      className="fixed inset-x-4 bottom-4 z-50 mx-auto max-w-[720px] rounded-tile border border-line-strong bg-surface-raised p-5 text-ink [color-scheme:dark] shadow-phone sm:inset-x-6 sm:p-6"
+      className="fixed inset-x-4 bottom-4 z-50 mx-auto max-w-[720px] rounded-tile border border-line-strong bg-surface p-5 text-ink shadow-phone sm:inset-x-6 sm:p-6"
     >
       <p className="text-small text-ink-secondary text-pretty">
         We use optional analytics and advertising cookies to see how our website is used and
         whether our ads work. They stay off unless you accept. See our{" "}
         <Link
           href="/cookie-policy"
-          className="text-ink underline decoration-energy underline-offset-4 hover:text-energy"
+          className="text-ink underline decoration-accent underline-offset-4 hover:text-accent-text"
         >
           Cookie Policy
         </Link>
@@ -79,7 +79,7 @@ export default function CookieConsent() {
         <button
           type="button"
           onClick={acceptAnalytics}
-          className={`${buttonClass} bg-cream text-on-cream`}
+          className={`${buttonClass} bg-primary text-on-primary`}
         >
           Accept optional cookies
         </button>

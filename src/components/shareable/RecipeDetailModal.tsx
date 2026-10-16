@@ -165,7 +165,7 @@ export default function RecipeDetailModal({
                     onClick={() => setActiveTab(tab.id)}
                     className={`-mb-px flex-1 border-b-2 pb-3 text-center text-body transition-colors ${
                       active
-                        ? "border-cream font-medium text-ink"
+                        ? "border-accent font-medium text-ink"
                         : "border-transparent text-ink-muted hover:text-ink"
                     }`}
                   >

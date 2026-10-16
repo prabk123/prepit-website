@@ -27,10 +27,12 @@ export type SectionPhoto = {
 type SectionProps = {
   id?: string;
   /**
-   * `page`: the warm near-black page. `surface`: one step lighter, to set a
-   * section apart. `photo`: a full-bleed lifestyle photo under a dark gradient.
+   * `page`: the light grey page. `surface`: white, to set a section apart.
+   * `dark`: one of the site's two dark bands (research, closing download).
+   * `photo`: a full-bleed lifestyle photo under a dark gradient, with light
+   * text on it.
    */
-  tone?: "page" | "surface" | "photo";
+  tone?: "page" | "surface" | "dark" | "photo";
   photo?: SectionPhoto;
   /** id of the heading that names this section, for screen readers. */
   labelledBy?: string;
@@ -54,6 +56,8 @@ export default function Section({
   children,
 }: SectionProps) {
   const background = tone === "surface" ? "bg-surface" : "bg-page";
+  // Dark bands and photos swap every colour token for its dark value.
+  const theme = tone === "dark" || tone === "photo" ? "theme-dark" : "";
   const scrim = photo?.scrim === "end" ? "section-photo-scrim-end" : "section-photo-scrim";
 
   return (
@@ -61,7 +65,7 @@ export default function Section({
       id={id}
       aria-labelledby={labelledBy}
       data-section-name={analyticsName}
-      className={`relative isolate w-full overflow-hidden ${background} text-ink ${className ?? ""}`}
+      className={`relative isolate w-full overflow-hidden ${theme} ${background} text-ink ${className ?? ""}`}
     >
       {tone === "photo" && photo && (
         <>

@@ -17,7 +17,7 @@ export default function LegalMDXPage({
   children,
 }: LegalMDXPageProps) {
   return (
-    <div className="w-full bg-page pt-16 text-ink [color-scheme:dark] lg:pt-[72px]">
+    <div className="w-full bg-page pt-16 text-ink lg:pt-[72px]">
       <Section labelledBy="legal-heading">
         <div className="mx-auto flex max-w-[720px] flex-col gap-10">
           <LegalNav currentPath={currentPath} />

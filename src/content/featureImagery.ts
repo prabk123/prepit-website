@@ -130,7 +130,7 @@ export const planFlatLays = {
 };
 
 /**
- * Soft honey light on near-black, behind sections that have no photo.
+ * Soft honey light, made for the dark site; only the dev imagery page uses it.
  * Decorative. WebP only: AVIF smeared the grain into blocks. It is a soft
  * blur, so stretching it full width is fine.
  */

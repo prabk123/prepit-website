@@ -1,10 +1,10 @@
 import LinkCard from "@/components/ui/LinkCard";
-import { isAppClip, isAppStill } from "@/lib/captures";
+import { captureThumb, isAppClip, isAppStill } from "@/lib/captures";
 import type { GuideMeta } from "@/lib/guides";
 
 function thumbnail(hero: string) {
   if (isAppClip(hero)) return { webp: `/app/${hero}-poster.webp` };
-  if (isAppStill(hero)) return { avif: `/app/${hero}-dark@1x.avif`, webp: `/app/${hero}-dark@1x.webp` };
+  if (isAppStill(hero)) return captureThumb(hero);
   return null;
 }
 

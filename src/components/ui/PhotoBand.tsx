@@ -16,7 +16,7 @@ type PhotoBandProps = {
    * right, for photos whose subject is on the left and low.
    */
   textSide?: "start" | "end";
-  /** Headline, line and points, set over the dark gradient. */
+  /** Headline, line and points, set light over the dark gradient from 1024 px (on the page below it). */
   children: ReactNode;
   /**
    * Phones under the photo, on the side away from the text. They don't
@@ -78,8 +78,10 @@ export default function PhotoBand({
             className={`${end ? "photo-band-scrim-end" : "photo-band-scrim"} absolute inset-0 z-[1] max-lg:hidden`}
           />
         )}
+        {/* From 1024 px the text sits on the dark photo, so it takes the dark
+            tokens there; below that it sits on the page under the photo. */}
         <div
-          className={`relative z-[3] mx-auto flex h-full w-full max-w-content px-gutter pt-[calc(var(--photo-strip-h)+1.5rem)] ${
+          className={`theme-dark-lg relative z-[3] mx-auto flex h-full w-full max-w-content px-gutter pt-[calc(var(--photo-strip-h)+1.5rem)] ${
             end ? "lg:items-start lg:justify-end lg:pt-16" : "items-center lg:py-16"
           }`}
         >
