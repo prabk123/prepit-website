@@ -1,10 +1,13 @@
 import { PRICES, TRIAL_DAYS } from "@/lib/pricing";
+import { RESEARCH_PAGE_HREF } from "@/lib/research";
 
 export type FaqItem = {
   /** Fixed slug, sent with the `faq_question_opened` event. Never change one. */
   id: string;
   question: string;
   answer: string;
+  /** A link shown under the answer (not in the structured data). */
+  link?: { href: string; label: string };
 };
 
 /**
@@ -39,6 +42,7 @@ export const FAQ_ITEMS: FaqItem[] = [
     question: "What are Energy, Satiety and Mood?",
     answer:
       "Three 0 to 100 scores that estimate how your food is likely to affect you. Energy and Satiety update as you log today; Mood is built from yesterday's full log. They're research-based guides for your next meal, not a measure of how you feel.",
+    link: { href: RESEARCH_PAGE_HREF, label: "The research behind the scores" },
   },
   {
     id: "nutritionist",

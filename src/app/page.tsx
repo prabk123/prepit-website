@@ -8,6 +8,7 @@ import LoggingSection from "@/components/home/LoggingSection";
 import NutritionistBand from "@/components/home/NutritionistBand";
 import PlansBand from "@/components/home/PlansBand";
 import ProofStrip from "@/components/home/ProofStrip";
+import ResearchSection from "@/components/home/ResearchSection";
 import SignalsSection from "@/components/home/SignalsSection";
 import WhyTrackersFail from "@/components/home/WhyTrackersFail";
 import FaqSection from "@/components/pricing/FaqSection";
@@ -64,6 +65,7 @@ export default function Home() {
       <ConsultationSection />
       <LoggingSection />
       <SignalsSection />
+      <ResearchSection />
       <NutritionistBand />
       <PlansBand />
       <EverythingElse />
