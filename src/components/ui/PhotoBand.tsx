@@ -40,6 +40,11 @@ type PhotoBandProps = {
    * photo to a headline and one line.
    */
   aside?: ReactNode;
+  /**
+   * `center` (default) centres the aside against the media; `start` tops it
+   * and keeps it in view from 1024 px, for media much taller than the text.
+   */
+  asideAlign?: "center" | "start";
 };
 
 /**
@@ -61,6 +66,7 @@ export default function PhotoBand({
   scrimBehindText = false,
   textOnBrightPhoto = false,
   aside,
+  asideAlign = "center",
 }: PhotoBandProps) {
   const end = textSide === "end";
   return (
@@ -111,8 +117,16 @@ export default function PhotoBand({
         </div>
       </AnnotatedPhoto>
       {media && aside && (
-        <div className="relative z-[4] mx-auto mt-10 grid w-full max-w-content items-center gap-stack px-gutter lg:grid-cols-2 lg:gap-x-12">
-          <div className={`flex w-full max-w-[460px] flex-col gap-8 ${end ? "lg:order-2 lg:justify-self-end" : ""}`}>
+        <div
+          className={`relative z-[4] mx-auto mt-10 grid w-full max-w-content gap-stack px-gutter lg:grid-cols-2 lg:gap-x-12 ${
+            asideAlign === "start" ? "items-start" : "items-center"
+          }`}
+        >
+          <div
+            className={`flex w-full max-w-[460px] flex-col gap-8 ${end ? "lg:order-2 lg:justify-self-end" : ""} ${
+              asideAlign === "start" ? "lg:sticky lg:top-28" : ""
+            }`}
+          >
             {aside}
           </div>
           <div className={`flex justify-center ${end ? "lg:order-1" : ""}`}>{media}</div>

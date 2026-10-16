@@ -7,13 +7,12 @@ import { RESEARCH_PAGE_HREF, RESEARCH_POINTS } from "@/lib/research";
 /**
  * "How your nutritionist decides what to say" (PRE-278): how the advice is
  * grounded, in six points, linking to /research for the sources. It is one of
- * the site's two dark bands in the light-led direction; until the light theme
- * (PRE-276) adds that band tone, it sits on the surface tone to stand apart.
- * The homepage restructure (PRE-277) owns where it sits on the page.
+ * the site's two dark bands in the light-led direction (PRE-276's dark tone).
+ * The homepage restructure (PRE-277) puts it after Energy, Satiety and Mood.
  */
 export default function ResearchSection() {
   return (
-    <Section id="how-it-decides" tone="surface" labelledBy="research-heading" analyticsName="research">
+    <Section id="how-it-decides" tone="dark" labelledBy="research-heading" analyticsName="research">
       <div className="flex flex-col gap-stack">
         <SectionHeading
           id="research-heading"
