@@ -1,31 +1,30 @@
 import type { Metadata } from "next";
 import SectionViewTracker from "@/components/analytics/SectionViewTracker";
-import AlwaysOnSection from "@/components/home/AlwaysOnSection";
-import ConsultationSection from "@/components/home/ConsultationSection";
-import EverythingElse from "@/components/home/EverythingElse";
 import HomeHero from "@/components/home/HomeHero";
-import LoggingSection from "@/components/home/LoggingSection";
-import NutritionistBand from "@/components/home/NutritionistBand";
+import KnowsYouSection from "@/components/home/KnowsYouSection";
+import ObjectionsSection from "@/components/home/ObjectionsSection";
 import PlansBand from "@/components/home/PlansBand";
-import ProofStrip from "@/components/home/ProofStrip";
+import ResearchSection from "@/components/home/ResearchSection";
 import SignalsSection from "@/components/home/SignalsSection";
-import WhyTrackersFail from "@/components/home/WhyTrackersFail";
+import SpeaksUpBand from "@/components/home/SpeaksUpBand";
 import FaqSection from "@/components/pricing/FaqSection";
 import PricingSection from "@/components/pricing/PricingSection";
 
+const TITLE = "PrepIt | The nutritionist that notices";
+const DESCRIPTION =
+  "Tell PrepIt what you eat. It spots what's behind the 3pm slump and the evening snacking, and tells you the one thing to change first. 7 days free on iPhone.";
+const SHARE_DESCRIPTION =
+  "An AI nutritionist that learns how you eat, speaks up when something slips, and shows how your food will make you feel.";
+
 export const metadata: Metadata = {
-  title: {
-    absolute: "PrepIt | Your AI Nutritionist – Meals In, Smart Advice Out",
-  },
-  description:
-    "Describe any meal in your own words. PrepIt logs it in seconds, shows how it affects your energy, hunger, and mood, and tells you what to do next—no food hunts, no guilt.",
+  title: { absolute: TITLE },
+  description: DESCRIPTION,
   alternates: {
     canonical: "https://www.tryprepit.app",
   },
   openGraph: {
-    title: "PrepIt | Your AI Nutritionist – Meals In, Smart Advice Out",
-    description:
-      "Log meals in plain English. PrepIt shows how each meal affects your energy, hunger, and mood—and what to do next.",
+    title: TITLE,
+    description: SHARE_DESCRIPTION,
     url: "https://www.tryprepit.app",
     images: [
       {
@@ -38,35 +37,29 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "PrepIt | Your AI Nutritionist – Meals In, Smart Advice Out",
-    description:
-      "Log meals in plain English. PrepIt shows how each meal affects your energy, hunger, and mood—and what to do next.",
+    title: TITLE,
+    description: SHARE_DESCRIPTION,
     images: ["/og-image.png"],
   },
 };
 
 /**
- * The homepage (design D3, copy approved 13 Oct). Pricing and FAQ come from
- * PRE-202; the closing download section is added by the layout. PRE-238 took
- * out the loop and the trust row: the sections after them already say the
- * same. Their lines that appeared nowhere else moved: the example next step,
- * "no cheat days" and "honest about confidence" to Signals, and the privacy
- * line to the bento's last tile.
+ * The homepage (PRE-277, the light redesign): the promise, the two standouts
+ * (the nutritionist that knows you and speaks up; how your food will make you
+ * feel), the research band, your week planned, the questions people ask, then
+ * price and FAQ. The closing download band is added by the layout.
  */
 export default function Home() {
   return (
     <div className="bg-page text-ink">
       <SectionViewTracker />
       <HomeHero />
-      <ProofStrip />
-      <WhyTrackersFail />
-      <AlwaysOnSection />
-      <ConsultationSection />
-      <LoggingSection />
+      <SpeaksUpBand />
+      <KnowsYouSection />
       <SignalsSection />
-      <NutritionistBand />
+      <ResearchSection />
       <PlansBand />
-      <EverythingElse />
+      <ObjectionsSection />
       <PricingSection />
       <FaqSection />
     </div>

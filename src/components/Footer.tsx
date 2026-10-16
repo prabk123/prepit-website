@@ -3,6 +3,7 @@ import Link from "next/link";
 import AppStoreLink from "@/components/AppStoreLink";
 import { FEATURE_SLUGS, FEATURES, featureHref } from "@/lib/features";
 import { HEADER_SECTION_LINKS, SITE_PAGE_LINKS } from "@/lib/homeSections";
+import { RESEARCH_PAGE_HREF } from "@/lib/research";
 
 // 44px tall on phones so each link is a full tap target; tighter on desktop.
 const linkClass = "flex min-h-11 items-center text-body text-ink-muted transition-colors hover:text-ink lg:min-h-0";
@@ -63,6 +64,9 @@ export default function Footer() {
                   {link.label}
                 </Link>
               ))}
+              <Link href={RESEARCH_PAGE_HREF} className={linkClass}>
+                How it decides
+              </Link>
               <a href="https://prepit.userjot.com/" target="_blank" rel="noopener noreferrer" className={linkClass}>
                 Feedback
               </a>

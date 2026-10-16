@@ -1,79 +1,66 @@
 import DeviceFrame from "@/components/device/DeviceFrame";
-import DevicePair from "@/components/device/DevicePair";
+import ChatPanel from "@/components/ui/ChatPanel";
 import FeatureSplit from "@/components/ui/FeatureSplit";
 import Glow from "@/components/ui/Glow";
-import PointList from "@/components/ui/PointList";
-import QuoteCard from "@/components/ui/QuoteCard";
 import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
 import TextLink from "@/components/ui/TextLink";
+import { satietyNextStep } from "@/content/nutritionistMessages";
 import { appCapture } from "@/lib/captures";
 
-const SIGNALS = [
-  {
-    title: "Energy",
-    detail: "Will you have steady energy and focus today? Built from meal timing, glycaemic load and how you spread your calories.",
-    accent: "var(--color-energy)",
-  },
-  {
-    title: "Satiety",
-    detail: "Will you stay in control around food? Driven by protein, fibre and how processed your meals are.",
-    accent: "var(--color-satiety)",
-  },
-  {
-    title: "Mood",
-    detail: "How well yesterday's food set you up for a calm, steady day.",
-    accent: "var(--color-mood)",
-  },
+const SIGNAL_DOTS = [
+  { name: "Energy", color: "var(--color-energy)" },
+  { name: "Satiety", color: "var(--color-satiety)" },
+  { name: "Mood", color: "var(--color-mood)" },
 ];
 
-/** "Know how you'll feel": Energy, Satiety and Mood. */
+/**
+ * Standout 2: how your food will make you feel. One score opened with its
+ * reasons, and one worked next step.
+ */
 export default function SignalsSection() {
   return (
     <Section id="signals" labelledBy="signals-heading" analyticsName="signals">
-      <div className="flex flex-col gap-stack">
-        <FeatureSplit
-          reverse
-          media={
-            <div className="relative">
-              <Glow />
-              <DevicePair className="[--device-w:260px] sm:[--device-w:300px] lg:[--device-w:clamp(260px,22vw,320px)]">
-                <DeviceFrame
-                  capture={appCapture(
-                    "06-signal-energy",
-                    "Energy at 84, with what shaped it: calorie fit, meal spread and timing",
-                  )}
-                />
-                <DeviceFrame
-                  className="hidden sm:block"
-                  capture={appCapture(
-                    "07-food-analysis",
-                    "What your food did: last 7 days of Energy, Satiety and Mood, and what changed",
-                  )}
-                />
-              </DevicePair>
-            </div>
-          }
-        >
-          <SectionHeading
-            id="signals-heading"
-            size="section"
-            title="Calories tell you what you ate. PrepIt tells you how you'll feel."
-            lead="Three scores from 0 to 100, built from your food alone. No wearable, no CGM."
-          />
-        </FeatureSplit>
-        <PointList layout="columns" points={SIGNALS} />
-        <QuoteCard
-          className="max-w-[760px]"
-          quote="Your toast and jam breakfast was light on protein. Adding eggs or Greek yogurt at lunch would help hold Satiety until dinner."
-          name="A next step, for example, when one would help. No shame, no “cheat days”."
+      <FeatureSplit
+        reverse
+        media={
+          <div className="relative">
+            <Glow />
+            <DeviceFrame
+              className="[--device-w:260px] sm:[--device-w:300px] lg:[--device-w:clamp(260px,22vw,320px)]"
+              capture={appCapture(
+                "06-signal-energy",
+                "Energy at 84, with what shaped it: calorie fit, meal spread and timing",
+              )}
+            />
+          </div>
+        }
+      >
+        <SectionHeading
+          id="signals-heading"
+          size="section"
+          title="Know how your food will make you feel."
+          lead="Calories say what you ate. Energy, Satiety and Mood say whether you'll get the 3pm dip, stay full until dinner and feel steady tomorrow."
         />
-        <p className="text-small text-ink-faint">
-          Grounded in published nutrition research. Estimates to guide your next meal, not a medical measurement.
-          And honest about confidence: when there isn&apos;t enough data, PrepIt says so.
+        <ul aria-label="The three scores" className="flex flex-wrap gap-x-6 gap-y-2">
+          {SIGNAL_DOTS.map((signal) => (
+            <li key={signal.name} className="flex items-center gap-2 text-small font-medium text-ink">
+              <span aria-hidden className="h-2.5 w-2.5 rounded-full" style={{ background: signal.color }} />
+              {signal.name}
+            </li>
+          ))}
+        </ul>
+        <p className="max-w-[46ch] text-body text-ink-secondary text-pretty">
+          Each one is a score from 0 to 100, worked out from your food alone. Tap it to see what moved it, and when a
+          change would help, your nutritionist tells you what to eat next.
         </p>
+        <ChatPanel
+          className="max-w-[480px]"
+          messages={[satietyNextStep]}
+          caption="An example next step. Estimates to guide your next meal, not a medical measurement."
+        />
         <TextLink href="/features/nutrition-signals">More about Energy, Satiety and Mood</TextLink>
-      </div>
+      </FeatureSplit>
     </Section>
   );
 }
