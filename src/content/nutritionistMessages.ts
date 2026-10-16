@@ -22,7 +22,7 @@ export const missedBreakfast = {
 export const proteinShort = {
   capture: chatCrop(
     "25b-nudge-protein-crop",
-    "The nutritionist's protein check-in: under target on 21 of 21 logged days, most of the gap at dinner, with two easy fixes. Replies: Bigger protein at dinner, Greek yogurt after dinner, Not now, Type your own",
+    "The nutritionist's protein check-in: under target on 18 of 21 logged days, about 127g a day against 158g, most of the gap at dinner, with two easy fixes. Replies: Bigger protein at dinner, Greek yogurt after dinner, Not now, Type your own",
   ),
   caption: "When protein runs short three weeks running",
 };
@@ -31,7 +31,7 @@ export const proteinShort = {
 export const weeklyPattern = {
   capture: chatCrop(
     "24-nudge-weekly-pattern-crop",
-    "The nutritionist noticing Tuesdays and Wednesdays run about 520 kcal over, then a Weekly calorie pattern card giving those days 2,250 kcal and the rest 1,620",
+    "The nutritionist noticing Tuesdays and Wednesdays run about 520 kcal over, then a Weekly calorie pattern card giving those days 1,740 kcal and the rest about 1,500, the same weekly total",
   ),
   caption: "When the same days keep running over",
   fade: true,
