@@ -22,7 +22,7 @@ export default function LegalNav({ currentPath }: { currentPath: string }) {
                 aria-current={current ? "page" : undefined}
                 className={`inline-flex h-11 items-center rounded-control px-4 text-small font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus ${
                   current
-                    ? "bg-accent text-on-accent"
+                    ? "border border-accent-text bg-accent text-on-accent"
                     : "border border-line-strong text-ink-muted hover:text-ink"
                 }`}
               >

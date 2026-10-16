@@ -130,7 +130,7 @@ export function appVideo(name: string, label: string): Omit<LoopVideoProps, "cla
 /** Home Screen widget captures (not phone screens), with their pixel size at 2x. */
 export function widgetCapture(name: string, alt: string, width: number, height: number, mode: CaptureMode = "light") {
   return {
-    src: `/app/${name}-${mode}@2x.webp`,
+    src: `/app/${name}-${modeFor(name, mode)}@2x.webp`,
     avif: srcSet(name, "avif", mode),
     webp: srcSet(name, "webp", mode),
     alt,
@@ -142,8 +142,8 @@ export function widgetCapture(name: string, alt: string, width: number, height: 
 /** A widget render, without a phone around it. */
 export function appWidget(name: AppWidget, mode: CaptureMode = "light") {
   return {
-    avif: `/app/${name}-${mode}@2x.avif`,
-    webp: `/app/${name}-${mode}@2x.webp`,
+    avif: `/app/${name}-${modeFor(name, mode)}@2x.avif`,
+    webp: `/app/${name}-${modeFor(name, mode)}@2x.webp`,
     ...APP_WIDGETS[name],
   };
 }

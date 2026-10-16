@@ -54,8 +54,8 @@ export default function WeekCalendar({
             </span>
             <span className="relative flex flex-col items-center">
               <span
-                className={`flex h-11 w-11 items-center justify-center rounded-control text-lead transition-colors sm:h-12 sm:w-12 ${
-                  selected ? "bg-accent font-medium text-on-accent" : "text-ink"
+                className={`flex h-11 w-11 items-center justify-center rounded-control border text-lead transition-colors sm:h-12 sm:w-12 ${
+                  selected ? "border-accent-text bg-accent font-medium text-on-accent" : "border-transparent text-ink"
                 }`}
               >
                 {date.getUTCDate()}

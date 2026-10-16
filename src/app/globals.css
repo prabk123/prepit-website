@@ -4,23 +4,6 @@
 :root {
   /* The site is light-led; dark bands set their own (tokens.css, .theme-dark). */
   color-scheme: light;
-
-  /* PrepIt Design System Colors */
-  --lime-30: #e9f8b2;
-  --grey-5: #f4f4f5;
-  --grey-10: #e9e9ea;
-  --grey-40: #a6a6ac;
-  --grey-60: #7a7a82;
-  --grey-80: #4d4d59;
-  --coral-100: #ff644f;
-  --black-100: #000000;
-  --white-100: #ffffff;
-
-  /* Gradient colors for AI badge */
-  --gradient-blue: #809ff9;
-  --gradient-purple: #d093d9;
-  --gradient-orange: #f38c61;
-  --gradient-yellow: #f5cc77;
 }
 
 @theme inline {
@@ -112,6 +95,13 @@
 
   .photo-band-scrim-end {
     background: var(--scrim-band-end);
+  }
+
+  /* The text-side scrims fade out where the photo fades into the light page,
+     so the band has no hard dark edge at its top and bottom. */
+  .photo-band-scrim,
+  .photo-band-scrim-end {
+    mask-image: var(--mask-photo-edges);
   }
 
   .photo-band-scrim-text {

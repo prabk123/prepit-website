@@ -175,7 +175,9 @@
     transparent 14%,
     transparent 78%,
     var(--color-page) 100%
-  );
+  );  /* The same stops as a mask, for layers over the photo (the text-side
+     scrims), so they fade out with it. */
+  --mask-photo-edges: linear-gradient(180deg, transparent 0%, #000 14%, #000 78%, transparent 100%);
 }
 
 :root {
