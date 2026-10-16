@@ -35,9 +35,9 @@ SEGMENTS = {
     "04-log-photo": [(0, 1.5), (4, 5.5), (6.5, 7.5), (10, 11.5), (12, 14), (15, 16.5), (23.5, 25.5),
                      (38, 40), (44, 46), (57, 62)],
     "08-chat-ask": [(2, 13.5)],
-    "09-chat-log-it": [(2.5, 5), (7.5, 13), (14.5, 19)],
+    "09-chat-log-it": [(4.3, 6), (7.5, 13), (14.5, 19)],
     "12-plan-week": [(0, 15.9)],
-    "21-walkthrough": [(0, 2), (4, 5.5), (6, 7), (10, 14.5), (15, 16), (17, 19), (27.5, 29.5), (46.5, 49),
+    "21-walkthrough": [(0, 2), (4, 5.5), (6, 7), (10, 14.5), (15, 16), (17, 19), (27.5, 29.5), (46.5, 47.6), (48, 49.5),
                        (51.5, 56), (57, 58.5), (58.5, 63), (79.5, 81.5), (83.5, 86.5), (86.5, 96)],
 }
 # The nutritionist greets the test account by its first name. Blur that word:
@@ -53,7 +53,7 @@ NAME_BOX_X, NAME_BOX_W, NAME_BOX_H = 728, 240, 86
 POSTER_FROM_END = ("03-log-typed", "04-log-photo", "08-chat-ask", "09-chat-log-it", "12-plan-week")
 
 # Videos that show the Home header somewhere, so the avatar is blurred throughout.
-AVATAR_VIDEOS = ("03-log-typed", "04-log-photo", "21-walkthrough")
+AVATAR_VIDEOS = ("03-log-typed", "04-log-photo", "09-chat-log-it", "21-walkthrough")
 
 WIDTHS = {"1x": 402, "2x": 804}
 
