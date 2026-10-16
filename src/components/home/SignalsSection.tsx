@@ -69,7 +69,7 @@ export default function SignalsSection() {
           name="A next step, for example, when one would help. No shame, no “cheat days”."
         />
         <p className="text-small text-ink-faint">
-          Grounded in published nutrition research. Estimates to guide your next meal, not a medical measurement.
+          Built on published nutrition research. Estimates to guide your next meal, not a medical measurement.
           And honest about confidence: when there isn&apos;t enough data, PrepIt says so.
         </p>
         <TextLink href="/features/nutrition-signals">More about Energy, Satiety and Mood</TextLink>
