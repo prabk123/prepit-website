@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import TextLink from "@/components/ui/TextLink";
 import type { FaqItem } from "@/lib/faq";
 import { trackFaqQuestionOpened } from "@/lib/posthogAnalytics";
 
@@ -53,8 +54,9 @@ function Question({
           <PlusMinus open={open} />
         </button>
       </h3>
-      <div id={panelId} hidden={!open}>
-        <p className="max-w-[60ch] pb-6 text-body text-ink-muted text-pretty">{item.answer}</p>
+      <div id={panelId} hidden={!open} className="flex flex-col gap-3 pb-6">
+        <p className="max-w-[60ch] text-body text-ink-muted text-pretty">{item.answer}</p>
+        {item.link && <TextLink href={item.link.href}>{item.link.label}</TextLink>}
       </div>
     </div>
   );
