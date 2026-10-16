@@ -68,7 +68,10 @@ function ToggleButton({ playing, toggle, className }: ToggleState & { className:
 /** The pause/play button of the LoopVideo in the same scope, drawn outside it. */
 export function LoopVideoToggle() {
   const state = useContext(ToggleStateContext);
-  if (!state) return null;
+  // Until the clip hydrates, hold the button's space so nothing below shifts.
+  if (!state) {
+    return <span aria-hidden className="loop-video__toggle loop-video__toggle--outside invisible" />;
+  }
   return <ToggleButton {...state} className="loop-video__toggle loop-video__toggle--outside" />;
 }
 

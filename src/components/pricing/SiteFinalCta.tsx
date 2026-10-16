@@ -13,7 +13,6 @@ const OWN_CLOSING_CTA_PREFIXES = ["/sharable/", "/guides/", "/features/"];
 /** Single-action pages with no download band at all (the sign-in email link). */
 const NO_CLOSING_CTA_PREFIXES = ["/auth/"];
 
-
 /**
  * Shows the site's closing download section on every page except those that
  * already end with their own, so no page has two.
