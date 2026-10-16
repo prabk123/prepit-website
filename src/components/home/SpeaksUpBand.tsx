@@ -19,6 +19,7 @@ export default function SpeaksUpBand() {
       phonePhoto={nutritionistEvening.mobile}
       annotations={nutritionistEvening.annotations}
       textSide={nutritionistEvening.textSide}
+      asideAlign="start"
       aside={
         <>
           <p className="text-body text-ink-secondary text-pretty">

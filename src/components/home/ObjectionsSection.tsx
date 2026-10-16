@@ -8,7 +8,7 @@ const QUESTIONS = [
   {
     question: "“I've quit trackers before.”",
     answer:
-      "Most people quit because logging is a chore. Here you type “two eggs and buttered toast”, snap your plate, or press the Action button and say it. It's on your log straight away, and you can fix anything in one tap.",
+      "Most people quit because logging is a chore. Here you type “two eggs and buttered toast”, snap your plate, or press the Action button and say it. It's on your log straight away, and easy to fix if it's off.",
   },
   {
     question: "“Do I need a watch or a ring?”",

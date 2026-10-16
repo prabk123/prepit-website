@@ -21,11 +21,16 @@ export const proteinShort: ChatPanelMessage = {
   replies: ["Bigger protein at dinner", "Greek yogurt after dinner", "Not now"],
 };
 
-/** Weekly calorie pattern suggestion: the same two days over, four weeks running. */
+/**
+ * Weekly calorie pattern suggestion: the same two days over, four weeks
+ * running. The app ends it with "Here's how it would look:" and the Weekly
+ * calorie pattern card; here the card stands in as its "Use this pattern"
+ * button, beside the "Not for me" reply.
+ */
 export const weeklyPattern: ChatPanelMessage = {
   note: "When the same days keep running over",
   text: "Tuesdays and Wednesdays have run about 520 kcal over your goal in most of the last four weeks, while the rest of the week sits close to it. That's completely normal when some days are busier or more social. Want to give Tuesdays and Wednesdays more room and take a little off the other days? Your week would still add up to the same total.",
-  replies: ["Not for me"],
+  replies: ["Use this pattern", "Not for me"],
 };
 
 /** Weigh-in reminder, a week after the last one. */
