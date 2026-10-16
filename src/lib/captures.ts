@@ -88,9 +88,9 @@ export function appCapture(name: string, alt: string): DeviceCapture {
  * Recordings whose WebM came out larger than the MP4. They are served as MP4
  * only, since every browser that plays WebM also plays MP4.
  */
-const MP4_ONLY = new Set(["03-log-typed", "08-chat-ask", "12-plan-week", "21-walkthrough"]);
+const MP4_ONLY = new Set(["08-chat-ask", "09-chat-log-it", "21-walkthrough"]);
 
-/** Screen recordings are 804 x 1748, recorded in dark mode. */
+/** Screen recordings are 804 x 1748, recorded in light mode (PRE-281). */
 export function appVideo(name: string, label: string): Omit<LoopVideoProps, "className"> {
   return {
     mp4: `/app/${name}.mp4`,

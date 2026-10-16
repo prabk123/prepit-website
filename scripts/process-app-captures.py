@@ -28,22 +28,22 @@ AVATAR_STILLS = ("01-home", "01b-home-log", "01c-home-scrolled", "16-supplements
                  "17b-achievement-confetti", "18b-offline-waiting-list")
 
 # Seconds to keep from each raw video, in order. Long model waits are cut out.
+# Timings are for the light-mode recordings from PRE-281.
 SEGMENTS = {
-    "03-log-typed": [(0, 1.5), (3, 4.5), (5, 6), (8, 10), (10.5, 11.5), (13, 15), (27, 30), (49.5, 51.6)],
-    "04-log-photo": [(0, 1.5), (3, 4), (5, 6), (12, 13.5), (14, 15.5), (23, 24.5), (28, 29.5), (33, 36.5),
-                     (57, 62.5)],
-    "08-chat-ask": [(2.5, 13)],
-    "09-chat-log-it": [(4.5, 7), (49.5, 55.5), (56, 60)],
-    "12-plan-week": [(0, 15.4)],
-    "21-walkthrough": [(0, 3), (6, 8), (8.5, 11), (16, 18), (20, 21.5), (31.5, 33), (38, 42), (53, 56),
-                       (62, 63), (65, 68), (74, 76), (80, 83), (84, 92), (96, 100), (104, 105), (106, 108),
-                       (114, 118), (119, 124.5)],
+    "03-log-typed": [(0, 1.5), (4, 5.5), (6.5, 7.5), (10.5, 14.5), (15, 16.5), (26.5, 28.5), (29, 30),
+                     (40.5, 44.7)],
+    "04-log-photo": [(0, 1.5), (4, 5.5), (6.5, 7.5), (10, 11.5), (12, 14), (15, 16.5), (23.5, 25.5),
+                     (38, 40), (44, 46), (57, 62)],
+    "08-chat-ask": [(2, 13.5)],
+    "09-chat-log-it": [(2.5, 5), (7.5, 13), (14.5, 19)],
+    "12-plan-week": [(0, 15.9)],
+    "21-walkthrough": [(0, 2), (4, 5.5), (6, 7), (10, 14.5), (15, 16), (17, 19), (27.5, 29.5), (46.5, 49),
+                       (51.5, 56), (57, 58.5), (58.5, 63), (79.5, 81.5), (83.5, 86.5), (86.5, 96)],
 }
 # The nutritionist greets the test account by its first name. Blur that word:
 # raw seconds (start, end) and the top of the name's line on the 1206x2622 frame.
-NAME_BLURS = {
-    "21-walkthrough": [(85.2, 87.7, 1754), (87.7, 103.8, 1415)],
-}
+# The light recordings (PRE-281) have no greeting by name, so nothing is blurred.
+NAME_BLURS: dict[str, list[tuple[float, float, int]]] = {}
 NAME_BOX_X, NAME_BOX_W, NAME_BOX_H = 728, 240, 86
 
 # Clips that open on an empty screen (an empty log, a blank Meal Plans list,
