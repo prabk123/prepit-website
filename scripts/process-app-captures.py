@@ -28,12 +28,13 @@ AVATAR_STILLS = ("01-home", "01b-home-log", "01c-home-scrolled", "16-supplements
                  "17b-achievement-confetti", "18b-offline-waiting-list")
 
 # Seconds to keep from each raw video, in order. Long model waits are cut out.
-# Timings are for the light-mode recordings from PRE-281.
+# Timings are for the light-mode recordings from PRE-281 (03 and 04 are the second takes,
+# which end with Home scrolled so the logged meal and its macros show).
 SEGMENTS = {
-    "03-log-typed": [(0, 1.5), (4, 5.5), (6.5, 7.5), (10.5, 14.5), (15, 16.5), (26.5, 28.5), (29, 30),
-                     (40.5, 44.7)],
-    "04-log-photo": [(0, 1.5), (4, 5.5), (6.5, 7.5), (10, 11.5), (12, 14), (15, 16.5), (23.5, 25.5),
-                     (38, 40), (44, 46), (57, 62)],
+    "03-log-typed": [(0, 1.5), (2, 3.5), (4.5, 5.5), (7.5, 11.5), (12, 13.5), (14.5, 16.5), (17, 18),
+                     (29.5, 31), (40, 45.5)],
+    "04-log-photo": [(0, 1.5), (2, 3.5), (4.5, 5.5), (7, 8.5), (10, 11.5), (12, 14), (14.5, 15.5),
+                     (22.5, 24.5), (28.5, 31), (35, 36.5), (38.5, 39.5), (61, 66)],
     "08-chat-ask": [(2, 13.5)],
     "09-chat-log-it": [(4.3, 6), (7.5, 13), (14.5, 19)],
     "12-plan-week": [(0, 15.9)],
