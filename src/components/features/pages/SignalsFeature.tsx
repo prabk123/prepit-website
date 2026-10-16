@@ -131,13 +131,14 @@ export default function SignalsFeature() {
             layout="columns"
             points={[
               { title: "From your food", detail: "Just what you log. Nothing to wear or charge." },
-              { title: "Research-based", detail: "Grounded in published nutrition research." },
+              { title: "Research-based", detail: "Built on published nutrition research." },
               {
                 title: "A guide, not a diagnosis",
                 detail: "Estimates to guide your next meal, not a medical measurement.",
               },
             ]}
           />
+          <TextLink href="/research#scores">How the scores are built, with sources</TextLink>
         </div>
       </Section>
     </>

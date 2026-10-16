@@ -4,6 +4,7 @@ import HomeHero from "@/components/home/HomeHero";
 import KnowsYouSection from "@/components/home/KnowsYouSection";
 import ObjectionsSection from "@/components/home/ObjectionsSection";
 import PlansBand from "@/components/home/PlansBand";
+import ResearchSection from "@/components/home/ResearchSection";
 import SignalsSection from "@/components/home/SignalsSection";
 import SpeaksUpBand from "@/components/home/SpeaksUpBand";
 import FaqSection from "@/components/pricing/FaqSection";
@@ -56,7 +57,7 @@ export default function Home() {
       <SpeaksUpBand />
       <KnowsYouSection />
       <SignalsSection />
-      {/* PRE-278's research band ("How your nutritionist decides what to say") goes here. */}
+      <ResearchSection />
       <PlansBand />
       <ObjectionsSection />
       <PricingSection />
