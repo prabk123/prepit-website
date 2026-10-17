@@ -28,16 +28,15 @@ AVATAR_STILLS = ("01-home", "01b-home-log", "01c-home-scrolled", "16-supplements
                  "17b-achievement-confetti", "18b-offline-waiting-list")
 
 # Seconds to keep from each raw video, in order. Long model waits are cut out.
-# Timings are for the light-mode recordings from PRE-281 (03 and 04 are the second takes,
-# which end with Home scrolled so the logged meal and its macros show).
+# Timings are for the light-mode recordings: 03, 04 and 12 are the PRE-286 showcase-account
+# takes (a full day already logged), the rest are from PRE-281.
 SEGMENTS = {
-    "03-log-typed": [(0, 1.5), (2, 3.5), (4.5, 5.5), (7.5, 11.5), (12, 13.5), (14.5, 16.5), (17, 18),
-                     (29.5, 31), (40, 45.5)],
-    "04-log-photo": [(0, 1.5), (2, 3.5), (4.5, 5.5), (7, 8.5), (10, 11.5), (12, 14), (14.5, 15.5),
-                     (22.5, 24.5), (28.5, 31), (35, 36.5), (38.5, 39.5), (61, 66)],
+    "03-log-typed": [(0, 1.5), (2, 3.5), (4.5, 6), (7, 12), (12.5, 14.5), (23, 24.8), (45, 53.3)],
+    "04-log-photo": [(0, 1.5), (2, 3.5), (4.5, 5.5), (7, 8.5), (9.5, 11), (12, 13.5), (14, 15.5), (16, 17.5),
+                     (28.5, 31), (35, 36.5), (38.5, 40), (67, 75.7)],
     "08-chat-ask": [(2, 13.5)],
     "09-chat-log-it": [(4.3, 6), (7.5, 13), (14.5, 19)],
-    "12-plan-week": [(0, 15.9)],
+    "12-plan-week": [(0, 13.7)],
     "21-walkthrough": [(0, 2), (4, 5.5), (6, 7), (10, 14.5), (15, 16), (17, 19), (27.5, 29.5), (46.5, 47.6), (48, 49.5),
                        (51.5, 56), (57, 58.5), (58.5, 63), (79.5, 81.5), (83.5, 86.5), (86.5, 96)],
 }
@@ -51,12 +50,27 @@ NAME_BOX_X, NAME_BOX_W, NAME_BOX_H = 728, 240, 86
 # loading bubbles). Their poster, which is all a visitor sees under reduced
 # motion, in Low Power Mode and before playback, is the last frame instead:
 # the filled log, the finished plan, the answered chat (PRE-235).
-POSTER_FROM_END = ("03-log-typed", "04-log-photo", "08-chat-ask", "09-chat-log-it", "12-plan-week")
+POSTER_FROM_END = ("03-log-typed", "04-log-photo", "08-chat-ask")
+# Posters taken at a set second of the cut clip instead: the chat card with its
+# black Log it button, before it is tapped, since nothing saves until then (PRE-286).
+POSTER_AT = {"09-chat-log-it": 8}
 
 # Videos that show the Home header somewhere, so the avatar is blurred throughout.
 AVATAR_VIDEOS = ("03-log-typed", "04-log-photo", "09-chat-log-it", "21-walkthrough")
 
 WIDTHS = {"1x": 402, "2x": 804}
+
+# Crops of a still, for a real message shown without the phone around it:
+# output name -> (source still, top, bottom) in 1206x2622 pixels. The
+# nudges from the top of the bubble (the unread NEW divider above it is left
+# out) to their last reply; the weekly pattern one stops
+# inside its card, which the site fades out (PRE-283).
+CROPS = {
+    "25-nudge-missed-breakfast-crop-light": ("25-nudge-missed-breakfast-light", 1486, 2500),
+    "25b-nudge-protein-crop-light": ("25b-nudge-protein-light", 886, 2500),
+    "24-nudge-weekly-pattern-crop-light": ("24-nudge-weekly-pattern-light", 526, 2130),
+    "24b-nudge-weigh-in-crop-light": ("24b-nudge-weigh-in-light", 1496, 2500),
+}
 
 # Screen recordings (and frames taken from them) include the Dynamic Island,
 # which the site's DeviceFrame draws itself. The pill on a 1206x2622 frame,
@@ -118,6 +132,14 @@ def still(name: str) -> None:
         out.save(os.path.join(OUT, f"{name}@{scale}.webp"), quality=82, method=6)
 
 
+def crop(name: str, source: str, top: int, bottom: int) -> None:
+    im = Image.open(os.path.join(RAW, source + ".png")).convert("RGB").crop((0, top, 1206, bottom))
+    for scale, width in WIDTHS.items():
+        out = im.resize((width, round(im.height * width / im.width)), Image.LANCZOS)
+        out.save(os.path.join(OUT, f"{name}@{scale}.avif"), quality=60)
+        out.save(os.path.join(OUT, f"{name}@{scale}.webp"), quality=82, method=6)
+
+
 def video(name: str) -> None:
     src = os.path.join(RAW, name + ".mp4")
     segs = SEGMENTS.get(name)
@@ -154,7 +176,7 @@ def video(name: str) -> None:
                              "-movflags", "+faststart", base + ".mp4"], check=True)
     subprocess.run(common + ["-c:v", "libvpx-vp9", "-crf", "40", "-b:v", "0", "-row-mt", "1",
                              base + ".webm"], check=True)
-    seek = ["-sseof", "-0.1"] if name in POSTER_FROM_END else []
+    seek = ["-sseof", "-0.1"] if name in POSTER_FROM_END else ["-ss", str(POSTER_AT.get(name, 0))]
     subprocess.run(["ffmpeg", "-y", "-hide_banner", "-loglevel", "error", *seek, "-i", base + ".mp4",
                     "-frames:v", "1", "-c:v", "libwebp", "-quality", "80", base + "-poster.webp"], check=True)
 
@@ -168,6 +190,9 @@ def main() -> None:
             still(stem)
         elif ext == ".mp4":
             video(stem)
+    for name, (source, top, bottom) in CROPS.items():
+        if source + ".png" in names:
+            crop(name, source, top, bottom)
     for f in sorted(os.listdir(OUT)):
         size = os.path.getsize(os.path.join(OUT, f))
         flag = "  OVER 2 MB" if size > 2 * 1024 * 1024 else ""

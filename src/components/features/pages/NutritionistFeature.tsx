@@ -1,38 +1,17 @@
 import DeviceFrame from "@/components/device/DeviceFrame";
 import DevicePair from "@/components/device/DevicePair";
 import FeatureBlock from "@/components/features/FeatureBlock";
+import ChatCapture from "@/components/ui/ChatCapture";
 import Glow from "@/components/ui/Glow";
-import QuoteCard from "@/components/ui/QuoteCard";
 import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
+import SwipeRow from "@/components/ui/SwipeRow";
 import TextLink from "@/components/ui/TextLink";
+import { missedBreakfast, proteinShort, weeklyPattern, weighIn } from "@/content/nutritionistMessages";
 import { appCapture, appVideo } from "@/lib/captures";
 import { RESEARCH_PAGE_HREF } from "@/lib/research";
 
 const PHONE = "[--device-w:260px] sm:[--device-w:300px] lg:[--device-w:clamp(260px,22vw,320px)]";
-
-/**
- * Messages the nutritionist sends on its own, worded as the app sends them
- * (fresca_backend src/services/proactiveNudges.ts). The numbers in the second
- * and third are an example person's.
- */
-const SPEAKS_UP = [
-  {
-    quote:
-      "I can't see any breakfast log today. Drop me a quick voice note when you get the chance if you had something, or let me know if you skipped it :)",
-    name: "When breakfast isn't logged by your usual time",
-  },
-  {
-    quote:
-      "Over the past few weeks protein has been a little low: under your target on 15 of 19 logged days, about 85g a day against 120g. Most of the gap is at dinner, which averages about 20g. Two easy fixes that don't change what you cook: a bigger portion of the protein you already have at dinner, or a pot of Greek yogurt after dinner. Want to try one?",
-    name: "When the same gap shows up three weeks running",
-  },
-  {
-    quote:
-      "Tuesdays and Wednesdays have run about 500 kcal over your goal in most of the last four weeks, while the rest of the week sits close to it. That's completely normal when some days are busier or more social. Want to give Tuesdays and Wednesdays more room and take a little off the other days? Your week would still add up to the same total.",
-    name: "When the same days keep going over, with a plan to give them more room",
-  },
-];
 
 /**
  * /features/ai-nutritionist: standout 1, "knows you and speaks up". It leads
@@ -51,11 +30,16 @@ export default function NutritionistFeature() {
             title="It speaks up before you slip."
             lead="A good nutritionist doesn't wait for your next appointment to mention what they've noticed. Neither does yours. These are real messages it sends on its own."
           />
-          <div className="grid gap-4 lg:grid-cols-3 lg:gap-5">
-            {SPEAKS_UP.map((message) => (
-              <QuoteCard key={message.name} quote={message.quote} name={message.name} />
+          {/* Real messages cropped from the app's chat (PRE-283), one row you swipe on phones (PRE-285). */}
+          <SwipeRow
+            label="Messages your nutritionist sends on its own"
+            itemClassName="w-[82%] max-w-[340px] lg:max-w-none lg:flex-1"
+            className="lg:items-start"
+          >
+            {[missedBreakfast, proteinShort, weeklyPattern, weighIn].map((message) => (
+              <ChatCapture key={message.caption} {...message} />
             ))}
-          </div>
+          </SwipeRow>
           <p className="text-small text-ink-faint">
             It sends one of these at most once a day, and only when it&apos;s useful. Missed-log nudges, pattern
             check-ins, weekly calorie pattern ideas and weigh-in reminders each have a switch in Settings.
@@ -67,7 +51,7 @@ export default function NutritionistFeature() {
         id="consultation"
         reverse
         title="It gets to know you first."
-        lead="You start with a short consultation about how you eat now. Once it has seen a few days of your meals, your nutritionist tells you what it noticed and agrees one thing to change first."
+        lead="It starts with a short consultation about how you eat now. After a few days of meals, it tells you what it noticed and agrees one thing to change first."
         media={
           <div className="relative">
             <Glow />
@@ -103,7 +87,7 @@ export default function NutritionistFeature() {
         id="charts"
         tone="surface"
         title="Ask it anything about your week."
-        lead="What to have for dinner, why you're hungry by 4pm, how to fit in a takeaway. It answers from what you actually ate, and when a picture says it faster, it draws a chart right in the chat."
+        lead="What to have for dinner, why you're hungry by 4pm, how to fit in a takeaway. It answers from what you actually ate, with a chart when that's quicker."
         media={
           <div className="relative">
             <Glow />
@@ -124,7 +108,7 @@ export default function NutritionistFeature() {
         id="log-it"
         reverse
         title="Tell it what you had. It does the rest."
-        lead="Mention a meal in chat and it prepares a Log it card with the calories and macros worked out. It can also move a meal to another day, fix an amount or change your calorie, macro and water goals."
+        lead="Mention a meal and it prepares a Log it card with the calories and macros worked out. It can also move a meal, fix an amount or change your goals."
         media={
           <div className="relative">
             <Glow />

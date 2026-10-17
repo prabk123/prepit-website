@@ -118,7 +118,7 @@ export default function PhotoBand({
       </AnnotatedPhoto>
       {media && aside && (
         <div
-          className={`relative z-[4] mx-auto mt-10 grid w-full max-w-content gap-stack px-gutter lg:grid-cols-2 lg:gap-x-12 ${
+          className={`relative z-[4] mx-auto mt-10 grid w-full max-w-content grid-cols-[minmax(0,1fr)] gap-stack px-gutter lg:grid-cols-2 lg:gap-x-12 ${
             asideAlign === "start" ? "items-start" : "items-center"
           }`}
         >
@@ -129,7 +129,7 @@ export default function PhotoBand({
           >
             {aside}
           </div>
-          <div className={`flex justify-center ${end ? "lg:order-1" : ""}`}>{media}</div>
+          <div className={`flex min-w-0 justify-center ${end ? "lg:order-1" : ""}`}>{media}</div>
         </div>
       )}
       {media && !aside && (

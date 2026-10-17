@@ -61,7 +61,7 @@ export default function LoggingFeature() {
         id="accuracy"
         tone="surface"
         title="Close to the truth, and easy to fix."
-        lead="For a branded or restaurant food, PrepIt looks for the official figures first. Typed and photo meals show what it assumed and how confident it is, so you can see where a number came from."
+        lead="Branded and restaurant food starts from the official figures. Typed and photo meals show what PrepIt assumed and how sure it is."
         media={
           <div className="relative">
             <Glow />
@@ -101,7 +101,7 @@ export default function LoggingFeature() {
       >
         <p className="max-w-[56ch] text-body text-ink-muted text-pretty">
           Put the same action on the Action button and logging is one press and a sentence. You can also add a Log
-          a meal button to your Lock Screen or Control Center (iOS 18 or later).
+          a meal button to your Lock Screen or Control Centre (iOS 18 or later).
         </p>
         <TextLink href="/features/widgets-and-siri">More about widgets and Siri</TextLink>
       </FeatureBlock>

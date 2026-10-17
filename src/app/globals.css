@@ -36,6 +36,20 @@
   }
 }
 
+/* SwipeRow (PRE-284): sideways rows on phones scroll without a scrollbar
+   under them; the next item peeking in shows there is more. */
+.swipe-row {
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.swipe-row::-webkit-scrollbar {
+  display: none;
+}
+.swipe-row:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 4px;
+}
+
 /* Revamp helpers. Values come from tokens.css. */
 @utility text-gradient-brand {
   background-image: var(--gradient-brand);

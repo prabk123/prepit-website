@@ -2,9 +2,9 @@ import DeviceFrame from "@/components/device/DeviceFrame";
 import WidgetImage from "@/components/device/WidgetImage";
 import FeatureBlock from "@/components/features/FeatureBlock";
 import { BentoGrid, BentoTile } from "@/components/ui/Bento";
+import CaptureRow from "@/components/ui/CaptureRow";
 import Glow from "@/components/ui/Glow";
 import PhotoBand from "@/components/ui/PhotoBand";
-import PointList from "@/components/ui/PointList";
 import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
 import TextLink from "@/components/ui/TextLink";
@@ -13,7 +13,31 @@ import { appCapture, widgetCapture } from "@/lib/captures";
 
 const PHONE = "[--device-w:260px] sm:[--device-w:300px] lg:[--device-w:clamp(260px,22vw,320px)]";
 
-/** /features/widgets-and-siri: Home Screen and Lock Screen widgets, Siri, the Action button and Control Center. */
+/** /features/widgets-and-siri: Home Screen and Lock Screen widgets, Siri, the Action button and Control Centre. */
+const ONE_PRESS = [
+  {
+    title: "Action button",
+    detail: "Set it to PrepIt's Log a meal shortcut. Press and hold, and Siri asks what you ate.",
+    capture: appCapture(
+      "26-action-button-shortcut",
+      "The Action button set to Shortcut, running PrepIt's Log a meal",
+    ),
+  },
+  {
+    title: "Lock Screen",
+    detail: "Add the Log a meal button, or widgets for your scores, streak, water and supplements.",
+    capture: appCapture(
+      "26b-lock-screen-control",
+      "Customising the Lock Screen, with PrepIt's Log a meal button bottom left and the Your next meal widget",
+    ),
+  },
+  {
+    title: "Control Centre",
+    detail: "Add the Log a meal control. One tap opens Log Meal, ready to type or talk.",
+    capture: appCapture("26c-control-centre", "Control Centre with PrepIt's Log a meal control added"),
+  },
+];
+
 export default function WidgetsFeature() {
   return (
     <>
@@ -165,24 +189,8 @@ export default function WidgetsFeature() {
             title="One press, from anywhere."
             lead="Put Log a meal where your thumb already is."
           />
-          <PointList
-            layout="columns"
-            points={[
-              {
-                title: "Action button",
-                detail: "Set it to PrepIt's Log a meal shortcut. Press and hold, and Siri asks what you ate.",
-              },
-              {
-                title: "Lock Screen",
-                detail:
-                  "Add the Log a meal button, or widgets for your scores, streak, water and supplements.",
-              },
-              {
-                title: "Control Center",
-                detail: "Add the Log a meal control. One tap opens Log Meal, ready to type or talk.",
-              },
-            ]}
-          />
+          {/* Each place with its real screen (PRE-285). */}
+          <CaptureRow label="Places to put Log a meal" items={ONE_PRESS} />
           <p className="text-small text-ink-faint">The Log a meal control needs iOS 18 or later.</p>
           <TextLink href="/guides/log-a-meal-with-the-action-button">
             Guide: log a meal with the Action button

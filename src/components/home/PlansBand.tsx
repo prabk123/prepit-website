@@ -21,8 +21,7 @@ export default function PlansBand() {
       aside={
         <>
           <p className="text-body text-ink-secondary text-pretty">
-            Your nutritionist plans around your goals, the food you like and your budget. Want a different dinner on
-            Thursday? Ask, and it swaps it.
+            Want a different dinner on Thursday? Ask, and it swaps it.
           </p>
           <TextLink href="/features/meal-plans">More about meal plans</TextLink>
         </>
@@ -32,7 +31,7 @@ export default function PlansBand() {
           <Glow />
           <DeviceFrame
             className="[--device-w:260px] sm:[--device-w:300px] lg:[--device-w:clamp(260px,22vw,320px)]"
-            video={appVideo("12-plan-week", "Asking for a week of meals and the plan being built")}
+            video={appVideo("12-plan-week", "Scrolling a week of planned meals, each with a photo of the dish")}
           />
         </div>
       }
@@ -41,7 +40,7 @@ export default function PlansBand() {
         id="plans-heading"
         size="section"
         title="Your week, planned."
-        lead="Ask for a week of meals. You get a plan built for you and one grocery list, sorted by aisle."
+        lead="Ask for a week of meals. You get a plan built around your goals, the food you like and your budget, and one grocery list, sorted by aisle."
       />
     </PhotoBand>
   );

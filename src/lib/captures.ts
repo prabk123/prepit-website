@@ -14,13 +14,15 @@ export const APP_STILLS = [
   "05b-meal-detail-scrolled",
   "06-signal-energy",
   "06b-signal-satiety",
+  "06c-signal-mood",
   "07-food-analysis",
   "10-voice-note",
   "11-check-in-report",
   "13-grocery-list",
   "14-weekly-pattern",
   "16-supplements-card",
-  "16b-supplements-screen",
+  // Suggested for you, populated from a plant-only log (PRE-285).
+  "16c-supplements-suggested",
   "17-achievement",
   "18-offline-water",
   "19-body-composition",
@@ -30,6 +32,10 @@ export const APP_STILLS = [
   "23-home-screen-widgets",
   // A clean Home Screen (not in edit mode) with the Today's calories widget, for the widgets page.
   "23b-home-screen-widgets",
+  // Also from Tips and tricks: Log a meal on the Action button, the Lock Screen and in Control Centre (PRE-285).
+  "26-action-button-shortcut",
+  "26b-lock-screen-control",
+  "26c-control-centre",
 ] as const;
 
 export const APP_CLIPS = [
@@ -109,6 +115,28 @@ export function appVideo(name: string, label: string): Omit<LoopVideoProps, "cla
     height: 1748,
     label,
     analyticsId: name,
+  };
+}
+
+/**
+ * Crops of a chat capture: one message and its replies without the phone
+ * around it, at their 2x pixel size (scripts/process-app-captures.py CROPS).
+ */
+export const CHAT_CROPS = {
+  "25-nudge-missed-breakfast-crop": { width: 804, height: 676 },
+  "25b-nudge-protein-crop": { width: 804, height: 1076 },
+  // Stops inside its Weekly calorie pattern card; ChatCapture fades it out.
+  "24-nudge-weekly-pattern-crop": { width: 804, height: 1069 },
+  "24b-nudge-weigh-in-crop": { width: 804, height: 669 },
+} as const;
+
+export function chatCrop(name: keyof typeof CHAT_CROPS, alt: string) {
+  return {
+    src: `/app/${name}-light@2x.webp`,
+    avif: srcSet(name, "avif", "light"),
+    webp: srcSet(name, "webp", "light"),
+    alt,
+    ...CHAT_CROPS[name],
   };
 }
 

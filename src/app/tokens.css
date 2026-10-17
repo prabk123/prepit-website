@@ -46,6 +46,10 @@
   --color-accent-text: #b24637;
   /* Keyboard focus rings. */
   --color-focus: #1a1a2e;
+  /* The app's light chat background, behind real chat captures (PRE-283).
+     Matches the captures' own pixels and stays light in every band. */
+  --color-app-chat: #f4f4f5;
+
   /* QR codes stay dark on white in every band, so every camera reads them. */
   --color-qr-bg: #ffffff;
   --color-qr-ink: #1a1a2e;
@@ -126,9 +130,10 @@
   --text-eyebrow--letter-spacing: 0.12em;
   --word-spacing-display: 0.08em;
 
-  /* Spacing. Each section is padded 64 to 96 px top and bottom, so two
-     sections sit 128 to 192 px apart; page gutter 20 to 64 px. */
-  --spacing-section: clamp(64px, 52.1px + 3.05vw, 96px);
+  /* Spacing. Each section is padded 44 px top and bottom on a 390 px phone,
+     growing to 96 px from 1280 px (PRE-284: phones got 128 px between
+     sections, about a sixth of the screen); page gutter 20 to 64 px. */
+  --spacing-section: clamp(44px, 21.2px + 5.84vw, 96px);
   --spacing-gutter: clamp(20px, 3.7px + 4.19vw, 64px);
   --spacing-stack: clamp(32px, 24.6px + 1.9vw, 52px);
   --container-content: 1200px;
@@ -142,10 +147,6 @@
   /* A Home Screen widget capture's corner, and a small icon tile. */
   --radius-widget: 22px;
   --radius-icon: 14px;
-  /* A chat bubble, as in the app's Nutritionist chat (the corner by the
-     sender's side is tighter). */
-  --radius-bubble: 24px;
-  --radius-bubble-tail: 6px;
 
   /* Shadows. Cards are flat; phones float. */
   --shadow-phone: 0 40px 80px -28px rgb(26 26 46 / 0.35), 0 12px 24px -12px rgb(26 26 46 / 0.2);

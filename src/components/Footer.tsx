@@ -37,7 +37,7 @@ export default function Footer() {
             <p className="text-small text-ink-muted">PrepIt, your personal AI nutritionist.</p>
           </div>
 
-          <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-14">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4 lg:gap-14">
             <Column title="Explore">
               <Link href="/" className={linkClass}>
                 Home

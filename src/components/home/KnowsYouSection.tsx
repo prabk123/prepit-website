@@ -42,8 +42,7 @@ export default function KnowsYouSection() {
           lead="A short consultation about how you eat now ends with one or two things to focus on, like protein at breakfast or the evening snacking."
         />
         <p className="max-w-[46ch] text-body text-ink-secondary text-pretty">
-          Every week, a check-in looks back at how it went and picks the one thing to change next. It remembers your
-          goals, your notes and what you told it last week, so every reply starts from you.
+          Every week, a check-in looks back at how it went and picks the one thing to change next.
         </p>
       </FeatureSplit>
     </Section>

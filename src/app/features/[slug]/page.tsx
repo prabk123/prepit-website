@@ -45,7 +45,7 @@ const PAGES: Record<FeatureSlug, { Body: ComponentType; hero: HeroMedia }> = {
   },
   "meal-plans": {
     Body: MealPlansFeature,
-    hero: { video: appVideo("12-plan-week", "Asking for a week of meals and the plan being built") },
+    hero: { video: appVideo("12-plan-week", "Scrolling a week of planned meals, each with a photo of the dish") },
   },
   "widgets-and-siri": {
     Body: WidgetsFeature,
