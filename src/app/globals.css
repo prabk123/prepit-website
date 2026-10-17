@@ -93,28 +93,23 @@
     container-type: inline-size;
     width: var(--device-w);
     margin-inline: calc(var(--device-w) * 0.12);
+    /* Crop the top of the phone (status bar and empty chat), keeping the
+       pop-outs free to spill sideways; ::after fades the cut into the page. */
+    --speaks-up-crop: calc(var(--device-w) * 0.42);
+    margin-top: calc(var(--speaks-up-crop) * -1);
+    clip-path: inset(var(--speaks-up-crop) -50% -15% -50%);
   }
 
-  /* Phones: crop the top of the phone (status bar and empty chat), keeping
-     the pop-outs free to spill sideways, and fade the cut edge into the page. */
-  @media (max-width: 1023.98px) {
-    .speaks-up-phone {
-      --speaks-up-crop: calc(var(--device-w) * 0.42);
-      margin-top: calc(var(--speaks-up-crop) * -1);
-      clip-path: inset(var(--speaks-up-crop) -50% -15% -50%);
-    }
-
-    .speaks-up-phone::after {
-      content: "";
-      position: absolute;
-      z-index: 1;
-      top: var(--speaks-up-crop);
-      left: -50%;
-      right: -50%;
-      height: 28px;
-      background: linear-gradient(var(--color-page), transparent);
-      pointer-events: none;
-    }
+  .speaks-up-phone::after {
+    content: "";
+    position: absolute;
+    z-index: 1;
+    top: var(--speaks-up-crop);
+    left: -50%;
+    right: -50%;
+    height: 28px;
+    background: linear-gradient(var(--color-page), transparent);
+    pointer-events: none;
   }
 
   .speaks-up-phone .device-frame__screen > .speaks-up-phone__screen {
@@ -165,16 +160,21 @@
     opacity: 1;
   }
 
+  /* How far the message and reply lift out. A phone can set these, as the
+     hero does on small screens to keep the message's text readable. */
   .speaks-up-phone__pop[data-active] .speaks-up-phone__cutout--message {
-    transform: translateX(-14%) scale(1.2);
+    transform: translateX(var(--speaks-up-pop-x, -14%)) scale(var(--speaks-up-pop-scale, 1.2));
   }
 
   .speaks-up-phone__pop[data-active] .speaks-up-phone__cutout--highlight {
-    transform: translateX(8%) scale(1.08);
+    transform: translate(var(--speaks-up-reply-x, 8%), var(--speaks-up-reply-y, 0px))
+      scale(var(--speaks-up-reply-scale, 1.08));
   }
 
   /* Why the message was sent, in the photo annotations' orange-dot style. */
-  /* Sits just above the message: `top` is the message's top edge. */
+  /* Sits just above the message: `top` is the message's top edge, raised by
+     --speaks-up-pop-lift (the share of the message's height its scaling adds
+     above it) and --speaks-up-reason-gap. */
   .speaks-up-phone__reason {
     position: absolute;
     left: -12cqw;

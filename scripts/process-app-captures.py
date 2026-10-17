@@ -81,6 +81,8 @@ CUTOUTS = {
     "25b-nudge-protein-reply-light": ("25b-nudge-protein-light", (48, 1794, 1158, 1938), 38),
     "24b-nudge-weigh-in-bubble-light": ("24b-nudge-weigh-in-light", (48, 1536, 1037, 1920), 46),
     "24b-nudge-weigh-in-reply-light": ("24b-nudge-weigh-in-light", (48, 1968, 1158, 2112), 38),
+    "25-nudge-missed-breakfast-bubble-light": ("25-nudge-missed-breakfast-light", (48, 1530, 1037, 1914), 46),
+    "25-nudge-missed-breakfast-reply-light": ("25-nudge-missed-breakfast-light", (48, 1962, 1158, 2112), 38),
 }
 
 # Screen recordings (and frames taken from them) include the Dynamic Island,
@@ -88,6 +90,11 @@ CUTOUTS = {
 # padded a little, is painted over with the status bar colour just left of it.
 ISLAND = (411, 38, 386, 118)  # x, y, width, height
 ISLAND_SAMPLE_X = 405
+
+# Stills shown under a pop-out tag, where the unread NEW divider would peek out
+# beside the tag: the rows it spans (top, bottom) are filled with the chat's
+# background, sampled just above them.
+NEW_DIVIDERS = {"25-nudge-missed-breakfast-light": (1446, 1500)}
 
 # Widget renders: a 36 px margin around the widget, whose corner radius is 64 px.
 WIDGET_MARGIN = 36
@@ -135,6 +142,9 @@ def still(name: str) -> None:
             out.save(os.path.join(OUT, f"{name}@{scale}.webp"), quality=82, method=6)
         return
     im = paint_out_island(im.convert("RGB"))
+    if name in NEW_DIVIDERS:
+        top, bottom = NEW_DIVIDERS[name]
+        im.paste(im.getpixel((20, top - 4)), (0, top, im.width, bottom))
     if name.startswith(AVATAR_STILLS):
         im = blur_avatar(im)
     for scale, width in WIDTHS.items():

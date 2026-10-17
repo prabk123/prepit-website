@@ -1,14 +1,15 @@
 import AnnotatedPhoto from "@/components/media/AnnotatedPhoto";
 import PreloadImage from "@/components/media/PreloadImage";
+import SpeaksUpPhone from "@/components/home/SpeaksUpPhone";
 import AppStoreCta from "@/components/ui/AppStoreCta";
-import ChatCapture from "@/components/ui/ChatCapture";
 import { heroCafe } from "@/content/lifestyle";
-import { missedBreakfast } from "@/content/nutritionistMessages";
+import { heroPhoneMessage } from "@/content/nutritionistMessages";
 import { TRIAL_DAYS } from "@/lib/pricing";
 
 /**
  * The promise, then a real moment: the nutritionist's own missed-breakfast
- * message, cropped from the app (PRE-283), beside the headline on desktop (under the button on phones), then
+ * message lifted out of the app's chat in a phone (PRE-283, PRE-294), beside
+ * the headline on desktop (under the button on phones), then
  * the annotated cafe photo, whose phone shows today's log. On a 390 x 844
  * phone the headline, line and button fit the first screen.
  */
@@ -46,15 +47,15 @@ export default function HomeHero() {
             The nutritionist that notices.
           </h1>
           <p className="max-w-[44ch] text-lead text-ink-secondary text-pretty">
-            Tell PrepIt what you eat. It spots what&apos;s behind the 3pm slump and the evening snacking, and
-            tells you the one thing to change first.
+            Tell PrepIt what you eat. It spots what&apos;s behind the 3pm slump and the evening snacking, and tells you
+            the one thing to change first.
           </p>
           <AppStoreCta trackingSource="home-hero" note={`${TRIAL_DAYS} days free. Cancel anytime.`} />
         </div>
-        <ChatCapture
-          className="mx-auto max-w-[400px] lg:mx-0"
-          capture={missedBreakfast.capture}
-          caption={`${missedBreakfast.caption}.`}
+        <SpeaksUpPhone
+          messages={[heroPhoneMessage]}
+          loading="eager"
+          className="[--device-w:216px] [--speaks-up-crop:calc(var(--device-w)*0.86)] [--speaks-up-pop-scale:1.55] [--speaks-up-pop-x:-12%] [--speaks-up-pop-lift:0.275] [--speaks-up-reason-gap:6px] [--speaks-up-reply-scale:1.2] [--speaks-up-reply-x:6%] [--speaks-up-reply-y:2px] sm:[--device-w:240px] lg:[--device-w:290px] lg:[--speaks-up-crop:calc(var(--device-w)*0.9)] lg:[--speaks-up-pop-scale:1.2] lg:[--speaks-up-pop-x:-14%] lg:[--speaks-up-pop-lift:0.1] lg:[--speaks-up-reply-scale:1.08] lg:[--speaks-up-reply-x:8%] lg:[--speaks-up-reply-y:0px]"
         />
       </div>
 

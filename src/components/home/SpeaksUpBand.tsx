@@ -8,6 +8,7 @@ import { nutritionistEvening } from "@/content/lifestyle";
  * Standout 1, first half: the nutritionist speaks up on its own. Under the
  * evening photo, one phone shows the messages it sends unasked, each lifted
  * out of the real chat screen, with buttons to switch between them (PRE-294).
+ * The text sits level with the phone's middle on desktop.
  */
 export default function SpeaksUpBand() {
   return (
@@ -19,7 +20,6 @@ export default function SpeaksUpBand() {
       phonePhoto={nutritionistEvening.mobile}
       annotations={nutritionistEvening.annotations}
       textSide={nutritionistEvening.textSide}
-      asideAlign="start"
       aside={
         <>
           <p className="text-body text-ink-secondary text-pretty">
