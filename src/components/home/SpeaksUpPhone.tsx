@@ -6,7 +6,7 @@ import { speaksUpPhoneMessages, type SpeaksUpPhoneMessage } from "@/content/nutr
 import type { ChatCutout } from "@/lib/captures";
 import { trackMessageSelected } from "@/lib/posthogAnalytics";
 
-function Cutout({ part, kind }: { part: ChatCutout; kind: "message" | "highlight" }) {
+function Cutout({ part, kind, active }: { part: ChatCutout; kind: "message" | "highlight"; active: boolean }) {
   return (
     <picture>
       <source srcSet={part.avif} type="image/avif" />
@@ -17,6 +17,7 @@ function Cutout({ part, kind }: { part: ChatCutout; kind: "message" | "highlight
         width={part.width}
         height={part.height}
         loading="lazy"
+        fetchPriority={active ? undefined : "low"}
         decoding="async"
         className={`speaks-up-phone__cutout speaks-up-phone__cutout--${kind}`}
         style={{ left: `${part.left}%`, top: `${part.top}%`, width: `${part.widthPercent}%` }}
@@ -38,6 +39,7 @@ function Screen({ message, active }: { message: SpeaksUpPhoneMessage; active: bo
           width={CAPTURE_WIDTH}
           height={CAPTURE_HEIGHT}
           loading="lazy"
+          fetchPriority={active ? undefined : "low"}
           decoding="async"
         />
       </picture>
@@ -49,7 +51,8 @@ function Screen({ message, active }: { message: SpeaksUpPhoneMessage; active: bo
  * The nutritionist's own messages in a phone (PRE-294): the real chat screen,
  * with the message and the part to look at cut from the same capture and
  * lifted out past the frame. A tag says why it was sent, and the buttons
- * under the phone switch between messages.
+ * under the phone switch between messages. Below 1024 px the phone's top,
+ * which is empty chat, is cropped off and faded so the band stays short.
  */
 export default function SpeaksUpPhone() {
   const [index, setIndex] = useState(0);
@@ -57,8 +60,8 @@ export default function SpeaksUpPhone() {
   const current = speaksUpPhoneMessages[index];
 
   return (
-    <figure className="flex w-full min-w-0 flex-col items-center gap-6" aria-labelledby={captionId}>
-      <div className="speaks-up-phone [--device-w:236px] sm:[--device-w:280px] lg:[--device-w:300px]">
+    <figure className="flex w-full min-w-0 flex-col items-center gap-4 lg:gap-6" aria-labelledby={captionId}>
+      <div className="speaks-up-phone [--device-w:216px] sm:[--device-w:240px] lg:[--device-w:300px]">
         <DeviceFrame>
           {speaksUpPhoneMessages.map((message, i) => (
             <Screen key={message.id} message={message} active={i === index} />
@@ -71,15 +74,11 @@ export default function SpeaksUpPhone() {
             className="speaks-up-phone__pop"
             data-active={i === index || undefined}
           >
-            <Cutout part={message.message} kind="message" />
-            <Cutout part={message.highlight} kind="highlight" />
+            <Cutout part={message.message} kind="message" active={i === index} />
+            <Cutout part={message.highlight} kind="highlight" active={i === index} />
             <p
               className="speaks-up-phone__reason"
-              style={
-                message.reasonBelow
-                  ? { top: `calc(${message.highlight.top + message.highlight.heightPercent}% + 14px)` }
-                  : { top: `calc(${message.message.top}% - 14px)`, translate: "0 -100%" }
-              }
+              style={{ top: `calc(${message.message.top}% - 14px)` }}
             >
               {message.reason}
             </p>

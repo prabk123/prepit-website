@@ -48,16 +48,16 @@ export const weighIn = {
 
 /*
  * The homepage's speaks-up phone (PRE-294): the full chat screen in a phone,
- * with the message and the part to look at (its first reply, or the days the
- * weekly pattern gives more room) cut from the same capture and lifted out
- * over it. Missed breakfast is left out: the hero already shows it.
+ * with the message and its first reply cut from the same capture and lifted out
+ * over it. Missed breakfast is left out because the hero already shows it,
+ * and the weekly pattern because the band's photo shows that card with other
+ * numbers.
  */
 export const speaksUpPhoneMessages = [
   {
     id: "protein",
     label: "Protein",
     reason: "Short on protein 18 of 21 days",
-    reasonBelow: false,
     caption: proteinShort.caption,
     screen: appCapture(
       "25b-nudge-protein",
@@ -67,24 +67,9 @@ export const speaksUpPhoneMessages = [
     highlight: chatCutout("25b-nudge-protein-reply"),
   },
   {
-    id: "weekly-pattern",
-    label: "Weekly pattern",
-    reason: "Tuesdays and Wednesdays run over",
-    // The message starts near the top of the chat, so the tag goes under the days.
-    reasonBelow: true,
-    caption: weeklyPattern.caption,
-    screen: appCapture(
-      "24-nudge-weekly-pattern",
-      "The Nutritionist chat noticing Tuesdays and Wednesdays run about 520 kcal over, then a Weekly calorie pattern card giving those days 1,740 kcal and the rest about 1,500, the same weekly total",
-    ),
-    message: chatCutout("24-nudge-weekly-pattern-bubble"),
-    highlight: chatCutout("24-nudge-weekly-pattern-days"),
-  },
-  {
     id: "weigh-in",
     label: "Weigh-in",
     reason: "8 days since the last weigh-in",
-    reasonBelow: false,
     caption: weighIn.caption,
     screen: appCapture(
       "24b-nudge-weigh-in",

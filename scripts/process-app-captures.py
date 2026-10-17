@@ -79,9 +79,6 @@ CROPS = {
 CUTOUTS = {
     "25b-nudge-protein-bubble-light": ("25b-nudge-protein-light", (48, 930, 1037, 1746), 46),
     "25b-nudge-protein-reply-light": ("25b-nudge-protein-light", (48, 1794, 1158, 1938), 38),
-    "24-nudge-weekly-pattern-bubble-light": ("24-nudge-weekly-pattern-light", (48, 564, 1037, 1380), 46),
-    # The Tue and Wed rows the pattern gives more room, on a slice of the card's white.
-    "24-nudge-weekly-pattern-days-light": ("24-nudge-weekly-pattern-light", (75, 1825, 1131, 2062), 32),
     "24b-nudge-weigh-in-bubble-light": ("24b-nudge-weigh-in-light", (48, 1536, 1037, 1920), 46),
     "24b-nudge-weigh-in-reply-light": ("24b-nudge-weigh-in-light", (48, 1968, 1158, 2112), 38),
 }

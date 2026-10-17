@@ -170,8 +170,6 @@ export function appWidget(name: AppWidget, mode: CaptureMode = "light") {
 export const CHAT_CUTOUTS = {
   "25b-nudge-protein-bubble": [48, 930, 1037, 1746],
   "25b-nudge-protein-reply": [48, 1794, 1158, 1938],
-  "24-nudge-weekly-pattern-bubble": [48, 564, 1037, 1380],
-  "24-nudge-weekly-pattern-days": [75, 1825, 1131, 2062],
   "24b-nudge-weigh-in-bubble": [48, 1536, 1037, 1920],
   "24b-nudge-weigh-in-reply": [48, 1968, 1158, 2112],
 } as const;
@@ -190,6 +188,5 @@ export function chatCutout(name: keyof typeof CHAT_CUTOUTS) {
     left: (left / 1206) * 100,
     top: (top / 2622) * 100,
     widthPercent: ((right - left) / 1206) * 100,
-    heightPercent: ((bottom - top) / 2622) * 100,
   };
 }
