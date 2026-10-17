@@ -99,7 +99,9 @@ export default function SpeaksUpPhone({
             <Cutout part={message.highlight} kind="highlight" active={i === index} loading={loading} />
             <p
               className="speaks-up-phone__reason"
-              style={{ top: `calc(${message.message.top}% - var(--speaks-up-reason-gap, 14px))` }}
+              style={{
+                top: `calc(${message.message.top}% - var(--speaks-up-pop-lift, 0) * ${message.message.heightPercent}% - var(--speaks-up-reason-gap, 14px))`,
+              }}
             >
               {message.reason}
             </p>

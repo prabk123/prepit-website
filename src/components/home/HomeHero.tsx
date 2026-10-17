@@ -55,7 +55,7 @@ export default function HomeHero() {
         <SpeaksUpPhone
           messages={[heroPhoneMessage]}
           loading="eager"
-          className="[--device-w:216px] [--speaks-up-crop:calc(var(--device-w)*0.95)] [--speaks-up-reason-gap:0px] sm:[--device-w:240px] lg:[--device-w:290px]"
+          className="[--device-w:216px] [--speaks-up-crop:calc(var(--device-w)*0.86)] [--speaks-up-pop-scale:1.55] [--speaks-up-pop-x:-12%] [--speaks-up-pop-lift:0.275] [--speaks-up-reason-gap:6px] [--speaks-up-reply-scale:1.2] [--speaks-up-reply-x:6%] [--speaks-up-reply-y:2px] sm:[--device-w:240px] lg:[--device-w:290px] lg:[--speaks-up-crop:calc(var(--device-w)*0.9)] lg:[--speaks-up-pop-scale:1.2] lg:[--speaks-up-pop-x:-14%] lg:[--speaks-up-pop-lift:0.1] lg:[--speaks-up-reply-scale:1.08] lg:[--speaks-up-reply-x:8%] lg:[--speaks-up-reply-y:0px]"
         />
       </div>
 

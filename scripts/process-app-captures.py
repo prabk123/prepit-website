@@ -91,6 +91,11 @@ CUTOUTS = {
 ISLAND = (411, 38, 386, 118)  # x, y, width, height
 ISLAND_SAMPLE_X = 405
 
+# Stills shown under a pop-out tag, where the unread NEW divider would peek out
+# beside the tag: the rows it spans (top, bottom) are filled with the chat's
+# background, sampled just above them.
+NEW_DIVIDERS = {"25-nudge-missed-breakfast-light": (1446, 1500)}
+
 # Widget renders: a 36 px margin around the widget, whose corner radius is 64 px.
 WIDGET_MARGIN = 36
 WIDGET_RADIUS = 64
@@ -137,6 +142,9 @@ def still(name: str) -> None:
             out.save(os.path.join(OUT, f"{name}@{scale}.webp"), quality=82, method=6)
         return
     im = paint_out_island(im.convert("RGB"))
+    if name in NEW_DIVIDERS:
+        top, bottom = NEW_DIVIDERS[name]
+        im.paste(im.getpixel((20, top - 4)), (0, top, im.width, bottom))
     if name.startswith(AVATAR_STILLS):
         im = blur_avatar(im)
     for scale, width in WIDTHS.items():

@@ -218,5 +218,6 @@ export function chatCutout(name: keyof typeof CHAT_CUTOUTS) {
     left: (left / 1206) * 100,
     top: (top / 2622) * 100,
     widthPercent: ((right - left) / 1206) * 100,
+    heightPercent: ((bottom - top) / 2622) * 100,
   };
 }

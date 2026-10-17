@@ -160,17 +160,21 @@
     opacity: 1;
   }
 
+  /* How far the message and reply lift out. A phone can set these, as the
+     hero does on small screens to keep the message's text readable. */
   .speaks-up-phone__pop[data-active] .speaks-up-phone__cutout--message {
-    transform: translateX(-14%) scale(1.2);
+    transform: translateX(var(--speaks-up-pop-x, -14%)) scale(var(--speaks-up-pop-scale, 1.2));
   }
 
   .speaks-up-phone__pop[data-active] .speaks-up-phone__cutout--highlight {
-    transform: translateX(8%) scale(1.08);
+    transform: translate(var(--speaks-up-reply-x, 8%), var(--speaks-up-reply-y, 0px))
+      scale(var(--speaks-up-reply-scale, 1.08));
   }
 
   /* Why the message was sent, in the photo annotations' orange-dot style. */
-  /* Sits just above the message: `top` is the message's top edge, less
-     --speaks-up-reason-gap (0 in the hero, where the tag covers the NEW line). */
+  /* Sits just above the message: `top` is the message's top edge, raised by
+     --speaks-up-pop-lift (the share of the message's height its scaling adds
+     above it) and --speaks-up-reason-gap. */
   .speaks-up-phone__reason {
     position: absolute;
     left: -12cqw;
