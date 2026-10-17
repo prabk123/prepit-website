@@ -72,6 +72,20 @@ CROPS = {
     "24b-nudge-weigh-in-crop-light": ("24b-nudge-weigh-in-light", 1496, 2500),
 }
 
+# Cut-outs of one part of a chat still, lifted out over the phone on the
+# homepage (PRE-294): output name -> (source still, (left, top, right, bottom)
+# in 1206x2622 pixels, corner radius). Corners outside the radius are made
+# transparent so the part keeps the app's rounded shape over the page.
+CUTOUTS = {
+    "25b-nudge-protein-bubble-light": ("25b-nudge-protein-light", (48, 930, 1037, 1746), 46),
+    "25b-nudge-protein-reply-light": ("25b-nudge-protein-light", (48, 1794, 1158, 1938), 38),
+    "24-nudge-weekly-pattern-bubble-light": ("24-nudge-weekly-pattern-light", (48, 564, 1037, 1380), 46),
+    # The Tue and Wed rows the pattern gives more room, on a slice of the card's white.
+    "24-nudge-weekly-pattern-days-light": ("24-nudge-weekly-pattern-light", (75, 1825, 1131, 2062), 32),
+    "24b-nudge-weigh-in-bubble-light": ("24b-nudge-weigh-in-light", (48, 1536, 1037, 1920), 46),
+    "24b-nudge-weigh-in-reply-light": ("24b-nudge-weigh-in-light", (48, 1968, 1158, 2112), 38),
+}
+
 # Screen recordings (and frames taken from them) include the Dynamic Island,
 # which the site's DeviceFrame draws itself. The pill on a 1206x2622 frame,
 # padded a little, is painted over with the status bar colour just left of it.
@@ -140,6 +154,19 @@ def crop(name: str, source: str, top: int, bottom: int) -> None:
         out.save(os.path.join(OUT, f"{name}@{scale}.webp"), quality=82, method=6)
 
 
+def cutout(name: str, source: str, box: tuple[int, int, int, int], radius: int) -> None:
+    im = Image.open(os.path.join(RAW, source + ".png")).convert("RGBA").crop(box)
+    ss = 4
+    mask = Image.new("L", (im.width * ss, im.height * ss), 0)
+    ImageDraw.Draw(mask).rounded_rectangle((0, 0, im.width * ss - 1, im.height * ss - 1), radius=radius * ss, fill=255)
+    im.putalpha(mask.resize(im.size, Image.LANCZOS))
+    # Same scale as the stills: 1x is a third of the capture, 2x two thirds.
+    for scale, factor in (("1x", 3), ("2x", 1.5)):
+        out = im.resize((round(im.width / factor), round(im.height / factor)), Image.LANCZOS)
+        out.save(os.path.join(OUT, f"{name}@{scale}.avif"), quality=60)
+        out.save(os.path.join(OUT, f"{name}@{scale}.webp"), quality=82, method=6)
+
+
 def video(name: str) -> None:
     src = os.path.join(RAW, name + ".mp4")
     segs = SEGMENTS.get(name)
@@ -193,6 +220,9 @@ def main() -> None:
     for name, (source, top, bottom) in CROPS.items():
         if source + ".png" in names:
             crop(name, source, top, bottom)
+    for name, (source, box, radius) in CUTOUTS.items():
+        if source + ".png" in names:
+            cutout(name, source, box, radius)
     for f in sorted(os.listdir(OUT)):
         size = os.path.getsize(os.path.join(OUT, f))
         flag = "  OVER 2 MB" if size > 2 * 1024 * 1024 else ""

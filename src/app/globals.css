@@ -86,6 +86,119 @@
 
 /* In a layer so Tailwind utilities passed as className still win. */
 @layer components {
+  /* <SpeaksUpPhone> (PRE-294): a phone whose message lifts out past the
+     frame. The wrapper is the frame's width, so cqw matches DeviceFrame's. */
+  .speaks-up-phone {
+    position: relative;
+    container-type: inline-size;
+    width: var(--device-w);
+    margin-inline: calc(var(--device-w) * 0.12);
+  }
+
+  .speaks-up-phone .device-frame__screen > .speaks-up-phone__screen {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+  }
+
+  .speaks-up-phone .device-frame__screen > .speaks-up-phone__screen[data-active] {
+    opacity: 1;
+  }
+
+  .speaks-up-phone__screen img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+  }
+
+  /* Sits exactly over the screen (shell and bezel padding are 4cqw) but is
+     free to spill past it. */
+  .speaks-up-phone__pop {
+    position: absolute;
+    inset: 4cqw;
+    pointer-events: none;
+  }
+
+  .speaks-up-phone__cutout {
+    position: absolute;
+    display: block;
+    max-width: none;
+    height: auto;
+    opacity: 0;
+    filter: drop-shadow(0 22px 26px rgb(26 26 46 / 0.26)) drop-shadow(0 6px 10px rgb(26 26 46 / 0.12));
+  }
+
+  .speaks-up-phone__cutout--message {
+    transform-origin: 0% 50%;
+  }
+
+  .speaks-up-phone__cutout--highlight {
+    transform-origin: 100% 50%;
+  }
+
+  .speaks-up-phone__pop[data-active] .speaks-up-phone__cutout,
+  .speaks-up-phone__pop[data-active] .speaks-up-phone__reason {
+    opacity: 1;
+  }
+
+  .speaks-up-phone__pop[data-active] .speaks-up-phone__cutout--message {
+    transform: translateX(-14%) scale(1.2);
+  }
+
+  .speaks-up-phone__pop[data-active] .speaks-up-phone__cutout--highlight {
+    transform: translateX(8%) scale(1.08);
+  }
+
+  /* Why the message was sent, in the photo annotations' orange-dot style. */
+  .speaks-up-phone__reason {
+    position: absolute;
+    left: -12cqw;
+    opacity: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px 6px 9px;
+    white-space: nowrap;
+    border: 1px solid var(--color-annotation-border);
+    border-radius: var(--radius-control);
+    background: var(--color-annotation-label);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: var(--color-annotation-ink);
+    font-size: var(--text-small);
+    font-weight: 500;
+    line-height: 1.2;
+    box-shadow: 0 8px 20px -10px rgb(26 26 46 / 0.3);
+  }
+
+  .speaks-up-phone__reason::before {
+    content: "";
+    flex: none;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-annotation);
+    box-shadow: 0 0 0 4px rgb(255 100 79 / 0.18);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .speaks-up-phone .device-frame__screen > .speaks-up-phone__screen {
+      transition: opacity 300ms ease;
+    }
+
+    .speaks-up-phone__reason {
+      transition: opacity 250ms ease 200ms;
+    }
+
+    .speaks-up-phone__cutout {
+      transition:
+        transform 500ms cubic-bezier(0.2, 0.8, 0.2, 1) 120ms,
+        opacity 250ms ease 120ms;
+    }
+  }
+
   /* <Glow>: soft orange light behind phones. */
   .glow-warm {
     pointer-events: none;
