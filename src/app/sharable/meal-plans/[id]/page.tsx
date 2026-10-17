@@ -20,7 +20,18 @@ function plural(count: number, word: string): string {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const plan = await getMealPlanById(id);
+  let plan: Awaited<ReturnType<typeof getMealPlanById>>;
+  try {
+    plan = await getMealPlanById(id);
+  } catch {
+    // The page itself throws on the same failure, logs it and shows error.tsx;
+    // this only keeps the tab title.
+    return {
+      title: "Shared meal plan",
+      description: "A meal plan shared from PrepIt.",
+      robots: { index: false, follow: false },
+    };
+  }
 
   if (!plan) {
     return { title: "Meal plan not found", robots: { index: false, follow: false } };

@@ -1,6 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type ReactNode,
+} from "react";
 import { trackVideoPlayed } from "@/lib/posthogAnalytics";
 
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
@@ -13,6 +21,58 @@ function subscribeToReducedMotion(onChange: () => void) {
 
 function prefersReducedMotion() {
   return window.matchMedia(REDUCED_MOTION_QUERY).matches;
+}
+
+type ToggleState = { playing: boolean; toggle: () => void };
+
+/**
+ * Lets a frame (DeviceFrame) draw the clip's pause/play button outside the
+ * screen, so it never sits on top of the app's own controls in a recording.
+ * Inside a scope, LoopVideo hands its state up and <LoopVideoToggle> draws
+ * the button wherever the frame puts it.
+ */
+const ToggleScopeContext = createContext<((state: ToggleState) => void) | null>(null);
+const ToggleStateContext = createContext<ToggleState | null>(null);
+
+export function LoopVideoToggleScope({ children }: { children: ReactNode }) {
+  const [state, setState] = useState<ToggleState | null>(null);
+  return (
+    <ToggleScopeContext.Provider value={setState}>
+      <ToggleStateContext.Provider value={state}>{children}</ToggleStateContext.Provider>
+    </ToggleScopeContext.Provider>
+  );
+}
+
+function ToggleButton({ playing, toggle, className }: ToggleState & { className: string }) {
+  return (
+    <button
+      type="button"
+      className={className}
+      aria-label={playing ? "Pause video" : "Play video"}
+      onClick={toggle}
+    >
+      {playing ? (
+        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden>
+          <rect x="3" y="2" width="3.5" height="12" rx="1" fill="currentColor" />
+          <rect x="9.5" y="2" width="3.5" height="12" rx="1" fill="currentColor" />
+        </svg>
+      ) : (
+        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden>
+          <path d="M4 2.6v10.8a1 1 0 0 0 1.5.86l9-5.4a1 1 0 0 0 0-1.72l-9-5.4A1 1 0 0 0 4 2.6Z" fill="currentColor" />
+        </svg>
+      )}
+    </button>
+  );
+}
+
+/** The pause/play button of the LoopVideo in the same scope, drawn outside it. */
+export function LoopVideoToggle() {
+  const state = useContext(ToggleStateContext);
+  // Until the clip hydrates, hold the button's space so nothing below shifts.
+  if (!state) {
+    return <span aria-hidden className="loop-video__toggle loop-video__toggle--outside invisible" />;
+  }
+  return <ToggleButton {...state} className="loop-video__toggle loop-video__toggle--outside" />;
 }
 
 export type LoopVideoProps = {
@@ -118,14 +178,21 @@ export default function LoopVideo({
   const toggle = () => {
     const video = videoRef.current;
     if (!video) return;
-    if (playing) {
-      choiceRef.current = "pause";
-      video.pause();
-    } else {
+    if (video.paused) {
       choiceRef.current = "play";
       video.play().catch(() => {});
+    } else {
+      choiceRef.current = "pause";
+      video.pause();
     }
   };
+
+  // In a frame's scope, the frame draws the button (see LoopVideoToggleScope).
+  const setScopeState = useContext(ToggleScopeContext);
+  useEffect(() => {
+    setScopeState?.({ playing, toggle });
+    // toggle reads only refs, so a new one each render behaves the same.
+  }, [setScopeState, playing]);
 
   return (
     <div
@@ -156,23 +223,9 @@ export default function LoopVideo({
         {webm && <source src={webm} type="video/webm" />}
         <source src={mp4} type="video/mp4" />
       </video>
-      <button
-        type="button"
-        className="loop-video__toggle"
-        aria-label={playing ? "Pause video" : "Play video"}
-        onClick={toggle}
-      >
-        {playing ? (
-          <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden>
-            <rect x="3" y="2" width="3.5" height="12" rx="1" fill="currentColor" />
-            <rect x="9.5" y="2" width="3.5" height="12" rx="1" fill="currentColor" />
-          </svg>
-        ) : (
-          <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden>
-            <path d="M4 2.6v10.8a1 1 0 0 0 1.5.86l9-5.4a1 1 0 0 0 0-1.72l-9-5.4A1 1 0 0 0 4 2.6Z" fill="currentColor" />
-          </svg>
-        )}
-      </button>
+      {!setScopeState && (
+        <ToggleButton playing={playing} toggle={toggle} className="loop-video__toggle" />
+      )}
     </div>
   );
 }

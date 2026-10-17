@@ -190,6 +190,8 @@ export default function RootLayout({
       <body
         className={`${dmSans.variable} ${brandFont.variable} antialiased`}
       >
+        {/* First in the body so a keyboard reaches it before the page. */}
+        <CookieConsent />
         <a
           href="#main"
           className="sr-only rounded-button bg-primary px-4 text-small font-bold text-on-primary focus:not-sr-only focus:fixed focus:left-4 focus:top-2.5 focus:z-[60] focus:inline-flex focus:h-11 focus:items-center focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus"
@@ -210,7 +212,6 @@ export default function RootLayout({
         </div>
         <SpeedInsights />
         <Analytics />
-        <CookieConsent />
       </body>
     </html>
   );

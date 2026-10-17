@@ -8,6 +8,7 @@ import { TRIAL_NOTE } from "@/lib/pricing";
 
 export const metadata: Metadata = {
   title: "Page not found",
+  description: "This page doesn't exist on the PrepIt website. Try the homepage, features or guides.",
   robots: { index: false, follow: true },
 };
 
@@ -15,13 +16,13 @@ const linkPill =
   "inline-flex h-14 items-center rounded-control border border-line-strong px-7 text-body font-medium text-ink transition-colors hover:bg-surface-raised focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus";
 
 /**
- * Any URL with no page, including a mistyped feature or guide slug. Those
- * paths hide the site's closing download band (SiteFinalCta), so the 404
- * carries its own App Store button.
+ * Any URL with no page, including a mistyped feature or guide slug. The 404
+ * carries its own App Store button and hides the site's closing download band
+ * (SiteFinalCta), so there is one download button on every 404.
  */
 export default function NotFound() {
   return (
-    <div className="w-full bg-page pt-16 text-ink lg:pt-[72px]">
+    <div className="w-full bg-page pt-16 text-ink lg:pt-[72px]" data-hide-site-final-cta="">
       <NotFoundTracker />
       <Section labelledBy="not-found-heading">
         <div className="flex flex-col gap-10">
