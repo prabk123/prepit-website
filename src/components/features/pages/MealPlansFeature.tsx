@@ -1,18 +1,16 @@
 import DeviceFrame from "@/components/device/DeviceFrame";
 import WidgetImage from "@/components/device/WidgetImage";
 import FeatureBlock from "@/components/features/FeatureBlock";
-import LoopVideo from "@/components/media/LoopVideo";
 import Glow from "@/components/ui/Glow";
-import Section, { type SectionPhoto } from "@/components/ui/Section";
-import SectionHeading from "@/components/ui/SectionHeading";
+import type { SectionPhoto } from "@/components/ui/Section";
 import TextLink from "@/components/ui/TextLink";
-import { cookingClip, planFlatLays } from "@/content/featureImagery";
+import { planFlatLays } from "@/content/featureImagery";
 import { appCapture, widgetCapture } from "@/lib/captures";
 
 const PHONE = "[--device-w:260px] sm:[--device-w:300px] lg:[--device-w:clamp(260px,22vw,320px)]";
 
-// Three across from 640 px, else full width inside the page gutters (20 px on phones).
-const FLAT_LAY_SIZES = "(min-width: 640px) 33vw, calc(100vw - 40px)";
+// Three across in the text column: about a sixth of the page on desktop, a third on phones.
+const FLAT_LAY_SIZES = "(min-width: 1024px) 16vw, 33vw";
 
 const FLAT_LAYS: { photo: SectionPhoto; caption: string }[] = [
   { photo: planFlatLays.oats, caption: "Protein overnight oats" },
@@ -24,54 +22,70 @@ const FLAT_LAYS: { photo: SectionPhoto; caption: string }[] = [
 export default function MealPlansFeature() {
   return (
     <>
-      <Section id="how-it-plans" tone="surface" labelledBy="how-it-plans-heading">
-        <div className="flex flex-col gap-stack">
-          <SectionHeading
-            id="how-it-plans-heading"
-            size="section"
-            title="It asks first, then plans."
-            lead="It asks which days to cover, which meals to leave out, snacks, your budget and how much variety you like. Then you check the week, day by day, before you confirm."
-          />
-          <ul className="grid gap-4 sm:grid-cols-3 lg:gap-5">
-            {FLAT_LAYS.map(({ photo, caption }) => (
-              <li key={caption} className="flex flex-col gap-3">
-                <picture>
-                  {photo.avif && <source srcSet={photo.avif} sizes={FLAT_LAY_SIZES} type="image/avif" />}
-                  {photo.webp && <source srcSet={photo.webp} sizes={FLAT_LAY_SIZES} type="image/webp" />}
-                  <img
-                    src={photo.src}
-                    alt={photo.alt}
-                    width={photo.width}
-                    height={photo.height}
-                    loading="lazy"
-                    decoding="async"
-                    className="h-auto w-full rounded-tile border border-line"
-                  />
-                </picture>
-                <p className="text-small text-ink-muted">{caption}</p>
-              </li>
-            ))}
-          </ul>
-          <TextLink href="/guides/make-your-first-meal-plan">Guide: make your first meal plan</TextLink>
-        </div>
-      </Section>
+      <FeatureBlock
+        id="how-it-plans"
+        tone="surface"
+        title="It asks first, then plans."
+        lead="It asks which days to cover, which meals to leave out, snacks, your budget and how much variety you like. Then you check the week, day by day, before you confirm."
+        media={
+          <div className="relative">
+            <Glow />
+            <DeviceFrame
+              className={PHONE}
+              capture={appCapture(
+                "27-plan-questions",
+                "The nutritionist's first plan question, which days to plan, with Friday 9 to Sunday 11 October suggested and a Confirm 3 days button",
+              )}
+            />
+          </div>
+        }
+      >
+        <TextLink href="/guides/make-your-first-meal-plan">Guide: make your first meal plan</TextLink>
+      </FeatureBlock>
 
       <FeatureBlock
         id="swaps"
+        reverse
         title="Don't fancy it? Swap it."
         lead="Not in the mood for Tuesday's dinner? Ask for something else and your nutritionist changes it, and the grocery list with it."
         media={
-          <LoopVideo
-            {...cookingClip}
-            analyticsId="cooking"
-            className="w-full overflow-hidden rounded-card border border-line"
-          />
+          <div className="relative">
+            <Glow />
+            <DeviceFrame
+              className={PHONE}
+              capture={appCapture(
+                "27b-plan-swap",
+                "Asking for alternatives to Monday's dinner, and the nutritionist offering cod and sweet potato mash, a chicken and vegetable stir-fry or a tuna and pasta bake",
+              )}
+            />
+          </div>
         }
       >
         <p className="max-w-[56ch] text-body text-ink-muted text-pretty">
           Plans cover up to 7 days, starting today if you like, and every meal is built around your calories,
           protein and tastes. Each one comes with its nutrition and cooking steps.
         </p>
+        {/* Meals from the showcase plan, as supporting pictures beside the swap (PRE-288). */}
+        <ul className="grid grid-cols-3 gap-3">
+          {FLAT_LAYS.map(({ photo, caption }) => (
+            <li key={caption} className="flex flex-col gap-2">
+              <picture>
+                {photo.avif && <source srcSet={photo.avif} sizes={FLAT_LAY_SIZES} type="image/avif" />}
+                {photo.webp && <source srcSet={photo.webp} sizes={FLAT_LAY_SIZES} type="image/webp" />}
+                <img
+                  src={photo.src}
+                  alt={photo.alt}
+                  width={photo.width}
+                  height={photo.height}
+                  loading="lazy"
+                  decoding="async"
+                  className="aspect-square h-auto w-full rounded-tile border border-line object-cover"
+                />
+              </picture>
+              <p className="text-small text-ink-muted">{caption}</p>
+            </li>
+          ))}
+        </ul>
       </FeatureBlock>
 
       <FeatureBlock

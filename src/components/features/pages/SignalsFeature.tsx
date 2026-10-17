@@ -7,7 +7,7 @@ import PhotoBand from "@/components/ui/PhotoBand";
 import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
 import TextLink from "@/components/ui/TextLink";
-import { signalsGym } from "@/content/featureImagery";
+import { lunchRings } from "@/content/lifestyle";
 import { appCapture } from "@/lib/captures";
 
 const PHONE = "[--device-w:260px] sm:[--device-w:300px] lg:[--device-w:clamp(260px,22vw,320px)]";
@@ -48,9 +48,10 @@ export default function SignalsFeature() {
       <PhotoBand
         id="at-a-glance"
         labelledBy="at-a-glance-heading"
-        photo={signalsGym.desktop}
-        phonePhoto={signalsGym.mobile}
-        textSide={signalsGym.textSide}
+        // Home's three rings, which this band describes; the hero above already shows Energy's detail (PRE-288).
+        photo={lunchRings.desktop}
+        phonePhoto={lunchRings.mobile}
+        textSide={lunchRings.textSide}
       >
         <SectionHeading
           id="at-a-glance-heading"

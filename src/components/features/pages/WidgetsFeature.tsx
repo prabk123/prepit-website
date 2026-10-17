@@ -4,11 +4,9 @@ import FeatureBlock from "@/components/features/FeatureBlock";
 import { BentoGrid, BentoTile } from "@/components/ui/Bento";
 import CaptureRow from "@/components/ui/CaptureRow";
 import Glow from "@/components/ui/Glow";
-import PhotoBand from "@/components/ui/PhotoBand";
 import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
 import TextLink from "@/components/ui/TextLink";
-import { widgetsDesk } from "@/content/featureImagery";
 import { appCapture, widgetCapture } from "@/lib/captures";
 
 const PHONE = "[--device-w:260px] sm:[--device-w:300px] lg:[--device-w:clamp(260px,22vw,320px)]";
@@ -41,28 +39,13 @@ const ONE_PRESS = [
 export default function WidgetsFeature() {
   return (
     <>
-      <PhotoBand
-        id="your-day"
-        labelledBy="your-day-heading"
-        photo={widgetsDesk.desktop}
-        phonePhoto={widgetsDesk.mobile}
-        textSide={widgetsDesk.textSide}
-      >
-        <SectionHeading
-          id="your-day-heading"
-          size="section"
-          title="Your day, on your Home Screen."
-          lead="See how today is going every time you unlock your phone: your scores, your plan, your water and your streak. The buttons do the job right on the widget."
-        />
-      </PhotoBand>
-
       <Section id="widgets" labelledBy="widgets-heading">
         <div className="flex flex-col gap-stack">
           <SectionHeading
             id="widgets-heading"
             size="section"
-            title="Widgets that do things."
-            lead="Add a drink, tick a supplement or log a planned meal without opening PrepIt."
+            title="Your day, on your Home Screen."
+            lead="Your scores, your plan, your water and your streak, every time you unlock your phone. Add a drink, tick a supplement or log a planned meal right on the widget."
           />
           <BentoGrid>
             <BentoTile

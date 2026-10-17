@@ -1,3 +1,5 @@
+import type { CardThumb } from "@/lib/captures";
+
 /**
  * The feature pages (PRE-203): one page per major feature at
  * /features/<slug>, so each has something for search engines to rank and
@@ -33,8 +35,8 @@ export type FeatureMeta = {
   heading: string;
   /** The line under the h1. */
   lead: string;
-  /** A still from public/app for the related-features card. */
-  thumb: string;
+  /** The related-features card's thumbnail, a crop of this still (PRE-289). */
+  thumb: CardThumb;
 };
 
 /*

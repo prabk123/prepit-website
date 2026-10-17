@@ -49,6 +49,10 @@ function phonePhoto(
 }
 
 /**
+ * Not on a page since PRE-288: its phone shows Energy's detail, the same
+ * screen as the Signals hero, so that band uses lunchRings (Home's rings).
+ * Only the dev imagery page shows it.
+ *
  * Signals section. Nothing on the bench is logged, so annotations should point
  * at the phone: the Energy 84 ring (about x 73%, y 37%) and Calorie fit,
  * 1481 / 1322 kcal expected, +22 (about x 72%, y 66%).
@@ -68,6 +72,10 @@ export const signalsGym: FeaturePhoto = {
 };
 
 /**
+ * Not on a page since PRE-288: the Today's plan widget on its phone repeats
+ * the seed's 400 kcal on every meal and the clock says 13:05, so it read as
+ * made up. Only the dev imagery page shows it.
+ *
  * Widgets tile. The phone is on the left, so the text sits on the right.
  * Annotation values on the phone: Energy 84, Satiety 96, Mood 87 (about
  * x 27%, y 22%) and Lunch, 12:30 PM, Chicken and rice, Logged (about x 27%,
@@ -136,7 +144,7 @@ export const planFlatLays = {
  */
 export const textureHoney = still("texture-honey", "", { avif: false });
 
-/** Props for LoopVideo: chicken and vegetables cooking, no phone (Plans). */
+/** Props for LoopVideo: chicken and vegetables cooking, no phone. Dev imagery page only since PRE-288, when Plans' swap block got the real swap screen. */
 export const cookingClip = {
   mp4: "/lifestyle/cooking.mp4",
   webm: "/lifestyle/cooking.webm",
