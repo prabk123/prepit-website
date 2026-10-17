@@ -188,3 +188,33 @@ export function appWidget(name: AppWidget, mode: CaptureMode = "light") {
     ...APP_WIDGETS[name],
   };
 }
+
+/**
+ * Parts of a chat still cut out with their rounded corners
+ * (scripts/process-app-captures.py CUTOUTS), lifted over the phone on the
+ * homepage (PRE-294). `box` is where the part sits on the 1206 x 2622
+ * capture, so it can be laid exactly over the screen.
+ */
+export const CHAT_CUTOUTS = {
+  "25b-nudge-protein-bubble": [48, 930, 1037, 1746],
+  "25b-nudge-protein-reply": [48, 1794, 1158, 1938],
+  "24b-nudge-weigh-in-bubble": [48, 1536, 1037, 1920],
+  "24b-nudge-weigh-in-reply": [48, 1968, 1158, 2112],
+} as const;
+
+export type ChatCutout = ReturnType<typeof chatCutout>;
+
+export function chatCutout(name: keyof typeof CHAT_CUTOUTS) {
+  const [left, top, right, bottom] = CHAT_CUTOUTS[name];
+  return {
+    src: `/app/${name}-light@2x.webp`,
+    avif: srcSet(name, "avif", "light"),
+    webp: srcSet(name, "webp", "light"),
+    width: Math.round(((right - left) * 2) / 3),
+    height: Math.round(((bottom - top) * 2) / 3),
+    /** Position on the screen, as percentages of its width and height. */
+    left: (left / 1206) * 100,
+    top: (top / 2622) * 100,
+    widthPercent: ((right - left) / 1206) * 100,
+  };
+}

@@ -1,4 +1,4 @@
-import { chatCrop } from "@/lib/captures";
+import { appCapture, chatCrop, chatCutout } from "@/lib/captures";
 
 /*
  * Messages the nutritionist sends on its own, as real crops of the app's
@@ -45,3 +45,39 @@ export const weighIn = {
   ),
   caption: "A week after your last weigh-in",
 };
+
+/*
+ * The homepage's speaks-up phone (PRE-294): the full chat screen in a phone,
+ * with the message and its first reply cut from the same capture and lifted out
+ * over it. Missed breakfast is left out because the hero already shows it,
+ * and the weekly pattern because the band's photo shows that card with other
+ * numbers.
+ */
+export const speaksUpPhoneMessages = [
+  {
+    id: "protein",
+    label: "Protein",
+    reason: "Short on protein 18 of 21 days",
+    caption: proteinShort.caption,
+    screen: appCapture(
+      "25b-nudge-protein",
+      "The Nutritionist chat with its protein check-in: under target on 18 of 21 logged days, about 127g a day against 158g, most of the gap at dinner, with two easy fixes. Replies: Bigger protein at dinner, Greek yogurt after dinner, Not now, Type your own",
+    ),
+    message: chatCutout("25b-nudge-protein-bubble"),
+    highlight: chatCutout("25b-nudge-protein-reply"),
+  },
+  {
+    id: "weigh-in",
+    label: "Weigh-in",
+    reason: "8 days since the last weigh-in",
+    caption: weighIn.caption,
+    screen: appCapture(
+      "24b-nudge-weigh-in",
+      "The Nutritionist chat with its weigh-in reminder after 8 days. Replies: Log my weight, Not this week, Type your own",
+    ),
+    message: chatCutout("24b-nudge-weigh-in-bubble"),
+    highlight: chatCutout("24b-nudge-weigh-in-reply"),
+  },
+] as const;
+
+export type SpeaksUpPhoneMessage = (typeof speaksUpPhoneMessages)[number];

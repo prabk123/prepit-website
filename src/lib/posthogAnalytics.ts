@@ -88,3 +88,13 @@ export function trackContactFormSubmitted(
     posthog.capture(POSTHOG_CONTACT_FORM_EVENT, { kind, outcome, ...(status ? { status } : {}) }),
   );
 }
+
+/**
+ * Fired when a visitor picks a message under the homepage's speaks-up phone
+ * (PRE-294). `message` is the message's fixed id.
+ */
+export const POSTHOG_MESSAGE_SELECTED_EVENT = "website_message_selected";
+
+export function trackMessageSelected(message: string) {
+  withPostHog((posthog) => posthog.capture(POSTHOG_MESSAGE_SELECTED_EVENT, { message }));
+}
