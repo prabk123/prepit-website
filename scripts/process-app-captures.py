@@ -81,6 +81,8 @@ CUTOUTS = {
     "25b-nudge-protein-reply-light": ("25b-nudge-protein-light", (48, 1794, 1158, 1938), 38),
     "24b-nudge-weigh-in-bubble-light": ("24b-nudge-weigh-in-light", (48, 1536, 1037, 1920), 46),
     "24b-nudge-weigh-in-reply-light": ("24b-nudge-weigh-in-light", (48, 1968, 1158, 2112), 38),
+    "25-nudge-missed-breakfast-bubble-light": ("25-nudge-missed-breakfast-light", (48, 1530, 1037, 1914), 46),
+    "25-nudge-missed-breakfast-reply-light": ("25-nudge-missed-breakfast-light", (48, 1962, 1158, 2112), 38),
 }
 
 # Screen recordings (and frames taken from them) include the Dynamic Island,

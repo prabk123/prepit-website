@@ -93,28 +93,23 @@
     container-type: inline-size;
     width: var(--device-w);
     margin-inline: calc(var(--device-w) * 0.12);
+    /* Crop the top of the phone (status bar and empty chat), keeping the
+       pop-outs free to spill sideways; ::after fades the cut into the page. */
+    --speaks-up-crop: calc(var(--device-w) * 0.42);
+    margin-top: calc(var(--speaks-up-crop) * -1);
+    clip-path: inset(var(--speaks-up-crop) -50% -15% -50%);
   }
 
-  /* Phones: crop the top of the phone (status bar and empty chat), keeping
-     the pop-outs free to spill sideways, and fade the cut edge into the page. */
-  @media (max-width: 1023.98px) {
-    .speaks-up-phone {
-      --speaks-up-crop: calc(var(--device-w) * 0.42);
-      margin-top: calc(var(--speaks-up-crop) * -1);
-      clip-path: inset(var(--speaks-up-crop) -50% -15% -50%);
-    }
-
-    .speaks-up-phone::after {
-      content: "";
-      position: absolute;
-      z-index: 1;
-      top: var(--speaks-up-crop);
-      left: -50%;
-      right: -50%;
-      height: 28px;
-      background: linear-gradient(var(--color-page), transparent);
-      pointer-events: none;
-    }
+  .speaks-up-phone::after {
+    content: "";
+    position: absolute;
+    z-index: 1;
+    top: var(--speaks-up-crop);
+    left: -50%;
+    right: -50%;
+    height: 28px;
+    background: linear-gradient(var(--color-page), transparent);
+    pointer-events: none;
   }
 
   .speaks-up-phone .device-frame__screen > .speaks-up-phone__screen {
@@ -174,7 +169,8 @@
   }
 
   /* Why the message was sent, in the photo annotations' orange-dot style. */
-  /* Sits just above the message: `top` is the message's top edge. */
+  /* Sits just above the message: `top` is the message's top edge, less
+     --speaks-up-reason-gap (0 in the hero, where the tag covers the NEW line). */
   .speaks-up-phone__reason {
     position: absolute;
     left: -12cqw;

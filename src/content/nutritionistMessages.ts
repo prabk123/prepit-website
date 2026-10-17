@@ -49,9 +49,9 @@ export const weighIn = {
 /*
  * The homepage's speaks-up phone (PRE-294): the full chat screen in a phone,
  * with the message and its first reply cut from the same capture and lifted out
- * over it. Missed breakfast is left out because the hero already shows it,
- * and the weekly pattern because the band's photo shows that card with other
- * numbers.
+ * over it. Missed breakfast is left out because the hero shows it the same
+ * way (heroPhoneMessage), and the weekly pattern because the band's photo
+ * shows that card with other numbers.
  */
 export const speaksUpPhoneMessages = [
   {
@@ -80,4 +80,18 @@ export const speaksUpPhoneMessages = [
   },
 ] as const;
 
-export type SpeaksUpPhoneMessage = (typeof speaksUpPhoneMessages)[number];
+/** The homepage hero's message, in the same phone (PRE-294). */
+export const heroPhoneMessage = {
+  id: "missed-breakfast",
+  label: "Missed breakfast",
+  reason: "No breakfast logged yet",
+  caption: missedBreakfast.caption,
+  screen: appCapture(
+    "25-nudge-missed-breakfast",
+    "The Nutritionist chat with its message: I can't see any breakfast log today. Drop me a quick voice note when you get the chance if you had something, or let me know if you skipped it. Replies: I skipped it, I'll log it now, Type your own",
+  ),
+  message: chatCutout("25-nudge-missed-breakfast-bubble"),
+  highlight: chatCutout("25-nudge-missed-breakfast-reply"),
+} as const;
+
+export type SpeaksUpPhoneMessage = (typeof speaksUpPhoneMessages)[number] | typeof heroPhoneMessage;

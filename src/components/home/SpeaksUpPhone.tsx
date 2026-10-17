@@ -6,7 +6,19 @@ import { speaksUpPhoneMessages, type SpeaksUpPhoneMessage } from "@/content/nutr
 import type { ChatCutout } from "@/lib/captures";
 import { trackMessageSelected } from "@/lib/posthogAnalytics";
 
-function Cutout({ part, kind, active }: { part: ChatCutout; kind: "message" | "highlight"; active: boolean }) {
+type Loading = "lazy" | "eager";
+
+function Cutout({
+  part,
+  kind,
+  active,
+  loading,
+}: {
+  part: ChatCutout;
+  kind: "message" | "highlight";
+  active: boolean;
+  loading: Loading;
+}) {
   return (
     <picture>
       <source srcSet={part.avif} type="image/avif" />
@@ -16,17 +28,21 @@ function Cutout({ part, kind, active }: { part: ChatCutout; kind: "message" | "h
         alt=""
         width={part.width}
         height={part.height}
-        loading="lazy"
+        loading={loading}
         fetchPriority={active ? undefined : "low"}
         decoding="async"
         className={`speaks-up-phone__cutout speaks-up-phone__cutout--${kind}`}
-        style={{ left: `${part.left}%`, top: `${part.top}%`, width: `${part.widthPercent}%` }}
+        style={{
+          left: `${part.left}%`,
+          top: `${part.top}%`,
+          width: `${part.widthPercent}%`,
+        }}
       />
     </picture>
   );
 }
 
-function Screen({ message, active }: { message: SpeaksUpPhoneMessage; active: boolean }) {
+function Screen({ message, active, loading }: { message: SpeaksUpPhoneMessage; active: boolean; loading: Loading }) {
   const { screen } = message;
   return (
     <div className="speaks-up-phone__screen" data-active={active || undefined} aria-hidden={!active}>
@@ -38,7 +54,7 @@ function Screen({ message, active }: { message: SpeaksUpPhoneMessage; active: bo
           alt={active ? screen.alt : ""}
           width={CAPTURE_WIDTH}
           height={CAPTURE_HEIGHT}
-          loading="lazy"
+          loading={loading}
           fetchPriority={active ? undefined : "low"}
           decoding="async"
         />
@@ -51,59 +67,70 @@ function Screen({ message, active }: { message: SpeaksUpPhoneMessage; active: bo
  * The nutritionist's own messages in a phone (PRE-294): the real chat screen,
  * with the message and the part to look at cut from the same capture and
  * lifted out past the frame. A tag says why it was sent, and the buttons
- * under the phone switch between messages. Below 1024 px the phone's top,
- * which is empty chat, is cropped off and faded so the band stays short.
+ * under the phone switch between messages (none with one message). The
+ * phone's top, which is empty chat, is cropped off and faded: by
+ * `--speaks-up-crop`, which `className` can set along with `--device-w`.
  */
-export default function SpeaksUpPhone() {
+export default function SpeaksUpPhone({
+  messages = speaksUpPhoneMessages,
+  className = "[--device-w:216px] sm:[--device-w:240px] lg:[--device-w:300px]",
+  loading = "lazy",
+}: {
+  messages?: readonly SpeaksUpPhoneMessage[];
+  className?: string;
+  /** `eager` for a phone in the first screen, such as the hero's. */
+  loading?: Loading;
+}) {
   const [index, setIndex] = useState(0);
   const captionId = useId();
-  const current = speaksUpPhoneMessages[index];
+  const current = messages[index];
 
   return (
     <figure className="flex w-full min-w-0 flex-col items-center gap-4 lg:gap-6" aria-labelledby={captionId}>
-      <div className="speaks-up-phone [--device-w:216px] sm:[--device-w:240px] lg:[--device-w:300px]">
+      <div className={`speaks-up-phone ${className}`}>
         <DeviceFrame>
-          {speaksUpPhoneMessages.map((message, i) => (
-            <Screen key={message.id} message={message} active={i === index} />
+          {messages.map((message, i) => (
+            <Screen key={message.id} message={message} active={i === index} loading={loading} />
           ))}
         </DeviceFrame>
-        {speaksUpPhoneMessages.map((message, i) => (
-          <div
-            key={message.id}
-            aria-hidden
-            className="speaks-up-phone__pop"
-            data-active={i === index || undefined}
-          >
-            <Cutout part={message.message} kind="message" active={i === index} />
-            <Cutout part={message.highlight} kind="highlight" active={i === index} />
+        {messages.map((message, i) => (
+          <div key={message.id} aria-hidden className="speaks-up-phone__pop" data-active={i === index || undefined}>
+            <Cutout part={message.message} kind="message" active={i === index} loading={loading} />
+            <Cutout part={message.highlight} kind="highlight" active={i === index} loading={loading} />
             <p
               className="speaks-up-phone__reason"
-              style={{ top: `calc(${message.message.top}% - 14px)` }}
+              style={{ top: `calc(${message.message.top}% - var(--speaks-up-reason-gap, 14px))` }}
             >
               {message.reason}
             </p>
           </div>
         ))}
       </div>
-      <div role="group" aria-label="Messages your nutritionist sends on its own" className="flex flex-wrap justify-center gap-2">
-        {speaksUpPhoneMessages.map((message, i) => (
-          <button
-            key={message.id}
-            type="button"
-            aria-pressed={i === index}
-            onClick={() => {
-              if (i === index) return;
-              setIndex(i);
-              trackMessageSelected(message.id);
-            }}
-            className="min-h-11 rounded-control border px-4 text-small font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus aria-pressed:border-primary aria-pressed:bg-primary aria-pressed:text-on-primary border-line-strong bg-surface text-ink hover:border-ink-faint"
-          >
-            {message.label}
-          </button>
-        ))}
-      </div>
+      {messages.length > 1 && (
+        <div
+          role="group"
+          aria-label="Messages your nutritionist sends on its own"
+          className="flex flex-wrap justify-center gap-2"
+        >
+          {messages.map((message, i) => (
+            <button
+              key={message.id}
+              type="button"
+              aria-pressed={i === index}
+              onClick={() => {
+                if (i === index) return;
+                setIndex(i);
+                trackMessageSelected(message.id);
+              }}
+              className="min-h-11 rounded-control border px-4 text-small font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus aria-pressed:border-primary aria-pressed:bg-primary aria-pressed:text-on-primary border-line-strong bg-surface text-ink hover:border-ink-faint"
+            >
+              {message.label}
+            </button>
+          ))}
+        </div>
+      )}
       <figcaption id={captionId} aria-live="polite" className="text-center text-small text-ink-faint">
-        {current.caption}. Real messages from the app.
+        {current.caption}. {messages.length > 1 ? "Real messages from the app." : "A real message from the app."}
       </figcaption>
     </figure>
   );

@@ -200,6 +200,8 @@ export const CHAT_CUTOUTS = {
   "25b-nudge-protein-reply": [48, 1794, 1158, 1938],
   "24b-nudge-weigh-in-bubble": [48, 1536, 1037, 1920],
   "24b-nudge-weigh-in-reply": [48, 1968, 1158, 2112],
+  "25-nudge-missed-breakfast-bubble": [48, 1530, 1037, 1914],
+  "25-nudge-missed-breakfast-reply": [48, 1962, 1158, 2112],
 } as const;
 
 export type ChatCutout = ReturnType<typeof chatCutout>;
