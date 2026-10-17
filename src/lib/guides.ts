@@ -5,7 +5,7 @@ import { compileMDX } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
 import type DeviceFrame from "@/components/device/DeviceFrame";
 import { guideMdxComponents } from "@/components/guides/GuideBlocks";
-import { appCapture, appVideo, isAppClip, isAppStill } from "@/lib/captures";
+import { appCapture, appVideo, isAppClip, isAppStill, isCardThumb } from "@/lib/captures";
 
 const GUIDES_DIR = path.join(process.cwd(), "src/content/guides");
 
@@ -30,7 +30,7 @@ type GuideFrontmatter = {
   /** A still or clip name from `public/app`, shown in the guide's header. */
   hero: string;
   heroAlt: string;
-  /** A still for the guide's card. Defaults to the hero, or its poster for a clip. */
+  /** A still for the guide's card, from CARD_THUMBS in lib/captures. Defaults to the hero. */
   thumb?: string;
   /**
    * On phones the hero shows after this numbered list (1 = the first, the
@@ -60,8 +60,12 @@ function assertFrontmatter(slug: string, data: GuideFrontmatter): GuideMeta {
   if (!isAppStill(data.hero) && !isAppClip(data.hero)) {
     throw new Error(`Guide "${slug}" names a hero capture that doesn't exist: "${data.hero}"`);
   }
-  if (data.thumb !== undefined && !isAppStill(data.thumb)) {
-    throw new Error(`Guide "${slug}" names a thumb still that doesn't exist: "${data.thumb}"`);
+  // The card shows a crop of this still (PRE-289), so it must have one.
+  const thumb = data.thumb ?? data.hero;
+  if (!isCardThumb(thumb)) {
+    throw new Error(
+      `Guide "${slug}" needs a card thumbnail: set thumb to one of CARD_THUMBS, or add "${thumb}" there and to scripts/make-card-thumbs.py`,
+    );
   }
   return { ...data, slug };
 }

@@ -1,7 +1,7 @@
 import LinkCard from "@/components/ui/LinkCard";
 import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
-import { captureThumb } from "@/lib/captures";
+import { cardThumb } from "@/lib/captures";
 import { featureHref, relatedFeatures, type FeatureSlug } from "@/lib/features";
 
 /** "More of what PrepIt does": a card for each other feature page. */
@@ -18,7 +18,7 @@ export default function RelatedFeatures({ slug }: { slug: FeatureSlug }) {
               title={feature.name}
               summary={feature.summary}
               action="See how it works"
-              thumb={captureThumb(feature.thumb)}
+              thumb={cardThumb(feature.thumb)}
             />
           ))}
         </div>

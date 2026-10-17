@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import DeviceFrame from "@/components/device/DeviceFrame";
-import { BentoGrid, BentoTile } from "@/components/ui/Bento";
+import { BentoTile } from "@/components/ui/Bento";
 import FeatureSplit from "@/components/ui/FeatureSplit";
 import Glow from "@/components/ui/Glow";
 import Section from "@/components/ui/Section";
@@ -53,7 +53,7 @@ const principles = [
 export default function AboutPage() {
   return (
     <div className="w-full bg-page pt-16 text-ink lg:pt-[72px]">
-      {/* A lifestyle photo from PRE-199 can replace the phone here once it is ready. */}
+      {/* A real check-in that names one easy fix. Not Home, which the download section below already shows (PRE-289). */}
       <Section labelledBy="about-heading">
         <FeatureSplit
           emphasis="text"
@@ -64,8 +64,8 @@ export default function AboutPage() {
                 className="[--device-w:260px] sm:[--device-w:300px] lg:[--device-w:340px]"
                 priority
                 capture={appCapture(
-                  "01-home",
-                  "PrepIt's Home screen for today: Energy 84, Satiety 96 and Mood 87, 1,481 of 1,570 kcal eaten, water and the day's log",
+                  "25b-nudge-protein",
+                  "The nutritionist noticing protein was under target on 18 of 21 days, mostly at dinner, and offering two easy fixes: Bigger protein at dinner or Greek yogurt after dinner",
                 )}
               />
             </div>
@@ -97,7 +97,7 @@ export default function AboutPage() {
             </div>
           }
         >
-          <SectionHeading id="why-heading" size="title" title="Why PrepIt exists" />
+          <SectionHeading id="why-heading" size="section" title="Why PrepIt exists." />
           <div className="flex flex-col gap-5 text-lead text-ink-secondary text-pretty">
             <p>
               Tracking always starts well. Then it gets annoying. You hit your numbers and still feel tired, hungry and
@@ -115,47 +115,36 @@ export default function AboutPage() {
         <div className="flex flex-col gap-stack">
           <SectionHeading
             id="principles-heading"
+            size="section"
             title="What we hold ourselves to."
             lead="The principles behind every part of PrepIt."
           />
-          <BentoGrid>
+          {/*
+            Three by three on desktop, so no tile is squeezed to a narrow column (PRE-289). Text only:
+            a phone in one tile left the other two in its row mostly empty, and the hero and the story
+            above already show the app.
+          */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">
             {principles.map((principle) => (
               <BentoTile key={principle.title} title={principle.title}>
                 {principle.body}
               </BentoTile>
             ))}
-            <BentoTile
-              size="medium"
-              layout="row"
-              rowFrom="xl"
-              title="You stay in control"
-              media={
-                // The top of the screen only, down to the Log it card under a voice note.
-                <div className="mx-auto h-[400px] w-[240px] overflow-hidden">
-                  <DeviceFrame
-                    className="[--device-w:240px]"
-                    capture={appCapture(
-                      "10-voice-note",
-                      "A chicken burrito bowl the nutritionist heard in a voice note, as a card with a Log it button",
-                    )}
-                  />
-                </div>
-              }
-            >
+            <BentoTile title="You stay in control">
               Your nutritionist can log, move or fix a meal, plan your week and change your goals,
               but any log, plan or goal change it makes shows up as a card first, and nothing is saved until you tap it.
             </BentoTile>
-            <BentoTile size="medium" title="A nutritionist, not a doctor">
+            <BentoTile title="A nutritionist, not a doctor">
               PrepIt gives nutrition guidance, not medical advice, and will tell you when something
               needs a professional.
             </BentoTile>
-          </BentoGrid>
+          </div>
         </div>
       </Section>
 
       <Section tone="surface" labelledBy="team-heading">
         <div className="mx-auto flex max-w-[720px] flex-col gap-8">
-          <SectionHeading id="team-heading" size="title" title="Who builds it" />
+          <SectionHeading id="team-heading" size="section" title="Who builds it." />
           <div className="flex flex-col gap-5 text-lead text-ink-secondary text-pretty">
             <p>
               PrepIt is made by a small, independent team, and it gets better every week from what

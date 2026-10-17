@@ -36,6 +36,9 @@ export const APP_STILLS = [
   "26-action-button-shortcut",
   "26b-lock-screen-control",
   "26c-control-centre",
+  // Tips and tricks again: the first plan question with its day picker, and swap ideas for a meal (PRE-288).
+  "27-plan-questions",
+  "27b-plan-swap",
 ] as const;
 
 export const APP_CLIPS = [
@@ -80,9 +83,34 @@ function srcSet(name: string, ext: "avif" | "webp", mode: CaptureMode) {
   return `/app/${name}-${mode}@1x.${ext} 1x, /app/${name}-${mode}@2x.${ext} 2x`;
 }
 
-/** The 1x files of a still, for small card thumbnails. */
-export function captureThumb(name: string, mode: CaptureMode = "light") {
-  return { avif: `/app/${name}-${mode}@1x.avif`, webp: `/app/${name}-${mode}@1x.webp` };
+/**
+ * Stills with a card thumbnail: the telling part of the screen, cropped by
+ * scripts/make-card-thumbs.py to 804 x 500 at 2x (PRE-289).
+ */
+export const CARD_THUMBS = [
+  "01-home",
+  "01b-home-log",
+  "02-chat-chart",
+  "05-meal-detail",
+  "05b-meal-detail-scrolled",
+  "06-signal-energy",
+  "11-check-in-report",
+  "13-grocery-list",
+  "22-action-button-siri",
+  // Not 23-home-screen-widgets: it is in edit mode, with a remove badge on the widget's corner.
+  "23b-home-screen-widgets",
+] as const;
+
+export type CardThumb = (typeof CARD_THUMBS)[number];
+
+export function isCardThumb(name: string): name is CardThumb {
+  return (CARD_THUMBS as readonly string[]).includes(name);
+}
+
+/** A card thumbnail's `1x, 2x` sources. */
+export function cardThumb(name: CardThumb) {
+  const set = (ext: string) => `/app/thumbs/${name}@1x.${ext} 1x, /app/thumbs/${name}@2x.${ext} 2x`;
+  return { avif: set("avif"), webp: set("webp"), src: `/app/thumbs/${name}@2x.webp` };
 }
 
 /**
