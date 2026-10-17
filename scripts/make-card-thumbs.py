@@ -29,7 +29,6 @@ THUMBS = {
     "11-check-in-report": 280,  # "Your steadiest week yet" and the goal card
     "13-grocery-list": 240,  # Grocery List, the estimate and the first aisle
     "22-action-button-siri": 120,  # "What did you eat?"
-    "23-home-screen-widgets": 150,  # the Meal plan widget
     "23b-home-screen-widgets": 150,  # the Today's calories widget
 }
 

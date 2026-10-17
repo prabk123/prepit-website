@@ -47,7 +47,7 @@ export default function MealPlansFeature() {
         id="swaps"
         reverse
         title="Don't fancy it? Swap it."
-        lead="Not in the mood for Tuesday's dinner? Ask for something else and your nutritionist changes it, and the grocery list with it."
+        lead="Not in the mood for Monday's dinner? Ask for something else and your nutritionist changes it, and the grocery list with it."
         media={
           <div className="relative">
             <Glow />

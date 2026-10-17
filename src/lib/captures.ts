@@ -97,7 +97,7 @@ export const CARD_THUMBS = [
   "11-check-in-report",
   "13-grocery-list",
   "22-action-button-siri",
-  "23-home-screen-widgets",
+  // Not 23-home-screen-widgets: it is in edit mode, with a remove badge on the widget's corner.
   "23b-home-screen-widgets",
 ] as const;
 
