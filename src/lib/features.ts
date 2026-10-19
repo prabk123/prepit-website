@@ -35,6 +35,8 @@ export type FeatureMeta = {
   heading: string;
   /** The line under the h1. */
   lead: string;
+  /** The link from this feature's hero on the Features overview (PRE-311). Names where it goes. */
+  overviewLink: string;
   /** The related-features card's thumbnail, a crop of this still (PRE-289). */
   thumb: CardThumb;
 };
@@ -55,6 +57,7 @@ export const FEATURES: Record<FeatureSlug, FeatureMeta> = {
     summary: "It learns how you eat, and speaks up before you slip.",
     heading: "A nutritionist that knows you and speaks up.",
     lead: "It learns how you eat, agrees one thing to change first, and messages you when it spots something. You don't have to remember to ask.",
+    overviewLink: "See what your nutritionist does",
     thumb: "02-chat-chart",
   },
   "nutrition-signals": {
@@ -66,6 +69,7 @@ export const FEATURES: Record<FeatureSlug, FeatureMeta> = {
     summary: "Know how your food will make you feel, and why.",
     heading: "Know how your food will make you feel.",
     lead: "Calories say what you ate. Energy, Satiety and Mood say whether you'll dip at 3pm, stay full until dinner and feel steady tomorrow, from your food alone.",
+    overviewLink: "How Energy, Satiety and Mood work",
     thumb: "06-signal-energy",
   },
   "meal-plans": {
@@ -77,6 +81,7 @@ export const FEATURES: Record<FeatureSlug, FeatureMeta> = {
     summary: "Ask for a week of meals. Get the plan and the shopping list.",
     heading: "Your week, planned in one chat.",
     lead: "Tell your nutritionist which days to cover and what you'd rather avoid. It plans the meals around your goals and builds the grocery list for you.",
+    overviewLink: "How meal plans work",
     thumb: "13-grocery-list",
   },
   logging: {
@@ -88,6 +93,7 @@ export const FEATURES: Record<FeatureSlug, FeatureMeta> = {
     summary: "Type it, snap it or say it. It's on your log straight away.",
     heading: "Logging that doesn't feel like a chore.",
     lead: "Most people quit tracking because logging takes too long. Here you type “two eggs and buttered toast”, snap your plate or say it to Siri, and it's on your log straight away.",
+    overviewLink: "How logging works",
     thumb: "01b-home-log",
   },
   "widgets-and-siri": {
@@ -99,6 +105,7 @@ export const FEATURES: Record<FeatureSlug, FeatureMeta> = {
     summary: "Log a meal or tick something off without opening the app.",
     heading: "PrepIt, without opening PrepIt.",
     lead: "The less effort logging takes, the better your nutritionist's advice gets. Press the Action button, ask Siri or tap a widget, and it's done.",
+    overviewLink: "How widgets and Siri work",
     thumb: "23b-home-screen-widgets",
   },
 };
