@@ -1,15 +1,15 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import AppStoreLink from "@/components/AppStoreLink";
+import LongLogo from "@/components/ui/LongLogo";
 import { HEADER_SECTION_LINKS, SITE_PAGE_LINKS } from "@/lib/homeSections";
 
 const linkClass =
   "text-small font-medium text-ink-muted transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus";
 const pillClass =
-  "inline-flex h-11 items-center rounded-button bg-primary px-4 text-small font-bold text-on-primary transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus";
+  "inline-flex h-11 items-center whitespace-nowrap rounded-button bg-primary px-4 text-small font-bold text-on-primary transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus";
 
 /** The site header: solid light bar (no text reads through it), section links and "Get the app". */
 export default function NavigationWrapper() {
@@ -73,12 +73,9 @@ export default function NavigationWrapper() {
         <div className="mx-auto flex h-16 w-full max-w-content items-center justify-between px-gutter">
           <Link
             href="/"
-            className="flex h-11 items-center gap-2.5 text-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus"
+            className="flex h-11 items-center text-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus"
           >
-            <span className="relative h-8 w-8">
-              <Image src="/logo.png" alt="" fill sizes="32px" className="object-contain" />
-            </span>
-            <span className="font-display text-[24px] leading-none">PrepIt</span>
+            <LongLogo className="h-7 w-auto text-primary lg:h-8" />
           </Link>
 
           {/* Desktop */}
