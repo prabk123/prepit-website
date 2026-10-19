@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import AppStoreLink from "@/components/AppStoreLink";
+import LongLogo from "@/components/ui/LongLogo";
 import { HEADER_SECTION_LINKS, SITE_PAGE_LINKS } from "@/lib/homeSections";
 
 const linkClass =
@@ -73,12 +73,9 @@ export default function NavigationWrapper() {
         <div className="mx-auto flex h-16 w-full max-w-content items-center justify-between px-gutter">
           <Link
             href="/"
-            className="flex h-11 items-center gap-2.5 text-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus"
+            className="flex h-11 items-center text-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus"
           >
-            <span className="relative h-8 w-8">
-              <Image src="/logo.png" alt="" fill sizes="32px" className="object-contain" />
-            </span>
-            <span className="font-display text-[24px] leading-none">PrepIt</span>
+            <LongLogo className="h-8 w-auto text-primary" />
           </Link>
 
           {/* Desktop */}

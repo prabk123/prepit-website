@@ -1,6 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
 import AppStoreLink from "@/components/AppStoreLink";
+import LongLogo from "@/components/ui/LongLogo";
 import { FEATURE_SLUGS, FEATURES, featureHref } from "@/lib/features";
 import { HEADER_SECTION_LINKS, SITE_PAGE_LINKS } from "@/lib/homeSections";
 import { RESEARCH_PAGE_HREF } from "@/lib/research";
@@ -28,11 +28,8 @@ export default function Footer() {
       <div className="mx-auto flex w-full max-w-content flex-col gap-12 px-gutter py-16">
         <div className="flex flex-col gap-10 lg:flex-row lg:justify-between">
           <div className="flex flex-col gap-4">
-            <Link href="/" className="flex h-11 w-fit items-center gap-2.5">
-              <span className="relative h-8 w-8">
-                <Image src="/logo.png" alt="" fill sizes="32px" className="object-contain" />
-              </span>
-              <span className="font-display text-[24px] leading-none">PrepIt</span>
+            <Link href="/" className="flex h-11 w-fit items-center">
+              <LongLogo className="h-8 w-auto text-primary" />
             </Link>
             <p className="text-small text-ink-muted">PrepIt, your personal AI nutritionist.</p>
           </div>
