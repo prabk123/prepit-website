@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { ImageResponse } from "next/og";
 import type { CardThumb } from "@/lib/captures";
+import type { FeatureSlug } from "@/lib/features";
 
 export const ogCardSize = { width: 1200, height: 630 };
 
@@ -65,27 +66,89 @@ export function AccentRule() {
   return <div style={{ width: 40, height: 6, borderRadius: 3, background: ogTokens.accent }} />;
 }
 
+// Satori cannot use container units, so the phone is drawn at one size with
+// the site frame's proportions (.device-frame in globals.css): shell 1.1%,
+// bezel 2.9%, screen 402 x 874.
+const PHONE = { shell: 3, bezel: 8, screenWidth: 252, screenHeight: 548 };
+
+/** The phone screen from a feature's hero (scripts/make-og-assets.py), as a data URL. */
+export async function loadOgPhone(feature: FeatureSlug): Promise<string> {
+  return dataUrl(await readFile(path.join(process.cwd(), "src/assets/og/phones", `${feature}.jpg`)), "image/jpeg");
+}
+
+/** The whole iPhone from a feature's hero, in the site's device frame. */
+export function OgPhone({ screen }: { screen: string }) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        padding: PHONE.shell,
+        borderRadius: 47,
+        background: "linear-gradient(145deg, #8a8a8f 0%, #3c3c40 18%, #2a2a2d 50%, #3c3c40 82%, #8a8a8f 100%)",
+        boxShadow: "0 28px 56px -20px rgba(26,26,46,0.35), 0 10px 20px -10px rgba(26,26,46,0.2)",
+      }}
+    >
+      <div style={{ display: "flex", padding: PHONE.bezel, borderRadius: 44, background: "#050505" }}>
+        <div
+          style={{
+            display: "flex",
+            position: "relative",
+            width: PHONE.screenWidth,
+            height: PHONE.screenHeight,
+            borderRadius: 36,
+            overflow: "hidden",
+            background: "#050505",
+          }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={screen} width={PHONE.screenWidth} height={PHONE.screenHeight} alt="" />
+          <div
+            style={{
+              position: "absolute",
+              top: 7,
+              left: (PHONE.screenWidth - 80) / 2,
+              width: 80,
+              height: 24,
+              borderRadius: 12,
+              background: "#050505",
+            }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+type OgCardMedia =
+  /** The telling part of a real app screen (a card thumbnail, the site cards' crop). */
+  | { thumb: CardThumb; phone?: never }
+  /** The whole phone from that feature's hero. */
+  | { phone: FeatureSlug; thumb?: never };
+
 /**
  * The link preview for feature pages, guides and their indexes: the PrepIt
  * mark, an eyebrow, the page's headline and one line on the light page, with
- * the telling part of a real app screen beside it (a card thumbnail, the same
- * crop the site's cards use).
+ * a real app screen beside it: a feature's hero phone, or a card thumbnail.
  */
 export async function renderOgCard({
   eyebrow,
   title,
   summary,
   thumb,
+  phone,
 }: {
   eyebrow: string;
   title: string;
   summary: string;
-  thumb: CardThumb;
-}): Promise<ImageResponse> {
+} & OgCardMedia): Promise<ImageResponse> {
   const [fonts, logo, screen] = await Promise.all([
     loadOgFonts(),
     loadOgLogo(),
-    readFile(path.join(process.cwd(), "src/assets/og/thumbs", `${thumb}.jpg`)),
+    phone
+      ? loadOgPhone(phone)
+      : readFile(path.join(process.cwd(), "src/assets/og/thumbs", `${thumb}.jpg`)).then((bytes) =>
+          dataUrl(bytes, "image/jpeg"),
+        ),
   ]);
   // Long headlines step down so they stay within two or three lines.
   const titleSize = title.length > 34 ? 52 : title.length > 24 ? 58 : 66;
@@ -154,27 +217,27 @@ export async function renderOgCard({
           <span style={{ fontSize: 24, fontWeight: 500, color: ogTokens.inkMuted }}>The nutritionist that notices.</span>
         </div>
 
-        <div style={{ width: 500, display: "flex", alignItems: "center", paddingRight: 64 }}>
-          <div
-            style={{
-              display: "flex",
-              padding: 10,
-              borderRadius: 32,
-              background: ogTokens.surface,
-              border: `1px solid ${ogTokens.line}`,
-              boxShadow: "0 24px 60px rgba(26,26,46,0.12)",
-            }}
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={dataUrl(screen, "image/jpeg")}
-              width={416}
-              height={259}
-              alt=""
-              style={{ borderRadius: 24, objectFit: "cover" }}
-            />
+        {phone ? (
+          <div style={{ width: 400, display: "flex", alignItems: "center", justifyContent: "center", paddingRight: 32 }}>
+            <OgPhone screen={screen} />
           </div>
-        </div>
+        ) : (
+          <div style={{ width: 500, display: "flex", alignItems: "center", paddingRight: 64 }}>
+            <div
+              style={{
+                display: "flex",
+                padding: 10,
+                borderRadius: 32,
+                background: ogTokens.surface,
+                border: `1px solid ${ogTokens.line}`,
+                boxShadow: "0 24px 60px rgba(26,26,46,0.12)",
+              }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={screen} width={416} height={259} alt="" style={{ borderRadius: 24, objectFit: "cover" }} />
+            </div>
+          </div>
+        )}
       </div>
     ),
     { ...ogCardSize, fonts },

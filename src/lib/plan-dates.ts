@@ -100,13 +100,3 @@ export function countRecipes(days: PlanDay[]): number {
   }
   return seen.size;
 }
-
-/** The first recipe photo in the plan, for previews. */
-export function firstRecipeImage(days: PlanDay[]): string | null {
-  for (const day of days) {
-    for (const meal of [day.breakfast, day.lunch, day.dinner, day.snack]) {
-      if (meal?.recipe?.image) return meal.recipe.image;
-    }
-  }
-  return null;
-}
