@@ -68,8 +68,12 @@ export function AccentRule() {
 
 // Satori cannot use container units, so the phone is drawn at one size with
 // the site frame's proportions (.device-frame in globals.css): shell 1.1%,
-// bezel 2.9%, screen 402 x 874.
-const PHONE = { shell: 3, bezel: 8, screenWidth: 252, screenHeight: 548 };
+// bezel 2.9%, screen 402 x 874. Every layer gets an explicit size, and the
+// screen is rounded on the image itself, since Satori does not clip an image
+// to its parent's rounded corners.
+const PHONE = { shell: 3, bezel: 8, screenWidth: 252, screenHeight: 548, screenRadius: 36 };
+const BEZEL = { width: PHONE.screenWidth + 2 * PHONE.bezel, height: PHONE.screenHeight + 2 * PHONE.bezel };
+const SHELL = { width: BEZEL.width + 2 * PHONE.shell, height: BEZEL.height + 2 * PHONE.shell };
 
 /** The phone screen from a feature's hero (scripts/make-og-assets.py), as a data URL. */
 export async function loadOgPhone(feature: FeatureSlug): Promise<string> {
@@ -82,39 +86,50 @@ export function OgPhone({ screen }: { screen: string }) {
     <div
       style={{
         display: "flex",
-        padding: PHONE.shell,
-        borderRadius: 47,
+        position: "relative",
+        width: SHELL.width,
+        height: SHELL.height,
+        borderRadius: PHONE.screenRadius + PHONE.bezel + PHONE.shell,
         background: "linear-gradient(145deg, #8a8a8f 0%, #3c3c40 18%, #2a2a2d 50%, #3c3c40 82%, #8a8a8f 100%)",
         boxShadow: "0 28px 56px -20px rgba(26,26,46,0.35), 0 10px 20px -10px rgba(26,26,46,0.2)",
       }}
     >
-      <div style={{ display: "flex", padding: PHONE.bezel, borderRadius: 44, background: "#050505" }}>
-        <div
-          style={{
-            display: "flex",
-            position: "relative",
-            width: PHONE.screenWidth,
-            height: PHONE.screenHeight,
-            borderRadius: 36,
-            overflow: "hidden",
-            background: "#050505",
-          }}
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={screen} width={PHONE.screenWidth} height={PHONE.screenHeight} alt="" />
-          <div
-            style={{
-              position: "absolute",
-              top: 7,
-              left: (PHONE.screenWidth - 80) / 2,
-              width: 80,
-              height: 24,
-              borderRadius: 12,
-              background: "#050505",
-            }}
-          />
-        </div>
-      </div>
+      <div
+        style={{
+          display: "flex",
+          position: "absolute",
+          top: PHONE.shell,
+          left: PHONE.shell,
+          width: BEZEL.width,
+          height: BEZEL.height,
+          borderRadius: PHONE.screenRadius + PHONE.bezel,
+          background: "#050505",
+        }}
+      />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={screen}
+        width={PHONE.screenWidth}
+        height={PHONE.screenHeight}
+        alt=""
+        style={{
+          position: "absolute",
+          top: PHONE.shell + PHONE.bezel,
+          left: PHONE.shell + PHONE.bezel,
+          borderRadius: PHONE.screenRadius,
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          top: PHONE.shell + PHONE.bezel + 7,
+          left: (SHELL.width - 74) / 2,
+          width: 74,
+          height: 22,
+          borderRadius: 11,
+          background: "#050505",
+        }}
+      />
     </div>
   );
 }
