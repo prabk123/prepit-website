@@ -64,7 +64,7 @@ export default function HomeHero() {
           annotations={heroCafe.annotations}
           annotationsFromXl
           fadeEdges
-          className="mt-8 aspect-[4/5] max-h-[720px] w-full lg:mt-0 lg:aspect-[1376/768] lg:max-h-[860px] lg:min-h-[600px]"
+          className="mt-8 aspect-[4/5] max-h-[720px] w-full lg:mt-0 lg:aspect-[1376/768] lg:max-h-[1040px] lg:min-h-[600px]"
         />
       </div>
     </section>

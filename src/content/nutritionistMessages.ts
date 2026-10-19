@@ -56,6 +56,8 @@ export const weighIn = {
 export const speaksUpPhoneMessages = [
   {
     id: "missed-breakfast",
+    // Short message: show the phone from lower down so its screen isn't mostly empty chat.
+    cropExtra: 0.38,
     label: "Breakfast",
     reason: "No breakfast logged yet",
     caption: missedBreakfast.caption,
@@ -68,6 +70,7 @@ export const speaksUpPhoneMessages = [
   },
   {
     id: "protein",
+    cropExtra: 0,
     label: "Protein",
     reason: "Short on protein 18 of 21 days",
     caption: proteinShort.caption,
@@ -80,6 +83,8 @@ export const speaksUpPhoneMessages = [
   },
   {
     id: "weigh-in",
+    // Short message: show the phone from lower down so its screen isn't mostly empty chat.
+    cropExtra: 0.38,
     label: "Weigh-in",
     reason: "8 days since the last weigh-in",
     caption: weighIn.caption,
