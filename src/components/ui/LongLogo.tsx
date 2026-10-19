@@ -19,6 +19,8 @@ export default function LongLogo({ className }: { className?: string }) {
   return (
     <svg
       viewBox="0 0 923 256"
+      width="923"
+      height="256"
       fill="currentColor"
       role="img"
       aria-label="PrepIt"
