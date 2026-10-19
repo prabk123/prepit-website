@@ -14,11 +14,10 @@ export const HEADER_SECTION_LINKS: HomeSectionLink[] = [
 ];
 
 /**
- * Site pages in the header and footer beside the homepage sections. /guides
- * and /about come with PRE-204.
+ * Site pages in the header and footer beside the homepage sections. The About
+ * page was removed in PRE-311; /about redirects to the homepage.
  */
 export const SITE_PAGE_LINKS: HomeSectionLink[] = [
   { label: "Guides", href: "/guides" },
-  { label: "About", href: "/about" },
   { label: "Contact", href: "/contact" },
 ];
