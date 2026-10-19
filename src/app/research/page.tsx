@@ -15,8 +15,9 @@ export const metadata: Metadata = {
   title: { absolute: `${title} | PrepIt` },
   description,
   alternates: { canonical: url },
-  // Page-level openGraph and twitter replace the root layout's, so the shared
-  // preview image and site name are repeated here.
+  // Page-level openGraph and twitter replace the root layout's, so the site
+  // name is repeated here. The preview image is the site default
+  // (src/app/opengraph-image.tsx).
   openGraph: {
     type: "website",
     url,
@@ -24,9 +25,8 @@ export const metadata: Metadata = {
     description,
     siteName: "PrepIt",
     locale: "en_US",
-    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "PrepIt – Your AI nutritionist app" }],
   },
-  twitter: { card: "summary_large_image", title, description, images: ["/og-image.png"] },
+  twitter: { card: "summary_large_image", title, description },
 };
 
 /**

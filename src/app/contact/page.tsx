@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   description,
   alternates: { canonical: url },
   openGraph: { title: "Contact us | PrepIt", description, url },
-  twitter: { card: "summary", title: "Contact us | PrepIt", description },
+  twitter: { card: "summary_large_image", title: "Contact us | PrepIt", description },
 };
 
 const SUPPORT_EMAIL = "support@tryprepit.app";
