@@ -1,4 +1,5 @@
-import { homeOgAlt, ogCardSize, renderHomeOgCard } from "@/lib/og-card";
+import { homeOgAlt, renderHomeOgCard } from "@/lib/home-og";
+import { ogCardSize } from "@/lib/og-card";
 
 export const alt = homeOgAlt;
 export const size = ogCardSize;

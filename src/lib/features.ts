@@ -31,6 +31,8 @@ export type FeatureMeta = {
   description: string;
   /** One line for the related-features card and the link preview. */
   summary: string;
+  /** The link preview's line instead of `summary`, where `summary` would repeat the heading (PRE-312). */
+  shareLine?: string;
   /** The page's h1. */
   heading: string;
   /** The line under the h1. */
@@ -67,6 +69,7 @@ export const FEATURES: Record<FeatureSlug, FeatureMeta> = {
     description:
       "Calories say what you ate. Energy, Satiety and Mood say whether you'll dip at 3pm, stay full until dinner and feel steady tomorrow, with the reason and what to try next.",
     summary: "Know how your food will make you feel, and why.",
+    shareLine: "Whether you'll dip at 3pm or stay full until dinner, from your food alone.",
     heading: "Know how your food will make you feel.",
     lead: "Calories say what you ate. Energy, Satiety and Mood say whether you'll dip at 3pm, stay full until dinner and feel steady tomorrow, from your food alone.",
     overviewLink: "How Energy, Satiety and Mood work",

@@ -1,4 +1,4 @@
-import { renderHomeOgCard } from "@/lib/og-card";
+import { renderHomeOgCard } from "@/lib/home-og";
 
 // Prerendered at build, like the opengraph-image routes.
 export const dynamic = "force-static";

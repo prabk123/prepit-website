@@ -58,7 +58,7 @@ export async function renderSharedPlanOg(id: string): Promise<ImageResponse> {
   // A database failure is already logged by the loader; fall back to the
   // generic card rather than no preview at all.
   const plan = await getMealPlanById(id).catch(() => null);
-  const [fonts, logo] = await Promise.all([loadOgFonts(), loadOgLogo()]);
+  const [fonts, logo, mark] = await Promise.all([loadOgFonts(), loadOgLogo(), readPublic("logo.png")]);
 
   const photoSrc = plan ? firstRecipeImage(plan.days) : null;
   const photo = photoSrc ? await loadMealPhoto(photoSrc, id) : null;
@@ -127,7 +127,7 @@ export async function renderSharedPlanOg(id: string): Promise<ImageResponse> {
               alt=""
               style={{ borderRadius: 40, objectFit: "cover", border: `1px solid ${tokens.line}` }}
             />
-          ) : (
+          ) : plan ? (
             <div
               style={{
                 width: 358,
@@ -142,13 +142,15 @@ export async function renderSharedPlanOg(id: string): Promise<ImageResponse> {
                 gap: 6,
               }}
             >
-              <span style={{ fontSize: 120, fontWeight: 500, lineHeight: 1, color: tokens.accent }}>
-                {plan ? days : "–"}
-              </span>
+              <span style={{ fontSize: 120, fontWeight: 500, lineHeight: 1, color: tokens.ink }}>{days}</span>
               <span style={{ fontSize: 30, fontWeight: 500, color: tokens.inkMuted }}>
                 {days === 1 ? "day of meals" : "days of meals"}
               </span>
             </div>
+          ) : (
+            // No plan to describe (not found, or the database failed): the PrepIt mark.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={dataUrl(mark, "image/png")} width={180} height={180} alt="" />
           )}
         </div>
       </div>
