@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 /**
  * Pages that end with their own download band: shared plans ("Make your own
  * plan"), each guide and each feature page (the same band, counted per
- * page). The guides index keeps the site band.
+ * page). The guides and features indexes keep the site band.
  */
 const OWN_CLOSING_CTA_PREFIXES = ["/sharable/", "/guides/", "/features/"];
 

@@ -43,10 +43,12 @@ export default function FeaturesPage() {
         <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6 lg:gap-5">
           {FEATURE_SLUGS.map((slug, index) => {
             const feature = FEATURES[slug];
+            // In the two-column tablet grid, an odd last card takes the whole row.
+            const loneLast = index === FEATURE_SLUGS.length - 1 && FEATURE_SLUGS.length % 2 === 1;
             return (
               <li
                 key={slug}
-                className={`flex min-w-0 [&>a]:flex-1 ${index < STANDOUTS ? "lg:col-span-3" : "lg:col-span-2"}`}
+                className={`flex min-w-0 [&>a]:flex-1 ${loneLast ? "sm:col-span-2" : ""} ${index < STANDOUTS ? "lg:col-span-3" : "lg:col-span-2"}`}
               >
                 <LinkCard
                   href={featureHref(slug)}
