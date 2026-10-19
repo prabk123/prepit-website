@@ -27,8 +27,10 @@ export const metadata: Metadata = {
  * The Features overview (PRE-307), where the header's Features link goes. One
  * hero per feature, in site order (PRE-311): the same heading, line and phone
  * as the top of that feature's page, alternating sides and backgrounds down
- * the page, each linking through. The site's closing download band follows
- * from the layout, as on the guides index.
+ * the page, each linking through. On phones the phone is the smaller 220 px
+ * size the research page and capture rows use, to keep five heroes short.
+ * The site's closing download band follows from the layout, as on the
+ * guides index.
  */
 export default function FeaturesPage() {
   return (
@@ -54,10 +56,10 @@ export default function FeaturesPage() {
               emphasis="text"
               reverse={index % 2 === 1}
               media={
-                <div className="relative py-4">
+                <div className="relative lg:py-4">
                   <Glow />
                   <DeviceFrame
-                    className="[--device-w:260px] sm:[--device-w:300px] lg:[--device-w:340px]"
+                    className="[--device-w:220px] sm:[--device-w:300px] lg:[--device-w:340px]"
                     priority={index === 0}
                     {...FEATURE_HERO_MEDIA[slug]}
                   />
