@@ -56,12 +56,16 @@ export const heroCafe: LifestylePhoto = {
   ...photo(
     "hero-cafe",
     "At a bright table by a window, a hand holds a phone showing a chat with the PrepIt nutritionist and a chart of protein per day against a 158 g target, beside a glass of water and a plate of apple slices and almonds.",
-    { position: "60% 50%", priority: true },
+    // Anchored high: on very wide screens the hero's height cap crops the photo's
+    // top and bottom, and the phone's top and chat header must stay in.
+    { position: "60% 26%", priority: true },
   ),
   textSide: "start",
   // Nothing on the table is logged, so the label points at the chart on the
   // phone: the dashed line is the showcase account's 158 g protein target.
-  annotations: [{ x: 61, y: 55, side: "left", length: 96, value: "158 g", label: "Daily protein target" }],
+  // It sits right of the phone, over the hand, since the hero's text takes
+  // the photo's left side (PRE-306).
+  annotations: [{ x: 76, y: 55, side: "right", length: 40, value: "158 g", label: "Daily protein target" }],
 };
 
 export const nutritionistEvening: LifestylePhoto = {

@@ -97,14 +97,19 @@
        pop-outs free to spill sideways; ::after fades the cut into the page. */
     --speaks-up-crop: calc(var(--device-w) * 0.42);
     margin-top: calc(var(--speaks-up-crop) * -1);
-    clip-path: inset(var(--speaks-up-crop) -50% -15% -50%);
+    /* A short message leaves empty chat above it: its phone shows from
+       lower down (--speaks-up-crop-extra, a share of the phone's width),
+       with page space above instead of an empty screen. The phone's box
+       keeps its height, so the buttons under it don't move. */
+    --speaks-up-visible-top: calc(var(--speaks-up-crop) + var(--device-w) * var(--speaks-up-crop-extra, 0));
+    clip-path: inset(var(--speaks-up-visible-top) -50% -15% -50%);
   }
 
   .speaks-up-phone::after {
     content: "";
     position: absolute;
     z-index: 1;
-    top: var(--speaks-up-crop);
+    top: var(--speaks-up-visible-top);
     left: -50%;
     right: -50%;
     height: 28px;

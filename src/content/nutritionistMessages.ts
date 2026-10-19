@@ -49,13 +49,28 @@ export const weighIn = {
 /*
  * The homepage's speaks-up phone (PRE-294): the full chat screen in a phone,
  * with the message and its first reply cut from the same capture and lifted out
- * over it. Missed breakfast is left out because the hero shows it the same
- * way (heroPhoneMessage), and the weekly pattern because the band's photo
- * shows that card with other numbers.
+ * over it. Missed breakfast leads, as the band's text does (PRE-306 moved it
+ * here from the hero). The weekly pattern is left out because the band's
+ * photo shows that card with other numbers.
  */
 export const speaksUpPhoneMessages = [
   {
+    id: "missed-breakfast",
+    // Short message: show the phone from lower down so its screen isn't mostly empty chat.
+    cropExtra: 0.38,
+    label: "Breakfast",
+    reason: "No breakfast logged yet",
+    caption: missedBreakfast.caption,
+    screen: appCapture(
+      "25-nudge-missed-breakfast",
+      "The Nutritionist chat with its message: I can't see any breakfast log today. Drop me a quick voice note when you get the chance if you had something, or let me know if you skipped it. Replies: I skipped it, I'll log it now, Type your own",
+    ),
+    message: chatCutout("25-nudge-missed-breakfast-bubble"),
+    highlight: chatCutout("25-nudge-missed-breakfast-reply"),
+  },
+  {
     id: "protein",
+    cropExtra: 0,
     label: "Protein",
     reason: "Short on protein 18 of 21 days",
     caption: proteinShort.caption,
@@ -68,6 +83,8 @@ export const speaksUpPhoneMessages = [
   },
   {
     id: "weigh-in",
+    // Short message: show the phone from lower down so its screen isn't mostly empty chat.
+    cropExtra: 0.38,
     label: "Weigh-in",
     reason: "8 days since the last weigh-in",
     caption: weighIn.caption,
@@ -80,18 +97,4 @@ export const speaksUpPhoneMessages = [
   },
 ] as const;
 
-/** The homepage hero's message, in the same phone (PRE-294). */
-export const heroPhoneMessage = {
-  id: "missed-breakfast",
-  label: "Missed breakfast",
-  reason: "No breakfast logged yet",
-  caption: missedBreakfast.caption,
-  screen: appCapture(
-    "25-nudge-missed-breakfast",
-    "The Nutritionist chat with its message: I can't see any breakfast log today. Drop me a quick voice note when you get the chance if you had something, or let me know if you skipped it. Replies: I skipped it, I'll log it now, Type your own",
-  ),
-  message: chatCutout("25-nudge-missed-breakfast-bubble"),
-  highlight: chatCutout("25-nudge-missed-breakfast-reply"),
-} as const;
-
-export type SpeaksUpPhoneMessage = (typeof speaksUpPhoneMessages)[number] | typeof heroPhoneMessage;
+export type SpeaksUpPhoneMessage = (typeof speaksUpPhoneMessages)[number];

@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useState, type CSSProperties } from "react";
 import DeviceFrame, { CAPTURE_HEIGHT, CAPTURE_WIDTH } from "@/components/device/DeviceFrame";
 import { speaksUpPhoneMessages, type SpeaksUpPhoneMessage } from "@/content/nutritionistMessages";
 import type { ChatCutout } from "@/lib/captures";
@@ -87,7 +87,10 @@ export default function SpeaksUpPhone({
 
   return (
     <figure className="flex w-full min-w-0 flex-col items-center gap-4 lg:gap-6" aria-labelledby={captionId}>
-      <div className={`speaks-up-phone ${className}`}>
+      <div
+        className={`speaks-up-phone ${className}`}
+        style={{ "--speaks-up-crop-extra": current.cropExtra } as CSSProperties}
+      >
         <DeviceFrame>
           {messages.map((message, i) => (
             <Screen key={message.id} message={message} active={i === index} loading={loading} />

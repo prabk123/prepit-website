@@ -45,6 +45,12 @@ type PhotoBandProps = {
    * and keeps it in view from 1024 px, for media much taller than the text.
    */
   asideAlign?: "center" | "start";
+  /**
+   * Side the phones under the photo take from 1024 px, with `aside` on the
+   * other. Defaults to the side away from the text; `start` puts them on the
+   * left so a band that follows a text-left section still alternates.
+   */
+  mediaSide?: "start" | "end";
 };
 
 /**
@@ -67,8 +73,10 @@ export default function PhotoBand({
   textOnBrightPhoto = false,
   aside,
   asideAlign = "center",
+  mediaSide,
 }: PhotoBandProps) {
   const end = textSide === "end";
+  const mediaFirst = (mediaSide ?? (end ? "start" : "end")) === "start";
   return (
     <section
       id={id}
@@ -123,13 +131,13 @@ export default function PhotoBand({
           }`}
         >
           <div
-            className={`flex w-full max-w-[460px] flex-col gap-8 ${end ? "lg:order-2 lg:justify-self-end" : ""} ${
+            className={`flex w-full max-w-[460px] flex-col gap-8 ${mediaFirst ? "lg:order-2" : ""} ${end ? "lg:justify-self-end" : ""} ${
               asideAlign === "start" ? "lg:sticky lg:top-28" : ""
             }`}
           >
             {aside}
           </div>
-          <div className={`flex min-w-0 justify-center ${end ? "lg:order-1" : ""}`}>{media}</div>
+          <div className={`flex min-w-0 justify-center ${mediaFirst ? "lg:order-1" : ""}`}>{media}</div>
         </div>
       )}
       {media && !aside && (

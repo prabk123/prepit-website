@@ -8,7 +8,8 @@ import { nutritionistEvening } from "@/content/lifestyle";
  * Standout 1, first half: the nutritionist speaks up on its own. Under the
  * evening photo, one phone shows the messages it sends unasked, each lifted
  * out of the real chat screen, with buttons to switch between them (PRE-294).
- * The text sits level with the phone's middle on desktop.
+ * On desktop the phone is on the left and its titled text on the right, level
+ * with the phone's middle, so the page keeps alternating (PRE-306).
  */
 export default function SpeaksUpBand() {
   return (
@@ -20,8 +21,12 @@ export default function SpeaksUpBand() {
       phonePhoto={nutritionistEvening.mobile}
       annotations={nutritionistEvening.annotations}
       textSide={nutritionistEvening.textSide}
+      mediaSide="start"
       aside={
         <>
+          <h3 id="speaks-up-messages-heading" className="font-display text-title text-ink text-balance">
+            A nudge, not a nag.
+          </h3>
           <p className="text-body text-ink-secondary text-pretty">
             When breakfast goes missing, protein runs short or the same days keep running over, it tells you, with a
             fix that fits how you already eat. Any change waits for your OK.
