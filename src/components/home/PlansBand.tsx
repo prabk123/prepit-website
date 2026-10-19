@@ -20,6 +20,7 @@ export default function PlansBand() {
       textOnBrightPhoto
       aside={
         <>
+          <SectionHeading as="h3" id="plans-swap-heading" size="section" title="Change anything, just ask." />
           <p className="text-body text-ink-secondary text-pretty">
             Want a different dinner on Thursday? Ask, and it swaps it.
           </p>

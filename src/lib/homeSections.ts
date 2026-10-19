@@ -3,9 +3,12 @@ export type HomeSectionLink = {
   href: string;
 };
 
-/** Homepage sections in the header and the footer's Explore column. */
+/**
+ * The header's and the footer Explore column's links: the Features overview
+ * page (PRE-307), then homepage sections.
+ */
 export const HEADER_SECTION_LINKS: HomeSectionLink[] = [
-  { label: "Features", href: "/#nutritionist" },
+  { label: "Features", href: "/features" },
   { label: "Pricing", href: "/#pricing" },
   { label: "FAQ", href: "/#faq" },
 ];
