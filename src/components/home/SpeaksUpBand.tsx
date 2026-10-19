@@ -24,9 +24,7 @@ export default function SpeaksUpBand() {
       mediaSide="start"
       aside={
         <>
-          <h3 id="speaks-up-messages-heading" className="font-display text-title text-ink text-balance">
-            A nudge, not a nag.
-          </h3>
+          <SectionHeading as="h3" id="speaks-up-messages-heading" size="section" title="A nudge, not a nag." />
           <p className="text-body text-ink-secondary text-pretty">
             When breakfast goes missing, protein runs short or the same days keep running over, it tells you, with a
             fix that fits how you already eat. Any change waits for your OK.
