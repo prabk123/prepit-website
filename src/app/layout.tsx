@@ -57,29 +57,22 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
+  // The preview image is ./opengraph-image.tsx and ./twitter-image.tsx (PRE-312),
+  // which pages without their own inherit.
   openGraph: {
     type: "website",
     locale: "en_US",
     url: baseUrl,
     siteName: "PrepIt",
-    title: "PrepIt | Your AI Nutritionist – Meals In, Smart Advice Out",
+    title: "PrepIt | The nutritionist that notices",
     description:
-      "Log meals in plain English. PrepIt shows how each meal affects your energy, hunger, and mood—and what to do next.",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "PrepIt – Your AI nutritionist app",
-      },
-    ],
+      "An AI nutritionist that learns how you eat, speaks up when something slips, and shows how your food will make you feel.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "PrepIt | Your AI Nutritionist – Meals In, Smart Advice Out",
+    title: "PrepIt | The nutritionist that notices",
     description:
-      "Log meals in plain English. PrepIt shows how each meal affects your energy, hunger, and mood—and what to do next.",
-    images: ["/og-image.png"],
+      "An AI nutritionist that learns how you eat, speaks up when something slips, and shows how your food will make you feel.",
   },
   alternates: {
     canonical: baseUrl,

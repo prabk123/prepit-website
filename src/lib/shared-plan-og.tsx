@@ -2,22 +2,14 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { ImageResponse } from "next/og";
 import { getMealPlanById } from "@/lib/meal-plan";
+import { loadOgFonts, loadOgLogo, OgWordmark, ogTokens } from "@/lib/og-card";
 import { countRecipes, firstRecipeImage, formatPlanRange } from "@/lib/plan-dates";
 
 export const sharedPlanOgSize = { width: 1200, height: 630 };
 export const sharedPlanOgAlt = "A PrepIt meal plan";
 
-// Satori takes plain values, not CSS variables, so these mirror tokens.css.
-const tokens = {
-  page: "#110f0c",
-  surfaceRaised: "#241d18",
-  lineStrong: "#3a3029",
-  ink: "#f7f1e8",
-  inkSecondary: "#e0d6c9",
-  inkMuted: "#b8ad9f",
-  energy: "#f5cc77",
-  satiety: "#f38c61",
-};
+// The light site's colours (PRE-312), shared with the other preview cards.
+const tokens = ogTokens;
 
 const IMAGE_TIMEOUT_MS = 3000;
 // Recipe photos are a few hundred KB; anything far bigger is skipped.
@@ -66,12 +58,7 @@ export async function renderSharedPlanOg(id: string): Promise<ImageResponse> {
   // A database failure is already logged by the loader; fall back to the
   // generic card rather than no preview at all.
   const plan = await getMealPlanById(id).catch(() => null);
-  const [clash, logo] = await Promise.all([
-    // The preview renderer cannot read variable fonts, so it uses a static
-    // weight-600 instance of the site's Clash Display.
-    readFile(path.join(process.cwd(), "src/app/fonts/ClashDisplay-Semibold.ttf")),
-    readPublic("logo.png"),
-  ]);
+  const [fonts, logo] = await Promise.all([loadOgFonts(), loadOgLogo()]);
 
   const photoSrc = plan ? firstRecipeImage(plan.days) : null;
   const photo = photoSrc ? await loadMealPhoto(photoSrc, id) : null;
@@ -104,30 +91,30 @@ export async function renderSharedPlanOg(id: string): Promise<ImageResponse> {
             padding: "64px 0 64px 72px",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={dataUrl(logo, "image/png")} width={56} height={56} alt="" />
-            <span style={{ fontSize: 40, fontWeight: 600, letterSpacing: "-0.02em" }}>PrepIt</span>
-          </div>
+          <OgWordmark logo={logo} />
 
           <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-            <span
-              style={{
-                fontSize: 24,
-                letterSpacing: "0.12em",
-                textTransform: "uppercase",
-                color: tokens.inkMuted,
-              }}
-            >
-              Shared meal plan
-            </span>
-            <span style={{ fontSize: 92, fontWeight: 600, lineHeight: 1, letterSpacing: "-0.025em" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+              <div style={{ width: 40, height: 6, borderRadius: 3, background: tokens.accent }} />
+              <span
+                style={{
+                  fontSize: 22,
+                  fontWeight: 500,
+                  letterSpacing: "0.12em",
+                  textTransform: "uppercase",
+                  color: tokens.inkMuted,
+                }}
+              >
+                Shared meal plan
+              </span>
+            </div>
+            <span style={{ fontSize: 84, fontWeight: 500, lineHeight: 1.04, letterSpacing: "-0.01em" }}>
               {title}
             </span>
-            <span style={{ fontSize: 34, color: tokens.inkSecondary }}>{detail}</span>
+            <span style={{ fontSize: 32, fontWeight: 500, color: tokens.inkSecondary }}>{detail}</span>
           </div>
 
-          <span style={{ fontSize: 26, color: tokens.energy }}>Planned by your personal AI nutritionist</span>
+          <span style={{ fontSize: 24, fontWeight: 500, color: tokens.inkMuted }}>Planned by your personal AI nutritionist</span>
         </div>
 
         <div style={{ width: 470, display: "flex", alignItems: "center", justifyContent: "center", padding: 56 }}>
@@ -138,7 +125,7 @@ export async function renderSharedPlanOg(id: string): Promise<ImageResponse> {
               width={358}
               height={358}
               alt=""
-              style={{ borderRadius: 40, objectFit: "cover", border: `2px solid ${tokens.lineStrong}` }}
+              style={{ borderRadius: 40, objectFit: "cover", border: `1px solid ${tokens.line}` }}
             />
           ) : (
             <div
@@ -146,8 +133,8 @@ export async function renderSharedPlanOg(id: string): Promise<ImageResponse> {
                 width: 358,
                 height: 358,
                 borderRadius: 40,
-                background: tokens.surfaceRaised,
-                border: `2px solid ${tokens.lineStrong}`,
+                background: tokens.surface,
+                border: `1px solid ${tokens.line}`,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
@@ -155,10 +142,10 @@ export async function renderSharedPlanOg(id: string): Promise<ImageResponse> {
                 gap: 6,
               }}
             >
-              <span style={{ fontSize: 120, fontWeight: 600, lineHeight: 1, color: tokens.satiety }}>
+              <span style={{ fontSize: 120, fontWeight: 500, lineHeight: 1, color: tokens.accent }}>
                 {plan ? days : "–"}
               </span>
-              <span style={{ fontSize: 30, color: tokens.inkMuted }}>
+              <span style={{ fontSize: 30, fontWeight: 500, color: tokens.inkMuted }}>
                 {days === 1 ? "day of meals" : "days of meals"}
               </span>
             </div>
@@ -168,7 +155,7 @@ export async function renderSharedPlanOg(id: string): Promise<ImageResponse> {
     ),
     {
       ...sharedPlanOgSize,
-      fonts: [{ name: "Clash Display", data: clash, weight: 600, style: "normal" }],
+      fonts,
     },
   );
 }

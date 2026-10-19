@@ -1,3 +1,5 @@
+> **Out of date (PRE-312).** Share images are no longer a file in `public/`. The site default is `src/app/opengraph-image.tsx` and `twitter-image.tsx`; feature, guide and shared meal plan pages have their own beside each route. All of them are drawn by `src/lib/og-card.tsx` (assets from `scripts/make-og-assets.py`). The rest of this guide is kept for history.
+
 # Open Graph Image Creation Guide
 
 ## What You Need to Create
