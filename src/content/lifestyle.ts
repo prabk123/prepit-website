@@ -61,7 +61,9 @@ export const heroCafe: LifestylePhoto = {
   textSide: "start",
   // Nothing on the table is logged, so the label points at the chart on the
   // phone: the dashed line is the showcase account's 158 g protein target.
-  annotations: [{ x: 61, y: 55, side: "left", length: 96, value: "158 g", label: "Daily protein target" }],
+  // It sits right of the phone, over the hand, since the hero's text takes
+  // the photo's left side (PRE-306).
+  annotations: [{ x: 76, y: 55, side: "right", length: 40, value: "158 g", label: "Daily protein target" }],
 };
 
 export const nutritionistEvening: LifestylePhoto = {
