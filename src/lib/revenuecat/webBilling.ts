@@ -177,3 +177,34 @@ export async function waitForPremium(uid: string, first?: CustomerInfo): Promise
   }
   return false;
 }
+
+/** Where the visitor's PrepIt subscription is billed, for the account page (PRE-304). */
+export type BillingPlace = "web" | "legacy_web" | "app_store" | "play_store" | "other";
+
+export type PremiumDetails = {
+  place: BillingPlace;
+  /** Renewal or end date, when RevenueCat has one. */
+  expirationDate: Date | null;
+  willRenew: boolean;
+};
+
+/** The active `premium` entitlement, or null when there is none. */
+export async function loadPremiumDetails(uid: string): Promise<PremiumDetails | null> {
+  const purchases = await purchasesFor(uid);
+  const entitlement = (await purchases.getCustomerInfo()).entitlements.active[PREMIUM_ENTITLEMENT];
+  if (!entitlement) return null;
+  const store = entitlement.store;
+  // Only Web Billing (rc_billing) has a portal the backend can open. Older
+  // Stripe or Paddle subscriptions were bought on the web too, but go to support.
+  const place: BillingPlace =
+    store === "rc_billing"
+      ? "web"
+      : store === "stripe" || store === "paddle"
+        ? "legacy_web"
+        : store === "app_store" || store === "mac_app_store"
+          ? "app_store"
+          : store === "play_store"
+            ? "play_store"
+            : "other";
+  return { place, expirationDate: entitlement.expirationDate, willRenew: entitlement.willRenew };
+}

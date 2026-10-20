@@ -67,6 +67,9 @@ export default function Footer() {
               <a href="https://prepit.userjot.com/" target="_blank" rel="noopener noreferrer" className={linkClass}>
                 Feedback
               </a>
+              <Link href="/account" className={linkClass}>
+                Manage subscription
+              </Link>
             </Column>
             <Column title="Legal">
               <Link href="/terms-and-conditions" className={linkClass}>
