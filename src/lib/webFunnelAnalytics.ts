@@ -1,4 +1,5 @@
-import { attributionEventProperties, readAttribution } from "@/lib/funnel/attribution";
+import { attributionEventProperties } from "@/lib/funnel/attribution";
+import { readAttribution } from "@/lib/funnel/attributionStore";
 import { withPostHog } from "@/lib/posthogClient";
 
 /**

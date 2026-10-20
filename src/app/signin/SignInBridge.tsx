@@ -10,7 +10,7 @@ import AppStoreButton from "@/components/ui/AppStoreButton";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { PRIMARY_BUTTON_CLASS, TEXT_BUTTON_CLASS } from "@/components/ui/buttons";
 import { providerOf, signOutOfWebsite, type SignInProvider } from "@/lib/firebase/auth";
-import { readAttribution } from "@/lib/funnel/attribution";
+import { readAttribution } from "@/lib/funnel/attributionStore";
 import { parseFunnelId, safeNextPath } from "@/lib/funnel/params";
 import { saveWebSignupProfile } from "@/lib/prepitApi";
 import { parsePlanId, PLANS, TRIAL_DAYS } from "@/lib/pricing";
@@ -31,6 +31,7 @@ export default function SignInBridge() {
   const [justSignedIn, setJustSignedIn] = useState<SignInProvider | null>(null);
   const viewTracked = useRef(false);
   const successTracked = useRef(false);
+  const savedFor = useRef<string | null>(null);
 
   useEffect(() => {
     if (viewTracked.current) return;
@@ -63,20 +64,29 @@ export default function SignInBridge() {
         has_account: account.summary.hasAccount,
         is_subscribed: account.summary.isSubscribed,
       });
-      // Someone new: start their web sign-up with the funnel and how they
-      // found us, so the app knows to finish setting up and the purchase can
-      // be traced to its campaign. No answers yet, so no account is made.
-      if (!account.summary.hasAccount) {
-        saveWebSignupProfile({ funnelId, attribution: readAttribution(), createAccount: false }).catch(() => {
-          // Not worth stopping checkout for; the backend logs its own failures.
-        });
-      }
     }
     if (!account.summary.isSubscribed && !account.summary.hasAccount && !account.summary.emailInUse) {
       router.push(nextPath);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [justSignedIn, account]);
+
+  // Anyone signed in here with no account, whether they signed in on this
+  // page or arrived signed in (back from an ad, or from /account): start
+  // their web sign-up with the funnel and how they found us, so the app knows
+  // to finish setting up and the purchase can be traced to its campaign. No
+  // answers yet, so no account is made. Once per uid; the backend keeps the
+  // first attribution, so a repeat save on a later visit changes nothing.
+  const uid = session.status === "signedIn" ? session.user.uid : null;
+  useEffect(() => {
+    if (!uid || account?.status !== "ready" || savedFor.current === uid) return;
+    if (account.summary.hasAccount || account.summary.emailInUse) return;
+    savedFor.current = uid;
+    saveWebSignupProfile({ funnelId, attribution: readAttribution(), createAccount: false }).catch(() => {
+      // Not worth stopping checkout for.
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [uid, account]);
 
   async function signOut() {
     await signOutOfWebsite();
