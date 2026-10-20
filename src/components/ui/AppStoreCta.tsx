@@ -9,6 +9,8 @@ type AppStoreCtaProps = {
   note?: string;
   /** Desktop only: a QR code beside the button with this caption. */
   qrCaption?: string;
+  /** What the QR code opens; the App Store listing unless set. */
+  qrUrl?: string;
   className?: string;
 };
 
@@ -22,6 +24,7 @@ export default function AppStoreCta({
   label = "Download on the App Store",
   note,
   qrCaption,
+  qrUrl,
   className,
 }: AppStoreCtaProps) {
 
@@ -29,7 +32,7 @@ export default function AppStoreCta({
     <div className={`flex flex-wrap items-center gap-x-10 gap-y-6 ${className ?? ""}`}>
       <AppStoreButton trackingSource={trackingSource} label={label} note={note} />
       {qrCaption && (
-        <AppStoreQr caption={qrCaption} trackingSource={`${trackingSource}-qr`} className="hidden lg:flex" />
+        <AppStoreQr caption={qrCaption} url={qrUrl} trackingSource={`${trackingSource}-qr`} className="hidden lg:flex" />
       )}
     </div>
   );
