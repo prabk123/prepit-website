@@ -70,7 +70,7 @@ function groupByTopic(sources: ResearchSource[]) {
 /** /research: the six points from the homepage research band, each with its sources (PRE-278). */
 export default function ResearchPage() {
   return (
-    <div className="w-full bg-page pt-16 text-ink [color-scheme:dark] lg:pt-[72px]">
+    <div className="w-full bg-page pt-16 text-ink lg:pt-[72px]">
       <Section labelledBy="research-page-heading">
         <div className="mx-auto flex max-w-[1040px] flex-col gap-stack">
           <SectionHeading
@@ -117,7 +117,7 @@ export default function ResearchPage() {
                                       href={source.url}
                                       target="_blank"
                                       rel="noopener noreferrer"
-                                      className="text-ink-secondary underline decoration-ink-faint underline-offset-4 hover:decoration-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cream"
+                                      className="text-ink-secondary underline decoration-ink-faint underline-offset-4 hover:decoration-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus"
                                     >
                                       {source.citation}
                                     </a>{" "}

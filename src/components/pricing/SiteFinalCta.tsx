@@ -1,32 +1,20 @@
-"use client";
-
-import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
 /**
- * Pages that end with their own download band: shared plans ("Make your own
- * plan"), each guide and each feature page (the same band, counted per
- * page). The guides and features indexes keep the site band.
- */
-const OWN_CLOSING_CTA_PREFIXES = ["/sharable/", "/guides/", "/features/"];
-
-/** Single-action pages with no download band at all (the sign-in email link). */
-const NO_CLOSING_CTA_PREFIXES = ["/auth/"];
-
-/**
- * Shows the site's closing download section on every page except those that
- * already end with their own, so no page has two.
+ * The site's closing download section, rendered on every page. Pages that
+ * end with their own download band (feature pages, guides, shared plans, the
+ * 404s) or that should have none (contact, legal pages, the sign-in email
+ * link) render <HideSiteFinalCta />, and globals.css hides this wrapper.
+ *
+ * It must not branch on the pathname: unknown /features and /guides slugs
+ * serve the 404 pre-rendered at build time, so a pathname check renders
+ * different HTML in the browser than on the server (React error #418).
  */
 export default function SiteFinalCta({ children }: { children: ReactNode }) {
-  const pathname = usePathname() ?? "/";
-  if (
-    [...OWN_CLOSING_CTA_PREFIXES, ...NO_CLOSING_CTA_PREFIXES].some((prefix) =>
-      pathname.startsWith(prefix),
-    )
-  ) {
-    return null;
-  }
-  // A page with its own App Store button but no path of its own (the 404)
-  // marks itself with data-hide-site-final-cta, and globals.css hides this.
   return <div className="site-final-cta">{children}</div>;
+}
+
+/** Marks the page so the site's closing download section is hidden. */
+export function HideSiteFinalCta() {
+  return <span hidden data-hide-site-final-cta="" />;
 }

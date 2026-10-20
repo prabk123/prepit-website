@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import ContactForm, { type ContactKind } from "@/components/ContactForm";
+import { HideSiteFinalCta } from "@/components/pricing/SiteFinalCta";
 import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
 import TextLink from "@/components/ui/TextLink";
@@ -43,6 +44,8 @@ export default async function ContactPage({
 
   return (
     <div className="w-full bg-page pt-16 text-ink lg:pt-[72px]">
+      {/* Mostly people who already have the app, with account or billing questions. */}
+      <HideSiteFinalCta />
       <Section labelledBy="contact-heading">
         <div className="grid gap-stack lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:gap-16">
           <div className="flex flex-col gap-8">

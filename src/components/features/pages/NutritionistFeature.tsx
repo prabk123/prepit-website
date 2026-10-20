@@ -30,11 +30,16 @@ export default function NutritionistFeature() {
             title="It speaks up before you slip."
             lead="A good nutritionist doesn't wait for your next appointment to mention what they've noticed. Neither does yours. These are real messages it sends on its own."
           />
-          {/* Real messages cropped from the app's chat (PRE-283), one row you swipe on phones (PRE-285). */}
+          {/*
+            Real messages cropped from the app's chat (PRE-283), one row you swipe on phones (PRE-285).
+            On desktop, two columns about as wide as the phone screen, so the chat text reads at the
+            app's own size; four in one row made it about 8 px (PRE-318).
+          */}
           <SwipeRow
             label="Messages your nutritionist sends on its own"
-            itemClassName="w-[82%] max-w-[340px] lg:max-w-none lg:flex-1"
-            className="lg:items-start"
+            desktop="columns"
+            itemClassName="w-[82%] max-w-[340px]"
+            className="lg:max-w-[880px]"
           >
             {[missedBreakfast, proteinShort, weeklyPattern, weighIn].map((message) => (
               <ChatCapture key={message.caption} {...message} />

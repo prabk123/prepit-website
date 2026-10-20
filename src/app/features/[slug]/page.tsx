@@ -9,6 +9,7 @@ import SignalsFeature from "@/components/features/pages/SignalsFeature";
 import WidgetsFeature from "@/components/features/pages/WidgetsFeature";
 import RelatedFeatures from "@/components/features/RelatedFeatures";
 import FinalCta from "@/components/pricing/FinalCta";
+import { HideSiteFinalCta } from "@/components/pricing/SiteFinalCta";
 import { FEATURE_HERO_MEDIA } from "@/lib/featureHeroMedia";
 import { FEATURES, FEATURE_SLUGS, featureHref, isFeatureSlug, type FeatureSlug } from "@/lib/features";
 
@@ -79,6 +80,7 @@ export default async function FeaturePage({ params }: Props) {
       <RelatedFeatures slug={slug} />
       {/* Feature pages end with their own download section, so App Store taps are counted per page. */}
       <FinalCta trackingSource={`feature-${slug}`} />
+      <HideSiteFinalCta />
     </>
   );
 }
