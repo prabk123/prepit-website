@@ -10,7 +10,9 @@ import AppStoreButton from "@/components/ui/AppStoreButton";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { PRIMARY_BUTTON_CLASS, TEXT_BUTTON_CLASS } from "@/components/ui/buttons";
 import { providerOf, signOutOfWebsite, type SignInProvider } from "@/lib/firebase/auth";
+import { readAttribution } from "@/lib/funnel/attribution";
 import { parseFunnelId, safeNextPath } from "@/lib/funnel/params";
+import { saveWebSignupProfile } from "@/lib/prepitApi";
 import { parsePlanId, PLANS, TRIAL_DAYS } from "@/lib/pricing";
 import { resetWebUser, trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webFunnelAnalytics";
 
@@ -61,6 +63,14 @@ export default function SignInBridge() {
         has_account: account.summary.hasAccount,
         is_subscribed: account.summary.isSubscribed,
       });
+      // Someone new: start their web sign-up with the funnel and how they
+      // found us, so the app knows to finish setting up and the purchase can
+      // be traced to its campaign. No answers yet, so no account is made.
+      if (!account.summary.hasAccount) {
+        saveWebSignupProfile({ funnelId, attribution: readAttribution(), createAccount: false }).catch(() => {
+          // Not worth stopping checkout for; the backend logs its own failures.
+        });
+      }
     }
     if (!account.summary.isSubscribed && !account.summary.hasAccount && !account.summary.emailInUse) {
       router.push(nextPath);
