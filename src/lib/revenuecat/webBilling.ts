@@ -100,6 +100,16 @@ export type CheckoutOffering =
   /** The offering has no paywall attached in the RevenueCat dashboard. */
   | { status: "no_paywall" };
 
+/** Whether RevenueCat offers this customer the free trial on this package. */
+export function packageOffersTrial(rcPackage: Package): boolean {
+  return rcPackage.webBillingProduct.freeTrialPhase != null;
+}
+
+/** Whether RevenueCat offers this customer the free trial on any of the offering's packages. */
+export function offeringOffersTrial(offering: Offering): boolean {
+  return offering.availablePackages.some(packageOffersTrial);
+}
+
 /** The current offering, whose RevenueCat paywall checkout shows. */
 export async function loadCheckoutOffering(uid: string): Promise<CheckoutOffering> {
   const purchases = await purchasesFor(uid);
