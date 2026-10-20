@@ -8,10 +8,11 @@ type SwipeRowProps = {
   children: ReactNode;
   /**
    * From 1024 px: `stack` lays the items one under another, `row` side by
-   * side, `scroll` keeps the swipe inside its column. Below 1024 px they are
-   * always one row you swipe.
+   * side, `columns` in two balanced columns (tall items such as chat crops,
+   * kept near their size on the phone), `scroll` keeps the swipe inside its
+   * column. Below 1024 px they are always one row you swipe.
    */
-  desktop?: "stack" | "row" | "scroll";
+  desktop?: "stack" | "row" | "columns" | "scroll";
   /** Width of each item on phones; the next one peeks in so it reads as swipeable. */
   itemClassName?: string;
   className?: string;
@@ -41,10 +42,17 @@ export default function SwipeRow({
     return () => observer.disconnect();
   }, []);
   const scroll = desktop === "scroll";
+  const columns = desktop === "columns";
   const desktopList = scroll
     ? "lg:mx-0 lg:scroll-px-0 lg:px-0"
-    : `lg:mx-0 lg:snap-none lg:overflow-visible lg:px-0 lg:pb-0 ${desktop === "stack" ? "lg:flex-col" : "lg:justify-center"}`;
-  const desktopItem = scroll ? "" : "lg:w-auto lg:max-w-none lg:shrink";
+    : `lg:mx-0 lg:snap-none lg:overflow-visible lg:px-0 lg:pb-0 ${
+        columns ? "lg:block lg:columns-2 lg:gap-10" : desktop === "stack" ? "lg:flex-col" : "lg:justify-center"
+      }`;
+  const desktopItem = scroll
+    ? ""
+    : columns
+      ? "lg:mb-12 lg:w-full lg:max-w-none lg:break-inside-avoid"
+      : "lg:w-auto lg:max-w-none lg:shrink";
   return (
     <ul
       ref={ref}
