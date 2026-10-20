@@ -50,10 +50,10 @@ export default function WidgetsFeature() {
           <BentoGrid>
             <BentoTile
               size="large"
-              mediaAlign="center"
+              mediaAlign="start"
               title="Today's plan"
               media={
-                <div className="w-full max-w-[420px]">
+                <div className="w-full max-w-[460px]">
                   <WidgetImage
                     capture={widgetCapture(
                       "15-widget-today-plan-large",
@@ -100,9 +100,12 @@ export default function WidgetsFeature() {
               Today&apos;s three scores, as on Home. Tap one to see what shaped it.
             </BentoTile>
             <BentoTile
+              compact
+              className="lg:col-span-2"
+              layout="row"
               title="Streak"
               media={
-                <div className="w-full max-w-[200px]">
+                <div className="w-full max-w-[200px] lg:w-[180px]">
                   <WidgetImage
                     capture={widgetCapture("15-widget-streak-small", "Small streak widget", 474, 474)}
                   />
@@ -112,9 +115,12 @@ export default function WidgetsFeature() {
               Your streak and the next milestone.
             </BentoTile>
             <BentoTile
+              compact
+              className="lg:col-span-2"
+              layout="row"
               title="Quick water"
               media={
-                <div className="w-full max-w-[200px]">
+                <div className="w-full max-w-[200px] lg:w-[180px]">
                   <WidgetImage
                     capture={widgetCapture(
                       "15-widget-water-small",
@@ -128,11 +134,12 @@ export default function WidgetsFeature() {
             >
               One tap adds your usual drink.
             </BentoTile>
-            <BentoTile size="medium" title="And more">
-              Tick off today&apos;s supplements, see today&apos;s nutrition and your next planned meal, and
-              put your scores, streak, water and supplements on your Lock Screen and in StandBy.
-            </BentoTile>
           </BentoGrid>
+          {/* Was a text-only "And more" tile; a note is a screen shorter on phones (PRE-318). */}
+          <p className="max-w-[56ch] text-body text-ink-muted text-pretty">
+            Tick off today&apos;s supplements, see today&apos;s nutrition and your next planned meal, and put your
+            scores, streak, water and supplements on your Lock Screen and in StandBy.
+          </p>
           <p className="text-small text-ink-faint">
             Buttons on widgets need iOS 17 or later. Widgets follow your light or dark mode.
           </p>
