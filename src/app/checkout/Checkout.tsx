@@ -9,17 +9,18 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import { PRIMARY_BUTTON_CLASS, TEXT_BUTTON_CLASS } from "@/components/ui/buttons";
 import { providerOf, signOutOfWebsite } from "@/lib/firebase/auth";
 import { parseFunnelId } from "@/lib/funnel/params";
-import { parsePlanId, type PlanId } from "@/lib/pricing";
+import { parsePlanId } from "@/lib/pricing";
 import {
   hasPremium,
-  loadCheckoutPlans,
+  loadCheckoutOffering,
+  planIdOf,
   purchasesFor,
   toCheckoutFailure,
   waitForPremium,
   webBillingKeyProblem,
   type CheckoutFailure,
-  type CheckoutPlan,
 } from "@/lib/revenuecat/webBilling";
+import type { Offering } from "@revenuecat/purchases-js";
 import { resetWebUser, trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webFunnelAnalytics";
 
 const PROVIDER_NAMES = { google: "Google", apple: "Apple" } as const;
@@ -36,18 +37,23 @@ const FAILURE_MESSAGES: Record<CheckoutFailure, string | null> = {
 
 type Plans =
   | { status: "loading" }
-  | { status: "ready"; plans: CheckoutPlan[] }
+  | { status: "ready"; offering: Offering; hasTrial: boolean }
   | { status: "already_subscribed" }
   /** The email belongs to a PrepIt account under the other provider: the bridge explains. */
   | { status: "email_in_use" }
   | { status: "no_trial_free_plans" }
+  /** The offering has no RevenueCat paywall attached yet. */
+  | { status: "no_paywall" }
   | { status: "error" };
 
-function trialEndDate(days: number): string {
-  const end = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
-  return end.toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric" });
-}
-
+/**
+ * Checkout (PRE-269): the plans, prices, trial and disclosures are the
+ * RevenueCat paywall built in the dashboard for the web offering, shown here
+ * with `presentPaywall`. Around it this page keeps what RevenueCat can't know:
+ * sign in first with the app's account, the email-in-use guard, no second
+ * free trial, no checkout for anyone already subscribed, and the "You're in"
+ * handoff once `premium` is active.
+ */
 export default function Checkout() {
   const params = useSearchParams();
   const router = useRouter();
@@ -57,11 +63,13 @@ export default function Checkout() {
   const keyProblem = webBillingKeyProblem();
 
   const [plansState, setPlans] = useState<{ key: string; plans: Plans } | null>(null);
-  const [selected, setSelected] = useState<PlanId>(requestedPlan ?? "annual");
-  const [paying, setPaying] = useState<"idle" | "paying" | "confirming">("idle");
+  const [paying, setPaying] = useState<"idle" | "confirming">("idle");
   const [failure, setFailure] = useState<CheckoutFailure | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
+  // Bumped to show the paywall again after a purchase that didn't go through.
+  const [presentKey, setPresentKey] = useState(0);
   const paywallTracked = useRef(false);
+  const paywallHost = useRef<HTMLDivElement>(null);
 
   const uid = session.status === "signedIn" ? session.user.uid : null;
   const account = session.status === "signedIn" ? session.account : null;
@@ -100,8 +108,7 @@ export default function Checkout() {
         // purchase made before the account existed) means no checkout.
         const purchases = await purchasesFor(uid);
         if (hasPremium(await purchases.getCustomerInfo())) return done({ status: "already_subscribed" });
-        const result = await loadCheckoutPlans(uid, summary.hasUsedTrial);
-        done(result.status === "ready" ? { status: "ready", plans: result.plans } : result);
+        done(await loadCheckoutOffering(uid, summary.hasUsedTrial));
       } catch {
         done({ status: "error" });
       }
@@ -117,7 +124,10 @@ export default function Checkout() {
     if (paywallTracked.current) return;
     const unavailable =
       keyProblem ??
-      (plans.status === "already_subscribed" || plans.status === "no_trial_free_plans" || plans.status === "email_in_use"
+      (plans.status === "already_subscribed" ||
+      plans.status === "no_trial_free_plans" ||
+      plans.status === "email_in_use" ||
+      plans.status === "no_paywall"
         ? plans.status
         : null);
     if (unavailable) {
@@ -125,15 +135,12 @@ export default function Checkout() {
       trackWebFunnelEvent(WEB_FUNNEL_EVENTS.checkoutUnavailable, { ...context, reason: unavailable });
     } else if (plans.status === "ready") {
       paywallTracked.current = true;
-      trackWebFunnelEvent(WEB_FUNNEL_EVENTS.paywallView, {
-        ...context,
-        plan: selected,
-        has_trial: plans.plans.some((plan) => plan.trialDays !== null),
-      });
+      trackWebFunnelEvent(WEB_FUNNEL_EVENTS.paywallView, { ...context, plan: requestedPlan, has_trial: plans.hasTrial });
     }
-  }, [plans, keyProblem, context, selected]);
+  }, [plans, keyProblem, context, requestedPlan]);
 
   const provider = session.status === "signedIn" ? providerOf(session.user) : null;
+  const email = session.status === "signedIn" ? session.user.email : null;
   const welcomePath = (pending: boolean) =>
     `/welcome?${new URLSearchParams({ ...(provider ? { provider } : {}), ...(pending ? { pending: "1" } : {}) })}`;
 
@@ -145,7 +152,77 @@ export default function Checkout() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [plans.status]);
 
-  if (keyProblem) {
+  // Shows RevenueCat's paywall in the page. It runs the purchase itself (with
+  // 3-D Secure and its own retryable errors); this waits for the result.
+  const offering = plans.status === "ready" ? plans.offering : null;
+  const hasTrial = plans.status === "ready" ? plans.hasTrial : false;
+  useEffect(() => {
+    const host = paywallHost.current;
+    if (!uid || !offering || !host || paying !== "idle") return;
+    let active = true;
+    // A fresh element per showing, so a second showing never stacks on the first.
+    const target = document.createElement("div");
+    host.replaceChildren(target);
+    let plan: string | null = null;
+    (async () => {
+      try {
+        const purchases = await purchasesFor(uid);
+        const result = await purchases.presentPaywall({
+          offering,
+          htmlTarget: target,
+          customerEmail: email ?? undefined,
+          metadata: { funnel_id: funnelId },
+          hideBackButtons: true,
+          listener: {
+            onPurchaseStarted: (rcPackage) => {
+              plan = planIdOf(rcPackage);
+              setFailure(null);
+              trackWebFunnelEvent(WEB_FUNNEL_EVENTS.checkoutStart, { ...context, plan, has_trial: hasTrial });
+            },
+            onPurchaseError: (error) => {
+              void toCheckoutFailure(error).then(({ code, rcErrorCode }) =>
+                trackWebFunnelEvent(WEB_FUNNEL_EVENTS.checkoutFailed, {
+                  ...context,
+                  plan,
+                  reason: code,
+                  rc_error_code: rcErrorCode,
+                  retryable: true,
+                }),
+              );
+            },
+          },
+        });
+        if (!active) return;
+        plan = planIdOf(result.selectedPackage) ?? plan;
+        setPaying("confirming");
+        const unlocked = await waitForPremium(uid, result.customerInfo);
+        trackWebFunnelEvent(WEB_FUNNEL_EVENTS.checkoutSuccess, {
+          ...context,
+          plan,
+          has_trial: hasTrial,
+          entitlement_confirmed: unlocked,
+        });
+        router.push(welcomePath(!unlocked));
+      } catch (error) {
+        if (!active) return;
+        const { code, rcErrorCode } = await toCheckoutFailure(error);
+        trackWebFunnelEvent(WEB_FUNNEL_EVENTS.checkoutFailed, { ...context, plan, reason: code, rc_error_code: rcErrorCode });
+        if (code === "already_purchased") {
+          router.push(welcomePath(false));
+          return;
+        }
+        setFailure(code);
+      }
+    })();
+    return () => {
+      active = false;
+      host.replaceChildren();
+    };
+    // welcomePath and context only change with the session and URL already in the deps.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [uid, offering, presentKey]);
+
+  if (keyProblem || plans.status === "no_paywall") {
     return (
       <SectionHeading
         as="h1"
@@ -196,140 +273,54 @@ export default function Checkout() {
     );
   }
 
-  const plan = plans.plans.find((candidate) => candidate.id === selected) ?? plans.plans[0];
-  const signedInUser = session.user;
-
-  async function pay() {
-    setFailure(null);
-    setPaying("paying");
-    trackWebFunnelEvent(WEB_FUNNEL_EVENTS.checkoutStart, { ...context, plan: plan.id, has_trial: plan.trialDays !== null });
-    try {
-      const purchases = await purchasesFor(signedInUser.uid);
-      const result = await purchases.purchase({
-        rcPackage: plan.rcPackage,
-        purchaseOption: plan.option,
-        customerEmail: signedInUser.email ?? undefined,
-        metadata: { funnel_id: funnelId },
-        skipSuccessPage: true,
-      });
-      setPaying("confirming");
-      const unlocked = await waitForPremium(signedInUser.uid, result.customerInfo);
-      trackWebFunnelEvent(WEB_FUNNEL_EVENTS.checkoutSuccess, {
-        ...context,
-        plan: plan.id,
-        has_trial: plan.trialDays !== null,
-        entitlement_confirmed: unlocked,
-      });
-      router.push(welcomePath(!unlocked));
-    } catch (error) {
-      const { code, rcErrorCode } = await toCheckoutFailure(error);
-      trackWebFunnelEvent(WEB_FUNNEL_EVENTS.checkoutFailed, {
-        ...context,
-        plan: plan.id,
-        reason: code,
-        rc_error_code: rcErrorCode,
-      });
-      if (code === "already_purchased") {
-        router.push(welcomePath(false));
-        return;
-      }
-      setFailure(code);
-      setPaying("idle");
-    }
-  }
-
-  const trial = plan.trialDays;
-
-  // Which account is paying, so an old session on the wrong account is visible.
-  const signedInAs = (
-    <p className="ph-no-capture text-small text-ink-muted">
-      Paying for the PrepIt account signed in{provider ? ` with ${PROVIDER_NAMES[provider]}` : ""}
-      {signedInUser.email ? ` as ${signedInUser.email}` : ""}.{" "}
-      <button
-        type="button"
-        className={TEXT_BUTTON_CLASS}
-        onClick={() => {
-          void signOutOfWebsite().then(resetWebUser);
-        }}
-      >
-        Not you? Sign out
-      </button>
-    </p>
-  );
-  const priceLine = `${plan.price} a ${plan.period}`;
   const message = failure ? FAILURE_MESSAGES[failure] : null;
 
   return (
     <>
-      <SectionHeading
-        as="h1"
-        size="title"
-        align="center"
-        title={trial ? `Start your ${trial}-day free trial` : "Choose your plan"}
-        lead={trial ? "You won't be charged today. Cancel any time before the trial ends." : undefined}
-      />
-      <fieldset className="flex w-full flex-col gap-3 text-left">
-        <legend className="sr-only">Plan</legend>
-        {plans.plans.map((option) => {
-          const checked = option.id === plan.id;
-          return (
-            <label
-              key={option.id}
-              className={`flex cursor-pointer items-center gap-4 rounded-tile border bg-surface p-5 transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-4 has-[:focus-visible]:outline-focus ${
-                checked ? "border-2 border-primary" : "border-line-strong hover:bg-surface-raised"
-              }`}
-            >
-              <input
-                type="radio"
-                name="plan"
-                value={option.id}
-                checked={checked}
-                onChange={() => setSelected(option.id)}
-                className="sr-only"
-              />
-              <span
-                aria-hidden
-                className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${checked ? "border-primary" : "border-line-strong"}`}
-              >
-                {checked && <span className="h-2.5 w-2.5 rounded-full bg-primary" />}
-              </span>
-              <span className="flex flex-1 flex-col gap-1">
-                <span className="text-body font-bold text-ink">{option.id === "annual" ? "Annual" : "Monthly"}</span>
-                <span className="text-small text-ink-muted">
-                  {option.price} a {option.period}
-                  {option.pricePerWeek ? `, ${option.pricePerWeek} a week` : ""}
-                </span>
-              </span>
-              {option.id === "annual" && (
-                <span className="rounded-control bg-surface-raised px-3 py-1 text-small font-medium text-accent-text">
-                  Best value
-                </span>
-              )}
-            </label>
-          );
-        })}
-      </fieldset>
-      <div className="flex w-full flex-col gap-3">
-        <button type="button" className={PRIMARY_BUTTON_CLASS} disabled={paying !== "idle"} onClick={() => void pay()}>
-          {paying === "confirming"
-            ? "Confirming your subscription…"
-            : paying === "paying"
-              ? "Opening checkout…"
-              : trial
-                ? "Start free trial"
-                : "Subscribe"}
-        </button>
-        <p role="status" aria-live="polite" className={message ? "text-small text-error" : "sr-only"}>
-          {message ?? ""}
+      {paying === "confirming" ? (
+        <p role="status" className="text-body text-ink-secondary">
+          Confirming your subscription…
         </p>
-      </div>
-      {signedInAs}
+      ) : (
+        <div ref={paywallHost} className="w-full" data-testid="revenuecat-paywall" />
+      )}
+      {failure && paying === "idle" && (
+        <div className="flex w-full flex-col gap-3">
+          {message && (
+            <p role="alert" className="text-small text-error">
+              {message}
+            </p>
+          )}
+          {failure !== "payment_pending" && (
+            <button
+              type="button"
+              className={PRIMARY_BUTTON_CLASS}
+              onClick={() => {
+                setFailure(null);
+                setPresentKey((key) => key + 1);
+              }}
+            >
+              Show the plans again
+            </button>
+          )}
+        </div>
+      )}
+      {/* Which account is paying, so an old session on the wrong account is visible. */}
+      <p className="ph-no-capture text-small text-ink-muted">
+        Paying for the PrepIt account signed in{provider ? ` with ${PROVIDER_NAMES[provider]}` : ""}
+        {email ? ` as ${email}` : ""}.{" "}
+        <button
+          type="button"
+          className={TEXT_BUTTON_CLASS}
+          onClick={() => {
+            void signOutOfWebsite().then(resetWebUser);
+          }}
+        >
+          Not you? Sign out
+        </button>
+      </p>
       <p className="text-small text-ink-muted">
-        {trial
-          ? `Free for ${trial} days, then ${priceLine} from ${trialEndDate(trial)}. `
-          : `${priceLine}, charged today. `}
-        Renews automatically until you cancel. Cancel any time at tryprepit.app/account
-        {trial ? " before the trial ends and you won't be charged" : ""}. See our{" "}
+        Renews automatically until you cancel. Cancel any time at tryprepit.app/account. See our{" "}
         <Link href="/terms-and-conditions" className="underline underline-offset-4 hover:text-ink">
           Terms
         </Link>

@@ -1,6 +1,6 @@
 "use client";
 
-import type { CustomerInfo, Package, Purchases, SubscriptionOption } from "@revenuecat/purchases-js";
+import type { CustomerInfo, Offering, Package, Purchases } from "@revenuecat/purchases-js";
 import { isProductionDeploy } from "@/lib/firebase/config";
 import type { PlanId } from "@/lib/pricing";
 
@@ -14,9 +14,11 @@ import type { PlanId } from "@/lib/pricing";
  *   Sandbox keys (`rcb_sb_…`) everywhere except production; production only
  *   takes a live key. A key on the wrong side is refused.
  * - NEXT_PUBLIC_REVENUECAT_OFFERING_ID (optional): the web offering; the
- *   project's current offering when unset.
+ *   project's current offering when unset. Its paywall, built in the
+ *   RevenueCat dashboard, is what checkout shows.
  * - NEXT_PUBLIC_REVENUECAT_OFFERING_ID_NO_TRIAL (optional): an offering with
- *   the same plans and no free trial, for people who already had one.
+ *   the same plans, no free trial and its own paywall, for people who already
+ *   had one. Without it they're sent to the app instead.
  */
 
 /** The entitlement the app unlocks with (fresca_app RevenueCatService.premiumEntitlement). */
@@ -62,22 +64,8 @@ export function hasPremium(customerInfo: CustomerInfo): boolean {
   return Boolean(customerInfo.entitlements.active[PREMIUM_ENTITLEMENT]);
 }
 
-/** One plan as checkout shows it: prices and trial from RevenueCat, not from code. */
-export type CheckoutPlan = {
-  id: PlanId;
-  rcPackage: Package;
-  /** The option bought: with the free trial, or without when they already had one. */
-  option: SubscriptionOption | null;
-  /** e.g. "$99.99" or "£89.99", in the visitor's currency. */
-  price: string;
-  period: "year" | "month";
-  /** Free trial length in days, or null when this purchase has none. */
-  trialDays: number | null;
-  /** e.g. "$1.92" for the annual plan. */
-  pricePerWeek: string | null;
-};
-
-function planIdOf(rcPackage: Package): PlanId | null {
+/** Which plan a package is, for analytics: `$rc_annual` / `$rc_monthly`, or by its period. */
+export function planIdOf(rcPackage: Package): PlanId | null {
   if (rcPackage.identifier === "$rc_annual") return "annual";
   if (rcPackage.identifier === "$rc_monthly") return "monthly";
   const unit = rcPackage.product.period?.unit;
@@ -86,68 +74,32 @@ function planIdOf(rcPackage: Package): PlanId | null {
   return null;
 }
 
-function trialDaysOf(option: SubscriptionOption | null): number | null {
-  const period = option?.trial?.period;
-  if (!period) return null;
-  switch (period.unit) {
-    case "day":
-      return period.number;
-    case "week":
-      return period.number * 7;
-    default:
-      return null;
-  }
-}
-
-function toPlan(rcPackage: Package, withTrial: boolean): CheckoutPlan | null {
-  const id = planIdOf(rcPackage);
-  if (!id) return null;
-  const product = rcPackage.product;
-  const options = Object.values(product.subscriptionOptions);
-  const option = withTrial
-    ? product.defaultSubscriptionOption
-    : (options.find((candidate) => candidate.trial === null) ?? null);
-  if (!withTrial && option === null && product.defaultSubscriptionOption?.trial) return null;
-  const base = option?.base ?? product.defaultSubscriptionOption?.base ?? null;
-  return {
-    id,
-    rcPackage,
-    option,
-    price: base?.price?.formattedPrice ?? product.price.formattedPrice,
-    period: id === "annual" ? "year" : "month",
-    trialDays: withTrial ? trialDaysOf(option) : null,
-    pricePerWeek: id === "annual" ? (base?.pricePerWeek?.formattedPrice ?? null) : null,
-  };
-}
-
-export type CheckoutPlans =
-  | { status: "ready"; plans: CheckoutPlan[] }
-  /** They had a trial before and no trial-free plans are set up in RevenueCat. */
-  | { status: "no_trial_free_plans" };
+export type CheckoutOffering =
+  | { status: "ready"; offering: Offering; hasTrial: boolean }
+  /** They had a trial before and no trial-free offering is set up in RevenueCat. */
+  | { status: "no_trial_free_plans" }
+  /** The offering has no paywall attached in the RevenueCat dashboard. */
+  | { status: "no_paywall" };
 
 /**
- * The annual and monthly plans, annual first. `hadTrial` drops the free trial:
- * from a trial-free option on the same product, or the no-trial offering.
+ * The offering whose RevenueCat paywall checkout shows. Someone who already
+ * had a free trial gets the no-trial offering instead, so the paywall never
+ * offers them a second one.
  */
-export async function loadCheckoutPlans(uid: string, hadTrial: boolean): Promise<CheckoutPlans> {
+export async function loadCheckoutOffering(uid: string, hadTrial: boolean): Promise<CheckoutOffering> {
   const purchases = await purchasesFor(uid);
   const offeringId = hadTrial
-    ? (process.env.NEXT_PUBLIC_REVENUECAT_OFFERING_ID_NO_TRIAL?.trim() ||
-      process.env.NEXT_PUBLIC_REVENUECAT_OFFERING_ID?.trim())
+    ? process.env.NEXT_PUBLIC_REVENUECAT_OFFERING_ID_NO_TRIAL?.trim()
     : process.env.NEXT_PUBLIC_REVENUECAT_OFFERING_ID?.trim();
+  if (hadTrial && !offeringId) return { status: "no_trial_free_plans" };
   const offerings = await purchases.getOfferings(offeringId ? { offeringIdentifier: offeringId } : undefined);
-  const offering = (offeringId ? offerings.all[offeringId] : null) ?? offerings.current;
-  if (!offering) throw new Error("No RevenueCat offering");
-
-  const plans = offering.availablePackages
-    .map((rcPackage) => toPlan(rcPackage, !hadTrial))
-    .filter((plan): plan is CheckoutPlan => plan !== null)
-    .sort((a, b) => (a.id === b.id ? 0 : a.id === "annual" ? -1 : 1));
-  const unique = plans.filter((plan, index) => plans.findIndex((other) => other.id === plan.id) === index);
-
-  if (unique.length === 0 && hadTrial) return { status: "no_trial_free_plans" };
-  if (unique.length === 0) throw new Error("No annual or monthly package in the offering");
-  return { status: "ready", plans: unique };
+  const offering = (offeringId ? offerings.all[offeringId] : offerings.current) ?? null;
+  if (!offering) {
+    if (hadTrial) return { status: "no_trial_free_plans" };
+    throw new Error("No RevenueCat offering");
+  }
+  if (!offering.hasPaywall) return { status: "no_paywall" };
+  return { status: "ready", offering, hasTrial: !hadTrial };
 }
 
 /** Why a purchase didn't go through, as a fixed code for analytics and the message. */

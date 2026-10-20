@@ -19,7 +19,7 @@ export const WEB_FUNNEL_EVENTS = {
   checkoutStart: "web_checkout_start",
   checkoutSuccess: "web_checkout_success",
   checkoutFailed: "web_checkout_failed",
-  /** Checkout couldn't be offered (`reason`: already_subscribed, no_trial_free_plans, not_configured…). */
+  /** Checkout couldn't be offered (`reason`: already_subscribed, no_trial_free_plans, no_paywall, not_configured…). */
   checkoutUnavailable: "web_checkout_unavailable",
   handoffView: "web_handoff_view",
   manageSubscriptionView: "web_manage_subscription_view",
