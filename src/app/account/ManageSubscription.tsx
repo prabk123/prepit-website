@@ -28,7 +28,8 @@ export default function ManageSubscription() {
   const { session, reloadAccount } = useWebSession();
   const [details, setDetails] = useState<{ uid: string; details: Details } | null>(null);
   const [portal, setPortal] = useState<"idle" | "opening" | "none" | "error">("idle");
-  const viewTracked = useRef(false);
+  // The uid the page view was counted for, so a different sign-in counts again.
+  const viewTrackedFor = useRef<string | null>(null);
 
   const uid = session.status === "signedIn" ? session.user.uid : null;
   const current: Details = details && details.uid === uid ? details.details : { status: "loading" };
@@ -63,10 +64,10 @@ export default function ManageSubscription() {
         : null;
 
   useEffect(() => {
-    if (viewTracked.current || !summary || place === null) return;
-    viewTracked.current = true;
+    if (!uid || viewTrackedFor.current === uid || !summary || place === null) return;
+    viewTrackedFor.current = uid;
     trackWebFunnelEvent(WEB_FUNNEL_EVENTS.manageSubscriptionView, { store: place, has_account: summary.hasAccount });
-  }, [summary, place]);
+  }, [uid, summary, place]);
 
   async function signOut() {
     await signOutOfWebsite();
@@ -188,6 +189,22 @@ export default function ManageSubscription() {
     );
   }
 
+  if (place === "legacy_web") {
+    return (
+      <>
+        <SectionHeading
+          as="h1"
+          size="title"
+          align="center"
+          title="Your subscription"
+          lead="You subscribed on our website before our current billing page, so it can't be opened here. Email support@tryprepit.app to change or cancel it."
+        />
+        {dateLine && <p className="text-small text-ink-muted">{dateLine}</p>}
+        {signedInAs}
+      </>
+    );
+  }
+
   if (place === "none" || place === "other") {
     return (
       <>
@@ -199,7 +216,7 @@ export default function ManageSubscription() {
           lead={
             place === "none"
               ? "There's no PrepIt subscription on this account. If you subscribed with a different Google or Apple account, sign out and sign in with that one."
-              : "Your PrepIt access isn't a paid subscription you can manage here. If something looks wrong, email support@tryprepit.app."
+              : "Your PrepIt access isn't something you can manage here. If something looks wrong, email support@tryprepit.app."
           }
         />
         {place === "none" && (
@@ -232,7 +249,9 @@ export default function ManageSubscription() {
       </button>
       <p role="status" aria-live="polite" className={portal === "none" || portal === "error" ? "text-small text-error" : "sr-only"}>
         {portal === "none"
-          ? "There's no website subscription on this account. If you subscribed on your iPhone, manage it in Settings, then your name, then Subscriptions."
+          ? place === "web"
+            ? "We couldn't find the billing page for this subscription. Please try again, or email support@tryprepit.app."
+            : "There's no website subscription on this account. If you subscribed on your iPhone, manage it in Settings, then your name, then Subscriptions."
           : portal === "error"
             ? "We couldn't open the billing page. Please try again."
             : ""}

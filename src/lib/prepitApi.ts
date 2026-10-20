@@ -1,6 +1,7 @@
 "use client";
 
 import { getIdToken } from "@/lib/firebase/auth";
+import { isRevenueCatPortalUrl } from "@/lib/revenuecat/portalUrl";
 
 /**
  * The PrepIt backend, called from the browser with the visitor's Firebase ID
@@ -132,7 +133,10 @@ export async function fetchAccountSummary(): Promise<AccountSummary> {
 export async function createBillingManagementUrl(): Promise<string | null> {
   try {
     const body = await prepitFetch<{ url?: unknown }>("/billing/management-url", { method: "POST", body: "{}" });
-    return typeof body.url === "string" && body.url.startsWith("https://") ? body.url : null;
+    if (typeof body.url !== "string" || !isRevenueCatPortalUrl(body.url)) {
+      throw new PrepItApiError(502, "BILLING_MANAGEMENT_URL_UNEXPECTED");
+    }
+    return body.url;
   } catch (error) {
     if (error instanceof PrepItApiError && error.status === 404) return null;
     throw error;
