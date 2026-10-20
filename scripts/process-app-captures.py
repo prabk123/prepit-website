@@ -68,8 +68,16 @@ WIDTHS = {"1x": 402, "2x": 804}
 CROPS = {
     "25-nudge-missed-breakfast-crop-light": ("25-nudge-missed-breakfast-light", 1486, 2500),
     "25b-nudge-protein-crop-light": ("25b-nudge-protein-light", 886, 2500),
-    "24-nudge-weekly-pattern-crop-light": ("24-nudge-weekly-pattern-light", 526, 2130),
+    # The whole message, its Weekly calorie pattern card and the replies, from two scrolled captures (PRE-317).
+    "24-nudge-weekly-pattern-crop-light": ("24-nudge-weekly-pattern-v2-light", 526, 3440),
     "24b-nudge-weigh-in-crop-light": ("24b-nudge-weigh-in-light", 1496, 2500),
+}
+
+# Stills taller than one screen, joined from two scrolled captures of the same
+# chat: name -> (top capture, bottom capture, seam row in the top capture,
+# the same row in the bottom capture). Crops above read the joined image.
+STITCHES = {
+    "24-nudge-weekly-pattern-v2-light": ("24-nudge-weekly-pattern-v2-light", "24-nudge-weekly-pattern-v2b-light", 2300, 1316),
 }
 
 # Cut-outs of one part of a chat still, lifted out over the phone on the
@@ -153,8 +161,20 @@ def still(name: str) -> None:
         out.save(os.path.join(OUT, f"{name}@{scale}.webp"), quality=82, method=6)
 
 
+def raw_still(source: str) -> Image.Image:
+    if source not in STITCHES:
+        return Image.open(os.path.join(RAW, source + ".png")).convert("RGB")
+    upper, lower, seam, seam_lower = STITCHES[source]
+    upper_im = Image.open(os.path.join(RAW, upper + ".png")).convert("RGB")
+    lower_im = Image.open(os.path.join(RAW, lower + ".png")).convert("RGB")
+    joined = Image.new("RGB", (1206, seam + lower_im.height - seam_lower))
+    joined.paste(upper_im.crop((0, 0, 1206, seam)), (0, 0))
+    joined.paste(lower_im.crop((0, seam_lower, 1206, lower_im.height)), (0, seam))
+    return joined
+
+
 def crop(name: str, source: str, top: int, bottom: int) -> None:
-    im = Image.open(os.path.join(RAW, source + ".png")).convert("RGB").crop((0, top, 1206, bottom))
+    im = raw_still(source).crop((0, top, 1206, bottom))
     for scale, width in WIDTHS.items():
         out = im.resize((width, round(im.height * width / im.width)), Image.LANCZOS)
         out.save(os.path.join(OUT, f"{name}@{scale}.avif"), quality=60)

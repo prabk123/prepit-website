@@ -4,7 +4,7 @@
 Each thumbnail is the telling part of one app still (the rings, the chart,
 the Log it card) at close to the size it is on the phone, instead of the top
 of the whole screen. Crops come from public/app/<name>-light@2x.webp (804 px
-wide), or from a frame of a raw recording for clips, and are written to
+wide), or from a frame of the clip's public/app/<name>.mp4, and are written to
 public/app/thumbs/<name>@1x and @2x as AVIF and WebP, 804 x 500 at 2x. Keep
 THUMBS in step with CARD_THUMBS in src/lib/captures.ts.
 
@@ -13,21 +13,18 @@ card is cut (PRE-317). A crop shorter than 500 px is filled below with the
 colour of its last row (the screen or card background); a taller one is
 scaled down to 500 px high and centred on that colour.
 
-Usage: python3 scripts/make-card-thumbs.py [raw captures dir]
-The raw dir (default /mnt/project-files/website/captures/raw) is only read for
-thumbnails cut from a recording (FRAMES).
+Usage: python3 scripts/make-card-thumbs.py
+Needs Pillow and, for FRAMES, ffmpeg.
 """
 
 import os
 import subprocess
-import sys
 import tempfile
 
 from PIL import Image
 
 SRC = "public/app"
 OUT = "public/app/thumbs"
-RAW = sys.argv[1] if len(sys.argv) > 1 else "/mnt/project-files/website/captures/raw"
 WIDTH, HEIGHT = 804, 500
 
 # Thumbnail name -> (top, bottom) of the crop, in 2x pixels.
@@ -35,7 +32,7 @@ THUMBS = {
     "01-home": (96, 596),  # the Home header and the Energy, Satiety and Mood rings
     "01b-home-log": (768, 1256),  # the Log's 7 AM breakfast and 8 AM coffee
     "02-chat-chart": (1050, 1550),  # the Protein per day bars against the target line, with their days
-    "05-meal-detail": (229, 672),  # a meal's calories, macros and servings
+    "05-meal-detail": (860, 1360),  # Meal items: what PrepIt assumed, under the meal's bold title
     "05b-meal-detail-scrolled": (262, 846),  # the meal's Energy and Satiety cards
     "06-signal-energy": (220, 712),  # the Energy ring and what it measures
     "11-check-in-report": (350, 845),  # the report's summary and goal, under its heading
@@ -45,21 +42,20 @@ THUMBS = {
     "23b-home-screen-widgets": (80, 580),  # the Today's calories widget
 }
 
-# Thumbnails cut from a raw recording (1206 px wide): name -> (file, second).
+# Thumbnails cut from a frame of a clip in public/app (804 px wide): name -> second.
 FRAMES = {
-    "12-plan-week": ("12-plan-week-light.mp4", 9.0),
+    "12-plan-week": 9.0,
 }
 
 
 def source(name: str) -> Image.Image:
     if name not in FRAMES:
         return Image.open(os.path.join(SRC, f"{name}-light@2x.webp")).convert("RGB")
-    file, second = FRAMES[name]
     with tempfile.TemporaryDirectory() as tmp:
         png = os.path.join(tmp, "frame.png")
         subprocess.run(
-            ["ffmpeg", "-v", "error", "-y", "-ss", str(second), "-i", os.path.join(RAW, file),
-             "-frames:v", "1", "-vf", f"scale={WIDTH}:-1:flags=lanczos", png],
+            ["ffmpeg", "-v", "error", "-y", "-ss", str(FRAMES[name]), "-i", os.path.join(SRC, f"{name}.mp4"),
+             "-frames:v", "1", png],
             check=True,
         )
         return Image.open(png).convert("RGB")

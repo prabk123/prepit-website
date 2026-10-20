@@ -26,7 +26,7 @@ export default function LoggingFeature() {
               className={PHONE}
               capture={appCapture(
                 "01b-home-log",
-                "Today's log in PrepIt: coffee with milk, a chicken wrap, Greek yogurt and a salmon bowl, each with its calories and its effect on Energy, Satiety and Mood",
+                "Today's log in PrepIt: protein overnight oats, coffee with milk and a chicken wrap with hummus, each with its calories and its effect on Energy, Satiety and Mood",
               )}
             />
           </div>
@@ -61,7 +61,7 @@ export default function LoggingFeature() {
         id="accuracy"
         tone="surface"
         title="Close to the truth, and easy to fix."
-        lead="Branded and restaurant food starts from the official figures. Typed and photo meals show what PrepIt assumed and how sure it is."
+        lead="Branded and restaurant food starts from the official figures. Typed and photo meals show what PrepIt assumed."
         media={
           <div className="relative">
             <Glow />
