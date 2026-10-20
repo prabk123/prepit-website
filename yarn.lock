@@ -1452,6 +1452,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@revenuecat/purchases-js@npm:1.68.0":
+  version: 1.68.0
+  resolution: "@revenuecat/purchases-js@npm:1.68.0"
+  checksum: 10c0/c2457733dd5376d0ef2a635214706f089b2d439647e705b8f3c780daa4c3f3ae78a442849f170ab88ca060809f2439908781990bbee5423203fe843ba34ffd95
+  languageName: node
+  linkType: hard
+
 "@rtsao/scc@npm:^1.1.0":
   version: 1.1.0
   resolution: "@rtsao/scc@npm:1.1.0"
@@ -5846,6 +5853,7 @@ __metadata:
   resolution: "prepit-website@workspace:."
   dependencies:
     "@eslint/eslintrc": "npm:^3"
+    "@revenuecat/purchases-js": "npm:1.68.0"
     "@tailwindcss/postcss": "npm:^4"
     "@types/node": "npm:^20"
     "@types/qrcode": "npm:1.5.5"

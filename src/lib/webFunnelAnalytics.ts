@@ -11,6 +11,13 @@ export const WEB_FUNNEL_EVENTS = {
   signInStart: "web_signin_start",
   signupSuccess: "web_signup_success",
   signInFailed: "web_signin_failed",
+  paywallView: "web_paywall_view",
+  checkoutStart: "web_checkout_start",
+  checkoutSuccess: "web_checkout_success",
+  checkoutFailed: "web_checkout_failed",
+  /** Checkout couldn't be offered (`reason`: already_subscribed, no_trial_free_plans, not_configured…). */
+  checkoutUnavailable: "web_checkout_unavailable",
+  handoffView: "web_handoff_view",
 } as const;
 
 type WebFunnelEvent = (typeof WEB_FUNNEL_EVENTS)[keyof typeof WEB_FUNNEL_EVENTS];
