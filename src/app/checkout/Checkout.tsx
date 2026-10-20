@@ -6,8 +6,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useWebSession } from "@/components/account/useWebSession";
 import AppStoreButton from "@/components/ui/AppStoreButton";
 import SectionHeading from "@/components/ui/SectionHeading";
-import { PRIMARY_BUTTON_CLASS } from "@/components/ui/buttons";
-import { providerOf } from "@/lib/firebase/auth";
+import { PRIMARY_BUTTON_CLASS, TEXT_BUTTON_CLASS } from "@/components/ui/buttons";
+import { providerOf, signOutOfWebsite } from "@/lib/firebase/auth";
 import { parseFunnelId } from "@/lib/funnel/params";
 import { parsePlanId, type PlanId } from "@/lib/pricing";
 import {
@@ -20,7 +20,9 @@ import {
   type CheckoutFailure,
   type CheckoutPlan,
 } from "@/lib/revenuecat/webBilling";
-import { trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webFunnelAnalytics";
+import { resetWebUser, trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webFunnelAnalytics";
+
+const PROVIDER_NAMES = { google: "Google", apple: "Apple" } as const;
 
 const FAILURE_MESSAGES: Record<CheckoutFailure, string | null> = {
   cancelled: null,
@@ -28,8 +30,8 @@ const FAILURE_MESSAGES: Record<CheckoutFailure, string | null> = {
   payment_pending: "Your payment is still being confirmed. We'll unlock PrepIt as soon as it goes through.",
   network: "We couldn't reach the payment service. Check your connection and try again.",
   not_allowed: "This payment couldn't go through. Please try a different card or try again.",
-  entitlement_timeout: null,
-  unknown: "Something went wrong with the payment. You haven't been charged. Please try again.",
+  unknown:
+    "Something went wrong with the payment. If you were charged, your subscription will show up shortly. Otherwise, please try again.",
 };
 
 type Plans =
@@ -220,14 +222,40 @@ export default function Checkout() {
       });
       router.push(welcomePath(!unlocked));
     } catch (error) {
-      const code = await toCheckoutFailure(error);
-      trackWebFunnelEvent(WEB_FUNNEL_EVENTS.checkoutFailed, { ...context, plan: plan.id, reason: code });
+      const { code, rcErrorCode } = await toCheckoutFailure(error);
+      trackWebFunnelEvent(WEB_FUNNEL_EVENTS.checkoutFailed, {
+        ...context,
+        plan: plan.id,
+        reason: code,
+        rc_error_code: rcErrorCode,
+      });
+      if (code === "already_purchased") {
+        router.push(welcomePath(false));
+        return;
+      }
       setFailure(code);
       setPaying("idle");
     }
   }
 
   const trial = plan.trialDays;
+
+  // Which account is paying, so an old session on the wrong account is visible.
+  const signedInAs = (
+    <p className="ph-no-capture text-small text-ink-muted">
+      Paying for the PrepIt account signed in{provider ? ` with ${PROVIDER_NAMES[provider]}` : ""}
+      {signedInUser.email ? ` as ${signedInUser.email}` : ""}.{" "}
+      <button
+        type="button"
+        className={TEXT_BUTTON_CLASS}
+        onClick={() => {
+          void signOutOfWebsite().then(resetWebUser);
+        }}
+      >
+        Not you? Sign out
+      </button>
+    </p>
+  );
   const priceLine = `${plan.price} a ${plan.period}`;
   const message = failure ? FAILURE_MESSAGES[failure] : null;
 
@@ -295,6 +323,7 @@ export default function Checkout() {
           {message ?? ""}
         </p>
       </div>
+      {signedInAs}
       <p className="text-small text-ink-muted">
         {trial
           ? `Free for ${trial} days, then ${priceLine} from ${trialEndDate(trial)}. `

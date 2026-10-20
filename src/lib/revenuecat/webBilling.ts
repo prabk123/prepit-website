@@ -51,6 +51,10 @@ export function purchasesFor(uid: string): Promise<Purchases> {
     });
   });
   configured = { uid, purchases };
+  // A failed load or user switch must not stick: the next call starts again.
+  purchases.catch(() => {
+    if (configured?.purchases === purchases) configured = null;
+  });
   return purchases;
 }
 
@@ -153,27 +157,28 @@ export type CheckoutFailure =
   | "payment_pending"
   | "network"
   | "not_allowed"
-  | "entitlement_timeout"
   | "unknown";
 
-export async function toCheckoutFailure(error: unknown): Promise<CheckoutFailure> {
+/** The failure code, plus RevenueCat's numeric error code when there is one (for analytics). */
+export async function toCheckoutFailure(error: unknown): Promise<{ code: CheckoutFailure; rcErrorCode: number | null }> {
   const { ErrorCode, PurchasesError } = await import("@revenuecat/purchases-js");
-  if (!(error instanceof PurchasesError)) return "unknown";
+  if (!(error instanceof PurchasesError)) return { code: "unknown", rcErrorCode: null };
+  const rcErrorCode = error.errorCode;
   switch (error.errorCode) {
     case ErrorCode.UserCancelledError:
-      return "cancelled";
+      return { code: "cancelled", rcErrorCode };
     case ErrorCode.ProductAlreadyPurchasedError:
-      return "already_purchased";
+      return { code: "already_purchased", rcErrorCode };
     case ErrorCode.PaymentPendingError:
-      return "payment_pending";
+      return { code: "payment_pending", rcErrorCode };
     case ErrorCode.NetworkError:
-      return "network";
+      return { code: "network", rcErrorCode };
     case ErrorCode.PurchaseNotAllowedError:
     case ErrorCode.IneligibleError:
     case ErrorCode.PurchaseInvalidError:
-      return "not_allowed";
+      return { code: "not_allowed", rcErrorCode };
     default:
-      return "unknown";
+      return { code: "unknown", rcErrorCode };
   }
 }
 
