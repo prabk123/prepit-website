@@ -1,0 +1,365 @@
+"use client";
+
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useWebSession } from "@/components/account/useWebSession";
+import AppStoreButton from "@/components/ui/AppStoreButton";
+import SectionHeading from "@/components/ui/SectionHeading";
+import { PRIMARY_BUTTON_CLASS, TEXT_BUTTON_CLASS } from "@/components/ui/buttons";
+import { providerOf, signOutOfWebsite } from "@/lib/firebase/auth";
+import { parseFunnelId } from "@/lib/funnel/params";
+import { parsePlanId } from "@/lib/pricing";
+import {
+  ensurePrivateCheckoutRoot,
+  hadPremium,
+  hasPremium,
+  loadCheckoutOffering,
+  planIdOf,
+  purchasesFor,
+  toCheckoutFailure,
+  waitForPremium,
+  webBillingKeyProblem,
+  type CheckoutFailure,
+} from "@/lib/revenuecat/webBilling";
+import type { Offering } from "@revenuecat/purchases-js";
+import { resetWebUser, trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webFunnelAnalytics";
+
+const PROVIDER_NAMES = { google: "Google", apple: "Apple" } as const;
+
+const FAILURE_MESSAGES: Record<CheckoutFailure, string | null> = {
+  cancelled: null,
+  already_purchased: "You already have this subscription.",
+  payment_pending: "Your payment is still being confirmed. We'll unlock PrepIt as soon as it goes through.",
+  network: "We couldn't reach the payment service. Check your connection and try again.",
+  not_allowed: "This payment couldn't go through. Please try a different card or try again.",
+  unknown:
+    "Something went wrong with the payment. If you were charged, your subscription will show up shortly. Otherwise, please try again.",
+};
+
+type Plans =
+  | { status: "loading" }
+  | { status: "ready"; offering: Offering; hasTrial: boolean }
+  | { status: "already_subscribed" }
+  /** The email belongs to a PrepIt account under the other provider: the bridge explains. */
+  | { status: "email_in_use" }
+  | { status: "no_trial_free_plans" }
+  /** The offering has no RevenueCat paywall attached yet. */
+  | { status: "no_paywall" }
+  | { status: "error" };
+
+/**
+ * Checkout (PRE-269): the plans, prices, trial and disclosures are the
+ * RevenueCat paywall built in the dashboard for the web offering, shown here
+ * with `presentPaywall`. Around it this page keeps what RevenueCat can't know:
+ * sign in first with the app's account, the email-in-use guard, no second
+ * free trial, no checkout for anyone already subscribed, and the "You're in"
+ * handoff once `premium` is active.
+ */
+export default function Checkout() {
+  const params = useSearchParams();
+  const router = useRouter();
+  const funnelId = parseFunnelId(params.get("funnel"));
+  const requestedPlan = parsePlanId(params.get("plan"));
+  const { session, reloadAccount } = useWebSession();
+  const keyProblem = webBillingKeyProblem();
+
+  const [plansState, setPlans] = useState<{ key: string; plans: Plans } | null>(null);
+  const [paying, setPaying] = useState<"idle" | "confirming">("idle");
+  const [failure, setFailure] = useState<CheckoutFailure | null>(null);
+  // The paywall itself couldn't be shown (nothing was bought).
+  const [paywallFailed, setPaywallFailed] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
+  // Bumped to show the paywall again after a purchase that didn't go through.
+  const [presentKey, setPresentKey] = useState(0);
+  const paywallTracked = useRef(false);
+  const paywallHost = useRef<HTMLDivElement>(null);
+
+  const uid = session.status === "signedIn" ? session.user.uid : null;
+  const account = session.status === "signedIn" ? session.account : null;
+  const summary = account?.status === "ready" ? account.summary : null;
+  const plansKey = uid && summary ? `${uid}:${summary.hasUsedTrial}:${summary.isSubscribed}:${reloadKey}` : null;
+  const plans: Plans = useMemo(
+    () => (plansState && plansState.key === plansKey ? plansState.plans : { status: "loading" }),
+    [plansState, plansKey],
+  );
+
+  // Signed out: sign in first, then come back here with the same plan.
+  useEffect(() => {
+    if (session.status !== "signedOut") return;
+    const back = `/checkout?${params.toString()}`;
+    const query = new URLSearchParams({ ...(requestedPlan ? { plan: requestedPlan } : {}), funnel: funnelId, next: back });
+    router.replace(`/signin?${query}`);
+  }, [session.status, params, requestedPlan, funnelId, router]);
+
+  useEffect(() => {
+    if (!uid || !summary || !plansKey || keyProblem) return;
+    let cancelled = false;
+    const done = (next: Plans) => {
+      if (!cancelled) setPlans({ key: plansKey, plans: next });
+    };
+    if (summary.emailInUse) {
+      done({ status: "email_in_use" });
+      return;
+    }
+    if (summary.isSubscribed) {
+      done({ status: "already_subscribed" });
+      return;
+    }
+    (async () => {
+      try {
+        // Premium from any store (an App Store subscription, or a web
+        // purchase made before the account existed) means no checkout.
+        const purchases = await purchasesFor(uid);
+        const customerInfo = await purchases.getCustomerInfo();
+        if (hasPremium(customerInfo)) return done({ status: "already_subscribed" });
+        done(await loadCheckoutOffering(uid, summary.hasUsedTrial || hadPremium(customerInfo)));
+      } catch {
+        done({ status: "error" });
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [uid, summary, plansKey, keyProblem]);
+
+  const context = useMemo(() => ({ funnel_id: funnelId }), [funnelId]);
+
+  useEffect(() => {
+    if (paywallTracked.current) return;
+    const unavailable =
+      keyProblem ??
+      (plans.status === "already_subscribed" ||
+      plans.status === "no_trial_free_plans" ||
+      plans.status === "email_in_use" ||
+      plans.status === "no_paywall"
+        ? plans.status
+        : null);
+    if (unavailable) {
+      paywallTracked.current = true;
+      trackWebFunnelEvent(WEB_FUNNEL_EVENTS.checkoutUnavailable, { ...context, reason: unavailable });
+    } else if (plans.status === "ready") {
+      paywallTracked.current = true;
+      trackWebFunnelEvent(WEB_FUNNEL_EVENTS.paywallView, { ...context, plan: requestedPlan, has_trial: plans.hasTrial });
+    }
+  }, [plans, keyProblem, context, requestedPlan]);
+
+  const provider = session.status === "signedIn" ? providerOf(session.user) : null;
+  const email = session.status === "signedIn" ? session.user.email : null;
+  const welcomePath = (pending: boolean) =>
+    `/welcome?${new URLSearchParams({ ...(provider ? { provider } : {}), ...(pending ? { pending: "1" } : {}) })}`;
+
+  useEffect(() => {
+    if (plans.status === "already_subscribed") router.replace(welcomePath(false));
+    if (plans.status === "email_in_use") {
+      router.replace(`/signin?${new URLSearchParams({ ...(requestedPlan ? { plan: requestedPlan } : {}), funnel: funnelId })}`);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [plans.status]);
+
+  // Shows RevenueCat's paywall in the page. It runs the purchase itself (with
+  // 3-D Secure and its own retryable errors); this waits for the result.
+  const offering = plans.status === "ready" ? plans.offering : null;
+  const hasTrial = plans.status === "ready" ? plans.hasTrial : false;
+  useEffect(() => {
+    const host = paywallHost.current;
+    if (!uid || !offering || !host || paying !== "idle") return;
+    let active = true;
+    // A fresh element per showing, so a second showing never stacks on the first.
+    const target = document.createElement("div");
+    host.replaceChildren(target);
+    let plan: string | null = null;
+    let purchaseStarted = false;
+    (async () => {
+      try {
+        const purchases = await purchasesFor(uid);
+        ensurePrivateCheckoutRoot();
+        const result = await purchases.presentPaywall({
+          offering,
+          htmlTarget: target,
+          customerEmail: email ?? undefined,
+          metadata: { funnel_id: funnelId },
+          hideBackButtons: true,
+          listener: {
+            onPurchaseStarted: (rcPackage) => {
+              purchaseStarted = true;
+              plan = planIdOf(rcPackage);
+              setFailure(null);
+              trackWebFunnelEvent(WEB_FUNNEL_EVENTS.checkoutStart, { ...context, plan, has_trial: hasTrial });
+            },
+            onPurchaseError: (error) => {
+              void toCheckoutFailure(error).then(({ code, rcErrorCode }) =>
+                trackWebFunnelEvent(WEB_FUNNEL_EVENTS.checkoutFailed, {
+                  ...context,
+                  plan,
+                  reason: code,
+                  rc_error_code: rcErrorCode,
+                  retryable: true,
+                }),
+              );
+            },
+          },
+        });
+        if (!active) return;
+        plan = planIdOf(result.selectedPackage) ?? plan;
+        setPaying("confirming");
+        const unlocked = await waitForPremium(uid, result.customerInfo);
+        if (!active) return;
+        trackWebFunnelEvent(WEB_FUNNEL_EVENTS.checkoutSuccess, {
+          ...context,
+          plan,
+          has_trial: hasTrial,
+          entitlement_confirmed: unlocked,
+        });
+        router.push(welcomePath(!unlocked));
+      } catch (error) {
+        if (!active) return;
+        const { code, rcErrorCode } = await toCheckoutFailure(error);
+        if (!active) return;
+        // Purchase errors stay inside the paywall, so a failure before any
+        // purchase started is the paywall failing to load, not a payment.
+        if (!purchaseStarted && code !== "cancelled" && code !== "already_purchased") {
+          trackWebFunnelEvent(WEB_FUNNEL_EVENTS.checkoutFailed, {
+            ...context,
+            reason: "paywall_load_failed",
+            rc_error_code: rcErrorCode,
+          });
+          setPaywallFailed(true);
+          return;
+        }
+        trackWebFunnelEvent(WEB_FUNNEL_EVENTS.checkoutFailed, { ...context, plan, reason: code, rc_error_code: rcErrorCode });
+        if (code === "already_purchased") {
+          router.push(welcomePath(false));
+          return;
+        }
+        setFailure(code);
+      }
+    })();
+    return () => {
+      active = false;
+      host.replaceChildren();
+    };
+    // welcomePath and context only change with the session and URL already in the deps.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [uid, offering, presentKey]);
+
+  if (keyProblem || plans.status === "no_paywall") {
+    return (
+      <SectionHeading
+        as="h1"
+        size="title"
+        align="center"
+        title="Checkout isn't available right now"
+        lead="Please try again later, or get PrepIt from the App Store."
+      />
+    );
+  }
+
+  if (session.status !== "signedIn" || account?.status === "loading" || plans.status === "loading" || plans.status === "already_subscribed" || plans.status === "email_in_use") {
+    return <p className="text-body text-ink-secondary">Loading your plans…</p>;
+  }
+
+  if (account?.status === "error" || plans.status === "error" || paywallFailed) {
+    return (
+      <>
+        <SectionHeading as="h1" size="title" align="center" title="We couldn't load the plans" lead="Please try again in a moment." />
+        <button
+          type="button"
+          className={PRIMARY_BUTTON_CLASS}
+          onClick={() => {
+            if (paywallFailed) {
+              setPaywallFailed(false);
+              setPresentKey((key) => key + 1);
+              return;
+            }
+            reloadAccount();
+            setReloadKey((key) => key + 1);
+          }}
+        >
+          Try again
+        </button>
+      </>
+    );
+  }
+
+  if (plans.status === "no_trial_free_plans") {
+    return (
+      <>
+        <SectionHeading
+          as="h1"
+          size="title"
+          align="center"
+          title="You've had your free trial"
+          lead="Subscribing again on the website isn't available yet. You can subscribe in the PrepIt app."
+        />
+        <div className="flex justify-center">
+          <AppStoreButton trackingSource="checkout-trial-used" />
+        </div>
+      </>
+    );
+  }
+
+  const message = failure ? FAILURE_MESSAGES[failure] : null;
+
+  return (
+    <>
+      {paying === "confirming" ? (
+        <p role="status" className="text-body text-ink-secondary">
+          Confirming your subscription…
+        </p>
+      ) : (
+        <div ref={paywallHost} className="ph-no-capture w-full" data-testid="revenuecat-paywall" />
+      )}
+      {failure && paying === "idle" && (
+        <div className="flex w-full flex-col gap-3">
+          {message && (
+            <p role="alert" className="text-small text-error">
+              {message}
+            </p>
+          )}
+          {failure !== "payment_pending" && (
+            <button
+              type="button"
+              className={PRIMARY_BUTTON_CLASS}
+              onClick={() => {
+                setFailure(null);
+                setPresentKey((key) => key + 1);
+              }}
+            >
+              Show the plans again
+            </button>
+          )}
+        </div>
+      )}
+      {/* Which account is paying, so an old session on the wrong account is visible. */}
+      <p className="ph-no-capture text-small text-ink-muted">
+        Paying for the PrepIt account signed in{provider ? ` with ${PROVIDER_NAMES[provider]}` : ""}
+        {email ? ` as ${email}` : ""}.{" "}
+        <button
+          type="button"
+          className={TEXT_BUTTON_CLASS}
+          onClick={() => {
+            void signOutOfWebsite().then(resetWebUser);
+          }}
+        >
+          Not you? Sign out
+        </button>
+      </p>
+      <p className="text-small text-ink-muted">
+        Renews automatically until you cancel. Cancel any time at tryprepit.app/account. See our{" "}
+        <Link href="/terms-and-conditions" className="underline underline-offset-4 hover:text-ink">
+          Terms
+        </Link>
+        ,{" "}
+        <Link href="/subscription-policy" className="underline underline-offset-4 hover:text-ink">
+          Subscription policy
+        </Link>{" "}
+        and{" "}
+        <Link href="/refund-policy" className="underline underline-offset-4 hover:text-ink">
+          Refund policy
+        </Link>
+        .
+      </p>
+    </>
+  );
+}
