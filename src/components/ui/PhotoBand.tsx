@@ -11,10 +11,10 @@ type PhotoBandProps = {
   /** A crop for screens below 1024 px (around the phone in the photo). */
   phonePhoto?: SectionPhoto;
   /**
-   * Leave the photo out below 1024 px, so the band opens on its text and
-   * phones. For a band right after a photo that shows much the same thing.
+   * Below 1024 px, show the whole photo as a wide strip instead of a tall
+   * crop. For a band whose tight crop would repeat the photo just above it.
    */
-  photoFromLg?: boolean;
+  wholePhotoOnPhones?: boolean;
   annotations?: PhotoAnnotation[];
   /**
    * Side the text sits on, clear of the photo's subject. `end` puts it top
@@ -70,7 +70,7 @@ export default function PhotoBand({
   analyticsName,
   photo,
   phonePhoto,
-  photoFromLg = false,
+  wholePhotoOnPhones = false,
   annotations,
   textSide = "start",
   children,
@@ -97,7 +97,7 @@ export default function PhotoBand({
         annotationsFromXl={end}
         fadeEdges
         stackOnPhones
-        hideOnPhones={photoFromLg}
+        wholePhotoOnPhones={wholePhotoOnPhones}
         className="w-full lg:aspect-[1376/768] lg:max-h-[860px] lg:min-h-[640px]"
       >
         {!scrimBehindText && !textOnBrightPhoto && (

@@ -42,10 +42,10 @@ type AnnotatedPhotoProps = {
    */
   stackOnPhones?: boolean;
   /**
-   * With `stackOnPhones`, leave the photo out below 1024 px (no strip), for a
-   * band whose photo would repeat the one just above it on a phone.
+   * With `stackOnPhones`, size the strip to the phone photo's own shape so it
+   * shows whole, uncropped, instead of a tall crop around its subject.
    */
-  hideOnPhones?: boolean;
+  wholePhotoOnPhones?: boolean;
   /** Size and position the box, e.g. an aspect ratio or `absolute inset-0`. */
   className?: string;
   /** Overlays on top of the photo, e.g. a heading. */
@@ -87,7 +87,7 @@ export default function AnnotatedPhoto({
   annotationsFromXl,
   fadeEdges,
   stackOnPhones,
-  hideOnPhones,
+  wholePhotoOnPhones,
   className,
   children,
 }: AnnotatedPhotoProps) {
@@ -134,14 +134,17 @@ export default function AnnotatedPhoto({
     <div
       ref={ref}
       className={`annotated-photo relative overflow-hidden ${
-        stackOnPhones ? (hideOnPhones ? "[--photo-strip-h:0px]" : "[--photo-strip-h:min(125vw,560px)]") : ""
+        stackOnPhones ? "[--photo-strip-h:min(125vw,560px)]" : ""
       } ${className ?? ""}`}
+      style={
+        stackOnPhones && wholePhotoOnPhones
+          ? ({ "--photo-strip-h": `calc(100vw * ${phone.height / phone.width})` } as CSSProperties)
+          : undefined
+      }
       data-annotations="static"
     >
       <div
-        className={`annotated-photo__media ${stackOnPhones ? "max-lg:bottom-auto max-lg:h-[var(--photo-strip-h)]" : ""} ${
-          hideOnPhones ? "max-lg:hidden" : ""
-        }`}
+        className={`annotated-photo__media ${stackOnPhones ? "max-lg:bottom-auto max-lg:h-[var(--photo-strip-h)]" : ""}`}
         style={layerVars}
       >
         <div className="annotated-photo__layer">
