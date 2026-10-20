@@ -14,14 +14,23 @@ import { TRIAL_DAYS } from "@/lib/pricing";
  *
  * `trackingSource` lets a page that ends with its own copy (each guide) count
  * its App Store taps separately; the site-wide band uses "final-cta".
+ *
+ * `id` keeps ids unique: the layout's band stays in the page (hidden) on pages
+ * that end with their own, so it passes a different one.
  */
-export default function FinalCta({ trackingSource = "final-cta" }: { trackingSource?: string }) {
+export default function FinalCta({
+  trackingSource = "final-cta",
+  id = "download",
+}: {
+  trackingSource?: string;
+  id?: string;
+}) {
   return (
-    <Section id="download" tone="dark" labelledBy="download-heading" analyticsName="final-cta">
+    <Section id={id} tone="dark" labelledBy={`${id}-heading`} analyticsName="final-cta">
       <BandPhoto photo={downloadStill} position="center" phone="none" text="centre" />
       <div className="relative flex flex-col items-center gap-8 text-center">
         <div className="flex flex-col items-center gap-5">
-          <h2 id="download-heading" className="font-display text-chapter text-ink text-balance">
+          <h2 id={`${id}-heading`} className="font-display text-chapter text-ink text-balance">
             Start eating better this week.
           </h2>
           <p className="w-fit text-gradient-brand text-lead font-medium">

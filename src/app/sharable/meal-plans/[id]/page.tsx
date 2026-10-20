@@ -34,7 +34,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   if (!plan) {
-    return { title: "Meal plan not found", robots: { index: false, follow: false } };
+    return {
+      title: "Meal plan not found",
+      description: "This shared meal plan isn't available. Make your own with PrepIt.",
+      robots: { index: false, follow: false },
+    };
   }
 
   const title = `Meal plan: ${formatPlanRange(plan.days)}`;
