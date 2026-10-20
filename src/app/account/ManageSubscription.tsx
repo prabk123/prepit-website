@@ -245,7 +245,7 @@ export default function ManageSubscription() {
       />
       {dateLine && <p className="text-small text-ink-muted">{dateLine}</p>}
       <button type="button" className={PRIMARY_BUTTON_CLASS} disabled={portal === "opening"} onClick={() => void openPortal()}>
-        {portal === "opening" ? "Opening…" : "Manage subscription"}
+        {portal === "opening" ? "Opening…" : portal === "error" ? "Try again" : "Manage subscription"}
       </button>
       <p role="status" aria-live="polite" className={portal === "none" || portal === "error" ? "text-small text-error" : "sr-only"}>
         {portal === "none"
