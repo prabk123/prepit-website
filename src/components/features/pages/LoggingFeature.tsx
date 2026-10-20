@@ -49,7 +49,7 @@ export default function LoggingFeature() {
             <Glow />
             <DeviceFrame
               className={PHONE}
-              video={appVideo("04-log-photo", "Logging a meal from a photo of the plate")}
+              video={appVideo("04-log-photo", "Logging a chicken burrito bowl from a photo of the plate, then the meal's 529 calories and the items PrepIt found")}
             />
           </div>
         }

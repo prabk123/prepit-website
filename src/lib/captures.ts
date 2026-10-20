@@ -91,6 +91,8 @@ export const CARD_THUMBS = [
   "01-home",
   "01b-home-log",
   "02-chat-chart",
+  // A frame of the 04-log-photo recording: the plate photo on the Describe your meal sheet (PRE-317).
+  "04-log-photo",
   "05-meal-detail",
   "05b-meal-detail-scrolled",
   "06-signal-energy",

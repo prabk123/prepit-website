@@ -30,6 +30,7 @@ WIDTH, HEIGHT = 804, 500
 # Thumbnail name -> (top, bottom) of the crop, in 2x pixels.
 THUMBS = {
     "01-home": (96, 596),  # the Home header and the Energy, Satiety and Mood rings
+    "04-log-photo": (490, 1150),  # the photo of the plate, on the Describe your meal sheet
     "01b-home-log": (768, 1256),  # the Log's 7 AM breakfast and 8 AM coffee
     "02-chat-chart": (1050, 1550),  # the Protein per day bars against the target line, with their days
     "05-meal-detail": (860, 1360),  # Meal items: what PrepIt assumed, under the meal's bold title
@@ -44,6 +45,7 @@ THUMBS = {
 
 # Thumbnails cut from a frame of a clip in public/app (804 px wide): name -> second.
 FRAMES = {
+    "04-log-photo": 9.5,
     "12-plan-week": 9.0,
 }
 
