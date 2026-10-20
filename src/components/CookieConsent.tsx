@@ -30,8 +30,8 @@ function focusMain() {
 
 /**
  * UK and EEA visitors choose here before optional cookies (PostHog, Meta Pixel)
- * are set. The root layout renders it first in <body>, so it is the first
- * thing a keyboard reaches; focus is not trapped.
+ * are set. The root layout renders it straight after the skip link, so a
+ * keyboard reaches "Skip to content" first and then this; focus is not trapped.
  */
 export default function CookieConsent() {
   const [visible, setVisible] = useState(false);

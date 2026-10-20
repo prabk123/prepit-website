@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import DeviceFrame from "@/components/device/DeviceFrame";
+import AppStoreCta from "@/components/ui/AppStoreCta";
 import FeatureSplit from "@/components/ui/FeatureSplit";
 import Glow from "@/components/ui/Glow";
 import Section from "@/components/ui/Section";
@@ -7,6 +8,7 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import TextLink from "@/components/ui/TextLink";
 import { FEATURE_HERO_MEDIA } from "@/lib/featureHeroMedia";
 import { FEATURE_SLUGS, FEATURES, featureHref } from "@/lib/features";
+import { TRIAL_DAYS } from "@/lib/pricing";
 import { RESEARCH_PAGE_HREF } from "@/lib/research";
 
 const title = "Features";
@@ -44,6 +46,7 @@ export default function FeaturesPage() {
             title="Everything your nutritionist does."
             lead="It learns how you eat, speaks up when something slips, plans your week and keeps logging quick."
           />
+          <AppStoreCta trackingSource="features-index-hero" note={`${TRIAL_DAYS} days free. Cancel anytime.`} />
           <TextLink href={RESEARCH_PAGE_HREF}>How your nutritionist decides</TextLink>
         </div>
       </Section>

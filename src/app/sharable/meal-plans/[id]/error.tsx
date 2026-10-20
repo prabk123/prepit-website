@@ -3,35 +3,32 @@
 import Link from "next/link";
 import AppStoreButton from "@/components/ui/AppStoreButton";
 import SectionHeading from "@/components/ui/SectionHeading";
+import { PILL_CLASS } from "@/components/ui/pill";
 import { TRIAL_NOTE } from "@/lib/pricing";
 
-/** The plan could not be loaded (the server logs the failure with the plan id). */
+/**
+ * The plan could not be loaded (the server logs the failure with the plan id).
+ * Laid out like the site's 404 and the plan's not-found page.
+ */
 export default function MealPlanError({ reset }: { error: Error; reset: () => void }) {
   return (
-    <div className="flex min-h-[60vh] flex-col justify-center gap-10 rounded-card border border-line bg-surface px-5 py-14 sm:px-10 lg:px-16">
+    <div className="flex flex-col gap-10">
       <SectionHeading
         eyebrow="Shared meal plan"
-        title="We couldn't load this meal plan"
+        title="We couldn't load this meal plan."
         lead="Something went wrong on our side. Try again in a moment, or make your own plan with PrepIt."
-        size="title"
+        size="section"
         as="h1"
       />
-      <div className="flex flex-col items-start gap-6">
-        <button
-          type="button"
-          onClick={reset}
-          className="inline-flex h-14 w-fit items-center rounded-control border border-line-strong px-7 text-body font-medium text-ink transition-colors hover:bg-surface-raised focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus"
-        >
+      <div className="flex flex-wrap gap-3">
+        <button type="button" onClick={reset} className={PILL_CLASS}>
           Try again
         </button>
-        <AppStoreButton trackingSource="shared-meal-plan-error" note={TRIAL_NOTE} />
-        <Link
-          href="/"
-          className="text-body font-medium text-ink-secondary underline decoration-line-strong underline-offset-4 transition-colors hover:text-ink hover:decoration-ink-muted"
-        >
-          Go to the PrepIt home page
+        <Link href="/" className={PILL_CLASS}>
+          Go to the homepage
         </Link>
       </div>
+      <AppStoreButton trackingSource="shared-meal-plan-error" note={TRIAL_NOTE} />
     </div>
   );
 }

@@ -5,6 +5,7 @@ import DeviceFrame from "@/components/device/DeviceFrame";
 import PreloadImage from "@/components/media/PreloadImage";
 import GuideCard from "@/components/guides/GuideCard";
 import FinalCta from "@/components/pricing/FinalCta";
+import { HideSiteFinalCta } from "@/components/pricing/SiteFinalCta";
 import FeatureSplit from "@/components/ui/FeatureSplit";
 import Glow from "@/components/ui/Glow";
 import Section from "@/components/ui/Section";
@@ -146,7 +147,7 @@ export default async function GuidePage({ params }: Props) {
       </Section>
 
       <Section tone="surface" className="max-lg:[&>div]:pt-stack">
-        <article className="mx-auto max-w-[720px]">{content}</article>
+        <article className="max-w-[720px]">{content}</article>
       </Section>
 
       <Section labelledBy="more-guides-heading">
@@ -169,6 +170,7 @@ export default async function GuidePage({ params }: Props) {
 
       {/* Guides end with their own download section, so App Store taps are counted per guide. */}
       <FinalCta trackingSource={`guide-${slug}`} />
+      <HideSiteFinalCta />
     </>
   );
 }

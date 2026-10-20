@@ -1,4 +1,5 @@
 import React from "react";
+import { HideSiteFinalCta } from "@/components/pricing/SiteFinalCta";
 import Section from "@/components/ui/Section";
 import LegalNav from "./LegalNav";
 
@@ -18,6 +19,8 @@ export default function LegalMDXPage({
 }: LegalMDXPageProps) {
   return (
     <div className="w-full bg-page pt-16 text-ink lg:pt-[72px]">
+      {/* Readers here mostly already have the app, so no download section. */}
+      <HideSiteFinalCta />
       <Section labelledBy="legal-heading">
         <div className="mx-auto flex max-w-[720px] flex-col gap-10">
           <LegalNav currentPath={currentPath} />
