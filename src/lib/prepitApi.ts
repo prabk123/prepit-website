@@ -69,13 +69,26 @@ export type PendingProfile = {
   accountCreatedAt: string | null;
 };
 
+/** How the PrepIt account that already owns this email signs in. */
+export type ExistingProvider = "google" | "apple" | "email" | "unknown";
+
 type AccountResponse = {
   account: null | {
     user: { subscriptionStatus?: string };
     hasUsedTrial?: boolean;
   };
   pendingProfile?: PendingProfile | null;
+  /**
+   * With `account: null`: this sign-in's email already belongs to another
+   * PrepIt account (a different Firebase user). Optional; older backends
+   * leave it out.
+   */
+  emailInUse?: { existingProvider?: string } | null;
 };
+
+function toExistingProvider(value: unknown): ExistingProvider {
+  return value === "google" || value === "apple" || value === "email" ? value : "unknown";
+}
 
 /** What the website needs to know about a signed-in visitor's PrepIt account. */
 export type AccountSummary = {
@@ -87,6 +100,12 @@ export type AccountSummary = {
   hasUsedTrial: boolean;
   /** Web quiz answers saved before the account exists (PRE-262), or null. */
   pendingProfile: PendingProfile | null;
+  /**
+   * Set when this is a new sign-in whose email already has a PrepIt account
+   * under another provider. Paying here would buy for the wrong account, so
+   * the visitor is asked to sign in the other way.
+   */
+  emailInUse: { existingProvider: ExistingProvider } | null;
 };
 
 /** `GET /account` with the cookbooks left out. */
@@ -98,5 +117,9 @@ export async function fetchAccountSummary(): Promise<AccountSummary> {
     isSubscribed: account ? ACTIVE_STATUSES.has(account.user?.subscriptionStatus ?? "none") : false,
     hasUsedTrial: account?.hasUsedTrial ?? false,
     pendingProfile: body.pendingProfile ?? null,
+    emailInUse:
+      account === null && body.emailInUse
+        ? { existingProvider: toExistingProvider(body.emailInUse.existingProvider) }
+        : null,
   };
 }

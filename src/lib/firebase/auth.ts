@@ -85,6 +85,8 @@ async function providerFor(provider: SignInProvider) {
   }
   // Same provider id as the app's Sign in with Apple, so the same Apple ID
   // gives the same Firebase user once the Services ID is grouped with the app.
+  // Apple sends the name only on the very first sign-in, and the website
+  // doesn't keep it; save it here if a web flow ever needs the name.
   const apple = new OAuthProvider("apple.com");
   apple.addScope("email");
   apple.addScope("name");
@@ -92,36 +94,19 @@ async function providerFor(provider: SignInProvider) {
 }
 
 /**
- * Signs in with a popup. Where popups can't open (some phone browsers), it
- * falls back to a full-page redirect, and the page picks the result up with
- * `completeRedirectSignIn` when it loads again.
+ * Signs in with a popup. There is no redirect fallback: with the auth domain
+ * on firebaseapp.com (a different site), browsers that partition third-party
+ * storage drop a redirect sign-in silently. A blocked popup shows a message
+ * instead. A redirect needs the auth domain served from this site first
+ * (proxy `/__/auth/*` and add it to the OAuth client's redirect URIs).
  */
 export async function signInWith(provider: SignInProvider): Promise<User> {
   const auth = await loadAuth();
-  const { signInWithPopup, signInWithRedirect } = await import("firebase/auth");
+  const { signInWithPopup } = await import("firebase/auth");
   const authProvider = await providerFor(provider);
   try {
     const credential = await signInWithPopup(auth, authProvider);
     return credential.user;
-  } catch (error) {
-    const failure = toFailure(error);
-    if (failure === "popup_blocked") {
-      await signInWithRedirect(auth, authProvider);
-      // The page navigates away; this promise never settles in practice.
-      return new Promise<User>(() => {});
-    }
-    throw new SignInError(failure);
-  }
-}
-
-/** Finishes a redirect sign-in started by `signInWith`, if there was one. */
-export async function completeRedirectSignIn(): Promise<User | null> {
-  if (!isSignInAvailable()) return null;
-  const auth = await loadAuth();
-  const { getRedirectResult } = await import("firebase/auth");
-  try {
-    const result = await getRedirectResult(auth);
-    return result?.user ?? null;
   } catch (error) {
     throw new SignInError(toFailure(error));
   }

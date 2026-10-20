@@ -2,13 +2,13 @@
 
 import type { User } from "firebase/auth";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { completeRedirectSignIn, SignInError, watchUser, type SignInFailure } from "@/lib/firebase/auth";
+import { watchUser } from "@/lib/firebase/auth";
 import { fetchAccountSummary, PrepItApiError, type AccountSummary } from "@/lib/prepitApi";
 import { identifyWebUser } from "@/lib/webFunnelAnalytics";
 
 export type WebSession =
   | { status: "loading" }
-  | { status: "signedOut"; redirectError: SignInFailure | null }
+  | { status: "signedOut" }
   | { status: "signedIn"; user: User; account: AccountState };
 
 export type AccountState =
@@ -22,18 +22,12 @@ export type AccountState =
  */
 export function useWebSession(): { session: WebSession; reloadAccount: () => void } {
   const [user, setUser] = useState<User | null | undefined>(undefined);
-  const [redirectError, setRedirectError] = useState<SignInFailure | null>(null);
   // The account answer for one uid and reload; any other key reads as loading.
   const [account, setAccount] = useState<{ key: string; state: AccountState } | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
   const lastUid = useRef<string | null>(null);
 
-  useEffect(() => {
-    completeRedirectSignIn().catch((error: unknown) => {
-      if (error instanceof SignInError && error.code !== "cancelled") setRedirectError(error.code);
-    });
-    return watchUser(setUser);
-  }, []);
+  useEffect(() => watchUser(setUser), []);
 
   const uid = user?.uid ?? null;
 
@@ -64,7 +58,7 @@ export function useWebSession(): { session: WebSession; reloadAccount: () => voi
 
   let session: WebSession;
   if (user === undefined) session = { status: "loading" };
-  else if (user === null) session = { status: "signedOut", redirectError };
+  else if (user === null) session = { status: "signedOut" };
   else {
     const current = account?.key === `${user.uid}:${reloadKey}` ? account.state : null;
     session = { status: "signedIn", user, account: current ?? { status: "loading" } };

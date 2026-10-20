@@ -20,7 +20,11 @@ export function safeNextPath(value: string | null | undefined, fallback: string)
   try {
     const url = new URL(value, "https://www.tryprepit.app");
     if (url.origin !== "https://www.tryprepit.app") return fallback;
-    return `${url.pathname}${url.search}`;
+    // The parser normalises the path (`/.//evil.com` becomes `//evil.com`),
+    // so check what comes out too: a leading `//` would leave the site.
+    const path = `${url.pathname}${url.search}`;
+    if (path.startsWith("//") || path.includes("\\")) return fallback;
+    return path;
   } catch {
     return fallback;
   }

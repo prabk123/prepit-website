@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import SignInButtons, { SIGN_IN_FAILURE_MESSAGES } from "@/components/account/SignInButtons";
+import SignInButtons from "@/components/account/SignInButtons";
 import { useWebSession } from "@/components/account/useWebSession";
 import AppStoreButton from "@/components/ui/AppStoreButton";
 import SectionHeading from "@/components/ui/SectionHeading";
@@ -11,9 +11,17 @@ import { PRIMARY_BUTTON_CLASS, TEXT_BUTTON_CLASS } from "@/components/ui/buttons
 import { providerOf, signOutOfWebsite, type SignInProvider } from "@/lib/firebase/auth";
 import { parseFunnelId, safeNextPath } from "@/lib/funnel/params";
 import { parsePlanId, PLANS, TRIAL_DAYS } from "@/lib/pricing";
+import type { ExistingProvider } from "@/lib/prepitApi";
 import { resetWebUser, trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webFunnelAnalytics";
 
 const PROVIDER_NAMES: Record<SignInProvider, string> = { google: "Google", apple: "Apple" };
+
+const EXISTING_PROVIDER_NAMES: Record<ExistingProvider, string | null> = {
+  google: "Google",
+  apple: "Apple",
+  email: "an email link",
+  unknown: null,
+};
 
 export default function SignInBridge() {
   const params = useSearchParams();
@@ -45,6 +53,15 @@ export default function SignInBridge() {
     if (!justSignedIn || account?.status !== "ready") return;
     if (!successTracked.current) {
       successTracked.current = true;
+      if (account.summary.emailInUse) {
+        trackWebFunnelEvent(WEB_FUNNEL_EVENTS.signInFailed, {
+          ...context,
+          signup_method: justSignedIn,
+          reason: "email_in_use",
+          existing_provider: account.summary.emailInUse.existingProvider,
+        });
+        return;
+      }
       trackWebFunnelEvent(WEB_FUNNEL_EVENTS.signupSuccess, {
         ...context,
         signup_method: justSignedIn,
@@ -52,7 +69,9 @@ export default function SignInBridge() {
         is_subscribed: account.summary.isSubscribed,
       });
     }
-    if (!account.summary.isSubscribed && !account.summary.hasAccount) router.push(nextPath);
+    if (!account.summary.isSubscribed && !account.summary.hasAccount && !account.summary.emailInUse) {
+      router.push(nextPath);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [justSignedIn, account]);
 
@@ -68,7 +87,6 @@ export default function SignInBridge() {
   }
 
   if (session.status === "signedOut") {
-    const redirectMessage = session.redirectError ? SIGN_IN_FAILURE_MESSAGES[session.redirectError] : null;
     const planLine = plan
       ? `${PLANS[plan].label} plan: ${TRIAL_DAYS} days free, then ${PLANS[plan].price} a ${PLANS[plan].period}.`
       : null;
@@ -83,7 +101,6 @@ export default function SignInBridge() {
         />
         {planLine && <p className="text-small font-medium text-ink">{planLine}</p>}
         <SignInButtons context={context} onSignedIn={setJustSignedIn} />
-        {redirectMessage && <p className="text-small text-error">{redirectMessage}</p>}
         <p className="text-small text-ink-muted">
           By continuing you agree to our{" "}
           <Link href="/terms-and-conditions" className="underline underline-offset-4 hover:text-ink">
@@ -101,7 +118,8 @@ export default function SignInBridge() {
 
   const provider = providerOf(session.user);
   const signedInAs = (
-    <p className="text-small text-ink-muted">
+    // ph-no-capture keeps the email out of session recordings.
+    <p className="ph-no-capture text-small text-ink-muted">
       Signed in{provider ? ` with ${PROVIDER_NAMES[provider]}` : ""}
       {session.user.email ? ` as ${session.user.email}` : ""}.{" "}
       <button type="button" className={TEXT_BUTTON_CLASS} onClick={() => void signOut()}>
@@ -139,6 +157,28 @@ export default function SignInBridge() {
 
   const { summary } = session.account;
   const appSignIn = provider ? ` with ${PROVIDER_NAMES[provider]}` : "";
+
+  if (summary.emailInUse) {
+    const existing = EXISTING_PROVIDER_NAMES[summary.emailInUse.existingProvider];
+    return (
+      <>
+        <SectionHeading
+          as="h1"
+          size="title"
+          align="center"
+          title="This email already has a PrepIt account"
+          lead={
+            existing
+              ? `That account signs in with ${existing}. Sign out here, then continue with ${existing} so your subscription goes to the right account.`
+              : "That account signs in another way. Sign out here, then sign in the way you do in the app, so your subscription goes to the right account."
+          }
+        />
+        <button type="button" className={PRIMARY_BUTTON_CLASS} onClick={() => void signOut()}>
+          Sign out
+        </button>
+      </>
+    );
+  }
 
   if (summary.isSubscribed) {
     return (
