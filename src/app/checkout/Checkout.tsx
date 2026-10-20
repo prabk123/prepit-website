@@ -11,6 +11,8 @@ import { providerOf, signOutOfWebsite } from "@/lib/firebase/auth";
 import { parseFunnelId } from "@/lib/funnel/params";
 import { parsePlanId } from "@/lib/pricing";
 import {
+  ensurePrivateCheckoutRoot,
+  hadPremium,
   hasPremium,
   loadCheckoutOffering,
   planIdOf,
@@ -65,6 +67,8 @@ export default function Checkout() {
   const [plansState, setPlans] = useState<{ key: string; plans: Plans } | null>(null);
   const [paying, setPaying] = useState<"idle" | "confirming">("idle");
   const [failure, setFailure] = useState<CheckoutFailure | null>(null);
+  // The paywall itself couldn't be shown (nothing was bought).
+  const [paywallFailed, setPaywallFailed] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
   // Bumped to show the paywall again after a purchase that didn't go through.
   const [presentKey, setPresentKey] = useState(0);
@@ -107,8 +111,9 @@ export default function Checkout() {
         // Premium from any store (an App Store subscription, or a web
         // purchase made before the account existed) means no checkout.
         const purchases = await purchasesFor(uid);
-        if (hasPremium(await purchases.getCustomerInfo())) return done({ status: "already_subscribed" });
-        done(await loadCheckoutOffering(uid, summary.hasUsedTrial));
+        const customerInfo = await purchases.getCustomerInfo();
+        if (hasPremium(customerInfo)) return done({ status: "already_subscribed" });
+        done(await loadCheckoutOffering(uid, summary.hasUsedTrial || hadPremium(customerInfo)));
       } catch {
         done({ status: "error" });
       }
@@ -164,9 +169,11 @@ export default function Checkout() {
     const target = document.createElement("div");
     host.replaceChildren(target);
     let plan: string | null = null;
+    let purchaseStarted = false;
     (async () => {
       try {
         const purchases = await purchasesFor(uid);
+        ensurePrivateCheckoutRoot();
         const result = await purchases.presentPaywall({
           offering,
           htmlTarget: target,
@@ -175,6 +182,7 @@ export default function Checkout() {
           hideBackButtons: true,
           listener: {
             onPurchaseStarted: (rcPackage) => {
+              purchaseStarted = true;
               plan = planIdOf(rcPackage);
               setFailure(null);
               trackWebFunnelEvent(WEB_FUNNEL_EVENTS.checkoutStart, { ...context, plan, has_trial: hasTrial });
@@ -196,6 +204,7 @@ export default function Checkout() {
         plan = planIdOf(result.selectedPackage) ?? plan;
         setPaying("confirming");
         const unlocked = await waitForPremium(uid, result.customerInfo);
+        if (!active) return;
         trackWebFunnelEvent(WEB_FUNNEL_EVENTS.checkoutSuccess, {
           ...context,
           plan,
@@ -206,6 +215,18 @@ export default function Checkout() {
       } catch (error) {
         if (!active) return;
         const { code, rcErrorCode } = await toCheckoutFailure(error);
+        if (!active) return;
+        // Purchase errors stay inside the paywall, so a failure before any
+        // purchase started is the paywall failing to load, not a payment.
+        if (!purchaseStarted && code !== "cancelled" && code !== "already_purchased") {
+          trackWebFunnelEvent(WEB_FUNNEL_EVENTS.checkoutFailed, {
+            ...context,
+            reason: "paywall_load_failed",
+            rc_error_code: rcErrorCode,
+          });
+          setPaywallFailed(true);
+          return;
+        }
         trackWebFunnelEvent(WEB_FUNNEL_EVENTS.checkoutFailed, { ...context, plan, reason: code, rc_error_code: rcErrorCode });
         if (code === "already_purchased") {
           router.push(welcomePath(false));
@@ -238,7 +259,7 @@ export default function Checkout() {
     return <p className="text-body text-ink-secondary">Loading your plans…</p>;
   }
 
-  if (account?.status === "error" || plans.status === "error") {
+  if (account?.status === "error" || plans.status === "error" || paywallFailed) {
     return (
       <>
         <SectionHeading as="h1" size="title" align="center" title="We couldn't load the plans" lead="Please try again in a moment." />
@@ -246,6 +267,11 @@ export default function Checkout() {
           type="button"
           className={PRIMARY_BUTTON_CLASS}
           onClick={() => {
+            if (paywallFailed) {
+              setPaywallFailed(false);
+              setPresentKey((key) => key + 1);
+              return;
+            }
             reloadAccount();
             setReloadKey((key) => key + 1);
           }}
@@ -282,7 +308,7 @@ export default function Checkout() {
           Confirming your subscription…
         </p>
       ) : (
-        <div ref={paywallHost} className="w-full" data-testid="revenuecat-paywall" />
+        <div ref={paywallHost} className="ph-no-capture w-full" data-testid="revenuecat-paywall" />
       )}
       {failure && paying === "idle" && (
         <div className="flex w-full flex-col gap-3">
