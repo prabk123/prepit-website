@@ -28,12 +28,14 @@ AVATAR_STILLS = ("01-home", "01b-home-log", "01c-home-scrolled", "16-supplements
                  "17b-achievement-confetti", "18b-offline-waiting-list")
 
 # Seconds to keep from each raw video, in order. Long model waits are cut out.
-# Timings are for the light-mode recordings: 03, 04 and 12 are the PRE-286 showcase-account
-# takes (a full day already logged), the rest are from PRE-281.
+# Timings are for the light-mode recordings: 03 and 12 are the PRE-286 showcase-account
+# takes (a full day already logged), 04 the PRE-317 one, the rest are from PRE-281.
 SEGMENTS = {
     "03-log-typed": [(0, 1.5), (2, 3.5), (4.5, 6), (7, 12), (12.5, 14.5), (23, 24.8), (45, 53.3)],
-    "04-log-photo": [(0, 1.5), (2, 3.5), (4.5, 5.5), (7, 8.5), (9.5, 11), (12, 13.5), (14, 15.5), (16, 17.5),
-                     (28.5, 31), (35, 36.5), (38.5, 40), (67, 75.7)],
+    # PRE-317 take (04-log-photo-light-v3): Add, Log Meal, Photo library, a burrito bowl photo, a few words,
+    # the time, then the logged meal and its detail. The typing is cut: a debug overflow stripe shows over the keyboard.
+    "04-log-photo": [(0, 1.5), (2, 3.5), (4, 5), (6.5, 7.5), (10, 11.5), (12.5, 14), (26, 28), (31.5, 34),
+                     (85, 87.5), (101, 106), (111.5, 120)],
     "08-chat-ask": [(2, 13.5)],
     "09-chat-log-it": [(4.3, 6), (7.5, 13), (14.5, 19)],
     "12-plan-week": [(0, 13.7)],
@@ -50,10 +52,11 @@ NAME_BOX_X, NAME_BOX_W, NAME_BOX_H = 728, 240, 86
 # loading bubbles). Their poster, which is all a visitor sees under reduced
 # motion, in Low Power Mode and before playback, is the last frame instead:
 # the filled log, the finished plan, the answered chat (PRE-235).
-POSTER_FROM_END = ("03-log-typed", "04-log-photo", "08-chat-ask")
+POSTER_FROM_END = ("03-log-typed", "08-chat-ask")
 # Posters taken at a set second of the cut clip instead: the chat card with its
 # black Log it button, before it is tapped, since nothing saves until then (PRE-286).
-POSTER_AT = {"09-chat-log-it": 8}
+# The photo clip's poster is the logged meal's detail: its name, 529 calories and macros (PRE-317).
+POSTER_AT = {"09-chat-log-it": 8, "04-log-photo": 18}
 
 # Videos that show the Home header somewhere, so the avatar is blurred throughout.
 AVATAR_VIDEOS = ("03-log-typed", "04-log-photo", "09-chat-log-it", "21-walkthrough")
@@ -68,8 +71,16 @@ WIDTHS = {"1x": 402, "2x": 804}
 CROPS = {
     "25-nudge-missed-breakfast-crop-light": ("25-nudge-missed-breakfast-light", 1486, 2500),
     "25b-nudge-protein-crop-light": ("25b-nudge-protein-light", 886, 2500),
-    "24-nudge-weekly-pattern-crop-light": ("24-nudge-weekly-pattern-light", 526, 2130),
+    # The whole message, its Weekly calorie pattern card and the replies, from two scrolled captures (PRE-317).
+    "24-nudge-weekly-pattern-crop-light": ("24-nudge-weekly-pattern-v2-light", 526, 3440),
     "24b-nudge-weigh-in-crop-light": ("24b-nudge-weigh-in-light", 1496, 2500),
+}
+
+# Stills taller than one screen, joined from two scrolled captures of the same
+# chat: name -> (top capture, bottom capture, seam row in the top capture,
+# the same row in the bottom capture). Crops above read the joined image.
+STITCHES = {
+    "24-nudge-weekly-pattern-v2-light": ("24-nudge-weekly-pattern-v2-light", "24-nudge-weekly-pattern-v2b-light", 2300, 1316),
 }
 
 # Cut-outs of one part of a chat still, lifted out over the phone on the
@@ -153,8 +164,20 @@ def still(name: str) -> None:
         out.save(os.path.join(OUT, f"{name}@{scale}.webp"), quality=82, method=6)
 
 
+def raw_still(source: str) -> Image.Image:
+    if source not in STITCHES:
+        return Image.open(os.path.join(RAW, source + ".png")).convert("RGB")
+    upper, lower, seam, seam_lower = STITCHES[source]
+    upper_im = Image.open(os.path.join(RAW, upper + ".png")).convert("RGB")
+    lower_im = Image.open(os.path.join(RAW, lower + ".png")).convert("RGB")
+    joined = Image.new("RGB", (1206, seam + lower_im.height - seam_lower))
+    joined.paste(upper_im.crop((0, 0, 1206, seam)), (0, 0))
+    joined.paste(lower_im.crop((0, seam_lower, 1206, lower_im.height)), (0, seam))
+    return joined
+
+
 def crop(name: str, source: str, top: int, bottom: int) -> None:
-    im = Image.open(os.path.join(RAW, source + ".png")).convert("RGB").crop((0, top, 1206, bottom))
+    im = raw_still(source).crop((0, top, 1206, bottom))
     for scale, width in WIDTHS.items():
         out = im.resize((width, round(im.height * width / im.width)), Image.LANCZOS)
         out.save(os.path.join(OUT, f"{name}@{scale}.avif"), quality=60)

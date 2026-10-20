@@ -91,10 +91,14 @@ export const CARD_THUMBS = [
   "01-home",
   "01b-home-log",
   "02-chat-chart",
+  // A frame of the 04-log-photo recording: the plate photo on the Describe your meal sheet (PRE-317).
+  "04-log-photo",
   "05-meal-detail",
   "05b-meal-detail-scrolled",
   "06-signal-energy",
   "11-check-in-report",
+  // A frame of the 12-plan-week recording: the plan's grocery list, days and daily target (PRE-317).
+  "12-plan-week",
   "13-grocery-list",
   "22-action-button-siri",
   // Not 23-home-screen-widgets: it is in edit mode, with a remove badge on the widget's corner.
@@ -153,8 +157,8 @@ export function appVideo(name: string, label: string): Omit<LoopVideoProps, "cla
 export const CHAT_CROPS = {
   "25-nudge-missed-breakfast-crop": { width: 804, height: 676 },
   "25b-nudge-protein-crop": { width: 804, height: 1076 },
-  // Stops inside its Weekly calorie pattern card; ChatCapture fades it out.
-  "24-nudge-weekly-pattern-crop": { width: 804, height: 1069 },
+  // The whole message, its Weekly calorie pattern card and the replies (PRE-317).
+  "24-nudge-weekly-pattern-crop": { width: 804, height: 1943 },
   "24b-nudge-weigh-in-crop": { width: 804, height: 669 },
 } as const;
 

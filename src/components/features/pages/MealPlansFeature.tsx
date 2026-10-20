@@ -26,7 +26,7 @@ export default function MealPlansFeature() {
         id="how-it-plans"
         tone="surface"
         title="It asks first, then plans."
-        lead="It asks which days to cover, which meals to leave out, snacks, your budget and how much variety you like. Then you check the week, day by day, before you confirm."
+        lead="It asks which days to cover, whether to plan every meal, snacks, your budget and how much variety you like. Then you check the week, day by day, before you confirm."
         media={
           <div className="relative">
             <Glow />
@@ -34,7 +34,7 @@ export default function MealPlansFeature() {
               className={PHONE}
               capture={appCapture(
                 "27-plan-questions",
-                "The nutritionist's first plan question, which days to plan, with Friday 9 to Sunday 11 October suggested and a Confirm 3 days button",
+                "The nutritionist's plan questions in the chat: snacks included, the same £30 grocery budget as last time, then how much variety you'd like, with Mostly the same meals, Mix of repeats & variety and New meals most days",
               )}
             />
           </div>

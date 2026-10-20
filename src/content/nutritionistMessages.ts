@@ -31,10 +31,9 @@ export const proteinShort = {
 export const weeklyPattern = {
   capture: chatCrop(
     "24-nudge-weekly-pattern-crop",
-    "The nutritionist noticing Tuesdays and Wednesdays run about 520 kcal over, then a Weekly calorie pattern card giving those days 1,740 kcal and the rest about 1,500, the same weekly total",
+    "The nutritionist noticing Tuesdays and Wednesdays run about 520 kcal over, then a Weekly calorie pattern card giving those days 1,740 kcal and the rest about 1,500, the same weekly total of 10,990 kcal, with Use this pattern. Replies: Not for me, Type your own",
   ),
   caption: "When the same days keep running over",
-  fade: true,
 };
 
 /** Weigh-in reminder, a week after the last one. */

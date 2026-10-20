@@ -84,8 +84,8 @@ export default function SignalsFeature() {
             <DeviceFrame
               className={PHONE}
               capture={appCapture(
-                "05-meal-detail",
-                "Protein overnight oats with apple and cinnamon: 357 calories, 34 g protein and each ingredient, with its Energy card below",
+                "05b-meal-detail-scrolled",
+                "A logged breakfast's Energy +34, Satiety +4 and Mood +11 cards, each with a line on why, like morning protein giving a steady power supply",
               )}
             />
           </div>

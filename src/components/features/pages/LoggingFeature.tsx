@@ -26,7 +26,7 @@ export default function LoggingFeature() {
               className={PHONE}
               capture={appCapture(
                 "01b-home-log",
-                "Today's log in PrepIt: coffee with milk, a chicken wrap, Greek yogurt and a salmon bowl, each with its calories and its effect on Energy, Satiety and Mood",
+                "Today's log in PrepIt: protein overnight oats, coffee with milk and a chicken wrap with hummus, each with its calories and its effect on Energy, Satiety and Mood",
               )}
             />
           </div>
@@ -41,7 +41,7 @@ export default function LoggingFeature() {
 
       <FeatureBlock
         id="snap-it"
-        layout="peek"
+        reverse
         title="Or just snap your plate."
         lead="Take a photo and PrepIt works out what's on the plate. Add a few words, like the restaurant or the portion, and it uses both."
         media={
@@ -49,7 +49,7 @@ export default function LoggingFeature() {
             <Glow />
             <DeviceFrame
               className={PHONE}
-              video={appVideo("04-log-photo", "Logging a meal from a photo of the plate")}
+              video={appVideo("04-log-photo", "Logging a chicken burrito bowl from a photo of the plate, then the meal's 529 calories and the items PrepIt found")}
             />
           </div>
         }
@@ -61,15 +61,15 @@ export default function LoggingFeature() {
         id="accuracy"
         tone="surface"
         title="Close to the truth, and easy to fix."
-        lead="Branded and restaurant food starts from the official figures. Typed and photo meals show what PrepIt assumed and how sure it is."
+        lead="Branded and restaurant food starts from the official figures. Typed and photo meals show what PrepIt assumed."
         media={
           <div className="relative">
             <Glow />
             <DeviceFrame
               className={PHONE}
               capture={appCapture(
-                "05b-meal-detail-scrolled",
-                "A logged breakfast's Energy, Satiety and Mood cards, and How it's calculated with a High confidence level of 82",
+                "05-meal-detail",
+                "Protein overnight oats with apple and cinnamon: 357 calories, 40 g carbs, 34 g protein and 7 g fat, with each item it assumed, like 51 calories of rolled oats, and edit at the top",
               )}
             />
           </div>
