@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useWebSession } from "@/components/account/useWebSession";
-import AppStoreButton from "@/components/ui/AppStoreButton";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { PRIMARY_BUTTON_CLASS, TEXT_BUTTON_CLASS } from "@/components/ui/buttons";
 import { providerOf, signOutOfWebsite } from "@/lib/firebase/auth";
@@ -39,11 +38,11 @@ const FAILURE_MESSAGES: Record<CheckoutFailure, string | null> = {
 
 type Plans =
   | { status: "loading" }
+  /** `hasTrial`: whether they should get the free trial (RevenueCat decides at purchase). */
   | { status: "ready"; offering: Offering; hasTrial: boolean }
   | { status: "already_subscribed" }
   /** The email belongs to a PrepIt account under the other provider: the bridge explains. */
   | { status: "email_in_use" }
-  | { status: "no_trial_free_plans" }
   /** The offering has no RevenueCat paywall attached yet. */
   | { status: "no_paywall" }
   | { status: "error" };
@@ -113,7 +112,11 @@ export default function Checkout() {
         const purchases = await purchasesFor(uid);
         const customerInfo = await purchases.getCustomerInfo();
         if (hasPremium(customerInfo)) return done({ status: "already_subscribed" });
-        done(await loadCheckoutOffering(uid, summary.hasUsedTrial || hadPremium(customerInfo)));
+        const loaded = await loadCheckoutOffering(uid);
+        // A trial before (PrepIt's record, or premium at any time in RevenueCat)
+        // means no second one; RevenueCat's trial eligibility enforces it.
+        const hadTrial = summary.hasUsedTrial || hadPremium(customerInfo);
+        done(loaded.status === "ready" ? { ...loaded, hasTrial: !hadTrial } : loaded);
       } catch {
         done({ status: "error" });
       }
@@ -130,7 +133,6 @@ export default function Checkout() {
     const unavailable =
       keyProblem ??
       (plans.status === "already_subscribed" ||
-      plans.status === "no_trial_free_plans" ||
       plans.status === "email_in_use" ||
       plans.status === "no_paywall"
         ? plans.status
@@ -278,23 +280,6 @@ export default function Checkout() {
         >
           Try again
         </button>
-      </>
-    );
-  }
-
-  if (plans.status === "no_trial_free_plans") {
-    return (
-      <>
-        <SectionHeading
-          as="h1"
-          size="title"
-          align="center"
-          title="You've had your free trial"
-          lead="Subscribing again on the website isn't available yet. You can subscribe in the PrepIt app."
-        />
-        <div className="flex justify-center">
-          <AppStoreButton trackingSource="checkout-trial-used" />
-        </div>
       </>
     );
   }

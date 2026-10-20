@@ -13,12 +13,11 @@ import type { PlanId } from "@/lib/pricing";
  * - NEXT_PUBLIC_REVENUECAT_WEB_BILLING_API_KEY: the Web Billing public key.
  *   Sandbox keys (`rcb_sb_…`) everywhere except production; production only
  *   takes a live key. A key on the wrong side is refused.
- * - NEXT_PUBLIC_REVENUECAT_OFFERING_ID (optional): the web offering; the
- *   project's current offering when unset. Its paywall, built in the
- *   RevenueCat dashboard, is what checkout shows.
- * - NEXT_PUBLIC_REVENUECAT_OFFERING_ID_NO_TRIAL (optional): an offering with
- *   the same plans, no free trial and its own paywall, for people who already
- *   had one. Without it they're sent to the app instead.
+ *
+ * Checkout shows the paywall of the project's current offering, so which
+ * offering, plans and paywall people see is changed in RevenueCat with no
+ * deploy. Who gets the free trial is RevenueCat's call too: each Web Billing
+ * product's trial eligibility setting decides at purchase.
  */
 
 /** The entitlement the app unlocks with (fresca_app RevenueCatService.premiumEntitlement). */
@@ -97,31 +96,17 @@ export function planIdOf(rcPackage: Package): PlanId | null {
 }
 
 export type CheckoutOffering =
-  | { status: "ready"; offering: Offering; hasTrial: boolean }
-  /** They had a trial before and no trial-free offering is set up in RevenueCat. */
-  | { status: "no_trial_free_plans" }
+  | { status: "ready"; offering: Offering }
   /** The offering has no paywall attached in the RevenueCat dashboard. */
   | { status: "no_paywall" };
 
-/**
- * The offering whose RevenueCat paywall checkout shows. Someone who already
- * had a free trial gets the no-trial offering instead, so the paywall never
- * offers them a second one.
- */
-export async function loadCheckoutOffering(uid: string, hadTrial: boolean): Promise<CheckoutOffering> {
+/** The current offering, whose RevenueCat paywall checkout shows. */
+export async function loadCheckoutOffering(uid: string): Promise<CheckoutOffering> {
   const purchases = await purchasesFor(uid);
-  const offeringId = hadTrial
-    ? process.env.NEXT_PUBLIC_REVENUECAT_OFFERING_ID_NO_TRIAL?.trim()
-    : process.env.NEXT_PUBLIC_REVENUECAT_OFFERING_ID?.trim();
-  if (hadTrial && !offeringId) return { status: "no_trial_free_plans" };
-  const offerings = await purchases.getOfferings(offeringId ? { offeringIdentifier: offeringId } : undefined);
-  const offering = (offeringId ? offerings.all[offeringId] : offerings.current) ?? null;
-  if (!offering) {
-    if (hadTrial) return { status: "no_trial_free_plans" };
-    throw new Error("No RevenueCat offering");
-  }
+  const offering = (await purchases.getOfferings()).current;
+  if (!offering) throw new Error("No current RevenueCat offering");
   if (!offering.hasPaywall) return { status: "no_paywall" };
-  return { status: "ready", offering, hasTrial: !hadTrial };
+  return { status: "ready", offering };
 }
 
 /** Why a purchase didn't go through, as a fixed code for analytics and the message. */
