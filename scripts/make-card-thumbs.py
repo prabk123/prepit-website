@@ -4,41 +4,86 @@
 Each thumbnail is the telling part of one app still (the rings, the chart,
 the Log it card) at close to the size it is on the phone, instead of the top
 of the whole screen. Crops come from public/app/<name>-light@2x.webp (804 px
-wide) and are written to public/app/thumbs/<name>@1x and @2x as AVIF and WebP,
-804 x 500 at 2x. Keep THUMBS in step with CARD_THUMBS in src/lib/captures.ts.
+wide), or from a frame of a raw recording for clips, and are written to
+public/app/thumbs/<name>@1x and @2x as AVIF and WebP, 804 x 500 at 2x. Keep
+THUMBS in step with CARD_THUMBS in src/lib/captures.ts.
 
-Usage: python3 scripts/make-card-thumbs.py
+Every crop starts and ends on a gap between elements, so no line of text or
+card is cut (PRE-317). A crop shorter than 500 px is filled below with the
+colour of its last row (the screen or card background); a taller one is
+scaled down to 500 px high and centred on that colour.
+
+Usage: python3 scripts/make-card-thumbs.py [raw captures dir]
+The raw dir (default /mnt/project-files/website/captures/raw) is only read for
+thumbnails cut from a recording (FRAMES).
 """
 
 import os
+import subprocess
+import sys
+import tempfile
 
 from PIL import Image
 
 SRC = "public/app"
 OUT = "public/app/thumbs"
+RAW = sys.argv[1] if len(sys.argv) > 1 else "/mnt/project-files/website/captures/raw"
 WIDTH, HEIGHT = 804, 500
 
-# Still name -> top of the 804 x 500 crop, in 2x pixels.
+# Thumbnail name -> (top, bottom) of the crop, in 2x pixels.
 THUMBS = {
-    "01-home": 220,  # Energy, Satiety and Mood rings, and the top of Eaten
-    "01b-home-log": 690,  # the Log, with breakfast and coffee
-    "02-chat-chart": 1040,  # the Protein per day bars against the target line
-    "05-meal-detail": 250,  # a meal's calories, macros, servings and time
-    "05b-meal-detail-scrolled": 260,  # the meal's Energy and Satiety cards
-    "06-signal-energy": 200,  # the Energy ring and what it measures
-    "11-check-in-report": 280,  # "Your steadiest week yet" and the goal card
-    "13-grocery-list": 240,  # Grocery List, the estimate and the first aisle
-    "22-action-button-siri": 120,  # "What did you eat?"
-    "23b-home-screen-widgets": 150,  # the Today's calories widget
+    "01-home": (96, 596),  # the Home header and the Energy, Satiety and Mood rings
+    "01b-home-log": (768, 1256),  # the Log's 7 AM breakfast and 8 AM coffee
+    "02-chat-chart": (1050, 1550),  # the Protein per day bars against the target line, with their days
+    "05-meal-detail": (229, 672),  # a meal's calories, macros and servings
+    "05b-meal-detail-scrolled": (262, 846),  # the meal's Energy and Satiety cards
+    "06-signal-energy": (220, 712),  # the Energy ring and what it measures
+    "11-check-in-report": (350, 845),  # the report's summary and goal, under its heading
+    "12-plan-week": (410, 975),  # a plan's grocery list, its week of days and the daily target
+    "13-grocery-list": (312, 812),  # the estimate and the first aisle, under the Grocery List heading
+    "22-action-button-siri": (120, 620),  # "What did you eat?"
+    "23b-home-screen-widgets": (80, 580),  # the Today's calories widget
 }
+
+# Thumbnails cut from a raw recording (1206 px wide): name -> (file, second).
+FRAMES = {
+    "12-plan-week": ("12-plan-week-light.mp4", 9.0),
+}
+
+
+def source(name: str) -> Image.Image:
+    if name not in FRAMES:
+        return Image.open(os.path.join(SRC, f"{name}-light@2x.webp")).convert("RGB")
+    file, second = FRAMES[name]
+    with tempfile.TemporaryDirectory() as tmp:
+        png = os.path.join(tmp, "frame.png")
+        subprocess.run(
+            ["ffmpeg", "-v", "error", "-y", "-ss", str(second), "-i", os.path.join(RAW, file),
+             "-frames:v", "1", "-vf", f"scale={WIDTH}:-1:flags=lanczos", png],
+            check=True,
+        )
+        return Image.open(png).convert("RGB")
+
+
+def thumb(im: Image.Image, top: int, bottom: int) -> Image.Image:
+    part = im.crop((0, top, WIDTH, bottom))
+    fill = part.getpixel((4, part.height - 1))
+    out = Image.new("RGB", (WIDTH, HEIGHT), fill)
+    if part.height > HEIGHT:
+        width = round(WIDTH * HEIGHT / part.height)
+        part = part.resize((width, HEIGHT), Image.LANCZOS)
+        out.paste(part, ((WIDTH - width) // 2, 0))
+    else:
+        out.paste(part, (0, 0))
+    return out
 
 
 def main() -> None:
     os.makedirs(OUT, exist_ok=True)
-    for name, top in THUMBS.items():
-        im = Image.open(os.path.join(SRC, f"{name}-light@2x.webp")).convert("RGB")
+    for name, (top, bottom) in THUMBS.items():
+        im = source(name)
         assert im.width == WIDTH, name
-        im = im.crop((0, top, WIDTH, top + HEIGHT))
+        im = thumb(im, top, bottom)
         for scale, factor in (("1x", 2), ("2x", 1)):
             out = im.resize((WIDTH // factor, HEIGHT // factor), Image.LANCZOS)
             out.save(os.path.join(OUT, f"{name}@{scale}.avif"), quality=60)

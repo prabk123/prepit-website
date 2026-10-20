@@ -95,6 +95,8 @@ export const CARD_THUMBS = [
   "05b-meal-detail-scrolled",
   "06-signal-energy",
   "11-check-in-report",
+  // A frame of the 12-plan-week recording: the plan's grocery list, days and daily target (PRE-317).
+  "12-plan-week",
   "13-grocery-list",
   "22-action-button-siri",
   // Not 23-home-screen-widgets: it is in edit mode, with a remove badge on the widget's corner.

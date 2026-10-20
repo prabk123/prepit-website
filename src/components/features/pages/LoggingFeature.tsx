@@ -41,7 +41,7 @@ export default function LoggingFeature() {
 
       <FeatureBlock
         id="snap-it"
-        layout="peek"
+        reverse
         title="Or just snap your plate."
         lead="Take a photo and PrepIt works out what's on the plate. Add a few words, like the restaurant or the portion, and it uses both."
         media={
@@ -68,8 +68,8 @@ export default function LoggingFeature() {
             <DeviceFrame
               className={PHONE}
               capture={appCapture(
-                "05b-meal-detail-scrolled",
-                "A logged breakfast's Energy, Satiety and Mood cards, and How it's calculated with a High confidence level of 82",
+                "05-meal-detail",
+                "Protein overnight oats with apple and cinnamon: 357 calories, 40 g carbs, 34 g protein and 7 g fat, with each item it assumed, like 51 calories of rolled oats, and edit at the top",
               )}
             />
           </div>
