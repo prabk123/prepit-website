@@ -1,6 +1,6 @@
 import AppStoreLink from "@/components/AppStoreLink";
 
-function AppleLogo() {
+export function AppleLogo() {
   return (
     <svg width="18" height="21" viewBox="0 0 18 21" aria-hidden>
       <path
