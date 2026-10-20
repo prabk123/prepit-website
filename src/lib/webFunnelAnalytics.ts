@@ -18,6 +18,8 @@ export const WEB_FUNNEL_EVENTS = {
   /** Checkout couldn't be offered (`reason`: already_subscribed, no_trial_free_plans, not_configured…). */
   checkoutUnavailable: "web_checkout_unavailable",
   handoffView: "web_handoff_view",
+  manageSubscriptionView: "web_manage_subscription_view",
+  manageSubscriptionPortalOpen: "web_manage_subscription_portal_open",
 } as const;
 
 type WebFunnelEvent = (typeof WEB_FUNNEL_EVENTS)[keyof typeof WEB_FUNNEL_EVENTS];

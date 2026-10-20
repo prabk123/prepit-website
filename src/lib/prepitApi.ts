@@ -123,3 +123,18 @@ export async function fetchAccountSummary(): Promise<AccountSummary> {
         : null,
   };
 }
+
+/**
+ * A single-use link to RevenueCat's Web Billing portal for this account's web
+ * subscription (`POST /billing/management-url`), or null when the account has
+ * no web subscription to manage.
+ */
+export async function createBillingManagementUrl(): Promise<string | null> {
+  try {
+    const body = await prepitFetch<{ url?: unknown }>("/billing/management-url", { method: "POST", body: "{}" });
+    return typeof body.url === "string" && body.url.startsWith("https://") ? body.url : null;
+  } catch (error) {
+    if (error instanceof PrepItApiError && error.status === 404) return null;
+    throw error;
+  }
+}

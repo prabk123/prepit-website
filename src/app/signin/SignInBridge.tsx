@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import EmailInUseNotice from "@/components/account/EmailInUseNotice";
 import SignInButtons from "@/components/account/SignInButtons";
 import { useWebSession } from "@/components/account/useWebSession";
 import AppStoreButton from "@/components/ui/AppStoreButton";
@@ -11,17 +12,9 @@ import { PRIMARY_BUTTON_CLASS, TEXT_BUTTON_CLASS } from "@/components/ui/buttons
 import { providerOf, signOutOfWebsite, type SignInProvider } from "@/lib/firebase/auth";
 import { parseFunnelId, safeNextPath } from "@/lib/funnel/params";
 import { parsePlanId, PLANS, TRIAL_DAYS } from "@/lib/pricing";
-import type { ExistingProvider } from "@/lib/prepitApi";
 import { resetWebUser, trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webFunnelAnalytics";
 
 const PROVIDER_NAMES: Record<SignInProvider, string> = { google: "Google", apple: "Apple" };
-
-const EXISTING_PROVIDER_NAMES: Record<ExistingProvider, string | null> = {
-  google: "Google",
-  apple: "Apple",
-  email: "an email link",
-  unknown: null,
-};
 
 export default function SignInBridge() {
   const params = useSearchParams();
@@ -159,24 +152,12 @@ export default function SignInBridge() {
   const appSignIn = provider ? ` with ${PROVIDER_NAMES[provider]}` : "";
 
   if (summary.emailInUse) {
-    const existing = EXISTING_PROVIDER_NAMES[summary.emailInUse.existingProvider];
     return (
-      <>
-        <SectionHeading
-          as="h1"
-          size="title"
-          align="center"
-          title="This email already has a PrepIt account"
-          lead={
-            existing
-              ? `That account signs in with ${existing}. Sign out here, then continue with ${existing} so your subscription goes to the right account.`
-              : "That account signs in another way. Sign out here, then sign in the way you do in the app, so your subscription goes to the right account."
-          }
-        />
-        <button type="button" className={PRIMARY_BUTTON_CLASS} onClick={() => void signOut()}>
-          Sign out
-        </button>
-      </>
+      <EmailInUseNotice
+        existingProvider={summary.emailInUse.existingProvider}
+        purpose="your subscription goes to the right account"
+        onSignOut={() => void signOut()}
+      />
     );
   }
 
