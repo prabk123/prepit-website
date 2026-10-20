@@ -95,7 +95,7 @@ export const FEATURES: Record<FeatureSlug, FeatureMeta> = {
       "Type what you ate like a text, snap your plate or ask Siri. It's on your log straight away, checked against official brand and restaurant figures first.",
     summary: "Type it, snap it or say it. It's on your log straight away.",
     heading: "Logging that doesn't feel like a chore.",
-    lead: "Most people quit tracking because logging takes too long. Here you type “two eggs and buttered toast”, snap your plate or say it to Siri, and it's on your log straight away.",
+    lead: "Logging is where most food apps lose people. Here you type “two eggs and buttered toast”, snap your plate or say it to Siri, and it's on your log straight away.",
     overviewLink: "How logging works",
     thumb: "01b-home-log",
   },

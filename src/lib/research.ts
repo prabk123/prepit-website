@@ -42,7 +42,7 @@ export const HOME_RESEARCH_POINT_IDS = ["scores", "numbers", "limits"] as const;
 export const RESEARCH_POINTS: ResearchPoint[] = [
   {
     id: "knows-you",
-    title: "It gets to know you first",
+    title: "Getting to know you comes first",
     detail:
       "A short consultation about how you eat now ends with one or two things to focus on. It remembers your goals, what you've told it about your routine and your recent conversations, and builds its replies around them.",
     more: "Advice that ignores your week isn't much use. Your focus, your routine and what you said last time are part of every reply, so you don't have to explain yourself twice.",
@@ -50,7 +50,7 @@ export const RESEARCH_POINTS: ResearchPoint[] = [
   },
   {
     id: "coaching",
-    title: "It coaches the way good nutritionists do",
+    title: "Coaching the way good nutritionists do",
     detail:
       "It borrows from motivational interviewing, the way of talking about change that many dietitians and health coaches use: it reflects back what you said, asks one question at a time, and never talks about cheat days or bad food.",
     more: "Motivational interviewing is a well-studied way of helping people change habits by drawing out their own reasons, rather than lecturing.",
@@ -69,7 +69,7 @@ export const RESEARCH_POINTS: ResearchPoint[] = [
   },
   {
     id: "scores",
-    title: "Its scores come from nutrition science",
+    title: "Scores built on nutrition science",
     summary:
       "Energy, Satiety and Mood weigh what nutrition science links to how you feel: glycaemic load, protein, fibre and how processed your food is.",
     detail:
@@ -176,7 +176,7 @@ export const RESEARCH_POINTS: ResearchPoint[] = [
   },
   {
     id: "numbers",
-    title: "Its numbers come from real sources",
+    title: "Numbers from real sources",
     summary:
       "Branded and restaurant food starts from the brand's own figures where they exist. Everyday foods use standard food composition tables.",
     detail:
@@ -196,7 +196,7 @@ export const RESEARCH_POINTS: ResearchPoint[] = [
   },
   {
     id: "guidance",
-    title: "It follows public health guidance",
+    title: "Amounts from public health guidance",
     detail:
       "Supplement and water amounts come from public health bodies such as the NHS, the European Food Safety Authority (EFSA) and the US National Institutes of Health.",
     more: "When it suggests a supplement, it only uses the public reference amount for adults, never more. Your water goal starts from EFSA's adequate intake unless you set your own.",

@@ -129,7 +129,7 @@ export default function NutritionistFeature() {
         layout="peek"
         tone="surface"
         title="Talk, and hear a reply."
-        lead="Send a voice note of up to two minutes, like on WhatsApp. Your nutritionist answers in its own voice, with the words written underneath."
+        lead="Send a voice note of up to two minutes, like a voice message. Your nutritionist answers in its own voice, with the words written underneath."
         media={
           <div className="relative">
             <Glow />
