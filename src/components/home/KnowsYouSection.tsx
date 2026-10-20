@@ -38,7 +38,7 @@ export default function KnowsYouSection() {
         <SectionHeading
           id="knows-you-heading"
           size="section"
-          title="It gets to know you first."
+          title="First, it gets to know you."
           lead="A short consultation about how you eat now ends with one or two things to focus on, like protein at breakfast or the evening snacking."
         />
         <p className="max-w-[46ch] text-body text-ink-secondary text-pretty">
