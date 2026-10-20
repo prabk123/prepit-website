@@ -48,6 +48,22 @@ export type WebSignupInput = {
 const QUESTION_ID = /^[A-Za-z0-9_:-]{1,64}$/;
 const MAX_ANSWERS = 100;
 
+// The values `pendingProfileUserSchema` / `pendingProfileSettingsSchema` accept
+// (fresca_backend services/pendingProfile.ts and the User / Settings models).
+const GENDERS = ["male", "female", "non-binary", "rather not say"];
+const GOALS = [
+  "lose weight",
+  "gain muscle",
+  "maintain weight",
+  "eat healthier",
+  "improve energy",
+  "stay fuller",
+  "fuel training",
+];
+const DAILY_ACTIVITIES = ["mostly_sitting", "lightly_on_feet", "on_feet_most_of_day", "physically_demanding"];
+const EXERCISE_FREQUENCIES = ["none", "one_to_two", "three_to_five", "six_to_seven", "athlete"];
+const DIETS = ["eat everything", "vegan", "vegetarian", "pescetarian", "high protein", "low carb", "keto"];
+
 function cap(value: string, max: number): string {
   return value.length > max ? value.slice(0, max) : value;
 }
@@ -65,15 +81,75 @@ function cleanAnswer(answer: WebSignupAnswer["answer"]): WebSignupAnswer["answer
   return undefined;
 }
 
+function inRange(value: number | undefined, min: number, max: number): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) && value >= min && value <= max ? value : undefined;
+}
+
+function oneOf<T extends string>(value: T | undefined, allowed: readonly string[], lowercase = false): T | undefined {
+  if (typeof value !== "string") return undefined;
+  const normalised = lowercase ? value.trim().toLowerCase() : value;
+  return allowed.includes(normalised) ? (normalised as T) : undefined;
+}
+
+function shortStrings(values: string[] | undefined, max: number): string[] | undefined {
+  if (!Array.isArray(values)) return undefined;
+  return values
+    .filter((item): item is string => typeof item === "string" && item.trim() !== "")
+    .map((item) => cap(item.trim(), 200))
+    .slice(0, max);
+}
+
+/** An ISO date that isn't in the future, as `Joi.date().iso().max("now")` wants. */
+function pastIsoDate(value: string | undefined): string | undefined {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}/.test(value)) return undefined;
+  const time = Date.parse(value);
+  return Number.isFinite(time) && time <= Date.now() ? value : undefined;
+}
+
+function withoutEmpty<T extends Record<string, unknown>>(value: T): T | undefined {
+  const kept = Object.fromEntries(Object.entries(value).filter(([, v]) => v !== undefined)) as T;
+  return Object.keys(kept).length > 0 ? kept : undefined;
+}
+
+/** Only the account fields, and values, the backend accepts; anything else is left out. */
+export function cleanWebSignupUser(user: WebSignupUser | undefined): WebSignupUser | undefined {
+  if (!user) return undefined;
+  return withoutEmpty({
+    dob: pastIsoDate(user.dob),
+    gender: oneOf(user.gender, GENDERS),
+    height: inRange(user.height, 50, 272),
+    weight: inRange(user.weight, 20, 400),
+  });
+}
+
+/** Only the settings, and values, the backend accepts; anything else is left out. */
+export function cleanWebSignupSettings(settings: WebSignupSettings | undefined): WebSignupSettings | undefined {
+  if (!settings) return undefined;
+  return withoutEmpty({
+    goal: oneOf(settings.goal, GOALS, true),
+    goalWeight: inRange(settings.goalWeight, 20, 400),
+    goalSpeed: inRange(settings.goalSpeed, 0, 2),
+    dailyActivity: oneOf(settings.dailyActivity, DAILY_ACTIVITIES),
+    exerciseFrequency: oneOf(settings.exerciseFrequency, EXERCISE_FREQUENCIES),
+    diet: oneOf(settings.diet, DIETS),
+    intolerances: shortStrings(settings.intolerances, 30),
+    mainBlocker: shortStrings(settings.mainBlocker, 20),
+    unit: oneOf(settings.unit, ["metric", "imperial"]),
+  });
+}
+
 /**
  * The request body, trimmed to what the backend accepts so one bad answer
  * can't get the whole save refused: answers with a bad id or value are
- * dropped, later answers to the same question win, and at most 100 are sent.
+ * dropped, later answers to the same question win, at most 100 are sent, and
+ * account fields or settings outside the backend's ranges are left out.
  */
 export function buildWebSignupBody(input: WebSignupInput): Record<string, unknown> {
   const body: Record<string, unknown> = {};
-  if (input.funnelId) body.funnelId = cap(input.funnelId.trim(), 64);
-  if (input.funnelVersion) body.funnelVersion = cap(input.funnelVersion.trim(), 64);
+  const funnelId = input.funnelId?.trim();
+  if (funnelId) body.funnelId = cap(funnelId, 64);
+  const funnelVersion = input.funnelVersion?.trim();
+  if (funnelVersion) body.funnelVersion = cap(funnelVersion, 64);
 
   if (input.answers) {
     const byId = new Map<string, WebSignupAnswer>();
@@ -91,8 +167,10 @@ export function buildWebSignupBody(input: WebSignupInput): Record<string, unknow
     body.answers = [...byId.values()].slice(-MAX_ANSWERS);
   }
 
-  if (input.user && Object.keys(input.user).length > 0) body.user = input.user;
-  if (input.settings && Object.keys(input.settings).length > 0) body.settings = input.settings;
+  const user = cleanWebSignupUser(input.user);
+  if (user) body.user = user;
+  const settings = cleanWebSignupSettings(input.settings);
+  if (settings) body.settings = settings;
   if (input.attribution && Object.keys(input.attribution).length > 0) body.attribution = input.attribution;
   if (input.createAccount !== undefined) body.createAccount = input.createAccount;
   return body;

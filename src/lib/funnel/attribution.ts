@@ -7,7 +7,10 @@
  *
  * Kept in sessionStorage only: it lives as long as the tab, which covers ad,
  * landing page, sign-in and checkout, and it is sent to nothing but our own
- * backend after sign-in.
+ * backend after sign-in. Like PostHog and the Meta Pixel, it is only stored
+ * and sent for a known non-EU visitor or after "Accept optional cookies"
+ * (click ids exist to match ad conversions); storage and consent are in
+ * attributionStore.ts, and this file stays free of browser APIs for its tests.
  */
 
 /** The fields `attributionSchema` accepts (fresca_backend services/pendingProfile.ts). */
@@ -25,7 +28,7 @@ export type Attribution = {
 };
 
 /** Query parameter -> field, with the backend's length limit. */
-const QUERY_FIELDS = [
+export const QUERY_FIELDS = [
   ["utm_source", "utmSource", 200],
   ["utm_medium", "utmMedium", 200],
   ["utm_campaign", "utmCampaign", 200],
@@ -36,27 +39,46 @@ const QUERY_FIELDS = [
   ["ttclid", "ttclid", 500],
 ] as const;
 
-const STORAGE_KEY = "prepit.attribution.v1";
+/**
+ * Hosts that aren't where a visitor came from: our own site, and the payment
+ * and sign-in pages they come back from mid-funnel. Subdomains count too.
+ */
+const NOT_REFERRERS = [
+  "tryprepit.app",
+  "revenuecat.com",
+  "rev.cat",
+  "stripe.com",
+  "stripe.network",
+  "paddle.com",
+  "appleid.apple.com",
+  "accounts.google.com",
+  "firebaseapp.com",
+];
 
-/** Visitors on these hosts are already on the site, so they aren't a referrer. */
-const OWN_HOSTS = new Set(["tryprepit.app", "www.tryprepit.app"]);
+function isNotReferrer(hostname: string): boolean {
+  const host = hostname.toLowerCase();
+  return NOT_REFERRERS.some((blocked) => host === blocked || host.endsWith(`.${blocked}`));
+}
 
+/** Trimmed and capped, or nothing. A value with an "@" is dropped: email tools can put the recipient's address in a UTM. */
 function clean(value: string | null | undefined, max: number): string | undefined {
   const trimmed = value?.trim();
-  return trimmed ? trimmed.slice(0, max) : undefined;
+  if (!trimmed || trimmed.includes("@")) return undefined;
+  return trimmed.slice(0, max);
 }
 
 /**
- * The referrer as origin and path only: a query string can carry someone's
- * search terms or ids. Our own pages and anything unparsable give nothing.
+ * The referrer's origin only: a path or query can carry profile names,
+ * message ids or search terms. Our own pages, payment and sign-in pages, and
+ * anything unparsable give nothing.
  */
 export function cleanReferrer(referrer: string | null | undefined, currentHost: string): string | undefined {
   if (!referrer) return undefined;
   try {
     const url = new URL(referrer);
     if (url.protocol !== "https:" && url.protocol !== "http:") return undefined;
-    if (url.host.toLowerCase() === currentHost.toLowerCase() || OWN_HOSTS.has(url.hostname.toLowerCase())) return undefined;
-    return clean(`${url.origin}${url.pathname === "/" ? "" : url.pathname}`, 500);
+    if (url.host.toLowerCase() === currentHost.toLowerCase() || isNotReferrer(url.hostname)) return undefined;
+    return url.origin.slice(0, 500);
   } catch {
     return undefined;
   }
@@ -80,53 +102,6 @@ export function parseAttribution(
   if (Object.keys(attribution).length === 0) return null;
   attribution.landingPath = clean(pathname, 500) ?? "/";
   return attribution;
-}
-
-function storage(): Storage | null {
-  try {
-    return typeof window === "undefined" ? null : window.sessionStorage;
-  } catch {
-    return null;
-  }
-}
-
-/** The attribution kept for this tab, or null. */
-export function readAttribution(): Attribution | null {
-  try {
-    const raw = storage()?.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as unknown;
-    if (!parsed || typeof parsed !== "object") return null;
-    // Only known string fields come back out.
-    const attribution: Attribution = {};
-    for (const [, field, max] of QUERY_FIELDS) {
-      const value = (parsed as Record<string, unknown>)[field];
-      if (typeof value === "string" && value) attribution[field] = value.slice(0, max);
-    }
-    for (const field of ["referrer", "landingPath"] as const) {
-      const value = (parsed as Record<string, unknown>)[field];
-      if (typeof value === "string" && value) attribution[field] = value.slice(0, 500);
-    }
-    return Object.keys(attribution).length > 0 ? attribution : null;
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Keeps the first attribution in this tab (first touch, as the backend does).
- * Later pages, including a second campaign landing, leave it as it is.
- */
-export function captureAttribution(location: { search: string; pathname: string; host: string }, referrer: string) {
-  const store = storage();
-  if (!store || readAttribution()) return;
-  const landed = parseAttribution(location.search, location.pathname, referrer, location.host);
-  if (!landed) return;
-  try {
-    store.setItem(STORAGE_KEY, JSON.stringify(landed));
-  } catch {
-    // Storage full or blocked: the funnel works without attribution.
-  }
 }
 
 /** Campaign properties for analytics events: campaign names only, never click ids. */

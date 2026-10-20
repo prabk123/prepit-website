@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { isAnalyticsEnabled } from "@/lib/analytics";
+import { forgetAttribution, keepPendingAttribution } from "@/lib/funnel/attributionStore";
 import { denyAnalyticsConsent, grantAnalyticsConsent } from "@/lib/posthogClient";
 import {
   COOKIE_MAX_AGE_ONE_YEAR,
@@ -49,6 +50,7 @@ export default function CookieConsent() {
     setClientCookie(PREPIT_ANALYTICS_CONSENT_COOKIE, "granted", COOKIE_MAX_AGE_ONE_YEAR);
     grantAnalyticsConsent();
     window.prepitLoadMetaPixel?.();
+    keepPendingAttribution();
     setVisible(false);
     focusMain();
   }
@@ -56,6 +58,7 @@ export default function CookieConsent() {
   function rejectAnalytics() {
     setClientCookie(PREPIT_ANALYTICS_CONSENT_COOKIE, "denied", COOKIE_MAX_AGE_ONE_YEAR);
     denyAnalyticsConsent();
+    forgetAttribution();
     setVisible(false);
     focusMain();
   }

@@ -22,7 +22,7 @@ test("parseAttribution keeps UTM parameters, click ids, referrer and landing pat
     fbclid: "AbC123",
     gclid: "g1",
     ttclid: "t1",
-    referrer: "https://l.instagram.com/some/path",
+    referrer: "https://l.instagram.com",
     landingPath: "/start",
   });
 });
@@ -39,9 +39,26 @@ test("parseAttribution trims and caps values at the backend's limits", () => {
   assert.equal(attribution.fbclid.length, 500);
 });
 
-test("cleanReferrer drops queries, our own hosts and non-web schemes", () => {
+test("parseAttribution drops values that look like an email address", () => {
+  const attribution = parseAttribution("?utm_source=newsletter&utm_content=jo%40example.com&utm_campaign=hi@x.co", "/", "", HOST);
+  assert.deepEqual(attribution, { utmSource: "newsletter", landingPath: "/" });
+});
+
+test("cleanReferrer keeps the origin only and skips our own, payment and sign-in hosts", () => {
   assert.equal(cleanReferrer("https://www.google.com/", HOST), "https://www.google.com");
-  assert.equal(cleanReferrer("https://www.google.com/search?q=private", HOST), "https://www.google.com/search");
+  assert.equal(cleanReferrer("https://www.google.com/search?q=private", HOST), "https://www.google.com");
+  assert.equal(cleanReferrer("https://mail.example.com/u/0/inbox/18c2a1f", HOST), "https://mail.example.com");
+  for (const host of [
+    "https://pay.rev.cat/abc",
+    "https://billing.revenuecat.com/",
+    "https://checkout.stripe.com/c/pay",
+    "https://appleid.apple.com/auth/authorize",
+    "https://accounts.google.com/o/oauth2",
+    "https://fresca-dev.firebaseapp.com/__/auth/handler",
+  ]) {
+    assert.equal(cleanReferrer(host, HOST), undefined, host);
+  }
+  assert.equal(cleanReferrer("https://www.apple.com/", HOST), "https://www.apple.com");
   assert.equal(cleanReferrer("https://tryprepit.app/features", HOST), undefined);
   assert.equal(cleanReferrer("http://localhost:3100/", "localhost:3100"), undefined);
   assert.equal(cleanReferrer("android-app://com.google.android.gm/", HOST), undefined);
@@ -83,4 +100,28 @@ test("buildWebSignupBody leaves out empty parts", () => {
   assert.deepEqual(buildWebSignupBody({ funnelId: "direct-sale", attribution: null, user: {}, settings: {} }), {
     funnelId: "direct-sale",
   });
+});
+
+test("buildWebSignupBody keeps only account fields and settings the backend accepts", () => {
+  const body = buildWebSignupBody({
+    funnelId: "   ",
+    user: { dob: "1992-05-14", gender: "female", height: 400, weight: 72 },
+    settings: {
+      goal: " Lose Weight ",
+      goalWeight: 5,
+      goalSpeed: 0.5,
+      diet: "carnivore",
+      intolerances: ["gluten", " ", "x".repeat(300)],
+      unit: "metric",
+    },
+  });
+  assert.equal(body.funnelId, undefined);
+  assert.deepEqual(body.user, { dob: "1992-05-14", gender: "female", weight: 72 });
+  assert.deepEqual(body.settings, {
+    goal: "lose weight",
+    goalSpeed: 0.5,
+    intolerances: ["gluten", "x".repeat(200)],
+    unit: "metric",
+  });
+  assert.equal(buildWebSignupBody({ user: { dob: "2999-01-01", gender: "robot" } }).user, undefined);
 });
