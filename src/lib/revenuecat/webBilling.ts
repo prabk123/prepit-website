@@ -64,6 +64,28 @@ export function hasPremium(customerInfo: CustomerInfo): boolean {
   return Boolean(customerInfo.entitlements.active[PREMIUM_ENTITLEMENT]);
 }
 
+/**
+ * Premium at any time, from any store, even if it has lapsed. Counts as having
+ * had the trial, since the backend's `hasUsedTrial` misses trials from before
+ * the webhook synced them and any webhook that was dropped.
+ */
+export function hadPremium(customerInfo: CustomerInfo): boolean {
+  return Boolean(customerInfo.entitlements.all[PREMIUM_ENTITLEMENT]);
+}
+
+/**
+ * RevenueCat mounts its checkout in `#rcb-ui-root` on the body, outside our
+ * page, and shows the email there. This makes that element ourselves, kept
+ * out of session replays, so the SDK reuses it.
+ */
+export function ensurePrivateCheckoutRoot(): void {
+  if (document.getElementById("rcb-ui-root")) return;
+  const root = document.createElement("div");
+  root.id = "rcb-ui-root";
+  root.className = "rcb-ui-root ph-no-capture";
+  document.body.appendChild(root);
+}
+
 /** Which plan a package is, for analytics: `$rc_annual` / `$rc_monthly`, or by its period. */
 export function planIdOf(rcPackage: Package): PlanId | null {
   if (rcPackage.identifier === "$rc_annual") return "annual";
