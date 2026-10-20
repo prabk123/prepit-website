@@ -1,10 +1,14 @@
+import { attributionEventProperties } from "@/lib/funnel/attribution";
+import { readAttribution } from "@/lib/funnel/attributionStore";
 import { withPostHog } from "@/lib/posthogClient";
 
 /**
  * Web2App funnel events (sign-in, checkout, account). Properties are fixed
  * ids and codes only (funnel id, plan, provider, reason codes); never names,
  * emails or anything a visitor typed. The person is identified by their
- * Firebase uid, the same distinct id the app and backend use.
+ * Firebase uid, the same distinct id the app and backend use. Each event also
+ * carries the campaign the visitor landed with (`utm_source`, `utm_medium`,
+ * `utm_campaign`), never ad click ids.
  */
 export const WEB_FUNNEL_EVENTS = {
   bridgeView: "web_bridge_view",
@@ -28,7 +32,8 @@ export function trackWebFunnelEvent(
   event: WebFunnelEvent,
   properties: Record<string, string | number | boolean | null> = {},
 ) {
-  withPostHog((posthog) => posthog.capture(event, { source: "website", ...properties }));
+  const campaign = attributionEventProperties(readAttribution());
+  withPostHog((posthog) => posthog.capture(event, { source: "website", ...campaign, ...properties }));
 }
 
 /**

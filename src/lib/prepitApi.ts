@@ -1,6 +1,7 @@
 "use client";
 
 import { getIdToken } from "@/lib/firebase/auth";
+import { buildWebSignupBody, type WebSignupAnswer, type WebSignupInput } from "@/lib/funnel/webSignupProfile";
 import { isRevenueCatPortalUrl } from "@/lib/revenuecat/portalUrl";
 
 /**
@@ -141,4 +142,50 @@ export async function createBillingManagementUrl(): Promise<string | null> {
     if (error instanceof PrepItApiError && error.status === 404) return null;
     throw error;
   }
+}
+
+/** The pending profile as the web endpoints return it (fresca_backend `PendingProfileView`). */
+export type WebSignupProfile = PendingProfile & {
+  answers: WebSignupAnswer[];
+};
+
+export type WebSignupState = {
+  hasAccount: boolean;
+  pendingProfile: WebSignupProfile | null;
+};
+
+/** `GET /web-signup/profile`: the answers saved so far and whether the account exists. */
+export async function getWebSignupProfile(): Promise<WebSignupState> {
+  const body = await prepitFetch<{ hasAccount?: boolean; pendingProfile?: WebSignupProfile | null }>(
+    "/web-signup/profile",
+  );
+  return { hasAccount: Boolean(body.hasAccount), pendingProfile: body.pendingProfile ?? null };
+}
+
+export type WebSignupSaveResult = WebSignupState & {
+  /** This save made the account from the answers. */
+  accountCreated: boolean;
+  /** The answers were enough but the account wasn't made: no email on the sign-in, or a value the account refuses. */
+  accountNotCreatedReason: "no_email" | "invalid" | null;
+};
+
+/**
+ * `PATCH /web-signup/profile`: merges answers, account fields and first-touch
+ * attribution into the pending profile. Throws `PrepItApiError` 409
+ * `email_in_use` when the account it would create belongs to another sign-in.
+ */
+export async function saveWebSignupProfile(input: WebSignupInput): Promise<WebSignupSaveResult> {
+  const body = await prepitFetch<{
+    hasAccount?: boolean;
+    accountCreated?: boolean;
+    accountNotCreatedReason?: string;
+    pendingProfile?: WebSignupProfile | null;
+  }>("/web-signup/profile", { method: "PATCH", body: JSON.stringify(buildWebSignupBody(input)) });
+  const reason = body.accountNotCreatedReason;
+  return {
+    hasAccount: Boolean(body.hasAccount),
+    accountCreated: Boolean(body.accountCreated),
+    accountNotCreatedReason: reason === "no_email" || reason === "invalid" ? reason : null,
+    pendingProfile: body.pendingProfile ?? null,
+  };
 }
