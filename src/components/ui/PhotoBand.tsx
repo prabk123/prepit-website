@@ -10,6 +10,11 @@ type PhotoBandProps = {
   photo: SectionPhoto;
   /** A crop for screens below 1024 px (around the phone in the photo). */
   phonePhoto?: SectionPhoto;
+  /**
+   * Below 1024 px, set the text first and the photo strip under it. For a
+   * band right after another photo, so the two photos don't touch.
+   */
+  textFirstOnPhones?: boolean;
   annotations?: PhotoAnnotation[];
   /**
    * Side the text sits on, clear of the photo's subject. `end` puts it top
@@ -65,6 +70,7 @@ export default function PhotoBand({
   analyticsName,
   photo,
   phonePhoto,
+  textFirstOnPhones = false,
   annotations,
   textSide = "start",
   children,
@@ -91,6 +97,7 @@ export default function PhotoBand({
         annotationsFromXl={end}
         fadeEdges
         stackOnPhones
+        stripLastOnPhones={textFirstOnPhones}
         className="w-full lg:aspect-[1376/768] lg:max-h-[860px] lg:min-h-[640px]"
       >
         {!scrimBehindText && !textOnBrightPhoto && (
@@ -102,7 +109,11 @@ export default function PhotoBand({
         {/* From 1024 px the text sits on the dark photo, so it takes the dark
             tokens there; below that it sits on the page under the photo. */}
         <div
-          className={`${textOnBrightPhoto ? "" : "theme-dark-lg "}relative z-[3] mx-auto flex h-full w-full max-w-content px-gutter pt-[calc(var(--photo-strip-h)+1.5rem)] ${
+          className={`${textOnBrightPhoto ? "" : "theme-dark-lg "}relative z-[3] mx-auto flex h-full w-full max-w-content px-gutter ${
+            textFirstOnPhones
+              ? "max-lg:pb-[calc(var(--photo-strip-h)+2.5rem)]"
+              : "pt-[calc(var(--photo-strip-h)+1.5rem)]"
+          } ${
             end ? "lg:items-start lg:justify-end lg:pt-16" : "items-center lg:py-16"
           }`}
         >

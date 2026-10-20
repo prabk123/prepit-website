@@ -55,7 +55,7 @@ export default function NutritionistFeature() {
       <FeatureBlock
         id="consultation"
         reverse
-        title="It gets to know you first."
+        title="First, it gets to know you."
         lead="It starts with a short consultation about how you eat now. After a few days of meals, it tells you what it noticed and agrees one thing to change first."
         media={
           <div className="relative">
@@ -134,7 +134,7 @@ export default function NutritionistFeature() {
         layout="peek"
         tone="surface"
         title="Talk, and hear a reply."
-        lead="Send a voice note of up to two minutes, like on WhatsApp. Your nutritionist answers in its own voice, with the words written underneath."
+        lead="Tap the mic and talk for up to two minutes. Your nutritionist answers in its own voice, with the words written underneath."
         media={
           <div className="relative">
             <Glow />

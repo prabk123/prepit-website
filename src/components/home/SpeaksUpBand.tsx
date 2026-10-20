@@ -9,7 +9,8 @@ import { nutritionistEvening } from "@/content/lifestyle";
  * evening photo, one phone shows the messages it sends unasked, each lifted
  * out of the real chat screen, with buttons to switch between them (PRE-294).
  * On desktop the phone is on the left and its titled text on the right, level
- * with the phone's middle, so the page keeps alternating (PRE-306).
+ * with the phone's middle, so the page keeps alternating (PRE-306). On
+ * phones the title comes first and the photo under it (PRE-319).
  */
 export default function SpeaksUpBand() {
   return (
@@ -19,6 +20,9 @@ export default function SpeaksUpBand() {
       analyticsName="speaks-up"
       photo={nutritionistEvening.desktop}
       phonePhoto={nutritionistEvening.mobile}
+      // Below 1024 px the title comes before the photo, so this photo doesn't
+      // sit straight under the hero's, a similar shot (PRE-319).
+      textFirstOnPhones
       annotations={nutritionistEvening.annotations}
       textSide={nutritionistEvening.textSide}
       mediaSide="start"

@@ -39,8 +39,8 @@ export default function ObjectionsSection() {
           <SectionHeading
             id="objections-heading"
             size="section"
-            title="Tracking always starts well. Then it gets annoying."
-            lead="So here's what people ask before they try PrepIt."
+            title="Tried apps like this before?"
+            lead="Here's what people ask before they try PrepIt."
             className="max-w-[760px]"
           />
           {/* Cards you swipe on phones, ruled rows beside the phone from 1024 px (PRE-284). */}

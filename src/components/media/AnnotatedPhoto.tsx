@@ -41,6 +41,11 @@ type AnnotatedPhotoProps = {
    * The strip height is `--photo-strip-h`.
    */
   stackOnPhones?: boolean;
+  /**
+   * With `stackOnPhones`, put the strip at the bottom instead, so the
+   * children come first and the photo follows them.
+   */
+  stripLastOnPhones?: boolean;
   /** Size and position the box, e.g. an aspect ratio or `absolute inset-0`. */
   className?: string;
   /** Overlays on top of the photo, e.g. a heading. */
@@ -82,6 +87,7 @@ export default function AnnotatedPhoto({
   annotationsFromXl,
   fadeEdges,
   stackOnPhones,
+  stripLastOnPhones,
   className,
   children,
 }: AnnotatedPhotoProps) {
@@ -133,7 +139,9 @@ export default function AnnotatedPhoto({
       data-annotations="static"
     >
       <div
-        className={`annotated-photo__media ${stackOnPhones ? "max-lg:bottom-auto max-lg:h-[var(--photo-strip-h)]" : ""}`}
+        className={`annotated-photo__media ${stackOnPhones
+            ? `${stripLastOnPhones ? "max-lg:top-auto" : "max-lg:bottom-auto"} max-lg:h-[var(--photo-strip-h)]`
+            : ""}`}
         style={layerVars}
       >
         <div className="annotated-photo__layer">
