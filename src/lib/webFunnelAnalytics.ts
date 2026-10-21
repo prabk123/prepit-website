@@ -30,7 +30,7 @@ export const WEB_FUNNEL_EVENTS = {
   handoffView: "web_handoff_view",
   /** "Open PrepIt" on the success page, for people who already have the app. */
   handoffOpenApp: "web_handoff_open_app",
-  /** A quiz screen was shown (`step_id`, `step_index`). Never an answer: stop screens are `stop-age` and `stop-safety`. */
+  /** A quiz screen was shown (`step_id`, `step_index`). Never an answer: both stop screens (under 18, eating disorder) are `stop` with a null `step_index`. */
   quizStepView: "web_quiz_step_view",
   /** The email gate saved its lead (`marketing_consent`, `saved`: false when the request failed). */
   quizLeadSaved: "web_quiz_lead_saved",

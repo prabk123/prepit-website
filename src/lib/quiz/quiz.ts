@@ -92,11 +92,11 @@ export const SCREENS: readonly Screen[] = [
 ];
 
 /**
- * The step id analytics sees. The eating-disorder stop is "stop-safety" so
- * no event names the condition.
+ * The step id analytics sees. Both stop screens are "stop", so no event says
+ * whether someone is under 18 or ticked an eating disorder (health data).
  */
 export function analyticsStepId(id: ScreenId): string {
-  return id === "stop-ed" ? "stop-safety" : id;
+  return isStopScreen(id) ? "stop" : id;
 }
 
 export function isStopScreen(id: ScreenId): boolean {

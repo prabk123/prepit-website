@@ -86,9 +86,10 @@ test("under 18 and an eating disorder go to their stop screens, which end the qu
   assert.equal(nextScreen("safety", answers({ safety: [SAFETY_EATING_DISORDER, SAFETY_PREGNANT] }), TODAY), "stop-ed");
   assert.equal(nextScreen("stop-age", answers(), TODAY), null);
   assert.equal(nextScreen("stop-ed", answers(), TODAY), null);
-  // Analytics never names the condition.
-  assert.equal(analyticsStepId("stop-ed"), "stop-safety");
-  assert.equal(analyticsStepId("stop-age"), "stop-age");
+  // Analytics can't tell the two stops apart, so it never learns either answer.
+  assert.equal(analyticsStepId("stop-ed"), "stop");
+  assert.equal(analyticsStepId("stop-age"), "stop");
+  assert.equal(analyticsStepId("safety"), "safety");
 });
 
 test("dates of birth must be real and in the past", () => {
