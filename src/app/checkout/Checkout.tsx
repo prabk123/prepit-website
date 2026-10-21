@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useWebSession } from "@/components/account/useWebSession";
-import AppStoreButton from "@/components/ui/AppStoreButton";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { PRIMARY_BUTTON_CLASS, TEXT_BUTTON_CLASS } from "@/components/ui/buttons";
 import { providerOf, signOutOfWebsite } from "@/lib/firebase/auth";
@@ -15,6 +14,8 @@ import {
   hadPremium,
   hasPremium,
   loadCheckoutOffering,
+  offeringOffersTrial,
+  packageOffersTrial,
   planIdOf,
   purchasesFor,
   toCheckoutFailure,
@@ -26,6 +27,16 @@ import type { Offering } from "@revenuecat/purchases-js";
 import { resetWebUser, trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webFunnelAnalytics";
 
 const PROVIDER_NAMES = { google: "Google", apple: "Apple" } as const;
+
+/**
+ * `has_trial` is RevenueCat's answer for this customer; `trial_expected` is
+ * ours (no trial in PrepIt's record or RevenueCat's history). A mismatch means
+ * RevenueCat offered a trial to someone who already had one, so a product's
+ * trial eligibility setting is probably wrong.
+ */
+function trialProperties(hasTrial: boolean, trialExpected: boolean) {
+  return { has_trial: hasTrial, trial_expected: trialExpected, trial_mismatch: hasTrial && !trialExpected };
+}
 
 const FAILURE_MESSAGES: Record<CheckoutFailure, string | null> = {
   cancelled: null,
@@ -39,22 +50,23 @@ const FAILURE_MESSAGES: Record<CheckoutFailure, string | null> = {
 
 type Plans =
   | { status: "loading" }
-  | { status: "ready"; offering: Offering; hasTrial: boolean }
+  /** `trialExpected`: whether we think they should get the free trial. RevenueCat decides. */
+  | { status: "ready"; offering: Offering; trialExpected: boolean }
   | { status: "already_subscribed" }
   /** The email belongs to a PrepIt account under the other provider: the bridge explains. */
   | { status: "email_in_use" }
-  | { status: "no_trial_free_plans" }
   /** The offering has no RevenueCat paywall attached yet. */
   | { status: "no_paywall" }
   | { status: "error" };
 
 /**
  * Checkout (PRE-269): the plans, prices, trial and disclosures are the
- * RevenueCat paywall built in the dashboard for the web offering, shown here
- * with `presentPaywall`. Around it this page keeps what RevenueCat can't know:
- * sign in first with the app's account, the email-in-use guard, no second
- * free trial, no checkout for anyone already subscribed, and the "You're in"
- * handoff once `premium` is active.
+ * RevenueCat paywall of the current offering, built in the dashboard and shown
+ * here with `presentPaywall`. Whether the free trial applies is RevenueCat's
+ * call, from each Web Billing product's trial eligibility setting. Around the
+ * paywall this page keeps what RevenueCat can't know: sign in first with the
+ * app's account, the email-in-use guard, no checkout for anyone already
+ * subscribed, and the "You're in" handoff once `premium` is active.
  */
 export default function Checkout() {
   const params = useSearchParams();
@@ -113,7 +125,11 @@ export default function Checkout() {
         const purchases = await purchasesFor(uid);
         const customerInfo = await purchases.getCustomerInfo();
         if (hasPremium(customerInfo)) return done({ status: "already_subscribed" });
-        done(await loadCheckoutOffering(uid, summary.hasUsedTrial || hadPremium(customerInfo)));
+        const loaded = await loadCheckoutOffering(uid);
+        // A trial before (PrepIt's record, or premium at any time in RevenueCat)
+        // means no second one; RevenueCat's trial eligibility enforces it.
+        const hadTrial = summary.hasUsedTrial || hadPremium(customerInfo);
+        done(loaded.status === "ready" ? { ...loaded, trialExpected: !hadTrial } : loaded);
       } catch {
         done({ status: "error" });
       }
@@ -130,7 +146,6 @@ export default function Checkout() {
     const unavailable =
       keyProblem ??
       (plans.status === "already_subscribed" ||
-      plans.status === "no_trial_free_plans" ||
       plans.status === "email_in_use" ||
       plans.status === "no_paywall"
         ? plans.status
@@ -140,7 +155,11 @@ export default function Checkout() {
       trackWebFunnelEvent(WEB_FUNNEL_EVENTS.checkoutUnavailable, { ...context, reason: unavailable });
     } else if (plans.status === "ready") {
       paywallTracked.current = true;
-      trackWebFunnelEvent(WEB_FUNNEL_EVENTS.paywallView, { ...context, plan: requestedPlan, has_trial: plans.hasTrial });
+      trackWebFunnelEvent(WEB_FUNNEL_EVENTS.paywallView, {
+        ...context,
+        plan: requestedPlan,
+        ...trialProperties(offeringOffersTrial(plans.offering), plans.trialExpected),
+      });
     }
   }, [plans, keyProblem, context, requestedPlan]);
 
@@ -160,7 +179,7 @@ export default function Checkout() {
   // Shows RevenueCat's paywall in the page. It runs the purchase itself (with
   // 3-D Secure and its own retryable errors); this waits for the result.
   const offering = plans.status === "ready" ? plans.offering : null;
-  const hasTrial = plans.status === "ready" ? plans.hasTrial : false;
+  const trialExpected = plans.status === "ready" ? plans.trialExpected : false;
   useEffect(() => {
     const host = paywallHost.current;
     if (!uid || !offering || !host || paying !== "idle") return;
@@ -169,6 +188,7 @@ export default function Checkout() {
     const target = document.createElement("div");
     host.replaceChildren(target);
     let plan: string | null = null;
+    let trial: ReturnType<typeof trialProperties> | null = null;
     let purchaseStarted = false;
     (async () => {
       try {
@@ -184,8 +204,9 @@ export default function Checkout() {
             onPurchaseStarted: (rcPackage) => {
               purchaseStarted = true;
               plan = planIdOf(rcPackage);
+              trial = trialProperties(packageOffersTrial(rcPackage), trialExpected);
               setFailure(null);
-              trackWebFunnelEvent(WEB_FUNNEL_EVENTS.checkoutStart, { ...context, plan, has_trial: hasTrial });
+              trackWebFunnelEvent(WEB_FUNNEL_EVENTS.checkoutStart, { ...context, plan, ...trial });
             },
             onPurchaseError: (error) => {
               void toCheckoutFailure(error).then(({ code, rcErrorCode }) =>
@@ -202,13 +223,14 @@ export default function Checkout() {
         });
         if (!active) return;
         plan = planIdOf(result.selectedPackage) ?? plan;
+        trial = trialProperties(packageOffersTrial(result.selectedPackage), trialExpected);
         setPaying("confirming");
         const unlocked = await waitForPremium(uid, result.customerInfo);
         if (!active) return;
         trackWebFunnelEvent(WEB_FUNNEL_EVENTS.checkoutSuccess, {
           ...context,
           plan,
-          has_trial: hasTrial,
+          ...trial,
           entitlement_confirmed: unlocked,
         });
         router.push(welcomePath(!unlocked));
@@ -278,23 +300,6 @@ export default function Checkout() {
         >
           Try again
         </button>
-      </>
-    );
-  }
-
-  if (plans.status === "no_trial_free_plans") {
-    return (
-      <>
-        <SectionHeading
-          as="h1"
-          size="title"
-          align="center"
-          title="You've had your free trial"
-          lead="Subscribing again on the website isn't available yet. You can subscribe in the PrepIt app."
-        />
-        <div className="flex justify-center">
-          <AppStoreButton trackingSource="checkout-trial-used" />
-        </div>
       </>
     );
   }
