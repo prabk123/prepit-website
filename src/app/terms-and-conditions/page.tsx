@@ -5,7 +5,7 @@ import { loadMDX } from "@/lib/loadMDX";
 export const metadata: Metadata = {
   title: "Terms & Conditions",
   description:
-    "Read PrepIt's terms and conditions. Understand the rules and guidelines for using our AI-powered meal planning and nutrition tracking app.",
+    "The terms for using the PrepIt app, website, quiz and checkout: not medical advice, AI estimates, subscriptions and your content.",
   alternates: {
     canonical: "https://www.tryprepit.app/terms-and-conditions",
   },
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 };
 
 export default async function TermsAndConditionsPage() {
-  const { title, effectiveDate, content } = await loadMDX(
+  const { title, effectiveDate, content, headings } = await loadMDX(
     "terms-and-conditions.mdx"
   );
 
@@ -26,6 +26,7 @@ export default async function TermsAndConditionsPage() {
     <LegalMDXPage
       title={title}
       lastUpdated={effectiveDate}
+      headings={headings}
       currentPath="/terms-and-conditions"
     >
       {content}

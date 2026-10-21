@@ -3,6 +3,7 @@ import path from "path";
 import { compileMDX } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
 import { legalMdxComponents } from "@/components/legal/legalMdxComponents";
+import { legalHeadings } from "@/lib/legalHeadings";
 
 interface LegalFrontmatter {
   title: string;
@@ -28,5 +29,6 @@ export async function loadMDX(filename: string) {
     title: frontmatter.title,
     effectiveDate: frontmatter.effectiveDate,
     content,
+    headings: legalHeadings(source),
   };
 }

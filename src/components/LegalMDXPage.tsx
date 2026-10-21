@@ -1,20 +1,24 @@
 import React from "react";
 import { HideSiteFinalCta } from "@/components/pricing/SiteFinalCta";
 import Section from "@/components/ui/Section";
+import type { LegalHeading } from "@/lib/legalHeadings";
 import LegalNav from "./LegalNav";
 
 interface LegalMDXPageProps {
   title: string;
   lastUpdated?: string;
   currentPath: string;
+  /** The page's `##` headings, listed as jump links under the title. */
+  headings?: LegalHeading[];
   children: React.ReactNode;
 }
 
-/** A legal page (D3): the guides' 720 px reading column on the dark page. */
+/** A legal page: the guides' 720 px reading column, with a contents list under the title. */
 export default function LegalMDXPage({
   title,
   lastUpdated,
   currentPath,
+  headings = [],
   children,
 }: LegalMDXPageProps) {
   return (
@@ -32,6 +36,25 @@ export default function LegalMDXPage({
               <p className="text-small text-ink-faint">Last updated {lastUpdated}</p>
             )}
           </div>
+          {headings.length > 2 && (
+            <nav aria-labelledby="legal-contents" className="rounded-tile border border-line bg-surface p-5 sm:p-6">
+              <h2 id="legal-contents" className="text-small font-medium text-ink-muted">
+                Contents
+              </h2>
+              <ol className="mt-3 flex flex-col gap-2 text-body">
+                {headings.map((heading) => (
+                  <li key={heading.id}>
+                    <a
+                      href={`#${heading.id}`}
+                      className="text-ink underline decoration-accent underline-offset-4 hover:text-accent-text"
+                    >
+                      {heading.text}
+                    </a>
+                  </li>
+                ))}
+              </ol>
+            </nav>
+          )}
           <article>{children}</article>
         </div>
       </Section>
