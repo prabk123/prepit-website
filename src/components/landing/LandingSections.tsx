@@ -149,7 +149,7 @@ function Body({ children }: { children: ReactNode }) {
   return <p className="max-w-[36em] text-body text-ink-secondary text-pretty">{children}</p>;
 }
 
-/** Copy that differs between the website (US) and the App Store markets. */
+/** Copy that differs between web checkout and the App Store markets. */
 export function landingCopy(market: WebMarket) {
   const web = market === "web";
   return {

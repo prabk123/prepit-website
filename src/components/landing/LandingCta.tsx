@@ -29,10 +29,10 @@ function Arrow() {
 }
 
 /**
- * "Start my free 7 days" on the landing page (PRE-302, PRE-331). In the US it
- * opens the shared bridge (sign in, choose a plan, pay $0); in the markets
- * waiting on web checkout it is the App Store button; elsewhere it goes to
- * the waitlist.
+ * "Start my free 7 days" on the landing page (PRE-302, PRE-331). Where the
+ * website sells (every country for now) it opens the shared bridge (sign
+ * in, choose a plan, pay $0); in a country listed for the App Store it is
+ * the App Store button; in a waitlist country it goes to the waitlist.
  */
 export default function LandingCta({ market, placement, fullWidth, small, className }: LandingCtaProps) {
   if (market === "app-store") {

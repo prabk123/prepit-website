@@ -114,13 +114,15 @@ export default function MyPlan({ market }: { market: WebMarket }) {
         </Card>
       )}
 
-      <Card>
-        <CardTitle>Your first 7 days are free</CardTitle>
-        <p className="text-[15px] text-ink-secondary">
-          Full access and your first session today, a reminder email on day 4, and your plan starts on day 8 if you keep it: {PRICES.annual} a
-          year or {PRICES.monthly} a month. Cancel before then and you pay nothing.
-        </p>
-      </Card>
+      {market === "web" && (
+        <Card>
+          <CardTitle>Your first 7 days are free</CardTitle>
+          <p className="text-[15px] text-ink-secondary">
+            Full access and your first session today, a reminder email on day 4, and your plan starts on day 8 if you keep it: {PRICES.annual} a
+            year or {PRICES.monthly} a month. Cancel before then and you pay nothing.
+          </p>
+        </Card>
+      )}
 
       <QuizStartCta market={market} className={PRIMARY_BUTTON_CLASS} trackingSource="my-plan" />
       <p className="-mt-2 text-center text-[12.5px] text-ink-muted">
