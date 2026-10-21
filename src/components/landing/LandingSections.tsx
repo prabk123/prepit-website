@@ -61,13 +61,13 @@ function Tick() {
   );
 }
 
-/** Up to three short points, each with a lime tick and a bold lead-in. */
+/** Up to three short points, each with an orange tick and a bold lead-in. */
 function Bullets({ items }: { items: [ReactNode, ReactNode][] }) {
   return (
     <ul className="grid gap-3">
       {items.map(([lead, rest], index) => (
         <li key={index} className="grid grid-cols-[22px_minmax(0,1fr)] items-start gap-3 text-ink-secondary">
-          <span className="mt-px grid h-[22px] w-[22px] place-items-center rounded-full bg-lime text-on-lime">
+          <span className="mt-px grid h-[22px] w-[22px] place-items-center rounded-full bg-accent text-on-accent">
             <Tick />
           </span>
           <span>
@@ -82,7 +82,7 @@ function Bullets({ items }: { items: [ReactNode, ReactNode][] }) {
 /** "After a few weeks": when a screen appears, so a new user knows what to expect. */
 function WhenPill({ children }: { children: ReactNode }) {
   return (
-    <span className="whitespace-nowrap rounded-full bg-lime px-2.5 py-0.5 text-[12px] font-bold uppercase tracking-[0.04em] text-on-lime">
+    <span className="whitespace-nowrap rounded-full bg-accent px-2.5 py-0.5 text-[12px] font-bold uppercase tracking-[0.04em] text-on-accent">
       {children}
     </span>
   );
@@ -393,7 +393,7 @@ export function SignalsSection() {
                 <span
                   key={mark.top}
                   aria-hidden
-                  className="pointer-events-none absolute z-[2] aspect-square w-[4.4%] -translate-x-1/2 -translate-y-1/2 rounded-full border-[2.5px] border-lime shadow-[0_0_0_2px_rgb(0_0_0/0.25)]"
+                  className="pointer-events-none absolute z-[2] aspect-square w-[4.4%] -translate-x-1/2 -translate-y-1/2 rounded-full border-[2.5px] border-accent shadow-[0_0_0_2px_rgb(0_0_0/0.25)]"
                   style={mark}
                 />
               ))}
@@ -737,7 +737,7 @@ export function OfferSection({ market }: { market: WebMarket }) {
               <span className="text-small text-ink-secondary">
                 <b className="text-ink">{PRICES.annual}</b> billed yearly
               </span>
-              <span className="justify-self-end whitespace-nowrap rounded-full bg-lime px-2.5 py-0.5 text-[12px] font-bold text-on-lime">
+              <span className="justify-self-end whitespace-nowrap rounded-full bg-accent px-2.5 py-0.5 text-[12px] font-bold text-on-accent">
                 Save {PRICES.annualSavingPercent} vs monthly
               </span>
             </div>
