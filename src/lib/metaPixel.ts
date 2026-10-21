@@ -30,3 +30,35 @@ export function trackQuizLead() {
 
   window.fbq("track", "Lead");
 }
+
+/**
+ * Meta's standard CompleteRegistration, once someone new to PrepIt signs in on
+ * the website. Fired once per uid in this browser; it carries nothing.
+ */
+export function trackSignupRegistration(uid: string) {
+  if (typeof window === "undefined" || typeof window.fbq !== "function") {
+    return;
+  }
+  const key = `prepit.meta.registration.${uid}`;
+  try {
+    if (window.localStorage.getItem(key)) return;
+    window.localStorage.setItem(key, "1");
+  } catch {
+    // No storage: send it; Meta counts a repeat at worst.
+  }
+
+  window.fbq("track", "CompleteRegistration");
+}
+
+/**
+ * Meta's standard InitiateCheckout, when the checkout paywall shows. It
+ * carries nothing; the trial or purchase itself reaches Meta through
+ * RevenueCat's Meta integration, with its value.
+ */
+export function trackCheckoutInitiated() {
+  if (typeof window === "undefined" || typeof window.fbq !== "function") {
+    return;
+  }
+
+  window.fbq("track", "InitiateCheckout");
+}

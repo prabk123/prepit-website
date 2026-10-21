@@ -1,7 +1,10 @@
 "use client";
 
 import type { CustomerInfo, Offering, Package, Purchases } from "@revenuecat/purchases-js";
+import { readCookie } from "@/lib/cookies";
 import { isProductionDeploy } from "@/lib/firebase/config";
+import { mayKeepAttribution, readAttribution } from "@/lib/funnel/attributionStore";
+import { metaMatchingAttributes } from "@/lib/metaMatching";
 import type { PlanId } from "@/lib/pricing";
 
 /**
@@ -83,6 +86,56 @@ export function ensurePrivateCheckoutRoot(): void {
   root.id = "rcb-ui-root";
   root.className = "rcb-ui-root ph-no-capture";
   document.body.appendChild(root);
+}
+
+export type MetaMatchingResult = {
+  has_email: boolean;
+  has_fbp: boolean;
+  has_fbc: boolean;
+  /** False when RevenueCat refused or didn't get that call. */
+  identity_saved: boolean;
+  browser_saved: boolean;
+};
+
+/**
+ * Gives RevenueCat what its Meta integration matches a web purchase on: the
+ * Meta Pixel's `_fbp` / `_fbc` (or one built from the ad click id), the
+ * sign-in email, the user agent and the page address (metaMatching.ts). Called
+ * on checkout before the paywall, so it is on the customer when RevenueCat
+ * sends the trial or purchase to Meta. Only under the pixel's own rule (known
+ * non-EU visitor, or "Accept optional cookies"); otherwise nothing is sent.
+ * The web SDK doesn't retry attributes, so a failure is reported, not thrown.
+ */
+export async function sendMetaMatchingToRevenueCat(uid: string, email: string | null): Promise<MetaMatchingResult | null> {
+  if (!mayKeepAttribution()) return null;
+  const { identity, browser } = metaMatchingAttributes({
+    fbpCookie: readCookie("_fbp"),
+    fbcCookie: readCookie("_fbc"),
+    fbclid: readAttribution()?.fbclid,
+    email,
+    userAgent: navigator.userAgent,
+    pageUrl: window.location.href,
+    now: Date.now(),
+  });
+  const purchases = await purchasesFor(uid);
+  const save = async (attributes: Record<string, string>) => {
+    if (Object.keys(attributes).length === 0) return false;
+    try {
+      await purchases.setAttributes(attributes);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+  // Separate calls, so a refused browser attribute can't lose the email.
+  const [identitySaved, browserSaved] = await Promise.all([save(identity), save(browser)]);
+  return {
+    has_email: "$email" in identity,
+    has_fbp: "$fbp" in browser,
+    has_fbc: "$fbc" in browser,
+    identity_saved: identitySaved,
+    browser_saved: browserSaved,
+  };
 }
 
 /** Which plan a package is, for analytics: `$rc_annual` / `$rc_monthly`, or by its period. */

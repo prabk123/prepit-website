@@ -18,12 +18,14 @@ import {
   packageOffersTrial,
   planIdOf,
   purchasesFor,
+  sendMetaMatchingToRevenueCat,
   toCheckoutFailure,
   waitForPremium,
   webBillingKeyProblem,
   type CheckoutFailure,
 } from "@/lib/revenuecat/webBilling";
 import type { Offering } from "@revenuecat/purchases-js";
+import { trackCheckoutInitiated } from "@/lib/metaPixel";
 import { resetWebUser, trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webFunnelAnalytics";
 
 const PROVIDER_NAMES = { google: "Google", apple: "Apple" } as const;
@@ -160,11 +162,27 @@ export default function Checkout() {
         plan: requestedPlan,
         ...trialProperties(offeringOffersTrial(plans.offering), plans.trialExpected),
       });
+      trackCheckoutInitiated();
     }
   }, [plans, keyProblem, context, requestedPlan]);
 
   const provider = session.status === "signedIn" ? providerOf(session.user) : null;
   const email = session.status === "signedIn" ? session.user.email : null;
+
+  // Once per signed-in uid, as soon as there's a paywall to buy from: what
+  // RevenueCat's Meta integration needs to match the purchase to an ad.
+  const metaMatchingSent = useRef<string | null>(null);
+  useEffect(() => {
+    if (!uid || plans.status !== "ready" || metaMatchingSent.current === uid) return;
+    metaMatchingSent.current = uid;
+    sendMetaMatchingToRevenueCat(uid, email)
+      .then((result) => {
+        if (result) trackWebFunnelEvent(WEB_FUNNEL_EVENTS.metaMatchingSent, { ...context, ...result });
+      })
+      .catch(() => {
+        trackWebFunnelEvent(WEB_FUNNEL_EVENTS.metaMatchingSent, { ...context, identity_saved: false, browser_saved: false });
+      });
+  }, [uid, email, plans.status, context]);
   const welcomePath = (pending: boolean) =>
     `/welcome?${new URLSearchParams({ ...(provider ? { provider } : {}), ...(pending ? { pending: "1" } : {}) })}`;
 
