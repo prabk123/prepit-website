@@ -17,6 +17,7 @@
  *
  * Kept free of React so it can be tested on its own.
  */
+import type { BridgeSource } from "./params";
 import type { WebSignupAnswer, WebSignupSettings, WebSignupUser } from "./webSignupProfile";
 
 /** What the quiz leaves for the bridge. */
@@ -120,5 +121,43 @@ export function readWebSessionId(): string | undefined {
     return id && WEB_SESSION_ID.test(id) ? id : undefined;
   } catch {
     return undefined;
+  }
+}
+
+/**
+ * What the bridge knew when it showed checkout, for the "You're in" page
+ * after it: which page they came from and whether they got the free week.
+ * Session storage, so it ends with the tab. Checkout (RevenueCat) owns the
+ * redirect, so this can't travel in the URL.
+ */
+export type BridgeVisit = { from: BridgeSource; trial: boolean };
+
+const BRIDGE_VISIT_KEY = "prepit.bridgeVisit";
+
+export function writeBridgeVisit(visit: BridgeVisit): void {
+  try {
+    if (typeof window !== "undefined") window.sessionStorage.setItem(BRIDGE_VISIT_KEY, JSON.stringify(visit));
+  } catch {
+    // Blocked storage: the success page uses its defaults.
+  }
+}
+
+/** Parses a stored visit. Exported for tests. */
+export function parseBridgeVisit(raw: string | null): BridgeVisit | null {
+  if (!raw) return null;
+  try {
+    const value = JSON.parse(raw) as Record<string, unknown>;
+    if ((value.from !== "landing" && value.from !== "quiz") || typeof value.trial !== "boolean") return null;
+    return { from: value.from, trial: value.trial };
+  } catch {
+    return null;
+  }
+}
+
+export function readBridgeVisit(): BridgeVisit | null {
+  try {
+    return typeof window === "undefined" ? null : parseBridgeVisit(window.sessionStorage.getItem(BRIDGE_VISIT_KEY));
+  } catch {
+    return null;
   }
 }

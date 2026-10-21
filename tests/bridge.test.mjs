@@ -1,7 +1,7 @@
 // Unit tests for the shared bridge handoff (PRE-323) and the in-app browser escape (PRE-324). Run with `yarn test`.
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { parseBridgeHandoff } from "../src/lib/funnel/bridgeHandoff.ts";
+import { parseBridgeHandoff, parseBridgeVisit } from "../src/lib/funnel/bridgeHandoff.ts";
 import { bridgePath, parseBridgeSource } from "../src/lib/funnel/params.ts";
 import { buildWebSignupBody } from "../src/lib/funnel/webSignupProfile.ts";
 
@@ -56,4 +56,12 @@ test("buildWebSignupBody sends a valid webSessionId and the quiz name", () => {
   assert.equal(buildWebSignupBody({ webSessionId: "short" }).webSessionId, undefined);
   assert.equal(buildWebSignupBody({ webSessionId: "has spaces in it" }).webSessionId, undefined);
   assert.equal(buildWebSignupBody({ user: { firstName: "  " } }).user, undefined);
+});
+
+test("parseBridgeVisit keeps a valid visit only", () => {
+  assert.deepEqual(parseBridgeVisit(JSON.stringify({ from: "quiz", trial: false })), { from: "quiz", trial: false });
+  assert.equal(parseBridgeVisit(JSON.stringify({ from: "evil", trial: true })), null);
+  assert.equal(parseBridgeVisit(JSON.stringify({ from: "landing" })), null);
+  assert.equal(parseBridgeVisit("{bad"), null);
+  assert.equal(parseBridgeVisit(null), null);
 });

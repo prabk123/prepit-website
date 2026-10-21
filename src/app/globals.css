@@ -551,6 +551,15 @@
     display: none;
   }
 
+  /* <SiteChrome>: the site header and footer; the bridge pages (<HideSiteChrome />) show their own. */
+  .site-chrome {
+    display: contents;
+  }
+
+  body:has([data-hide-site-chrome]) .site-chrome {
+    display: none;
+  }
+
   /* <LoopVideo>: the clip plus its pause/play button. */
   .loop-video {
     position: relative;

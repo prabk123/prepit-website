@@ -73,8 +73,8 @@ export default function SignInBridge() {
   // (answers from the quiz, attribution, the quiz session id).
   useSaveWebSignup(session, funnelId, reloadAccount);
 
-  async function signOut() {
-    await signOutOfWebsite();
+  async function signOut(keepQuizAnswers = false) {
+    await signOutOfWebsite({ keepQuizAnswers });
     resetWebUser();
     setJustSignedIn(null);
     successTracked.current = false;
@@ -161,7 +161,7 @@ export default function SignInBridge() {
       <EmailInUseNotice
         existingProvider={summary.emailInUse.existingProvider}
         purpose="your subscription goes to the right account"
-        onSignOut={() => void signOut()}
+        onSignOut={() => void signOut(true)}
       />
     );
   }

@@ -2,8 +2,9 @@
 
 import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { BridgeHead, BridgeProgress } from "@/components/bridge/BridgeParts";
+import { BridgeHead, BridgeHeader, BridgeProgress } from "@/components/bridge/BridgeParts";
 import { watchUser } from "@/lib/firebase/auth";
+import { readBridgeVisit } from "@/lib/funnel/bridgeHandoff";
 import { trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webFunnelAnalytics";
 
 const PROVIDER_NAMES = { google: "Google", apple: "Apple" } as const;
@@ -34,12 +35,17 @@ export default function WelcomeDetails({ download }: { download: ReactNode }) {
   const pending = params.get("pending") === "1";
   const tracked = useRef(false);
   const [account, setAccount] = useState<{ email: string | null; name: string | null } | null>(null);
+  // Where they came from and whether they got the free week, left by the
+  // bridge; useSearchParams keeps this page out of the server render.
+  const [visit] = useState(() => readBridgeVisit());
+  const from = visit?.from ?? "landing";
+  const trial = visit?.trial ?? true;
 
   useEffect(() => {
     if (tracked.current) return;
     tracked.current = true;
-    trackWebFunnelEvent(WEB_FUNNEL_EVENTS.handoffView, { provider, pending });
-  }, [provider, pending]);
+    trackWebFunnelEvent(WEB_FUNNEL_EVENTS.handoffView, { provider, pending, from, trial });
+  }, [provider, pending, from, trial]);
 
   // The address they signed in with, so they pick the same account in the app.
   useEffect(
@@ -54,11 +60,16 @@ export default function WelcomeDetails({ download }: { download: ReactNode }) {
 
   return (
     <>
-      <BridgeProgress from="landing" current="app" />
+      <BridgeHeader />
+      <BridgeProgress from={from} current="app" />
       <BridgeHead
-        eyebrow="Free week started"
+        eyebrow={trial ? "Free week started" : "Membership started"}
         title={account?.name ? `You’re in, ${account.name}.` : "You’re in."}
-        lead="Session 1 with your AI nutritionist is waiting in the app. It takes about 5 minutes."
+        lead={
+          trial
+            ? "Session 1 with your AI nutritionist is waiting in the app. It takes about 5 minutes."
+            : "Your account and past logs are waiting in the app."
+        }
       />
       {pending && (
         <p role="status" className="text-small text-ink-muted">

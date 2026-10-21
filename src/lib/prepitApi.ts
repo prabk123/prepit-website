@@ -20,6 +20,8 @@ export class PrepItApiError extends Error {
   constructor(
     readonly status: number,
     readonly code?: string,
+    /** The backend's own reason (`details`), e.g. which field Joi refused. Never shown to people. */
+    readonly details?: string,
   ) {
     super(`PrepIt API ${status}${code ? ` ${code}` : ""}`);
     this.name = "PrepItApiError";
@@ -49,13 +51,15 @@ export async function prepitFetch<T>(path: string, init: RequestInit = {}): Prom
 
   if (!response.ok) {
     let code: string | undefined;
+    let details: string | undefined;
     try {
-      const body = (await response.json()) as { code?: unknown };
+      const body = (await response.json()) as { code?: unknown; details?: unknown };
       if (typeof body.code === "string") code = body.code;
+      if (typeof body.details === "string") details = body.details;
     } catch {
       // Not JSON; the status is enough.
     }
-    throw new PrepItApiError(response.status, code);
+    throw new PrepItApiError(response.status, code, details);
   }
   return (await response.json()) as T;
 }
@@ -189,7 +193,9 @@ export async function saveWebSignupProfile(input: WebSignupInput): Promise<WebSi
   } catch (error) {
     // A backend from before PRE-327 refuses the unknown `webSessionId`; the
     // save matters more than the lead match, so send it again without.
-    if (!(error instanceof PrepItApiError && error.status === 400 && input.webSessionId)) throw error;
+    const refusedSessionId =
+      error instanceof PrepItApiError && error.status === 400 && Boolean(error.details?.includes("webSessionId"));
+    if (!(refusedSessionId && input.webSessionId)) throw error;
     body = await patch({ ...input, webSessionId: undefined });
   }
   const reason = body.accountNotCreatedReason;

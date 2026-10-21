@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { BridgeFooter, SUPPORT_EMAIL } from "@/components/bridge/BridgeParts";
 import { HideSiteFinalCta } from "@/components/pricing/SiteFinalCta";
+import { HideSiteChrome } from "@/components/SiteChrome";
 import AppStoreCta from "@/components/ui/AppStoreCta";
 import { openAppUrl } from "@/lib/appStore";
 import OpenAppLink from "./OpenAppLink";
@@ -35,7 +36,8 @@ export default async function WelcomePage({ searchParams }: { searchParams: Prom
     </div>
   );
   return (
-    <div className="flex w-full justify-center bg-page px-4 pb-section pt-24 text-ink lg:pt-32">
+    <div className="flex w-full justify-center bg-page px-4 pb-section pt-4 text-ink lg:pt-8">
+      <HideSiteChrome />
       <HideSiteFinalCta />
       <div className="flex w-full max-w-[560px] flex-col gap-6">
         <Suspense fallback={null}>

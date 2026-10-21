@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import DeviceFrame from "@/components/device/DeviceFrame";
+import LongLogo from "@/components/ui/LongLogo";
 import { appCapture } from "@/lib/captures";
 import type { BridgeSource } from "@/lib/funnel/params";
 import { PLANS, PRICES, TRIAL_DAYS, type PlanId } from "@/lib/pricing";
@@ -400,6 +401,25 @@ export function ConsultationShots() {
 }
 
 /** Support, legal links. */
+/**
+ * The bridge pages' own short header (the site header is hidden there): the
+ * logo and, on the right, `children` such as "Already a member? Sign in".
+ * No App Store button, so nothing skips the sign-in.
+ */
+export function BridgeHeader({ children }: { children?: ReactNode }) {
+  return (
+    <header className="flex min-h-11 items-center justify-between gap-4">
+      <Link
+        href="/"
+        className="flex h-11 items-center text-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus"
+      >
+        <LongLogo className="h-7 w-auto text-primary" />
+      </Link>
+      {children}
+    </header>
+  );
+}
+
 export function BridgeFooter() {
   return (
     <footer className="flex flex-col gap-2 border-t border-line pt-5 text-small text-ink-muted">

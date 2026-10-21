@@ -12,6 +12,7 @@ import {
   BridgeAlert,
   BridgeFooter,
   BridgeHead,
+  BridgeHeader,
   BridgeProgress,
   ConsultationShots,
   DueSummary,
@@ -26,7 +27,7 @@ import FaqAccordion from "@/components/pricing/FaqAccordion";
 import { PRIMARY_BUTTON_CLASS, TEXT_BUTTON_CLASS } from "@/components/ui/buttons";
 import { openAppUrl } from "@/lib/appStore";
 import { providerOf, signOutOfWebsite } from "@/lib/firebase/auth";
-import { readBridgeHandoff, type BridgeHandoff } from "@/lib/funnel/bridgeHandoff";
+import { readBridgeHandoff, writeBridgeVisit, type BridgeHandoff } from "@/lib/funnel/bridgeHandoff";
 import { parseBridgeSource, parseFunnelId, type BridgeSource } from "@/lib/funnel/params";
 import { parsePlanId, type PlanId } from "@/lib/pricing";
 import { resetWebUser, trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webFunnelAnalytics";
@@ -104,7 +105,10 @@ export default function StartBridge() {
   const save = useSaveWebSignup(session, funnelId, reloadAccount);
   // The quiz's answers live in this browser. useSearchParams keeps this page
   // out of the server render, so reading storage here can't mismatch.
-  const [handoff] = useState<BridgeHandoff | null>(() => readBridgeHandoff());
+  const [handoff, setHandoff] = useState<BridgeHandoff | null>(() => readBridgeHandoff());
+  // PrepIt is iPhone-only: Android visitors stop before any card is taken.
+  const [android] = useState(() => typeof navigator !== "undefined" && /Android/i.test(navigator.userAgent));
+  const [androidContinue, setAndroidContinue] = useState(false);
   const [today] = useState(() => new Date());
   const viewTracked = useRef(false);
   const signInTracked = useRef<string | null>(null);
@@ -112,8 +116,8 @@ export default function StartBridge() {
   useEffect(() => {
     if (viewTracked.current) return;
     viewTracked.current = true;
-    trackWebFunnelEvent(WEB_FUNNEL_EVENTS.bridgeView, { ...context, has_quiz_answers: handoff !== null });
-  }, [context, handoff]);
+    trackWebFunnelEvent(WEB_FUNNEL_EVENTS.bridgeView, { ...context, has_quiz_answers: handoff !== null, android });
+  }, [context, handoff, android]);
 
   const account = session.status === "signedIn" ? session.account : null;
   const summary = account?.status === "ready" ? account.summary : null;
@@ -138,14 +142,27 @@ export default function StartBridge() {
     });
   }, [session, summary, context, handoff]);
 
+  const accountError = account?.status === "error" ? account.code : null;
+  useEffect(() => {
+    if (accountError) trackWebFunnelEvent(WEB_FUNNEL_EVENTS.bridgeError, { ...context, code: accountError });
+  }, [accountError, context]);
+
+  // The "You're in" page after checkout reads this (Checkout owns the redirect).
+  const atCheckout = Boolean(summary && !summary.isSubscribed && !summary.emailInUse && save.status === "done");
+  const trial = !summary?.hasUsedTrial;
+  useEffect(() => {
+    if (atCheckout) writeBridgeVisit({ from, trial });
+  }, [atCheckout, from, trial]);
+
   function choosePlan(next: PlanId) {
     const query = new URLSearchParams(params.toString());
     query.set("plan", next);
     router.replace(`${pathname}?${query}`, { scroll: false });
   }
 
-  async function signOut() {
-    await signOutOfWebsite();
+  async function signOut(keepQuizAnswers = false) {
+    await signOutOfWebsite({ keepQuizAnswers });
+    if (!keepQuizAnswers) setHandoff(null);
     resetWebUser();
   }
 
@@ -177,13 +194,36 @@ export default function StartBridge() {
     );
 
   if (session.status === "loading") {
-    return <p className="text-body text-ink-secondary">Loading…</p>;
+    return (
+      <>
+        <BridgeHeader />
+        <p className="text-body text-ink-secondary">Loading…</p>
+      </>
+    );
+  }
+
+  if (session.status === "signedOut" && android && !androidContinue) {
+    return (
+      <>
+        <BridgeHeader />
+        <BridgeProgress from={from} current="trial" />
+        <BridgeHead
+          eyebrow="Your AI nutritionist"
+          title="PrepIt is on iPhone for now."
+          lead="Android is coming soon. We won’t take a card for an app you can’t use yet."
+        />
+        <button type="button" className="w-fit text-left text-small text-ink-secondary" onClick={() => setAndroidContinue(true)}>
+          Have an iPhone too? <u className="font-bold text-ink">Continue on this page</u>
+        </button>
+        <BridgeFooter />
+      </>
+    );
   }
 
   if (session.status === "signedOut" || summary?.emailInUse) {
     return (
       <>
-        <div className="flex justify-end">
+        <BridgeHeader>
           <button
             type="button"
             className="text-small text-ink-secondary"
@@ -191,7 +231,7 @@ export default function StartBridge() {
           >
             Already a member? <u className="font-bold text-ink">Sign in</u>
           </button>
-        </div>
+        </BridgeHeader>
         <BridgeProgress from={from} current="trial" />
         {intro}
         <FreeWeekTimeline plan={plan} today={today} />
@@ -205,7 +245,7 @@ export default function StartBridge() {
             <EmailInUseNotice
               existingProvider={summary.emailInUse.existingProvider}
               purpose={from === "quiz" ? "your plan and trial stay in one place" : "your trial stays in one place"}
-              onSignOut={() => void signOut()}
+              onSignOut={() => void signOut(true)}
             />
           ) : (
             <>
@@ -234,6 +274,9 @@ export default function StartBridge() {
   if (account?.status === "error") {
     return (
       <div className="flex flex-col items-center gap-4 py-10 text-center">
+        <div className="self-stretch text-left">
+          <BridgeHeader />
+        </div>
         <h1 className="font-display text-title text-ink">We couldn’t start your free week</h1>
         <p className="text-small text-ink-secondary">
           Something went wrong on our side. You have not been charged{from === "quiz" ? ", and your plan is saved" : ""}.
@@ -249,14 +292,20 @@ export default function StartBridge() {
     );
   }
 
-  if (!summary || save !== "done") {
-    return <SavingPlan from={from} provider={providerName} />;
+  if (!summary || save.status !== "done") {
+    return (
+      <>
+        <BridgeHeader />
+        <SavingPlan from={from} provider={providerName} />
+      </>
+    );
   }
 
   // Already paying (any store): never a checkout.
   if (summary.isSubscribed) {
     return (
       <>
+        <BridgeHeader />
         <BridgeHead
           eyebrow="Welcome back"
           title="You’re already a member."
@@ -272,7 +321,7 @@ export default function StartBridge() {
           Open PrepIt
         </a>
         <p className="text-small text-ink-muted">
-          Manage your subscription at{" "}
+          See your subscription at{" "}
           <a href="/account" className={TEXT_BUTTON_CLASS}>
             tryprepit.app/account
           </a>
@@ -286,6 +335,7 @@ export default function StartBridge() {
   const welcomeBack = summary.hasUsedTrial;
   return (
     <>
+      <BridgeHeader />
       <BridgeProgress from={from} current="trial" />
       {welcomeBack ? (
         <BridgeHead
@@ -294,7 +344,7 @@ export default function StartBridge() {
           lead="You’ve had a free week before, so this time your plan starts today. Your account and past logs are still here."
         />
       ) : (
-        <BridgeAlert tone="success" title={from === "quiz" ? "Your plan is saved." : "You’re signed in."}>
+        <BridgeAlert tone="success" title={save.accountCreated ? "Your plan is saved." : "You’re signed in."}>
           Your free 7 days are one step away. Nothing was charged.
         </BridgeAlert>
       )}

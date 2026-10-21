@@ -2,6 +2,7 @@
 
 import type { Auth, User } from "firebase/auth";
 import { getFirebaseConfig, isProductionDeploy } from "@/lib/firebase/config";
+import { clearBridgeHandoff } from "@/lib/funnel/bridgeHandoff";
 
 /**
  * Website sign-in with Google or Apple through Firebase Auth (PRE-264).
@@ -140,7 +141,14 @@ export async function getIdToken(): Promise<string | null> {
   return auth.currentUser ? auth.currentUser.getIdToken() : null;
 }
 
-export async function signOutOfWebsite(): Promise<void> {
+/**
+ * Signs out of the website. The quiz's saved answers go too, so they never
+ * reach the next person to sign in on this browser, unless `keepQuizAnswers`
+ * (the "use your other account" step, where the same person signs straight
+ * back in with Apple or Google).
+ */
+export async function signOutOfWebsite({ keepQuizAnswers = false }: { keepQuizAnswers?: boolean } = {}): Promise<void> {
+  if (!keepQuizAnswers) clearBridgeHandoff();
   if (!isSignInAvailable()) return;
   const auth = await loadAuth();
   const { signOut } = await import("firebase/auth");

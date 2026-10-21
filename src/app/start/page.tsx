@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { HideSiteFinalCta } from "@/components/pricing/SiteFinalCta";
+import { HideSiteChrome } from "@/components/SiteChrome";
 import StartBridge from "./StartBridge";
 
 export const metadata: Metadata = {
@@ -18,7 +19,8 @@ export const metadata: Metadata = {
  */
 export default function StartPage() {
   return (
-    <div className="flex w-full justify-center bg-page px-4 pb-section pt-24 text-ink lg:pt-32">
+    <div className="flex w-full justify-center bg-page px-4 pb-section pt-4 text-ink lg:pt-8">
+      <HideSiteChrome />
       <HideSiteFinalCta />
       <div className="flex w-full max-w-[560px] flex-col gap-6">
         <Suspense fallback={<p className="text-body text-ink-secondary">Loading…</p>}>
