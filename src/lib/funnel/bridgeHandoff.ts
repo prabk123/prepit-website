@@ -30,6 +30,8 @@ export type BridgeHandoff = {
   firstName?: string;
   /** The email gate's address; a hint for Google's account picker, never sent to the backend from here. */
   email?: string;
+  /** What the bridge's "your plan" card shows: the quiz's chips and daily targets. */
+  planSummary?: { tags?: string[]; calories?: number; proteinGrams?: number };
 };
 
 export const BRIDGE_HANDOFF_KEY = "prepit.bridgeHandoff";
@@ -71,7 +73,20 @@ export function parseBridgeHandoff(raw: string | null, now = Date.now()): Bridge
     settings: object<WebSignupSettings>(value.settings),
     firstName: text(value.firstName, 100),
     email: text(value.email, 320),
+    planSummary: parsePlanSummary(value.planSummary),
   };
+}
+
+function parsePlanSummary(value: unknown): BridgeHandoff["planSummary"] {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  const raw = value as Record<string, unknown>;
+  const number = (field: unknown, max: number) =>
+    typeof field === "number" && Number.isFinite(field) && field > 0 && field < max ? Math.round(field) : undefined;
+  const tags = Array.isArray(raw.tags)
+    ? raw.tags.filter((tag): tag is string => typeof tag === "string" && tag.trim() !== "").map((tag) => tag.trim().slice(0, 40)).slice(0, 4)
+    : undefined;
+  const summary = { tags: tags?.length ? tags : undefined, calories: number(raw.calories, 10000), proteinGrams: number(raw.proteinGrams, 1000) };
+  return summary.tags || summary.calories || summary.proteinGrams ? summary : undefined;
 }
 
 export function writeBridgeHandoff(handoff: BridgeHandoff): void {

@@ -11,6 +11,8 @@ type FaqAccordionProps = {
   trackingSource: string;
   /** Question open on first load (the price question, as in D3). */
   defaultOpenId?: string;
+  /** One column at every width, for narrow pages such as the bridge. Two from 1024 px otherwise. */
+  singleColumn?: boolean;
 };
 
 function PlusMinus({ open }: { open: boolean }) {
@@ -67,7 +69,7 @@ function Question({
  * work. Two columns from 1024 px. Answers stay in the server-rendered HTML
  * while closed, matching the FAQPage structured data.
  */
-export default function FaqAccordion({ items, trackingSource, defaultOpenId }: FaqAccordionProps) {
+export default function FaqAccordion({ items, trackingSource, defaultOpenId, singleColumn = false }: FaqAccordionProps) {
   const [openIds, setOpenIds] = useState<ReadonlySet<string>>(
     () => new Set(defaultOpenId ? [defaultOpenId] : []),
   );
@@ -84,10 +86,10 @@ export default function FaqAccordion({ items, trackingSource, defaultOpenId }: F
   };
 
   const half = Math.ceil(items.length / 2);
-  const columns = [items.slice(0, half), items.slice(half)];
+  const columns = singleColumn ? [items] : [items.slice(0, half), items.slice(half)];
 
   return (
-    <div className="grid gap-x-14 lg:grid-cols-2">
+    <div className={`grid gap-x-14 ${singleColumn ? "" : "lg:grid-cols-2"}`}>
       {columns.map((column, index) => (
         <div key={index} className={`border-line ${index === columns.length - 1 ? "border-b" : "lg:border-b"}`}>
           {column.map((item) => (

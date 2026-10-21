@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { HideSiteFinalCta } from "@/components/pricing/SiteFinalCta";
-import NarrowCard from "@/components/ui/NarrowCard";
 import StartBridge from "./StartBridge";
 
 export const metadata: Metadata = {
@@ -19,11 +18,13 @@ export const metadata: Metadata = {
  */
 export default function StartPage() {
   return (
-    <NarrowCard>
+    <div className="flex w-full justify-center bg-page px-4 pb-section pt-24 text-ink lg:pt-32">
       <HideSiteFinalCta />
-      <Suspense fallback={<p className="text-body text-ink-secondary">Loading…</p>}>
-        <StartBridge />
-      </Suspense>
-    </NarrowCard>
+      <div className="flex w-full max-w-[560px] flex-col gap-6">
+        <Suspense fallback={<p className="text-body text-ink-secondary">Loading…</p>}>
+          <StartBridge />
+        </Suspense>
+      </div>
+    </div>
   );
 }
