@@ -93,7 +93,8 @@ function SavingPlan({ from, provider }: { from: BridgeSource; provider: string |
  * get their own page, people who had a trial get "Welcome back", and
  * everyone else goes on to RevenueCat's checkout and then "You're in".
  */
-export default function StartBridge() {
+/** `country` and `askWithdrawalConsent` go to checkout (the UK/EEA right-to-cancel consent). */
+export default function StartBridge({ country, askWithdrawalConsent }: { country: string | null; askWithdrawalConsent: boolean }) {
   const params = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -355,7 +356,7 @@ export default function StartBridge() {
       {/* Checkout names the signed-in account under the paywall, with Sign out. */}
       <div className="rounded-tile border border-line bg-surface p-4 sm:p-6">
         <div className="flex w-full flex-col items-center gap-6 text-center">
-          <Checkout />
+          <Checkout country={country} askWithdrawalConsent={askWithdrawalConsent} />
         </div>
       </div>
       <Assurances trial={!welcomeBack} />

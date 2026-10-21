@@ -9,9 +9,9 @@ import { webMarketFor, type WebMarket } from "@/lib/markets";
 
 /**
  * The header button on the landing page (PRE-302, PRE-331). Web checkout
- * visitors (every country for now) go to the bridge, like every other button on the page, so the header doesn't leak
- * them to the App Store; App Store markets keep "Get the app"; elsewhere it's
- * the waitlist. The market comes from the cookie the proxy sets, so nothing
+ * visitors (every country for now) go to the bridge, like every other button
+ * on the page, so the header doesn't leak them to the App Store; App Store
+ * markets keep "Get the app"; elsewhere it's the waitlist. The market comes from the cookie the proxy sets, so nothing
  * renders until it has been read, rather than flashing the App Store link.
  */
 export default function LandingHeaderCta({ className, trackingSource }: { className: string; trackingSource: string }) {

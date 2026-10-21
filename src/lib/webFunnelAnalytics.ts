@@ -23,6 +23,8 @@ export const WEB_FUNNEL_EVENTS = {
   signInFailed: "web_signin_failed",
   paywallView: "web_paywall_view",
   checkoutStart: "web_checkout_start",
+  /** A UK or EEA buyer asked for the subscription to start now, waiving the 14-day right to cancel (`wording_version`, `recorded`: false when RevenueCat refused the attributes). */
+  withdrawalConsent: "web_checkout_withdrawal_consent",
   /** Meta matching details given to RevenueCat on checkout, and again on purchase start if `_fbp` was missing (`trigger`, `has_fbp`, `has_fbc`, `has_email`, `identity_saved`, `ids_saved`, `browser_saved`). Never the values. */
   metaMatchingSent: "web_meta_matching_sent",
   checkoutSuccess: "web_checkout_success",
