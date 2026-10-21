@@ -20,6 +20,8 @@ export class PrepItApiError extends Error {
   constructor(
     readonly status: number,
     readonly code?: string,
+    /** The backend's own reason (`details`), e.g. which field Joi refused. Never shown to people. */
+    readonly details?: string,
   ) {
     super(`PrepIt API ${status}${code ? ` ${code}` : ""}`);
     this.name = "PrepItApiError";
@@ -49,13 +51,15 @@ export async function prepitFetch<T>(path: string, init: RequestInit = {}): Prom
 
   if (!response.ok) {
     let code: string | undefined;
+    let details: string | undefined;
     try {
-      const body = (await response.json()) as { code?: unknown };
+      const body = (await response.json()) as { code?: unknown; details?: unknown };
       if (typeof body.code === "string") code = body.code;
+      if (typeof body.details === "string") details = body.details;
     } catch {
       // Not JSON; the status is enough.
     }
-    throw new PrepItApiError(response.status, code);
+    throw new PrepItApiError(response.status, code, details);
   }
   return (await response.json()) as T;
 }
@@ -175,12 +179,25 @@ export type WebSignupSaveResult = WebSignupState & {
  * `email_in_use` when the account it would create belongs to another sign-in.
  */
 export async function saveWebSignupProfile(input: WebSignupInput): Promise<WebSignupSaveResult> {
-  const body = await prepitFetch<{
+  type SaveResponse = {
     hasAccount?: boolean;
     accountCreated?: boolean;
     accountNotCreatedReason?: string;
     pendingProfile?: WebSignupProfile | null;
-  }>("/web-signup/profile", { method: "PATCH", body: JSON.stringify(buildWebSignupBody(input)) });
+  };
+  const patch = (value: WebSignupInput) =>
+    prepitFetch<SaveResponse>("/web-signup/profile", { method: "PATCH", body: JSON.stringify(buildWebSignupBody(value)) });
+  let body: SaveResponse;
+  try {
+    body = await patch(input);
+  } catch (error) {
+    // A backend from before PRE-327 refuses the unknown `webSessionId`; the
+    // save matters more than the lead match, so send it again without.
+    const refusedSessionId =
+      error instanceof PrepItApiError && error.status === 400 && Boolean(error.details?.includes("webSessionId"));
+    if (!(refusedSessionId && input.webSessionId)) throw error;
+    body = await patch({ ...input, webSessionId: undefined });
+  }
   const reason = body.accountNotCreatedReason;
   return {
     hasAccount: Boolean(body.hasAccount),

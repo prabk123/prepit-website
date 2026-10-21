@@ -2,6 +2,7 @@
 
 import type { Auth, User } from "firebase/auth";
 import { getFirebaseConfig, isProductionDeploy } from "@/lib/firebase/config";
+import { clearBridgeHandoff } from "@/lib/funnel/bridgeHandoff";
 
 /**
  * Website sign-in with Google or Apple through Firebase Auth (PRE-264).
@@ -76,11 +77,12 @@ function toFailure(error: unknown): SignInFailure {
   }
 }
 
-async function providerFor(provider: SignInProvider) {
+async function providerFor(provider: SignInProvider, loginHint?: string) {
   const { GoogleAuthProvider, OAuthProvider } = await import("firebase/auth");
   if (provider === "google") {
     const google = new GoogleAuthProvider();
-    google.setCustomParameters({ prompt: "select_account" });
+    // The quiz's email, so Google's picker starts on that account.
+    google.setCustomParameters({ prompt: "select_account", ...(loginHint ? { login_hint: loginHint } : {}) });
     return google;
   }
   // Same provider id as the app's Sign in with Apple, so the same Apple ID
@@ -100,10 +102,10 @@ async function providerFor(provider: SignInProvider) {
  * instead. A redirect needs the auth domain served from this site first
  * (proxy `/__/auth/*` and add it to the OAuth client's redirect URIs).
  */
-export async function signInWith(provider: SignInProvider): Promise<User> {
+export async function signInWith(provider: SignInProvider, options: { loginHint?: string } = {}): Promise<User> {
   const auth = await loadAuth();
   const { signInWithPopup } = await import("firebase/auth");
-  const authProvider = await providerFor(provider);
+  const authProvider = await providerFor(provider, options.loginHint);
   try {
     const credential = await signInWithPopup(auth, authProvider);
     return credential.user;
@@ -139,7 +141,14 @@ export async function getIdToken(): Promise<string | null> {
   return auth.currentUser ? auth.currentUser.getIdToken() : null;
 }
 
-export async function signOutOfWebsite(): Promise<void> {
+/**
+ * Signs out of the website. The quiz's saved answers go too, so they never
+ * reach the next person to sign in on this browser, unless `keepQuizAnswers`
+ * (the "use your other account" step, where the same person signs straight
+ * back in with Apple or Google).
+ */
+export async function signOutOfWebsite({ keepQuizAnswers = false }: { keepQuizAnswers?: boolean } = {}): Promise<void> {
+  if (!keepQuizAnswers) clearBridgeHandoff();
   if (!isSignInAvailable()) return;
   const auth = await loadAuth();
   const { signOut } = await import("firebase/auth");
@@ -164,4 +173,24 @@ export function isInAppBrowser(userAgent: string): boolean {
   return /FBAN|FBAV|FB_IAB|Instagram|TikTok|musical_ly|BytedanceWebview|Snapchat|LinkedInApp|Line\/|Twitter|Pinterest/i.test(
     userAgent,
   );
+}
+
+/**
+ * A link that opens `url` in the phone's own browser from an in-app browser:
+ * Safari's `x-safari-https` scheme on iOS (iOS 17 and later), an Android
+ * intent with no package, which picks the default browser. Null elsewhere,
+ * where copying the link is the fallback.
+ */
+export function systemBrowserUrl(url: string, userAgent: string): string | null {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return null;
+  }
+  if (parsed.protocol !== "https:") return null;
+  const rest = `${parsed.host}${parsed.pathname}${parsed.search}${parsed.hash}`;
+  if (/iPhone|iPad|iPod/i.test(userAgent)) return `x-safari-https://${rest}`;
+  if (/Android/i.test(userAgent)) return `intent://${parsed.host}${parsed.pathname}${parsed.search}#Intent;scheme=https;end`;
+  return null;
 }

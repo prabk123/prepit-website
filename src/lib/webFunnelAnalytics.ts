@@ -14,6 +14,12 @@ export const WEB_FUNNEL_EVENTS = {
   bridgeView: "web_bridge_view",
   signInStart: "web_signin_start",
   signupSuccess: "web_signup_success",
+  /** The quiz's answers were sent after sign-in (`account_created`, `not_created_reason`, and `status` when the save failed). */
+  bridgeAnswersSaved: "web_bridge_answers_saved",
+  /** The bridge couldn't read the account and showed "We couldn't start your free week" (`status`). */
+  bridgeError: "web_bridge_error",
+  /** An in-app browser (Instagram, Facebook…) visitor tapped Open in Safari or Copy link (`action`). */
+  inAppBrowserEscape: "web_in_app_browser_escape",
   signInFailed: "web_signin_failed",
   paywallView: "web_paywall_view",
   checkoutStart: "web_checkout_start",
@@ -22,6 +28,8 @@ export const WEB_FUNNEL_EVENTS = {
   /** Checkout couldn't be offered (`reason`: already_subscribed, no_paywall, not_configured…). */
   checkoutUnavailable: "web_checkout_unavailable",
   handoffView: "web_handoff_view",
+  /** "Open PrepIt" on the success page, for people who already have the app. */
+  handoffOpenApp: "web_handoff_open_app",
   manageSubscriptionView: "web_manage_subscription_view",
   manageSubscriptionPortalOpen: "web_manage_subscription_portal_open",
 } as const;

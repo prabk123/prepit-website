@@ -8,6 +8,7 @@ import NavigationWrapper from "@/components/NavigationWrapper";
 import FinalCta from "@/components/pricing/FinalCta";
 import SiteFinalCta from "@/components/pricing/SiteFinalCta";
 import Footer from "@/components/Footer";
+import SiteChrome from "@/components/SiteChrome";
 import CookieConsent from "@/components/CookieConsent";
 import AttributionCapture from "@/components/funnel/AttributionCapture";
 import MarketCapture from "@/components/funnel/MarketCapture";
@@ -196,7 +197,9 @@ export default function RootLayout({
         <AttributionCapture />
         <MarketCapture />
         <div className="flex min-h-screen flex-col items-center bg-page">
-          <NavigationWrapper />
+          <SiteChrome>
+            <NavigationWrapper />
+          </SiteChrome>
 
           <main id="main" tabIndex={-1} className="w-full outline-none">
             {children}
@@ -205,7 +208,9 @@ export default function RootLayout({
           <SiteFinalCta>
             <FinalCta id="site-download" />
           </SiteFinalCta>
-          <Footer />
+          <SiteChrome>
+            <Footer />
+          </SiteChrome>
         </div>
         <SpeedInsights />
         <Analytics />

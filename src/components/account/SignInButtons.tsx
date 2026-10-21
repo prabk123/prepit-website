@@ -7,6 +7,7 @@ import { isAppleSignInEnabled } from "@/lib/firebase/config";
 import {
   isInAppBrowser,
   isSignInAvailable,
+  systemBrowserUrl,
   SignInError,
   signInWith,
   type SignInFailure,
@@ -27,7 +28,7 @@ function GoogleLogo() {
 
 /** The message shown for each failure. Cancelling shows nothing. */
 export const SIGN_IN_FAILURE_MESSAGES: Record<SignInFailure, string | null> = {
-  cancelled: null,
+  cancelled: "Sign-in was cancelled. Nothing was saved or charged. Try again, or use the other option.",
   popup_blocked: "Your browser blocked the sign-in window. Allow pop-ups for this site and try again.",
   different_provider:
     "This email already signs in to PrepIt another way. Try the other button, the one you use in the app.",
@@ -44,17 +45,23 @@ export const SIGN_IN_FAILURE_MESSAGES: Record<SignInFailure, string | null> = {
 export default function SignInButtons({
   context,
   onSignedIn,
+  loginHint,
 }: {
   context: Record<string, string | null>;
   onSignedIn?: (provider: SignInProvider) => void;
+  /** An email to start Google's account picker on (the quiz's). */
+  loginHint?: string;
 }) {
   const [busy, setBusy] = useState<SignInProvider | null>(null);
   const [failure, setFailure] = useState<SignInFailure | null>(null);
   const [inAppBrowser, setInAppBrowser] = useState(false);
+  const [browserUrl, setBrowserUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    setInAppBrowser(isInAppBrowser(navigator.userAgent));
+    const inApp = isInAppBrowser(navigator.userAgent);
+    setInAppBrowser(inApp);
+    if (inApp) setBrowserUrl(systemBrowserUrl(window.location.href, navigator.userAgent));
   }, []);
 
   if (!isSignInAvailable()) {
@@ -66,7 +73,7 @@ export default function SignInButtons({
     setFailure(null);
     trackWebFunnelEvent(WEB_FUNNEL_EVENTS.signInStart, { ...context, signup_method: provider });
     try {
-      await signInWith(provider);
+      await signInWith(provider, { loginHint });
       onSignedIn?.(provider);
     } catch (error) {
       const code = error instanceof SignInError ? error.code : "unknown";
@@ -80,6 +87,7 @@ export default function SignInButtons({
   }
 
   async function copyLink() {
+    trackWebFunnelEvent(WEB_FUNNEL_EVENTS.inAppBrowserEscape, { ...context, action: "copy_link" });
     try {
       await navigator.clipboard.writeText(window.location.href);
       setCopied(true);
@@ -104,15 +112,44 @@ export default function SignInButtons({
         </button>
       )}
       {inAppBrowser ? (
-        <div className="flex flex-col gap-3 rounded-tile bg-surface-raised p-5 text-left">
-          <p className="text-small text-ink-secondary">
-            Google sign-in doesn&apos;t work inside this app&apos;s browser. Open this page in Safari or Chrome
-            to continue with Google.
-          </p>
-          <button type="button" className={SECONDARY_BUTTON_CLASS} onClick={() => void copyLink()}>
-            {copied ? "Link copied" : "Copy link"}
+        <>
+          {/* Google refuses sign-in inside app browsers: the button says what to do instead. */}
+          <button type="button" className={`${SECONDARY_BUTTON_CLASS} h-auto min-h-14 flex-col gap-0 py-2`} disabled>
+            <span className="inline-flex items-center gap-2.5">
+              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-surface">
+                <GoogleLogo />
+              </span>
+              Continue with Google
+            </span>
+            <span className="text-[12.5px] font-medium">
+              {browserUrl?.startsWith("x-safari") ? "Open in Safari to use Google" : "Open in your browser to use Google"}
+            </span>
           </button>
-        </div>
+          <div role="status" className="flex flex-col gap-3 rounded-tile border border-energy bg-energy/20 p-4 text-left text-small text-ink-secondary">
+            <p>
+              <b className="font-bold text-ink">You&apos;re in this app&apos;s own browser.</b>{" "}
+              {isAppleSignInEnabled() ? "Continue with Apple works here. " : ""}To use Google, open this page in{" "}
+              {browserUrl?.startsWith("x-safari") ? "Safari" : "your browser"}
+              {browserUrl ? "." : ": tap ••• at the top, then Open in external browser."}
+            </p>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              {browserUrl && (
+                <a
+                  href={browserUrl}
+                  className={PRIMARY_BUTTON_CLASS}
+                  onClick={() =>
+                    trackWebFunnelEvent(WEB_FUNNEL_EVENTS.inAppBrowserEscape, { ...context, action: "open_browser" })
+                  }
+                >
+                  {browserUrl.startsWith("x-safari") ? "Open in Safari" : "Open in your browser"}
+                </a>
+              )}
+              <button type="button" className={SECONDARY_BUTTON_CLASS} onClick={() => void copyLink()}>
+                {copied ? "Link copied" : "Copy page link"}
+              </button>
+            </div>
+          </div>
+        </>
       ) : (
         <button
           type="button"
@@ -126,7 +163,11 @@ export default function SignInButtons({
           {busy === "google" ? "Signing in…" : "Continue with Google"}
         </button>
       )}
-      <p role="status" aria-live="polite" className={message ? "text-small text-error" : "sr-only"}>
+      <p
+        role="status"
+        aria-live="polite"
+        className={message ? `text-small ${failure === "cancelled" ? "text-ink-secondary" : "text-error"}` : "sr-only"}
+      >
         {message ?? ""}
       </p>
     </div>
