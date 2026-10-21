@@ -211,11 +211,16 @@ export default function Checkout({ country, askWithdrawalConsent }: { country: s
     metaMatchingSent.current = uid;
     sendMetaMatching(uid, email, "paywall");
   }, [uid, email, plans.status, sendMetaMatching]);
-  const welcomePath = (pending: boolean) =>
-    `/welcome?${new URLSearchParams({ ...(provider ? { provider } : {}), ...(pending ? { pending: "1" } : {}) })}`;
+  // `member`: they already had premium, so nothing new started (PRE-335).
+  const welcomePath = (pending: boolean, member = false) =>
+    `/welcome?${new URLSearchParams({
+      ...(provider ? { provider } : {}),
+      ...(pending ? { pending: "1" } : {}),
+      ...(member ? { member: "1" } : {}),
+    })}`;
 
   useEffect(() => {
-    if (plans.status === "already_subscribed") router.replace(welcomePath(false));
+    if (plans.status === "already_subscribed") router.replace(welcomePath(false, true));
     if (plans.status === "email_in_use") {
       router.replace(`/signin?${new URLSearchParams({ ...(requestedPlan ? { plan: requestedPlan } : {}), funnel: funnelId })}`);
     }
@@ -304,7 +309,7 @@ export default function Checkout({ country, askWithdrawalConsent }: { country: s
         }
         trackWebFunnelEvent(WEB_FUNNEL_EVENTS.checkoutFailed, { ...context, plan, reason: code, rc_error_code: rcErrorCode });
         if (code === "already_purchased") {
-          router.push(welcomePath(false));
+          router.push(welcomePath(false, true));
           return;
         }
         setFailure(code);

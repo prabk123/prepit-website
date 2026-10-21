@@ -9,6 +9,7 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import { PRIMARY_BUTTON_CLASS, TEXT_BUTTON_CLASS } from "@/components/ui/buttons";
 import { providerOf, signOutOfWebsite } from "@/lib/firebase/auth";
 import { createBillingManagementUrl } from "@/lib/prepitApi";
+import { subscriptionDateLine } from "@/lib/revenuecat/subscriptionDateLine";
 import { loadPremiumDetails, webBillingKeyProblem, type PremiumDetails } from "@/lib/revenuecat/webBilling";
 import { resetWebUser, trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webFunnelAnalytics";
 
@@ -62,12 +63,20 @@ export default function ManageSubscription() {
           ? "unknown"
           : "none"
         : null;
+  const loadedPremium = current.status === "ready" ? current.premium : null;
+  const inTrial = loadedPremium?.inTrial ?? null;
+  const willRenew = loadedPremium?.willRenew ?? null;
 
   useEffect(() => {
     if (!uid || viewTrackedFor.current === uid || !summary || place === null) return;
     viewTrackedFor.current = uid;
-    trackWebFunnelEvent(WEB_FUNNEL_EVENTS.manageSubscriptionView, { store: place, has_account: summary.hasAccount });
-  }, [uid, summary, place]);
+    trackWebFunnelEvent(WEB_FUNNEL_EVENTS.manageSubscriptionView, {
+      store: place,
+      has_account: summary.hasAccount,
+      in_trial: inTrial,
+      will_renew: willRenew,
+    });
+  }, [uid, summary, place, inTrial, willRenew]);
 
   async function signOut() {
     await signOutOfWebsite();
@@ -150,12 +159,7 @@ export default function ManageSubscription() {
     );
   }
 
-  const premium = current.status === "ready" ? current.premium : null;
-  const dateLine = premium?.expirationDate
-    ? premium.willRenew
-      ? `Renews on ${formatDate(premium.expirationDate)}.`
-      : `Ends on ${formatDate(premium.expirationDate)}. It won't renew.`
-    : null;
+  const dateLine = loadedPremium ? subscriptionDateLine(loadedPremium, formatDate) : null;
 
   if (place === "app_store") {
     return (

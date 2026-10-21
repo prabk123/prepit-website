@@ -14,6 +14,7 @@ import { providerOf, signOutOfWebsite, type SignInProvider } from "@/lib/firebas
 import { parseFunnelId, safeNextPath } from "@/lib/funnel/params";
 import { parsePlanId, PLANS, TRIAL_DAYS } from "@/lib/pricing";
 import { identifyPixelUser, trackSignupRegistration } from "@/lib/metaPixel";
+import { loadPremiumDetails, webBillingKeyProblem } from "@/lib/revenuecat/webBilling";
 import { resetWebUser, trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webFunnelAnalytics";
 
 const PROVIDER_NAMES: Record<SignInProvider, string> = { google: "Google", apple: "Apple" };
@@ -73,6 +74,41 @@ export default function SignInBridge() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [justSignedIn, account]);
 
+  // PrepIt's record can lag a purchase (the RevenueCat webhook), so someone
+  // with an account it doesn't show as subscribed is checked in RevenueCat
+  // before being asked to choose a plan (PRE-335). Premium from any store counts.
+  const uid = session.status === "signedIn" ? session.user.uid : null;
+  const askRevenueCat =
+    account?.status === "ready" &&
+    account.summary.hasAccount &&
+    !account.summary.isSubscribed &&
+    !account.summary.emailInUse;
+  const [premium, setPremium] = useState<{ uid: string; active: boolean } | null>(null);
+  useEffect(() => {
+    if (!uid || !askRevenueCat) return;
+    let cancelled = false;
+    const done = (active: boolean) => {
+      if (!cancelled) setPremium({ uid, active });
+    };
+    if (webBillingKeyProblem()) {
+      done(false);
+      return;
+    }
+    loadPremiumDetails(uid)
+      .then((details) => done(details !== null))
+      .catch(() => done(false));
+    return () => {
+      cancelled = true;
+    };
+  }, [uid, askRevenueCat]);
+  const premiumChecked = premium !== null && premium.uid === uid;
+  const premiumInRevenueCat = premiumChecked && premium.active;
+
+  useEffect(() => {
+    if (premiumInRevenueCat) trackWebFunnelEvent(WEB_FUNNEL_EVENTS.bridgeMemberFound, { ...context, source: "revenuecat" });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [premiumInRevenueCat]);
+
   // Starts the web sign-up for anyone signed in here with no account
   // (answers from the quiz, attribution, the quiz session id).
   useSaveWebSignup(session, funnelId, reloadAccount);
@@ -130,7 +166,7 @@ export default function SignInBridge() {
     </p>
   );
 
-  if (session.account.status === "loading") {
+  if (session.account.status === "loading" || (askRevenueCat && !premiumChecked)) {
     return (
       <>
         <SectionHeading as="h1" size="title" align="center" title="Checking your account…" />
@@ -170,7 +206,7 @@ export default function SignInBridge() {
     );
   }
 
-  if (summary.isSubscribed) {
+  if (summary.isSubscribed || premiumInRevenueCat) {
     return (
       <>
         <SectionHeading
