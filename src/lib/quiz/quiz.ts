@@ -316,7 +316,7 @@ type FoodRule = { label: string; value: string; leavesOut: string[]; extra?: boo
 /** "No pork" and friends send the app's existing Pork, Beef and Alcohol intolerances. */
 const ALL_FOOD_RULES: FoodRule[] = [
   { label: "Halal", value: "Halal", leavesOut: ["pork", "alcohol"], extra: true },
-  { label: "Kosher", value: "Kosher", leavesOut: ["pork", "shellfish"], extra: true },
+  { label: "Kosher", value: "Kosher", leavesOut: ["pork", "shellfish", "crustaceans", "molluscs"], extra: true },
   { label: "No pork", value: "Pork", leavesOut: ["pork"] },
   { label: "No beef", value: "Beef", leavesOut: ["beef"] },
   { label: "No alcohol", value: "Alcohol", leavesOut: ["alcohol"] },
@@ -324,6 +324,33 @@ const ALL_FOOD_RULES: FoodRule[] = [
 
 export function foodRules(extraFoodRules = EXTRA_FOOD_RULES_ENABLED): FoodRule[] {
   return ALL_FOOD_RULES.filter((rule) => extraFoodRules || !rule.extra);
+}
+
+/** Halal and kosher are diets in the app (PRE-328), with the foods they rule out. */
+const RULE_DIETS: Record<string, { diet: string; label: string; foods: string[] }> = {
+  Halal: { diet: "halal", label: "Halal", foods: ["Pork", "Alcohol"] },
+  Kosher: { diet: "kosher", label: "Kosher", foods: ["Pork", "Shellfish", "Crustacean", "Mollusc"] },
+};
+
+/**
+ * The diet and intolerances saved for the answers, as the app saves them
+ * (PRE-328): with Eat everything, halal or kosher becomes the diet; with any
+ * other diet (or a second rule) the rule's foods join the intolerances.
+ * "No pork" and friends are intolerances already.
+ */
+export function savedDiet(a: QuizAnswers): { diet?: string; intolerances: string[] } {
+  let diet = a.diet;
+  const intolerances = [...a.intolerances];
+  const add = (item: string) => {
+    if (!intolerances.some((existing) => existing.toLowerCase() === item.toLowerCase())) intolerances.push(item);
+  };
+  for (const rule of a.rules) {
+    const ruleDiet = RULE_DIETS[rule];
+    if (!ruleDiet) add(rule);
+    else if (!diet || diet === "eat everything") diet = ruleDiet.diet;
+    else ruleDiet.foods.forEach(add);
+  }
+  return { diet, intolerances };
 }
 
 export const MEAL_HELP_OPTIONS: Option[] = [
@@ -707,7 +734,10 @@ export function goalLabelFor(value: string | null | undefined): string | undefin
 
 /** The diet's label for a saved diet value, e.g. "pescetarian" to "Pescatarian". */
 export function dietLabelFor(value: string | null | undefined): string | undefined {
-  return ALL_DIET_OPTIONS.find((option) => option.value === value)?.label;
+  return (
+    ALL_DIET_OPTIONS.find((option) => option.value === value)?.label ??
+    Object.values(RULE_DIETS).find((rule) => rule.diet === value)?.label
+  );
 }
 
 /** The plan email's page headline from the saved goal and name. */
@@ -746,9 +776,15 @@ export type StartingPoint = { name: string; why: string; line: string };
 export function startingPoint(a: QuizAnswers): StartingPoint {
   const b = a.blockers;
   if (a.energy === "I dip mid-afternoon" || a.energy === "Low most days" || b.includes("I feel tired")) {
+    const energy =
+      a.energy === "I dip mid-afternoon"
+        ? "your energy dips in the afternoon"
+        : a.energy === "Low most days"
+          ? "your energy is low most days"
+          : "tiredness gets in the way";
     return {
-      name: "The afternoon dip",
-      why: `You said your energy dips in the afternoon${a.skipsBreakfast === "Yes" ? " and you often skip breakfast" : ""}.`,
+      name: a.energy === "I dip mid-afternoon" ? "The afternoon dip" : "The energy gap",
+      why: `You said ${energy}${a.skipsBreakfast === "Yes" ? " and you often skip breakfast" : ""}.`,
       line: "Your Energy score looks at breakfast, morning protein and how sugary your carbs are, so the food side of it shows up.",
     };
   }
@@ -766,9 +802,13 @@ export function startingPoint(a: QuizAnswers): StartingPoint {
     a.hunger === "Most days" ||
     a.hunger === "I graze all day"
   ) {
+    const said: string[] = [];
+    if (a.eveningSnacks === "Yes") said.push("evenings are when you snack most");
+    if (b.includes("I crave snacks")) said.push("snack cravings get in the way");
+    if (b.includes("I get hungry") || a.hunger === "Most days" || a.hunger === "I graze all day") said.push("hunger shows up between meals");
     return {
-      name: "The evening graze",
-      why: "You said evenings are when you snack most, and hunger shows up between meals.",
+      name: a.eveningSnacks === "Yes" ? "The evening graze" : "The between-meal graze",
+      why: `You said ${joinList(said.slice(0, 2))}.`,
       line: "Your Satiety score looks at the gaps between meals too, so a long afternoon shows up.",
     };
   }
@@ -807,11 +847,16 @@ export function trialDay(n: number, today = new Date()): string {
 
 // ---------------------------------------------------------------- saving
 
-/** The goal used for targets. Pregnant or breastfeeding never gets a weight-loss deficit. */
+/**
+ * The goal weight sent for targets and the account. When the goal-weight
+ * screen is hidden (goals without a weight target, or pregnant or
+ * breastfeeding) it is the current weight, as the app does
+ * (`goalsWithoutWeightTarget`): the backend needs one to create the account,
+ * and the same weight means maintenance, never a deficit.
+ */
 function goalWeightForTargets(a: QuizAnswers): number | undefined {
-  const weight = weightKg(a);
-  if (a.goal === "Lose fat" && isPregnant(a)) return weight ?? undefined;
-  return isVisible("goalweight", a) ? a.goalWeightKg : undefined;
+  if (isVisible("goalweight", a)) return a.goalWeightKg;
+  return weightKg(a) ?? undefined;
 }
 
 /** The body for the public `POST /onboarding/calculate-nutritional-goals`, or null if answers are missing. */
@@ -901,8 +946,7 @@ export function buildQuizProfile(
     goalSpeed: targets?.resolvedGoalSpeed,
     dailyActivity: a.activity,
     exerciseFrequency: a.exercise,
-    diet: a.diet,
-    intolerances: [...a.intolerances, ...a.rules],
+    ...savedDiet(a),
     mainBlocker: a.blockers.length ? a.blockers : undefined,
     // The app has no stones; it shows pounds for them.
     unit: a.unit === "metric" ? "metric" : "imperial",

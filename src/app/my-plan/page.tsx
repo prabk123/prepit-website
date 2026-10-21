@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 /** The page the email gate's "copy of your plan" email links to (PRE-327). */
 export default function MyPlanPage() {
   return (
-    <div className="flex w-full justify-center bg-page px-4 pb-section pt-28 text-ink lg:pt-36">
+    <div className="ph-no-capture flex w-full justify-center bg-page px-4 pb-section pt-28 text-ink lg:pt-36">
       <HideSiteFinalCta />
       <MyPlan />
     </div>

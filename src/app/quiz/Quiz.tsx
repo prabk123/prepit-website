@@ -134,7 +134,8 @@ export default function Quiz({ country }: { country: string }) {
   const [screen, setScreen] = useState<ScreenId>("goal");
   const [history, setHistory] = useState<ScreenId[]>([]);
   const [restored, setRestored] = useState(false);
-  const [targets, setTargets] = useState<Targets | null | undefined>(undefined);
+  // Targets for the answers they were fetched for, so a change after Back fetches again.
+  const [fetched, setFetched] = useState<{ key: string; targets: Targets | null } | null>(null);
   const [emailState, setEmailState] = useState<"idle" | "saving" | "invalid">("idle");
   const leadSaved = useRef(false);
   const advanceTimer = useRef<number | null>(null);
@@ -188,15 +189,18 @@ export default function Quiz({ country }: { country: string }) {
 
   const back = () => {
     if (advanceTimer.current) window.clearTimeout(advanceTimer.current);
-    if (!history.length) return;
-    setScreen(history[history.length - 1]);
-    setHistory(history.slice(0, -1));
+    // Back never replays the loader's 12 seconds and questions.
+    let index = history.length - 1;
+    while (index > 0 && history[index] === "loader") index -= 1;
+    if (index < 0 || history[index] === "loader") return;
+    setScreen(history[index]);
+    setHistory(history.slice(0, index));
   };
 
   const restart = () => {
     setAnswers(emptyAnswers());
     setHistory([]);
-    setTargets(undefined);
+    setFetched(null);
     leadSaved.current = false;
     setScreen("goal");
   };
@@ -221,22 +225,38 @@ export default function Quiz({ country }: { country: string }) {
     update({ [key]: values });
   };
 
-  // The targets are fetched while the loader runs; the plan page waits for them.
+  // The targets are fetched from the loader on (again after a reload or a
+  // Back from the bridge); the plan page waits for them. undefined = loading.
+  const request = targetsRequest(answers);
+  const requestKey = request ? JSON.stringify(request) : "";
+  const targets: Targets | null | undefined = !request ? null : fetched?.key === requestKey ? fetched.targets : undefined;
+  const needsTargets = screen === "loader" || screen === "email" || screen === "name" || screen === "result";
   useEffect(() => {
-    if (screen !== "loader" || targets !== undefined) return;
-    const request = targetsRequest(answers);
-    if (!request) {
-      setTargets(null);
-      return;
-    }
+    if (!needsTargets || !requestKey || fetched?.key === requestKey) return;
     let cancelled = false;
-    fetchTargets(request)
-      .then((value) => !cancelled && setTargets(value))
-      .catch(() => !cancelled && setTargets(null));
+    fetchTargets(JSON.parse(requestKey) as Record<string, unknown>)
+      .then((value) => !cancelled && setFetched({ key: requestKey, targets: value }))
+      .catch(() => !cancelled && setFetched({ key: requestKey, targets: null }));
     return () => {
       cancelled = true;
     };
-  }, [screen, answers, targets]);
+  }, [needsTargets, requestKey, fetched]);
+
+  /**
+   * Leaves the answers for the bridge in this browser. Written from the email
+   * gate on, so "Start my free 7 days" on the plan email's page (same
+   * browser) still carries them.
+   */
+  const writeHandoff = (latest: QuizAnswers) => {
+    writeBridgeHandoff({
+      funnelId: QUIZ_FUNNEL_ID,
+      funnelVersion: QUIZ_FUNNEL_VERSION,
+      ...buildQuizProfile(latest, targets),
+      firstName: latest.firstName.trim() || undefined,
+      email: latest.email.trim() || undefined,
+      planSummary: planSummary(latest, targets),
+    });
+  };
 
   const leadInput = (latest: QuizAnswers, webSessionId: string) => ({
     webSessionId,
@@ -255,23 +275,28 @@ export default function Quiz({ country }: { country: string }) {
     setEmailState("saving");
     const webSessionId = getWebSessionId();
     let saved = false;
+    let errorStatus: number | undefined;
     if (webSessionId) {
       try {
         await saveLead(leadInput(answers, webSessionId));
         saved = true;
       } catch (error) {
-        if (error instanceof LeadApiError && error.status === 400) {
+        errorStatus = error instanceof LeadApiError ? error.status : 0;
+        // Only a refused address is theirs to fix; the gate has no skip.
+        if (error instanceof LeadApiError && error.status === 400 && /email/i.test(error.details ?? "")) {
           setEmailState("invalid");
           return;
         }
-        // Down or rate-limited: the plan still shows, and the bridge saves the answers.
+        // Down, rate-limited or another field refused: the plan still shows, and the bridge saves the answers.
       }
     }
     leadSaved.current = saved;
+    writeHandoff(answers);
     trackWebFunnelEvent(WEB_FUNNEL_EVENTS.quizLeadSaved, {
       funnel_id: QUIZ_FUNNEL_ID,
       saved,
       marketing_consent: answers.marketingConsent,
+      ...(errorStatus !== undefined ? { error_status: errorStatus } : {}),
     });
     if (saved) trackQuizLead();
     setEmailState("idle");
@@ -286,20 +311,13 @@ export default function Quiz({ country }: { country: string }) {
     if (leadSaved.current && webSessionId && latest.firstName.trim()) {
       saveLead(leadInput(latest, webSessionId)).catch(() => undefined);
     }
+    writeHandoff(latest);
     next(latest);
   };
 
   const startTrial = () => {
-    const profile = buildQuizProfile(answers, targets);
-    writeBridgeHandoff({
-      funnelId: QUIZ_FUNNEL_ID,
-      funnelVersion: QUIZ_FUNNEL_VERSION,
-      ...profile,
-      firstName: answers.firstName.trim() || undefined,
-      email: answers.email.trim() || undefined,
-      planSummary: planSummary(answers, targets),
-    });
-    trackWebFunnelEvent(WEB_FUNNEL_EVENTS.quizStartTrial, { funnel_id: QUIZ_FUNNEL_ID });
+    writeHandoff(answers);
+    trackWebFunnelEvent(WEB_FUNNEL_EVENTS.quizStartTrial, { funnel_id: QUIZ_FUNNEL_ID, targets_available: Boolean(targets) });
     router.push(bridgePath({ from: "quiz", funnel: QUIZ_FUNNEL_ID }));
   };
 
@@ -968,7 +986,8 @@ export default function Quiz({ country }: { country: string }) {
   }
 
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-[520px] flex-col bg-page text-ink">
+    // ph-no-capture: no autocapture or replay of the answers (health, diet, safety).
+    <div className="ph-no-capture mx-auto flex min-h-dvh w-full max-w-[520px] flex-col bg-page text-ink">
       <header className="sticky top-0 z-10 bg-page px-5 pb-2.5 pt-[18px]">
         <div className="flex min-h-8 items-center gap-3">
           <button

@@ -67,7 +67,8 @@ const GOALS = [
 ];
 const DAILY_ACTIVITIES = ["mostly_sitting", "lightly_on_feet", "on_feet_most_of_day", "physically_demanding"];
 const EXERCISE_FREQUENCIES = ["none", "one_to_two", "three_to_five", "six_to_seven", "athlete"];
-const DIETS = ["eat everything", "vegan", "vegetarian", "pescetarian", "high protein", "low carb", "keto"];
+// Flexitarian, halal and kosher are backend diets since PRE-328; the quiz only sends them behind its flag.
+const DIETS = ["eat everything", "flexitarian", "vegan", "vegetarian", "pescetarian", "halal", "kosher", "high protein", "low carb", "keto"];
 
 function cap(value: string, max: number): string {
   return value.length > max ? value.slice(0, max) : value;

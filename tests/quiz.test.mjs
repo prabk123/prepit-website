@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { parseBridgeHandoff } from "../src/lib/funnel/bridgeHandoff.ts";
 import { buildWebSignupBody } from "../src/lib/funnel/webSignupProfile.ts";
+import { withoutEmailToken } from "../src/lib/urlTokens.ts";
 import {
   ageFrom,
   analyticsStepId,
@@ -22,6 +23,7 @@ import {
   progress,
   resultHeadline,
   resultTags,
+  savedDiet,
   SAFETY_EATING_DISORDER,
   SAFETY_NONE,
   SAFETY_PREGNANT,
@@ -240,4 +242,46 @@ test("the bridge reads back the quiz's handoff and plan summary", () => {
   assert.equal(handoff.funnelId, "quiz");
   assert.deepEqual(handoff.planSummary, summary);
   assert.equal(handoff.settings.goal, "lose weight");
+});
+
+test("goals with no goal-weight screen send the current weight, so sign-in can create the account", () => {
+  for (const goal of ["Improve energy", "Stay fuller", "Eat healthier", "Fuel training", "Maintain"]) {
+    const a = answers({ goal });
+    assert.equal(targetsRequest(a).goalWeight, 79.8, goal);
+    assert.equal(buildQuizProfile(a).settings.goalWeight, 79.8, goal);
+  }
+  assert.equal(buildQuizProfile(answers({ goal: "Build muscle", goalWeightKg: 85 })).settings.goalWeight, 85);
+});
+
+test("halal and kosher save as the app saves them (PRE-328)", () => {
+  assert.deepEqual(savedDiet(answers({ rules: ["Halal"] })), { diet: "halal", intolerances: [] });
+  assert.deepEqual(savedDiet(answers({ diet: "vegetarian", intolerances: ["Shellfish"], rules: ["Kosher", "Beef"] })), {
+    diet: "vegetarian",
+    intolerances: ["Shellfish", "Pork", "Crustacean", "Mollusc", "Beef"],
+  });
+  assert.deepEqual(savedDiet(answers({ rules: ["Kosher", "Halal"] })), {
+    diet: "kosher",
+    intolerances: ["Pork", "Alcohol"],
+  });
+  const body = buildWebSignupBody({ funnelId: "quiz", ...buildQuizProfile(answers({ rules: ["Halal"] })) });
+  assert.equal(body.settings.diet, "halal");
+  assert.equal(leaveOutLine(answers({ rules: ["Kosher"] }), true), "Plans leave out pork, shellfish, crustaceans and molluscs.");
+});
+
+test("the starting point only repeats what they said", () => {
+  assert.equal(startingPoint(answers({ energy: "Low most days" })).why, "You said your energy is low most days.");
+  const graze = startingPoint(answers({ energy: "Steady all day", blockers: ["I crave snacks"], eveningSnacks: "No" }));
+  assert.equal(graze.name, "The between-meal graze");
+  assert.equal(graze.why, "You said snack cravings get in the way.");
+  assert.equal(
+    startingPoint(answers({ energy: "Steady all day", blockers: [], eveningSnacks: "Yes", hunger: "Most days" })).why,
+    "You said evenings are when you snack most and hunger shows up between meals.",
+  );
+});
+
+test("analytics URLs never keep an email link's token", () => {
+  assert.equal(withoutEmailToken("https://tryprepit.app/my-plan?token=abc"), "https://tryprepit.app/my-plan");
+  assert.equal(withoutEmailToken("https://tryprepit.app/my-plan?token=abc&utm_source=email"), "https://tryprepit.app/my-plan?utm_source=email");
+  assert.equal(withoutEmailToken("https://tryprepit.app/p?a=1&token=abc#x"), "https://tryprepit.app/p?a=1#x");
+  assert.equal(withoutEmailToken("https://tryprepit.app/p?mytoken=1"), "https://tryprepit.app/p?mytoken=1");
 });

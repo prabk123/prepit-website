@@ -10,7 +10,11 @@ import type { WebSignupAnswer, WebSignupSettings, WebSignupUser } from "@/lib/fu
 import { parseTargets, type Targets } from "./quiz";
 
 export class LeadApiError extends Error {
-  constructor(readonly status: number) {
+  /** `details` is the backend's reason, e.g. "Invalid email." on a 400. */
+  constructor(
+    readonly status: number,
+    readonly details?: string,
+  ) {
     super(`PrepIt API ${status}`);
     this.name = "LeadApiError";
   }
@@ -34,7 +38,10 @@ async function post<T>(path: string, body: unknown): Promise<T> {
   } catch {
     throw new LeadApiError(0);
   }
-  if (!response.ok) throw new LeadApiError(response.status);
+  if (!response.ok) {
+    const error = (await response.json().catch(() => null)) as { details?: unknown } | null;
+    throw new LeadApiError(response.status, typeof error?.details === "string" ? error.details : undefined);
+  }
   return (await response.json()) as T;
 }
 
