@@ -21,8 +21,8 @@ export const WEB_FUNNEL_EVENTS = {
   /** An in-app browser (Instagram, Facebook…) visitor tapped Open in Safari or Copy link (`action`). */
   inAppBrowserEscape: "web_in_app_browser_escape",
   signInFailed: "web_signin_failed",
-  /** The sign-in bridge found premium in RevenueCat for an account PrepIt's record didn't show as subscribed, so it showed "You already have PrepIt" instead of the plans (`source`). */
-  bridgeMemberFound: "web_bridge_member_found",
+  /** The sign-in bridge asked RevenueCat about someone PrepIt's record doesn't show as subscribed (`result`: found, none, error, timeout or no_key; `has_account`). `found` shows "You already have PrepIt" instead of the plans. */
+  bridgePremiumCheck: "web_bridge_premium_check",
   paywallView: "web_paywall_view",
   checkoutStart: "web_checkout_start",
   /** A UK or EEA buyer asked for the subscription to start now, waiving the 14-day right to cancel (`wording_version`, `recorded`: false when RevenueCat refused the attributes). */

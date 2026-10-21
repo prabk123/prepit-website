@@ -211,7 +211,7 @@ export default function Checkout({ country, askWithdrawalConsent }: { country: s
     metaMatchingSent.current = uid;
     sendMetaMatching(uid, email, "paywall");
   }, [uid, email, plans.status, sendMetaMatching]);
-  // `member`: they already had premium, so nothing new started (PRE-335).
+  // `member`: premium was already active before checkout, so nothing new started (PRE-335).
   const welcomePath = (pending: boolean, member = false) =>
     `/welcome?${new URLSearchParams({
       ...(provider ? { provider } : {}),
@@ -308,8 +308,9 @@ export default function Checkout({ country, askWithdrawalConsent }: { country: s
           return;
         }
         trackWebFunnelEvent(WEB_FUNNEL_EVENTS.checkoutFailed, { ...context, plan, reason: code, rc_error_code: rcErrorCode });
+        // Usually a retry after a first purchase that went through, so not `member`.
         if (code === "already_purchased") {
-          router.push(welcomePath(false, true));
+          router.push(welcomePath(false));
           return;
         }
         setFailure(code);

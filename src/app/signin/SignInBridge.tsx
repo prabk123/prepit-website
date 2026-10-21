@@ -19,6 +19,11 @@ import { resetWebUser, trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webF
 
 const PROVIDER_NAMES: Record<SignInProvider, string> = { google: "Google", apple: "Apple" };
 
+/** How long the bridge waits for RevenueCat before showing the plans anyway. */
+const PREMIUM_CHECK_TIMEOUT_MS = 4_000;
+
+type PremiumCheckResult = "found" | "none" | "error" | "timeout" | "no_key";
+
 export default function SignInBridge() {
   const params = useSearchParams();
   const router = useRouter();
@@ -74,40 +79,48 @@ export default function SignInBridge() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [justSignedIn, account]);
 
-  // PrepIt's record can lag a purchase (the RevenueCat webhook), so someone
-  // with an account it doesn't show as subscribed is checked in RevenueCat
-  // before being asked to choose a plan (PRE-335). Premium from any store counts.
+  // PrepIt's record can lag a purchase (the RevenueCat webhook), and a web
+  // buyer has no account until onboarding in the app, so anyone it doesn't
+  // show as subscribed is checked in RevenueCat before being asked to choose
+  // a plan (PRE-335). Premium from any store counts. Someone who has just
+  // signed in here with no account goes straight to checkout instead, which
+  // makes the same check. A slow or failed check shows the plans: checkout
+  // still refuses a second purchase.
   const uid = session.status === "signedIn" ? session.user.uid : null;
   const askRevenueCat =
     account?.status === "ready" &&
-    account.summary.hasAccount &&
     !account.summary.isSubscribed &&
-    !account.summary.emailInUse;
+    !account.summary.emailInUse &&
+    (account.summary.hasAccount || !justSignedIn);
+  const hasAccount = account?.status === "ready" && account.summary.hasAccount;
   const [premium, setPremium] = useState<{ uid: string; active: boolean } | null>(null);
   useEffect(() => {
     if (!uid || !askRevenueCat) return;
     let cancelled = false;
-    const done = (active: boolean) => {
-      if (!cancelled) setPremium({ uid, active });
+    const done = (result: PremiumCheckResult) => {
+      if (cancelled) return;
+      cancelled = true;
+      setPremium({ uid, active: result === "found" });
+      trackWebFunnelEvent(WEB_FUNNEL_EVENTS.bridgePremiumCheck, { ...context, result, has_account: hasAccount });
     };
     if (webBillingKeyProblem()) {
-      done(false);
+      done("no_key");
       return;
     }
+    const timer = setTimeout(() => done("timeout"), PREMIUM_CHECK_TIMEOUT_MS);
     loadPremiumDetails(uid)
-      .then((details) => done(details !== null))
-      .catch(() => done(false));
+      .then((details) => done(details ? "found" : "none"))
+      .catch(() => done("error"))
+      .finally(() => clearTimeout(timer));
     return () => {
       cancelled = true;
+      clearTimeout(timer);
     };
+    // The context comes from the URL; hasAccount only changes with the account answer.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uid, askRevenueCat]);
   const premiumChecked = premium !== null && premium.uid === uid;
   const premiumInRevenueCat = premiumChecked && premium.active;
-
-  useEffect(() => {
-    if (premiumInRevenueCat) trackWebFunnelEvent(WEB_FUNNEL_EVENTS.bridgeMemberFound, { ...context, source: "revenuecat" });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [premiumInRevenueCat]);
 
   // Starts the web sign-up for anyone signed in here with no account
   // (answers from the quiz, attribution, the quiz session id).
