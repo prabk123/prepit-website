@@ -30,6 +30,16 @@ export const WEB_FUNNEL_EVENTS = {
   handoffView: "web_handoff_view",
   /** "Open PrepIt" on the success page, for people who already have the app. */
   handoffOpenApp: "web_handoff_open_app",
+  /** A quiz screen was shown (`step_id`, `step_index`). Never an answer: stop screens are `stop-age` and `stop-safety`. */
+  quizStepView: "web_quiz_step_view",
+  /** The email gate saved its lead (`marketing_consent`, `saved`: false when the request failed). */
+  quizLeadSaved: "web_quiz_lead_saved",
+  /** "Start my free 7 days" on the quiz's plan page, on to the bridge. */
+  quizStartTrial: "web_quiz_start_trial",
+  /** The plan page an email links to (`found`). */
+  leadPlanView: "web_lead_plan_view",
+  /** The email preferences page (`action`: unsubscribe or delete). */
+  leadPreferencesAction: "web_lead_preferences_action",
   manageSubscriptionView: "web_manage_subscription_view",
   manageSubscriptionPortalOpen: "web_manage_subscription_portal_open",
 } as const;

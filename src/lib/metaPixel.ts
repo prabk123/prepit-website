@@ -4,7 +4,7 @@ export const META_PIXEL_APP_STORE_EVENT = "AppStoreClick";
 declare global {
   interface Window {
     fbq?: (
-      command: "trackCustom",
+      command: "trackCustom" | "track",
       eventName: string,
       params?: Record<string, string>
     ) => void;
@@ -17,4 +17,16 @@ export function trackAppStoreClick(source: string) {
   }
 
   window.fbq("trackCustom", META_PIXEL_APP_STORE_EVENT, { source });
+}
+
+/**
+ * Meta's standard Lead event, when the quiz's email gate saves a plan. It
+ * carries nothing: no answer, email or step goes to Meta.
+ */
+export function trackQuizLead() {
+  if (typeof window === "undefined" || typeof window.fbq !== "function") {
+    return;
+  }
+
+  window.fbq("track", "Lead");
 }

@@ -1,6 +1,7 @@
-import type { PostHog } from "posthog-js";
+import type { CaptureResult, PostHog } from "posthog-js";
 import { isPostHogEnabled } from "@/lib/analytics";
 import { PREPIT_ANALYTICS_CONSENT_COOKIE, PREPIT_GEO_COOKIE, readCookie } from "@/lib/cookies";
+import { withoutEmailToken } from "@/lib/urlTokens";
 
 /**
  * PostHog is about 190 KB of script, so it stays off the first paint: it loads
@@ -38,6 +39,18 @@ function mayCapture(): boolean {
   return !needsConsent() || hasConsent();
 }
 
+/** Takes an email link's `?token=` out of every URL an event carries. */
+function stripEmailTokens(event: CaptureResult | null): CaptureResult | null {
+  if (!event) return event;
+  for (const bag of [event.properties, event.$set, event.$set_once]) {
+    if (!bag) continue;
+    for (const [key, value] of Object.entries(bag)) {
+      if (typeof value === "string") bag[key] = withoutEmailToken(value);
+    }
+  }
+  return event;
+}
+
 function load(): Promise<PostHog> {
   loading ??= import("posthog-js").then(({ default: posthog }) => {
     posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
@@ -47,6 +60,7 @@ function load(): Promise<PostHog> {
       person_profiles: "identified_only",
       capture_pageview: true,
       capture_pageleave: true,
+      before_send: stripEmailTokens,
       session_recording: {
         maskAllInputs: true,
       },
