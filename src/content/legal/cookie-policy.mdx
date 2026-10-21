@@ -1,6 +1,6 @@
 ---
 title: "Cookie Policy"
-effectiveDate: "14 October 2026"
+effectiveDate: "21 October 2026"
 ---
 
 This policy explains the cookies and similar technologies used on the PrepIt website (tryprepit.app) and in the PrepIt iPhone app. PrepIt is run by DocWhizz Ltd. Our [Privacy Policy](/privacy-policy) explains how we handle personal data more generally.
@@ -17,15 +17,29 @@ Cookies are small text files a website stores in your browser. Apps use similar 
 | prepit-country | Remembers which country you're in, so we show the right way to start PrepIt there | Strictly necessary | Session |
 | prepit-country-override | Only on our test previews, never on tryprepit.app: the country chosen for testing | Strictly necessary | Session |
 | prepit-analytics-consent | Remembers whether you accepted or rejected optional cookies | Strictly necessary | 1 year |
-| PostHog (ph_*) | Measures how the site is used, including anonymised session recordings with form inputs hidden | Optional analytics | Up to 1 year |
-| Meta Pixel (_fbp) | Measures whether our ads lead to App Store visits | Optional marketing | Up to 90 days |
+| Stripe (__stripe_mid, __stripe_sid) | Set by Stripe on the checkout page only, to process your payment and prevent fraud | Strictly necessary | Up to 1 year |
+| PostHog (ph_*) | Measures how the site is used, including session recordings that hide what you type and don't record the quiz or checkout | Analytics: needs your consent in the UK and EEA, on by default elsewhere | Up to 1 year |
+| Meta Pixel (_fbp, _fbc) | Measures whether our ads lead to App Store visits and plans saved from the quiz | Marketing: needs your consent in the UK and EEA, on by default elsewhere | Up to 90 days |
 
 Vercel Web Analytics and Speed Insights also measure page views and site speed. They don't use cookies or identify you.
 
+## Storage in your browser
+
+Some pages also keep information in your browser's local or session storage. It stays on your device unless a row says otherwise.
+
+| Item | What it does | Type | How long |
+| :--- | :--- | :--- | :--- |
+| prepit.quiz.v3 | Keeps your place and answers in the quiz if you reload the page | Strictly necessary | Until you close the tab |
+| prepit.bridgeHandoff | Holds your quiz answers until you sign in, then they're sent to your account | Strictly necessary | Until you sign in; not used after 30 days |
+| prepit.webSessionId | A random ID that links the plan you saved by email to your account when you sign in | Strictly necessary | Until you clear this site's data |
+| prepit.bridgeVisit, prepit.emailToken | Remember which sign-up page you came from, and the link from our email, so a reload still works | Strictly necessary | Until you close the tab |
+| Sign-in (Firebase) | Keeps you signed in on the website after you sign in with Apple or Google | Strictly necessary | Until you sign out |
+| prepit.attribution.v1 | Remembers the campaign and ad click details in the link that brought you here, so we can see which ads work. Sent to your account when you sign in | Marketing: needs your consent in the UK and EEA, on by default elsewhere | Until you close the tab |
+
 ## Your choices on the website
 
-- **In the UK and EEA, or when we can't tell where you are:** we ask before setting optional cookies. Nothing optional is set until you choose "Accept optional cookies". You can change your mind by clearing this site's cookies in your browser, which shows the banner again.
-- **Elsewhere:** the optional analytics and marketing cookies are on by default. You can block or delete them in your browser settings, and the site will still work.
+- **In the UK and EEA, or when we can't tell where you are:** we ask before using PostHog, the Meta Pixel or campaign details. None of them runs until you choose "Accept optional cookies". You can change your mind by clearing this site's cookies in your browser, which shows the banner again.
+- **Elsewhere, including the US:** we don't show a banner. PostHog, the Meta Pixel and campaign details are on as soon as you arrive. You can block or delete them in your browser settings or with a tracker blocker, and the site, quiz and checkout will still work.
 
 ## In the app
 

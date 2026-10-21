@@ -1,13 +1,32 @@
-import type { ComponentPropsWithoutRef } from "react";
+import { Children, type ComponentPropsWithoutRef, type ReactNode } from "react";
 import { guideMdxComponents } from "@/components/guides/GuideBlocks";
+import { legalHeadingId } from "@/lib/legalHeadings";
+
+/** A heading's plain text, for its id. Legal headings are plain text. */
+function textOf(children: ReactNode): string {
+  return Children.toArray(children)
+    .map((child) => (typeof child === "string" || typeof child === "number" ? String(child) : ""))
+    .join("");
+}
 
 /*
  * Legal pages use the guides' Markdown styles (headings, links, lists,
  * numbered steps) at body size, since they are long reads, plus tables that
  * scroll inside their own box on phones instead of widening the page.
+ * Each `##` gets the id the page's "Contents" list links to, with room for
+ * the fixed header when it is jumped to.
  */
 export const legalMdxComponents = {
   ...guideMdxComponents,
+  h2: ({ children, ...props }: ComponentPropsWithoutRef<"h2">) => (
+    <h2
+      id={legalHeadingId(textOf(children))}
+      className="mt-16 mb-6 scroll-mt-24 font-display text-title text-ink text-balance first:mt-0 lg:scroll-mt-28"
+      {...props}
+    >
+      {children}
+    </h2>
+  ),
   p: (props: ComponentPropsWithoutRef<"p">) => (
     <p className="my-4 text-body text-ink-secondary text-pretty" {...props} />
   ),

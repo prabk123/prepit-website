@@ -156,12 +156,13 @@ export default function Quiz({ country }: { country: string }) {
   }, [answers, screen, history, restored]);
 
   // Each screen: one step event (its id only), back to the top, focus on the question.
+  // A stop screen sends no index either: where it falls would tell the two apart.
   useEffect(() => {
     if (!restored) return;
     trackWebFunnelEvent(WEB_FUNNEL_EVENTS.quizStepView, {
       funnel_id: QUIZ_FUNNEL_ID,
       step_id: analyticsStepId(screen),
-      step_index: history.length,
+      step_index: isStopScreen(screen) ? null : history.length,
     });
     if (firstScreen.current) {
       firstScreen.current = false;

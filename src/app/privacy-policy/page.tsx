@@ -5,7 +5,7 @@ import { loadMDX } from "@/lib/loadMDX";
 export const metadata: Metadata = {
   title: "Privacy Policy",
   description:
-    "Learn how PrepIt collects, uses, and protects your personal information. Read our privacy policy to understand your data rights and our commitment to privacy.",
+    "What PrepIt collects (meals, photos, voice notes, chat, quiz answers), who processes it, how long we keep it and your rights.",
   alternates: {
     canonical: "https://www.tryprepit.app/privacy-policy",
   },
@@ -18,12 +18,13 @@ export const metadata: Metadata = {
 };
 
 export default async function PrivacyPolicyPage() {
-  const { title, effectiveDate, content } = await loadMDX("privacy-policy.mdx");
+  const { title, effectiveDate, content, headings } = await loadMDX("privacy-policy.mdx");
 
   return (
     <LegalMDXPage
       title={title}
       lastUpdated={effectiveDate}
+      headings={headings}
       currentPath="/privacy-policy"
     >
       {content}
