@@ -7,41 +7,39 @@ interface UnitSystemToggleProps {
   onChange: (system: UnitSystem) => void;
 }
 
-export default function UnitSystemToggle({
-  value,
-  onChange,
-}: UnitSystemToggleProps) {
+const OPTIONS: { value: UnitSystem; label: string }[] = [
+  { value: "metric", label: "Metric" },
+  { value: "imperial", label: "Imperial" },
+];
+
+export default function UnitSystemToggle({ value, onChange }: UnitSystemToggleProps) {
   return (
-    <div className="flex items-center justify-between rounded-2xl bg-white p-4">
-      <span className="text-sm font-semibold" style={{ color: "#4D4D59" }}>
+    <div className="flex items-center justify-between rounded-tile border border-line bg-surface p-4 sm:px-5">
+      <span id="units-label" className="text-body font-medium text-ink-secondary">
         Units
       </span>
       <div
-        className="relative flex rounded-full p-0.5"
-        style={{ backgroundColor: "#F4F4F5" }}
+        role="radiogroup"
+        aria-labelledby="units-label"
+        className="flex rounded-control bg-surface-raised p-1"
       >
-        <button
-          type="button"
-          onClick={() => onChange("imperial")}
-          className="relative z-10 rounded-full px-4 py-1.5 text-xs font-semibold transition-colors duration-200"
-          style={{
-            color: value === "imperial" ? "#fff" : "#7A7A82",
-            backgroundColor: value === "imperial" ? "#000" : "transparent",
-          }}
-        >
-          Imperial
-        </button>
-        <button
-          type="button"
-          onClick={() => onChange("metric")}
-          className="relative z-10 rounded-full px-4 py-1.5 text-xs font-semibold transition-colors duration-200"
-          style={{
-            color: value === "metric" ? "#fff" : "#7A7A82",
-            backgroundColor: value === "metric" ? "#000" : "transparent",
-          }}
-        >
-          Metric
-        </button>
+        {OPTIONS.map((option) => {
+          const selected = value === option.value;
+          return (
+            <button
+              key={option.value}
+              type="button"
+              role="radio"
+              aria-checked={selected}
+              onClick={() => onChange(option.value)}
+              className={`rounded-control border px-4 py-1.5 text-small font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus ${
+                selected ? "border-primary bg-primary text-on-primary" : "border-transparent text-ink-muted hover:text-ink"
+              }`}
+            >
+              {option.label}
+            </button>
+          );
+        })}
       </div>
     </div>
   );

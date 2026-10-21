@@ -1,95 +1,72 @@
 "use client";
 
+import { useSyncExternalStore } from "react";
+import { formatFullDay, formatWeekday, planDayKey } from "@/lib/plan-dates";
+
 interface WeekCalendarProps {
+  /** Plan days as UTC midnight, from planWeek(). */
   weekDates: Date[];
   planDateSet: Set<string>;
   selectedDate: string;
-  onSelect: (dateStr: string) => void;
+  onSelect: (dateKey: string) => void;
 }
 
-function isToday(date: Date): boolean {
+// The visitor's own today, read in the browser only, so the server render
+// (in UTC) never disagrees with it.
+function todayKey(): string {
   const now = new Date();
-  return (
-    date.getDate() === now.getDate() &&
-    date.getMonth() === now.getMonth() &&
-    date.getFullYear() === now.getFullYear()
-  );
+  return planDayKey(new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())));
 }
 
-function toDateKey(date: Date): string {
-  return date.toISOString().split("T")[0];
-}
+const noSubscribe = () => () => {};
 
-export function getWeekDates(startDate: Date): Date[] {
-  const dates: Date[] = [];
-  for (let i = 0; i < 7; i++) {
-    const day = new Date(startDate);
-    day.setDate(startDate.getDate() + i);
-    dates.push(day);
-  }
-  return dates;
-}
-
+/** Rows of seven day cells. Days outside the plan are greyed and disabled. */
 export default function WeekCalendar({
   weekDates,
   planDateSet,
   selectedDate,
   onSelect,
 }: WeekCalendarProps) {
+  const today = useSyncExternalStore(noSubscribe, todayKey, () => null);
+
   return (
-    <div className="flex justify-around">
+    <div className="grid grid-cols-7 gap-y-3">
       {weekDates.map((date) => {
-        const dateKey = toDateKey(date);
+        const dateKey = planDayKey(date);
         const inPlan = planDateSet.has(dateKey);
         const selected = dateKey === selectedDate;
-        const today = isToday(date);
-        const dayLabel = date.toLocaleDateString("en-US", { weekday: "short" });
-        const dayNum = date.getDate();
+        const label = `${formatFullDay(date)}${selected ? ", selected" : ""}${inPlan ? "" : ", disabled"}`;
 
         return (
           <button
             key={dateKey}
+            type="button"
             onClick={() => inPlan && onSelect(dateKey)}
-            className="flex flex-col items-center gap-1"
-            style={{
-              opacity: inPlan ? 1 : 0.3,
-              cursor: inPlan ? "pointer" : "default",
-            }}
             disabled={!inPlan}
+            aria-label={label}
+            aria-pressed={inPlan ? selected : undefined}
+            className="flex flex-col items-center gap-1.5 rounded-control focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:cursor-default disabled:opacity-35"
           >
             <span
-              className="text-sm"
-              style={{
-                fontWeight: selected ? 700 : 400,
-                color: "#000",
-              }}
+              className={`text-small ${selected ? "font-medium text-ink" : "text-ink-muted"}`}
             >
-              {dayLabel}
+              {formatWeekday(date)}
             </span>
-            <div className="relative flex flex-col items-center">
-              <div
-                className="flex h-12 w-12 items-center justify-center rounded-full transition-colors"
-                style={{
-                  backgroundColor: selected ? "#000" : "transparent",
-                }}
+            <span className="relative flex flex-col items-center">
+              <span
+                className={`flex h-11 w-11 items-center justify-center rounded-control border text-lead transition-colors sm:h-12 sm:w-12 ${
+                  selected ? "border-primary bg-primary font-medium text-on-primary" : "border-transparent text-ink"
+                }`}
               >
+                {date.getUTCDate()}
+              </span>
+              {dateKey === today && (
                 <span
-                  className="text-lg"
-                  style={{
-                    fontWeight: selected ? 700 : 400,
-                    color: selected ? "#FFF" : "#000",
-                  }}
-                >
-                  {dayNum}
-                </span>
-              </div>
-              {today && (
-                <div
-                  className="absolute -bottom-1 h-2 w-2 rounded-full"
-                  style={{ backgroundColor: "#FF5722" }}
+                  aria-hidden
+                  className="absolute -bottom-1.5 h-1.5 w-1.5 rounded-control bg-satiety"
                 />
               )}
-            </div>
+            </span>
           </button>
         );
       })}

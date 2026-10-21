@@ -1,0 +1,134 @@
+# Lifestyle imagery (PRE-199)
+
+Every lifestyle photo on the site is listed here with its prompt, model, reference images and seed, so a scene can be regenerated after an app update.
+
+The phone screen is part of the generated photo: the real app capture is passed to the image model as a reference image and the model renders the phone showing it, with the scene's light and reflections (Prabodh, 13 Oct). Nothing is pasted over the photo afterwards.
+
+## Style guide (pasted into every prompt)
+
+> Editorial lifestyle photograph, shot on a 35 mm lens at f/2, natural light, warm and low-key: deep warm shadows, honey and amber highlights, cream and walnut tones, no cool blue cast. Real, lived-in places (a neighbourhood cafe, a home kitchen, a sofa at dusk), everyday food that looks home-made or cafe-made, not styled for an advert. Soft 35 mm film grain, gentle vignette. People appear only as hands, forearms, a shoulder or an out-of-focus figure in the background: no faces in focus. Any phone in the shot is a modern iPhone held or propped so its screen faces the camera almost square on, and its screen shows exactly the app screenshot from the reference image: same layout, text, numbers and colours, nothing added, nothing removed, readable at a glance. No logos, no brand names, no text anywhere. Leave calm, darker space where the page text will sit.
+
+The palette is chosen to sit on the site's page colour `#110f0c` under the left-hand photo scrim, with the amber annotation colour `#f5cc77` reading clearly on top.
+
+## Shot list (homepage, design D3)
+
+| # | Scene | Section | Screen reference image | Annotations (real values) |
+| -- | -- | -- | -- | -- |
+| 1 | Cafe lunch: hand holding a phone over a chicken, hummus and salad wrap on a wooden cafe table, flat white beside it | Hero, full width under the headline | `public/app/01b-home-log-dark` (the wrap at 12:30 PM in today's log) | 462 kcal, Chicken wrap with hummus and salad; 61 g protein; 150 g chicken breast; 60 g wholemeal tortilla |
+| 2 | Evening sofa: phone in hand, a bowl of Greek yogurt with raspberries on the arm of the sofa, cup of tea, warm lamp light | Ask anything (5), full bleed, text on the left | `public/app/02-chat-chart-dark` (protein chart in chat) | 168 kcal, Greek yogurt with raspberries; 13 g protein |
+| 3 | Kitchen shop: the groceries on the phone's list just unpacked on a worktop (wholemeal tortillas, eggs, feta, Greek yogurt, apples, avocados), phone propped against a jar | Plans (10), full bleed, text on the right (the phone is on the left of the picked photo) | `public/app/13-grocery-list-dark` | 850 g Greek yogurt on the tub; 200 g eggs and 120 g wholemeal tortilla on their rows on the phone (the carton and pack hold more); Est. £48–£66 for the week |
+
+The groceries in shot 3 are the items visible on the phone's list, so the photo and the screen agree. Annotation values (and the screens the phone shows) come from the `showcase-full-account` seed in `fresca_backend` (`src/dev/resetTestAccount/seeds.ts`, `SHOWCASE_WRAP` and `SHOWCASE_BERRY_YOGURT`; the grocery values are the list on the capture), which is the account the PRE-198 captures were taken on, so the numbers on the photo match the numbers on the phone.
+
+Shots 4 to 10 (below) are for the features page (PRE-203), sitewide backgrounds and the walkthrough video. They follow the same style guide. From shot 6 on, each shot has two variations, and shots with no phone screen run at 1K medium (textures at 1K low), because there is no text to read.
+
+## Prompts
+
+Each prompt is the style guide above, the scene line, and a closing line naming the screen's key text and telling the model to reproduce the screenshot exactly, with the scene's capture attached as a reference image (the 2x dark WebP from `public/app/`). One generation per scene, four variations each, on gpt-image-2 through ElevenLabs, which takes the capture as a reference image.
+
+## Screen fidelity check
+
+Every variation is checked against its reference capture before it goes in front of Prabodh:
+
+1. Crop the phone screen from the variation, flatten it to the capture's aspect ratio, and place it side by side with the capture at the same size.
+2. Read every line of text and every number on the generated screen. Any wrong, missing, invented or garbled character fails the variation: the annotation values next to the phone must match what the phone shows.
+3. Layout, icons, ring and chart shapes and colours must match the capture; an extra or missing element fails it.
+4. The screen must read as a real phone screen (no warped edges, no doubled status bar, notch and Dynamic Island in the right place).
+
+Failed variations are dropped, with the reason noted in the Generations table. If a scene has no passing variation, it is regenerated with a tighter prompt (closer framing on the phone, screen larger in frame) rather than patched. The contact sheet Prabodh picks from shows each passing variation beside its side-by-side screen check.
+
+### 1. Cafe lunch (hero)
+
+> Wide 16:9 photograph across a small wooden table in a warm neighbourhood cafe at lunchtime, late autumn daylight from a window on the right. In the centre-right, a chicken, hummus, spinach and cucumber wrap cut in half on a simple ceramic plate, one half turned to show the filling. A flat white in a cream cup beside it. On the right third, a hand holds an iPhone upright just above the table edge, screen facing the camera almost square on. The left half of the frame is darker cafe interior, softly out of focus, with an out-of-focus figure in the background. Shallow depth of field, the wrap and the phone sharp.
+
+### 2. Evening sofa (Ask anything)
+
+> Wide 16:9 photograph on a deep linen sofa in the evening, lit by a single warm table lamp off frame on the right, the rest of the room in deep shadow. On the right third, a hand rests an iPhone on a knee wrapped in a soft knit blanket, screen facing the camera almost square on. On the sofa arm beside it, a small bowl of thick Greek yogurt topped with fresh raspberries, and a cup of tea with steam. The left half of the frame is dark, quiet shadow. Shallow depth of field.
+
+### 3. Kitchen shop (Plans)
+
+> Wide 16:9 photograph of a home kitchen worktop just after a grocery shop, soft early evening daylight from a window on the right. On the right half, the shop laid out loosely: a pack of wholemeal tortillas, a box of six eggs, a block of feta, a large plain tub of Greek yogurt, a few red apples and two avocados, a paper shopping bag behind them. An iPhone is propped upright against a glass jar among them, screen facing the camera almost square on. The left half of the frame is darker worktop and kitchen wall, softly out of focus. A hand reaching in from the right edge for an apple.
+
+## More scenes (features page and video)
+
+| # | Scene | Where it goes | Screen reference | Notes |
+| -- | -- | -- | -- | -- |
+| 4 | Gym bench: phone leaning on a gym bag, protein shake, towel | Features (PRE-203), Signals | `public/app/01-home-dark` | Annotations point at the phone (Energy 84, Satiety 96, Mood 87; 1,481 of 1,570 kcal), since nothing on the bench is logged |
+| 5 | Desk lunch: phone on a walnut stand showing widgets, chicken and rice lunch box, laptop, status bar 12:41 | Features (PRE-203), Widgets tile | `15-widget-signals-medium-dark-green` and `15-widget-today-plan-large-dark-lunch` (a good day: all rings green, lunch logged) on a plain dark home screen | Phone on the left, so `textSide: "end"` and the mirrored scrim |
+| 6 | Overhead flat-lays: protein overnight oats with apple and cinnamon; chicken wrap with hummus and salad; Mediterranean salmon bowl with quinoa | Features (PRE-203), Plans; share images (PRE-206) | None | Meals from the showcase plan. Dark space on the left for text |
+| 7 | Honey light texture | Backgrounds for sections with no photo | None | Decorative, empty alt |
+| 8 | Cafe clip from the hero still | Homepage hero video option | Starts from the hero still | Failed (see Generations); not shipped |
+| 9 | Cooking clip: chicken, peppers and spinach in a cast-iron pan | Features (PRE-203), Plans | None | Plays through `LoopVideo` (`cookingClip` in `src/content/featureImagery.ts`, which holds all of shots 4 to 10; the homepage photos stay in `lifestyle.ts`) |
+| 10 | Voiceover and music bed for `21-walkthrough` | A "watch with sound" player: press to play, native controls, never autoplay | None | Captions in `21-walkthrough-narrated.vtt`, timed to the pauses in the voice. Mixed onto the walkthrough as `public/app/21-walkthrough-narrated.mp4` and `.webm`: voice from 1 s, music ducked under the voice and faded out over the last 3 s. The silent loops are unchanged. The narrated files were removed from `public/app` in PRE-242 because no page used them; restore them from git history when a player is built |
+
+Flat-lay prompt (the oats one; the others swap the dish line):
+
+> Overhead flat-lay food photograph shot straight down, warm low-key evening light from one side, deep walnut wood table, honey and amber highlights, soft shadows, subtle film grain. Centre-right: a ceramic bowl of protein overnight oats topped with diced red apple and a dusting of cinnamon, a spoon resting on a cream linen napkin, a few apple slices and a cinnamon stick beside it. Generous dark empty space on the left third of the frame. Editorial, natural, not glossy. No text, no logos, no packaging, no people, no hands.
+
+Voiceover script (read by the ElevenLabs library voice "Cass", eleven_v3):
+
+> This is PrepIt. Your nutritionist, always on. Open the app and your day is right there: energy, satiety and mood, worked out from what you actually ate. Tap Ask Nutritionist and just tell it what you had. "A handful of cucumber slices." Done, logged to the right time. Your log fills in through the day, every meal with its calories, protein, carbs and fat. Not sure what to have for dinner? Ask. It knows your targets, and it'll suggest something that fits. Tap Log it, and it's in. No barcodes. No guessing. Just a nutritionist in your pocket who knows what you've eaten. PrepIt. Try it free for seven days.
+
+## Output files
+
+All files go in `public/lifestyle/`. Paths are fixed, so pages can reference them before the photos land.
+
+| Scene | Desktop (16:9) | Phone crop (4:5, the phone in the hand) |
+| -- | -- | -- |
+| Cafe lunch | `hero-cafe@1x.{avif,webp}` 1440 x 810, `hero-cafe@2x.{avif,webp}` 2048 x 1152 | `hero-cafe-mobile@1x.{avif,webp}` 640 x 800, `hero-cafe-mobile@2x.{avif,webp}` 920 x 1150 |
+| Evening sofa | `nutritionist-evening@1x/@2x` (same sizes) | `nutritionist-evening-mobile@1x/@2x` |
+| Kitchen shop | `plans-kitchen@1x/@2x` (same sizes) | `plans-kitchen-mobile@1x/@2x` |
+| Gym bench | `signals-gym@1x/@2x` (same sizes) | `signals-gym-mobile@1x/@2x` |
+| Desk lunch | `widgets-desk@1x/@2x` (same sizes) | `widgets-desk-mobile@1x/@2x` |
+
+Flat-lays and the texture are 1280 x 720 only (`flatlay-oats`, `flatlay-wrap` and `flatlay-salmon` as `.avif` and `.webp`; `texture-honey` as `.webp` only, since AVIF smeared its grain into blocks), the size the model made them, so there is no @2x. The cooking clip is `cooking.mp4` (H.264) and `cooking.webm` (VP9) at 1280 x 720, 8 s, no sound, with `cooking-poster.webp`.
+
+The model renders at 2048 x 1152, so @2x is the full generated size rather than an upscale to 2880 x 1620, and the phone crop @2x is the full-height 922 x 1152 crop. Every file is under 120 KB (AVIF quality 52, WebP quality 76, made with sharp). Annotation anchors (percent of the desktop photo), their text, alt text, and which side the page text sits on are in `src/content/lifestyle.ts`.
+
+The kitchen photo has the phone on the left, so the Plans section puts its text on the right (`textSide: "end"`) with the mirrored scrim (`scrim: "end"` on the photo, token `--scrim-photo-end`). Its annotations sit low on the right, under the groceries, so the text block there belongs in the upper half.
+
+## Generations
+
+| Scene | Model | Reference image | Seed | Variations passed / generated | Picked | Licence check |
+| -- | -- | -- | -- | -- | -- | -- |
+| Cafe lunch | gpt-image-2 (ElevenLabs), 16:9, 2K, high | `public/app/01b-home-log-dark@2x.webp` at 0b935d8 | Not exposed by the model | 4 / 4 | 2 (generation `jotJjOLKcGI49OoGQevd`) | Generated on PrepIt's ElevenLabs workspace with paid credits (ElevenLabs grants commercial use on paid plans). No real people, brands or text beyond the app screen. |
+| Evening sofa | gpt-image-2, same settings | `public/app/02-chat-chart-dark@2x.webp` at 0b935d8 | Not exposed | 4 / 4 (all reproduce every word and number; the chart bars are shaped slightly differently from the capture, with no value labels on them) | 2 (`TjPqRlBc39Nt2mi3chOa`) | As above |
+| Kitchen shop | gpt-image-2, same settings | `public/app/13-grocery-list-dark@2x.webp` at 0b935d8 | Not exposed | 3 / 4 (variation 4 failed: the handset had an earpiece slot and camera dot, not a modern iPhone) | 2 (`RQN7u3H6TXqqctCBMfAS`) | As above |
+| Gym bench | gpt-image-2, 16:9, 2K, high | `public/app/01-home-dark@2x.webp` at 0b935d8 | Not exposed | 3 / 4 (variation 4 garbled the macros: "131/1S6g", "1S6/1S8g") | 1 | As above |
+| Desk lunch | gpt-image-2, 16:9, 2K, high, two references | Mac captures `15-widget-signals-medium-dark-green.png` and `15-widget-today-plan-large-dark-lunch.png` (seeds `showcase-full-account` and `logged-breakfast-with-plan-today`) | Not exposed | 2 / 2 (every word, time and number matches; the first run, which showed a red Mood ring and lunch skipped, was replaced at Prabodh's request) | 2 (`TgBiTVTojgj3ZrgYAKIS`; its ring gaps match the capture more closely) | As above |
+| Flat-lay: oats | gpt-image-2, 16:9, 1K, medium (one 1K low draft first) | None | Not exposed | 2 / 2 | 2 (`EWhQnBkM3eEmsiDWCcMf`) | As above |
+| Flat-lay: wrap | Same | None | Not exposed | 2 / 2 | 1 (`7sVm97IyfvfBmglMzq8b`) | As above |
+| Flat-lay: salmon | Same | None | Not exposed | 2 / 2 | 1 (`qZtKTZKnddTQVSW6wf3a`) | As above |
+| Texture | gpt-image-2, 16:9, 1K, low | None | Not exposed | 2 / 2 | 1 (`8EMhyFvEsRRF27BkpMiR`) | As above |
+| Cafe clip | Veo 3.1 Fast, 8 s, 1080p, no audio, start frame = the hero pick | Hero still | Not exposed | 0 / 1 (the model redraws the phone screen from the first frame: 00:41, 403 kcal, "solod", "respborrios") | None | As above |
+| Cooking clip | Veo 3.1 Fast, 8 s, 1080p, no audio | None | Not exposed | 1 / 1 | `i6dE8Sdn2OEA7obO7K8a` | As above |
+| Voiceover | eleven_v3, voice Cass | None | n/a | 2 (46.5 s and 45.9 s) | 1 (`sZM4Mf8hKxcug18sjYC6`) | As above |
+| Music bed | eleven_music_v2_5, instrumental, 54 s | None | n/a | 2 | 1 (`h7XB3xj324ridSyjJbGW`) | As above |
+
+Every variation (30 photos, 2 clips, 2 voiceovers and 2 music beds) with their screen checks: [contact sheet](https://claude.ai/artifact/Ccqc5PkZZBRax3kMQtPPoT). Full-size originals are kept outside the repo. ElevenLabs flow `088lf68ZQahQ3mm7eg5x`.
+
+`/dev/imagery` (local development and Vercel previews only, like `/dev/components`) shows shots 4 to 10 the way a page would use them, for checking in the browser.
+
+## Light site regeneration (PRE-282)
+
+The light redesign (PRE-276) made the dark PRE-199 photos look out of place, so every photo above was made again for a bright, daylight look, with the phone screens generated from the **light** app captures. The file names stay the same, so pages pick the new photos up without code changes. Three new photos were added for the redesigned homepage (PRE-277).
+
+Style guide pasted into every prompt:
+
+> Editorial lifestyle photograph for a bright, modern health app website. Shot on a 35 mm lens at f/2.8, soft natural daylight, airy and clean: white walls, pale oak and white surfaces, linen, warm neutral whites, soft gentle shadows, true-to-life colour with a slight warm tint. No dark moody grade, no heavy vignette, no film grain. People appear only as hands or an out-of-focus figure in the background: no faces. The phone is a modern iPhone (thin even black bezels, Dynamic Island, no home button). No logos, no brand names, no other text.
+
+The two dark bands (research and download) use a dark stone or evening scene instead, with dark space on the left for the band's text and no readable screen.
+
+| File | Scene | Reference image | Variations passed / generated | Picked |
+| -- | -- | -- | -- | -- |
+| `hero-cafe` | Hand holding the phone at a bright window table, apple and almonds, water | `public/app/02-chat-chart-light@2x.webp` | 2 / 2 | 1 (`2IxM9qKS57kFMQybEREx`) |
+| `nutritionist-evening` (standout: speaks up) | Hand holding the phone in a bright kitchen, yogurt and berries, coffee, keys; out-of-focus figure from behind | Mac capture `24-nudge-weekly-pattern-light.png` (seed `calorie-banking-suggestion-sent`), in `docs/imagery/references/` | 2 / 2 (every word of the message and card matches) | 1 (`ptRlZmd6GxPJCRr3Bziu`) |
+| `lunch-rings` (new, standout: how food makes you feel) | Hand holding the phone beside a chicken, quinoa and pepper bowl | `public/app/01-home-light@2x.webp` | 2 / 2 | 1 (`CEOjUPfVfTaaBrgz2jMn`) |
+| `plans-kitchen` | Phone against a jar, groceries unpacked | `public/app/13-grocery-list-light@2x.webp` | 2 / 2 | 1 (`LptQo1yFT2RyzvM5VvPX`) |
+| `signals-gym` | Phone against a bottle in a bright home gym, towel, banana, smoothie | `public/app/06-signal-energy-light@2x.webp` | 2 / 2 | 1 (`lUj0DGmuc8qwNEeGdj5K`) |
+| `widgets-desk` | Phone on a stand after lunch, empty lunch box, laptop | Mac captures `15-widget-signals-medium-light-green.png` and `15-widget-today-plan-large-light-lunch.png`, in `docs/imagery/references/` | 2 / 2 on the second run. The first run (`yWkBuNtNXqnqvnW70s9d`) failed 0 / 2: its prompt and references disagreed on the ring numbers and colours | 2 (`z2HWMQpjNYtTPdK4420O`) |
+| `research-table` (new) | Whole foods on dark stone | None (1K, medium) | 2 / 2 | 1 (`vRpFwqdCO9i9zZOt88oX`) |
+| `download-evening` (new) | Phone face down on a sofa arm in the evening, tea, berries | None (1K, medium) | 2 / 2 | 2 (`rSGmvHjfPXpjeP2ssKms`) |
+| `flatlay-oats`, `flatlay-wrap`, `flatlay-salmon` | Overhead on pale oak and linen | None (1K, medium) | 2 / 2 each | 1 each (`OZa2Sr0ob2qwrkHgG9pj`, `FZPHEPBCcEu1EydAYtnT`, `K0rkdnHCOpJPrTbeoePu`) |
+
+Phone shots are gpt-image-2 at 16:9, 2K, high; the rest are 1K, medium. Sizes, quality settings and the 120 KB cap are the same as above; `research-table` is 1280 x 720 and `download-evening` also has a `-768` copy. The texture and the cooking clip were not remade. ElevenLabs flow `wg5id7jXorT57941lgwt`. About 20,700 credits in all, including the failed widgets run.

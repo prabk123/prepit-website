@@ -1,4 +1,4 @@
-import type { UnitInfo, UnitConversion } from "./types/meal-plan";
+import type { UnitInfo, UnitConversion, UnitSystem } from "./types/meal-plan";
 
 interface ConvertedQuantity {
   quantity: number;
@@ -107,4 +107,12 @@ export function maybeConvert({
     unitLabelSingular: unitSingular,
     unitLabelPlural: unitPlural || unitSingular,
   };
+}
+
+/**
+ * Same rule as the app's first-run default: US visitors get Imperial and
+ * everyone else Metric. The visitor can still switch with the Units toggle.
+ */
+export function defaultUnitSystemForCountry(countryCode: string | null | undefined): UnitSystem {
+  return countryCode?.trim().toUpperCase() === "US" ? "imperial" : "metric";
 }

@@ -1,26 +1,20 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, DM_Sans } from "next/font/google";
+import { DM_Sans } from "next/font/google";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
 import Script from "next/script";
 import localFont from "next/font/local";
 import NavigationWrapper from "@/components/NavigationWrapper";
-import DownloadCTA from "@/components/DownloadCTA";
+import FinalCta from "@/components/pricing/FinalCta";
+import SiteFinalCta from "@/components/pricing/SiteFinalCta";
 import Footer from "@/components/Footer";
-import SmartBanner from "@/components/SmartBanner";
-import FloatingGetAppButton from "@/components/FloatingGetAppButton";
+import SiteChrome from "@/components/SiteChrome";
 import CookieConsent from "@/components/CookieConsent";
+import AttributionCapture from "@/components/funnel/AttributionCapture";
+import MarketCapture from "@/components/funnel/MarketCapture";
+import { PREPIT_ANALYTICS_CONSENT_COOKIE, PREPIT_GEO_COOKIE } from "@/lib/cookies";
+import { APP_STORE_ID } from "@/lib/appStore";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
@@ -29,15 +23,9 @@ const dmSans = DM_Sans({
 });
 
 const brandFont = localFont({
-  src: "./fonts/ClashDisplay-Variable.ttf",
+  src: "./fonts/ClashDisplay-Variable.woff2",
   variable: "--font-brand",
   display: "swap",
-});
-
-const prepitIcons = localFont({
-  src: "./fonts/PrepItIcons.ttf",
-  variable: "--font-prepit-icons",
-  display: "block",
 });
 
 // Base URL - production URL
@@ -72,29 +60,22 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
+  // The preview image is ./opengraph-image.tsx and ./twitter-image.tsx (PRE-312),
+  // which pages without their own inherit.
   openGraph: {
     type: "website",
     locale: "en_US",
     url: baseUrl,
     siteName: "PrepIt",
-    title: "PrepIt | Your AI Nutritionist – Meals In, Smart Advice Out",
+    title: "PrepIt | The nutritionist that notices",
     description:
-      "Log meals in plain English. PrepIt shows how each meal affects your energy, hunger, and mood—and what to do next.",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "PrepIt – Your AI nutritionist app",
-      },
-    ],
+      "An AI nutritionist that learns how you eat, speaks up when something slips, and shows how your food will make you feel.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "PrepIt | Your AI Nutritionist – Meals In, Smart Advice Out",
+    title: "PrepIt | The nutritionist that notices",
     description:
-      "Log meals in plain English. PrepIt shows how each meal affects your energy, hunger, and mood—and what to do next.",
-    images: ["/og-image.png"],
+      "An AI nutritionist that learns how you eat, speaks up when something slips, and shows how your food will make you feel.",
   },
   alternates: {
     canonical: baseUrl,
@@ -115,6 +96,12 @@ export const metadata: Metadata = {
     apple: "/logo.png",
   },
   manifest: "/manifest.json",
+  // Safari's Smart App Banner. It must be in the server HTML: Safari reads it
+  // on load and ignores a tag added later by JavaScript. Legal pages turn it
+  // off with `itunes: null`.
+  itunes: {
+    appId: APP_STORE_ID,
+  },
 };
 
 export default function RootLayout({
@@ -133,29 +120,34 @@ export default function RootLayout({
         />
         {metaPixelId && (
           <>
+            {/* In the UK and EEA (or when the region is unknown) the pixel only
+                loads after "Accept optional cookies"; CookieConsent calls
+                prepitLoadMetaPixel then. Cookie names are in src/lib/cookies.ts. */}
             <Script id="meta-pixel" strategy="afterInteractive">
               {`
-                !function(f,b,e,v,n,t,s)
-                {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-                n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-                if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-                n.queue=[];t=b.createElement(e);t.async=!0;
-                t.src=v;s=b.getElementsByTagName(e)[0];
-                s.parentNode.insertBefore(t,s)}(window, document,'script',
-                'https://connect.facebook.net/en_US/fbevents.js');
-                fbq('init', '${metaPixelId}');
-                fbq('track', 'PageView');
+                window.prepitLoadMetaPixel = function () {
+                  /* The plan email pages carry a token in the address until
+                     the page removes it, so PageView must not see them. */
+                  var path = location.pathname;
+                  if (path === '/my-plan' || path === '/email-preferences' || path.indexOf('/my-plan/') === 0 || path.indexOf('/email-preferences/') === 0) return;
+                  !function(f,b,e,v,n,t,s)
+                  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+                  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+                  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+                  n.queue=[];t=b.createElement(e);t.async=!0;
+                  t.src=v;s=b.getElementsByTagName(e)[0];
+                  s.parentNode.insertBefore(t,s)}(window, document,'script',
+                  'https://connect.facebook.net/en_US/fbevents.js');
+                  /* No automatic events: they send button text (quiz answers) to Meta. */
+                  fbq('set', 'autoConfig', false, '${metaPixelId}');
+                  fbq('init', '${metaPixelId}');
+                  fbq('track', 'PageView');
+                };
+                var geo = (document.cookie.match(/(?:^|; )${PREPIT_GEO_COOKIE}=([^;]*)/) || [])[1];
+                var consent = (document.cookie.match(/(?:^|; )${PREPIT_ANALYTICS_CONSENT_COOKIE}=([^;]*)/) || [])[1];
+                if (geo === 'non-eu' || consent === 'granted') window.prepitLoadMetaPixel();
               `}
             </Script>
-            <noscript>
-              <img
-                height="1"
-                width="1"
-                style={{ display: "none" }}
-                src={`https://www.facebook.com/tr?id=${metaPixelId}&ev=PageView&noscript=1`}
-                alt=""
-              />
-            </noscript>
           </>
         )}
         <script
@@ -198,24 +190,36 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${dmSans.variable} ${brandFont.variable} ${prepitIcons.variable} antialiased`}
+        className={`${dmSans.variable} ${brandFont.variable} antialiased`}
       >
-        <SmartBanner />
-        <FloatingGetAppButton />
-        <div className="flex min-h-screen flex-col items-center bg-white">
-          <NavigationWrapper />
+        <a
+          href="#main"
+          className="sr-only rounded-button bg-primary px-4 text-small font-bold text-on-primary focus:not-sr-only focus:fixed focus:left-4 focus:top-2.5 focus:z-[60] focus:inline-flex focus:h-11 focus:items-center focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus"
+        >
+          Skip to content
+        </a>
+        {/* Straight after the skip link, so a keyboard reaches it before the page. */}
+        <CookieConsent />
+        <AttributionCapture />
+        <MarketCapture />
+        <div className="flex min-h-screen flex-col items-center bg-page">
+          <SiteChrome>
+            <NavigationWrapper />
+          </SiteChrome>
 
-          <main className="w-full">
+          <main id="main" tabIndex={-1} className="w-full outline-none">
             {children}
-            <SpeedInsights />
           </main>
 
-          <DownloadCTA />
-          <Footer />
+          <SiteFinalCta>
+            <FinalCta id="site-download" />
+          </SiteFinalCta>
+          <SiteChrome>
+            <Footer />
+          </SiteChrome>
         </div>
         <SpeedInsights />
         <Analytics />
-        <CookieConsent />
       </body>
     </html>
   );

@@ -1,5 +1,6 @@
+import { cache } from "react";
 import { ObjectId } from "mongodb";
-import { getDatabase } from "./mongodb";
+import { getSharedPlanFixture } from "./meal-plan-fixtures";
 import type { SharedMealPlan } from "./types/meal-plan";
 
 const RECIPE_PROJECTION = {
@@ -18,13 +19,56 @@ const RECIPE_PROJECTION = {
   sourceType: 1,
 };
 
-export async function getMealPlanById(
-  id: string
-): Promise<SharedMealPlan | null> {
-  if (!ObjectId.isValid(id)) {
-    return null;
-  }
+/**
+ * One shared plan by id, or null when the id is not a plan. Cached per
+ * request, so the page, its metadata and its preview image read Mongo once.
+ * A database failure is logged (plan id only) and rethrown, so the page shows
+ * its error state rather than "not found".
+ */
+export const getMealPlanById = cache(
+  async (id: string): Promise<SharedMealPlan | null> => {
+    if (!ObjectId.isValid(id)) {
+      return null;
+    }
 
+    const fixture = getSharedPlanFixture(id);
+    if (fixture) return fixture;
+
+    try {
+      return await loadMealPlan(id);
+    } catch (error) {
+      console.error("[shared-meal-plan] Failed to load plan", {
+        planId: id,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      throw error;
+    }
+  },
+);
+
+/**
+ * The app builds a plan's grocery list in the background after the plan is
+ * saved or changed (changes clear the list first). Older plans can have no
+ * list at all, so an empty list only means "almost ready" when the plan was
+ * saved, or a chat change started (`meta.lastUpdate.at`, restamped on each
+ * attempt), in the last few minutes. `meta.updating` alone is not trusted: a
+ * job that dies leaves it true until the owner opens the plan again.
+ */
+const GROCERY_BUILD_WINDOW_MS = 15 * 60 * 1000;
+
+export function groceriesMayStillArrive(
+  { created, lastUpdateAt }: { created?: string; lastUpdateAt?: string },
+  now = Date.now(),
+): boolean {
+  return [created, lastUpdateAt].some((value) => {
+    const time = value ? new Date(value).getTime() : NaN;
+    return Number.isFinite(time) && now - time < GROCERY_BUILD_WINDOW_MS;
+  });
+}
+
+async function loadMealPlan(id: string): Promise<SharedMealPlan | null> {
+  // Imported here so a missing MONGODB_URI fails inside the logged try block.
+  const { getDatabase } = await import("./mongodb");
   const db = await getDatabase();
 
   const results = await db
@@ -126,6 +170,8 @@ export async function getMealPlanById(
           _id: "$_id",
           days: { $push: "$days" },
           groceries: { $first: "$groceries" },
+          created: { $first: "$created" },
+          lastUpdateAt: { $first: "$meta.lastUpdate.at" },
         },
       },
       {
@@ -133,6 +179,8 @@ export async function getMealPlanById(
           _id: { $toString: "$_id" },
           days: 1,
           groceries: 1,
+          created: 1,
+          lastUpdateAt: 1,
         },
       },
     ])
@@ -144,7 +192,25 @@ export async function getMealPlanById(
 
   // Round-trip through JSON to strip ObjectId buffers and Date objects
   // so the data is safe to pass as props to client components
-  const plan = JSON.parse(JSON.stringify(results[0])) as SharedMealPlan;
+  const { created, lastUpdateAt, ...raw } = JSON.parse(JSON.stringify(results[0])) as SharedMealPlan & {
+    created?: string;
+    lastUpdateAt?: string;
+  };
+  const plan: SharedMealPlan = raw;
+
+  // A plan saved with no days unwinds to one empty day with no date.
+  plan.days = (plan.days ?? []).filter((day) => Boolean(day?.date));
+  plan.groceries = plan.groceries ?? [];
+  plan.groceriesPending =
+    plan.groceries.length === 0 && groceriesMayStillArrive({ created, lastUpdateAt });
+  if (plan.days.length === 0) {
+    return null;
+  }
+
+  // $push keeps $unwind order, but sort by date so the strip and the swipe
+  // always agree.
+  plan.days.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
   const apiBaseUrl = process.env.PREPIT_API_BASE_URL || "";
 
   for (const day of plan.days) {

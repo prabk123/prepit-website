@@ -1,0 +1,263 @@
+#!/usr/bin/env python3
+"""Turn raw simulator captures (PRE-198) into the web assets under public/app/.
+
+Stills (1206x2622 PNG) become AVIF and WebP at 1x (402 px wide) and 2x
+(804 px). Videos are cut to the segments listed in SEGMENTS and written as
+H.264 MP4 and VP9 WebM at 804 px wide, each with a WebP poster. The test
+account's profile photo is blurred wherever the Home header shows it, and the
+Dynamic Island is painted out (the site's DeviceFrame draws its own). Widget
+renders are cropped to the widget with transparent corners.
+
+Usage: python3 scripts/process-app-captures.py <raw dir> [out dir]
+Needs Pillow with AVIF support and ffmpeg (libx264, libvpx-vp9).
+"""
+
+import os
+import subprocess
+import sys
+
+from PIL import Image, ImageDraw, ImageFilter
+
+RAW = sys.argv[1]
+OUT = sys.argv[2] if len(sys.argv) > 2 else "public/app"
+
+# The Home header avatar on a 1206x2622 capture: centre and radius.
+AVATAR = (1097, 270, 66)
+# Stills whose top bar is the Home header (with the avatar).
+AVATAR_STILLS = ("01-home", "01b-home-log", "01c-home-scrolled", "16-supplements-card", "17-achievement",
+                 "17b-achievement-confetti", "18b-offline-waiting-list")
+
+# Seconds to keep from each raw video, in order. Long model waits are cut out.
+# Timings are for the light-mode recordings: 03 and 12 are the PRE-286 showcase-account
+# takes (a full day already logged), 04 the PRE-317 one, the rest are from PRE-281.
+SEGMENTS = {
+    "03-log-typed": [(0, 1.5), (2, 3.5), (4.5, 6), (7, 12), (12.5, 14.5), (23, 24.8), (45, 53.3)],
+    # PRE-317 take (04-log-photo-light-v3): Add, Log Meal, Photo library, a burrito bowl photo, a few words,
+    # the time, then the logged meal and its detail. The typing is cut: a debug overflow stripe shows over the keyboard.
+    "04-log-photo": [(0, 1.5), (2, 3.5), (4, 5), (6.5, 7.5), (10, 11.5), (12.5, 14), (26, 28), (31.5, 34),
+                     (85, 87.5), (101, 106), (111.5, 120)],
+    "08-chat-ask": [(2, 13.5)],
+    "09-chat-log-it": [(4.3, 6), (7.5, 13), (14.5, 19)],
+    "12-plan-week": [(0, 13.7)],
+    "21-walkthrough": [(0, 2), (4, 5.5), (6, 7), (10, 14.5), (15, 16), (17, 19), (27.5, 29.5), (46.5, 47.6), (48, 49.5),
+                       (51.5, 56), (57, 58.5), (58.5, 63), (79.5, 81.5), (83.5, 86.5), (86.5, 96)],
+}
+# The nutritionist greets the test account by its first name. Blur that word:
+# raw seconds (start, end) and the top of the name's line on the 1206x2622 frame.
+# The light recordings (PRE-281) have no greeting by name, so nothing is blurred.
+NAME_BLURS: dict[str, list[tuple[float, float, int]]] = {}
+NAME_BOX_X, NAME_BOX_W, NAME_BOX_H = 728, 240, 86
+
+# Clips that open on an empty screen (an empty log, a blank Meal Plans list,
+# loading bubbles). Their poster, which is all a visitor sees under reduced
+# motion, in Low Power Mode and before playback, is the last frame instead:
+# the filled log, the finished plan, the answered chat (PRE-235).
+POSTER_FROM_END = ("03-log-typed", "08-chat-ask")
+# Posters taken at a set second of the cut clip instead: the chat card with its
+# black Log it button, before it is tapped, since nothing saves until then (PRE-286).
+# The photo clip's poster is the logged meal's detail: its name, 529 calories and macros (PRE-317).
+POSTER_AT = {"09-chat-log-it": 8, "04-log-photo": 18}
+
+# Videos that show the Home header somewhere, so the avatar is blurred throughout.
+AVATAR_VIDEOS = ("03-log-typed", "04-log-photo", "09-chat-log-it", "21-walkthrough")
+
+WIDTHS = {"1x": 402, "2x": 804}
+
+# Crops of a still, for a real message shown without the phone around it:
+# output name -> (source still, top, bottom) in 1206x2622 pixels. The
+# nudges from the top of the bubble (the unread NEW divider above it is left
+# out) to their last reply; the weekly pattern one stops
+# inside its card, which the site fades out (PRE-283).
+CROPS = {
+    "25-nudge-missed-breakfast-crop-light": ("25-nudge-missed-breakfast-light", 1486, 2500),
+    "25b-nudge-protein-crop-light": ("25b-nudge-protein-light", 886, 2500),
+    # The whole message, its Weekly calorie pattern card and the replies, from two scrolled captures (PRE-317).
+    "24-nudge-weekly-pattern-crop-light": ("24-nudge-weekly-pattern-v2-light", 526, 3440),
+    "24b-nudge-weigh-in-crop-light": ("24b-nudge-weigh-in-light", 1496, 2500),
+}
+
+# Stills taller than one screen, joined from two scrolled captures of the same
+# chat: name -> (top capture, bottom capture, seam row in the top capture,
+# the same row in the bottom capture). Crops above read the joined image.
+STITCHES = {
+    "24-nudge-weekly-pattern-v2-light": ("24-nudge-weekly-pattern-v2-light", "24-nudge-weekly-pattern-v2b-light", 2300, 1316),
+}
+
+# Cut-outs of one part of a chat still, lifted out over the phone on the
+# homepage (PRE-294): output name -> (source still, (left, top, right, bottom)
+# in 1206x2622 pixels, corner radius). Corners outside the radius are made
+# transparent so the part keeps the app's rounded shape over the page.
+CUTOUTS = {
+    "25b-nudge-protein-bubble-light": ("25b-nudge-protein-light", (48, 930, 1037, 1746), 46),
+    "25b-nudge-protein-reply-light": ("25b-nudge-protein-light", (48, 1794, 1158, 1938), 38),
+    "24b-nudge-weigh-in-bubble-light": ("24b-nudge-weigh-in-light", (48, 1536, 1037, 1920), 46),
+    "24b-nudge-weigh-in-reply-light": ("24b-nudge-weigh-in-light", (48, 1968, 1158, 2112), 38),
+    "25-nudge-missed-breakfast-bubble-light": ("25-nudge-missed-breakfast-light", (48, 1530, 1037, 1914), 46),
+    "25-nudge-missed-breakfast-reply-light": ("25-nudge-missed-breakfast-light", (48, 1962, 1158, 2112), 38),
+}
+
+# Screen recordings (and frames taken from them) include the Dynamic Island,
+# which the site's DeviceFrame draws itself. The pill on a 1206x2622 frame,
+# padded a little, is painted over with the status bar colour just left of it.
+ISLAND = (411, 38, 386, 118)  # x, y, width, height
+ISLAND_SAMPLE_X = 405
+
+# Stills shown under a pop-out tag, where the unread NEW divider would peek out
+# beside the tag: the rows it spans (top, bottom) are filled with the chat's
+# background, sampled just above them.
+NEW_DIVIDERS = {"25-nudge-missed-breakfast-light": (1446, 1500)}
+
+# Widget renders: a 36 px margin around the widget, whose corner radius is 64 px.
+WIDGET_MARGIN = 36
+WIDGET_RADIUS = 64
+
+
+def blur_avatar(im: Image.Image) -> Image.Image:
+    x, y, r = AVATAR
+    box = (x - r, y - r, x + r, y + r)
+    region = im.crop(box).filter(ImageFilter.GaussianBlur(28))
+    mask = Image.new("L", region.size, 0)
+    ImageDraw.Draw(mask).ellipse((0, 0, 2 * r, 2 * r), fill=255)
+    im.paste(region, box[:2], mask)
+    return im
+
+
+def paint_out_island(im: Image.Image) -> Image.Image:
+    x, y, w, h = ISLAND
+    if sum(im.getpixel((x + w // 2, y + h // 2))) < 20:
+        fill = im.crop((ISLAND_SAMPLE_X, y, ISLAND_SAMPLE_X + 1, y + h)).resize((w, h))
+        im.paste(fill, (x, y))
+    return im
+
+
+def widget(im: Image.Image) -> Image.Image:
+    """Crop a widget render to the widget and make its corners transparent."""
+    m = WIDGET_MARGIN
+    im = im.convert("RGBA").crop((m, m, im.width - m, im.height - m))
+    ss = 4
+    mask = Image.new("L", (im.width * ss, im.height * ss), 0)
+    ImageDraw.Draw(mask).rounded_rectangle((0, 0, im.width * ss - 1, im.height * ss - 1),
+                                           radius=WIDGET_RADIUS * ss, fill=255)
+    im.putalpha(mask.resize(im.size, Image.LANCZOS))
+    return im
+
+
+def still(name: str) -> None:
+    im = Image.open(os.path.join(RAW, name + ".png"))
+    if im.size != (1206, 2622):
+        # Widget renders: the render itself is the 2x asset, half of it the 1x.
+        im = widget(im)
+        for scale, factor in (("1x", 2), ("2x", 1)):
+            out = im.resize((im.width // factor, im.height // factor), Image.LANCZOS)
+            out.save(os.path.join(OUT, f"{name}@{scale}.avif"), quality=60)
+            out.save(os.path.join(OUT, f"{name}@{scale}.webp"), quality=82, method=6)
+        return
+    im = paint_out_island(im.convert("RGB"))
+    if name in NEW_DIVIDERS:
+        top, bottom = NEW_DIVIDERS[name]
+        im.paste(im.getpixel((20, top - 4)), (0, top, im.width, bottom))
+    if name.startswith(AVATAR_STILLS):
+        im = blur_avatar(im)
+    for scale, width in WIDTHS.items():
+        out = im.resize((width, round(im.height * width / im.width)), Image.LANCZOS)
+        out.save(os.path.join(OUT, f"{name}@{scale}.avif"), quality=60)
+        out.save(os.path.join(OUT, f"{name}@{scale}.webp"), quality=82, method=6)
+
+
+def raw_still(source: str) -> Image.Image:
+    if source not in STITCHES:
+        return Image.open(os.path.join(RAW, source + ".png")).convert("RGB")
+    upper, lower, seam, seam_lower = STITCHES[source]
+    upper_im = Image.open(os.path.join(RAW, upper + ".png")).convert("RGB")
+    lower_im = Image.open(os.path.join(RAW, lower + ".png")).convert("RGB")
+    joined = Image.new("RGB", (1206, seam + lower_im.height - seam_lower))
+    joined.paste(upper_im.crop((0, 0, 1206, seam)), (0, 0))
+    joined.paste(lower_im.crop((0, seam_lower, 1206, lower_im.height)), (0, seam))
+    return joined
+
+
+def crop(name: str, source: str, top: int, bottom: int) -> None:
+    im = raw_still(source).crop((0, top, 1206, bottom))
+    for scale, width in WIDTHS.items():
+        out = im.resize((width, round(im.height * width / im.width)), Image.LANCZOS)
+        out.save(os.path.join(OUT, f"{name}@{scale}.avif"), quality=60)
+        out.save(os.path.join(OUT, f"{name}@{scale}.webp"), quality=82, method=6)
+
+
+def cutout(name: str, source: str, box: tuple[int, int, int, int], radius: int) -> None:
+    im = Image.open(os.path.join(RAW, source + ".png")).convert("RGBA").crop(box)
+    ss = 4
+    mask = Image.new("L", (im.width * ss, im.height * ss), 0)
+    ImageDraw.Draw(mask).rounded_rectangle((0, 0, im.width * ss - 1, im.height * ss - 1), radius=radius * ss, fill=255)
+    im.putalpha(mask.resize(im.size, Image.LANCZOS))
+    # Same scale as the stills: 1x is a third of the capture, 2x two thirds.
+    for scale, factor in (("1x", 3), ("2x", 1.5)):
+        out = im.resize((round(im.width / factor), round(im.height / factor)), Image.LANCZOS)
+        out.save(os.path.join(OUT, f"{name}@{scale}.avif"), quality=60)
+        out.save(os.path.join(OUT, f"{name}@{scale}.webp"), quality=82, method=6)
+
+
+def video(name: str) -> None:
+    src = os.path.join(RAW, name + ".mp4")
+    segs = SEGMENTS.get(name)
+    select = "+".join(f"between(t,{a},{b})" for a, b in segs) if segs else None
+    # Resample to a constant 30 fps first: simulator recordings drop frames while
+    # the screen is still, so a pause would otherwise vanish from the cut.
+    filters = []
+    for i, (a, b, top) in enumerate(NAME_BLURS.get(name, [])):
+        y = top - 8
+        filters.append(
+            f"split[n{i}a][n{i}b];[n{i}b]crop={NAME_BOX_W}:{NAME_BOX_H}:{NAME_BOX_X}:{y},boxblur=20[n{i}c];"
+            f"[n{i}a][n{i}c]overlay={NAME_BOX_X}:{y}:enable='between(t,{a},{b})'"
+        )
+    filters.append("fps=30")
+    if select:
+        filters.append(f"select='{select}',setpts=N/FRAME_RATE/TB")
+    if name in AVATAR_VIDEOS:
+        x, y, r = AVATAR
+        filters.append(
+            f"split[a][b];[b]crop={2*r}:{2*r}:{x-r}:{y-r},boxblur=24,format=rgba,"
+            f"geq=r='r(X,Y)':g='g(X,Y)':b='b(X,Y)':a='if(lte(hypot(X-{r},Y-{r}),{r}),255,0)'[c];"
+            f"[a][c]overlay={x-r}:{y-r}"
+        )
+    ix, iy, iw, ih = ISLAND
+    filters.append(
+        f"split[m][n];[n]crop=2:{ih}:{ISLAND_SAMPLE_X}:{iy},scale={iw}:{ih}:flags=neighbor[p];"
+        f"[m][p]overlay={ix}:{iy}"
+    )
+    filters.append("scale=804:-2")
+    vf = ",".join(filters)
+    base = os.path.join(OUT, name)
+    common = ["ffmpeg", "-y", "-hide_banner", "-loglevel", "error", "-i", src, "-vf", vf, "-an"]
+    subprocess.run(common + ["-c:v", "libx264", "-crf", "28", "-preset", "slow", "-pix_fmt", "yuv420p",
+                             "-movflags", "+faststart", base + ".mp4"], check=True)
+    subprocess.run(common + ["-c:v", "libvpx-vp9", "-crf", "40", "-b:v", "0", "-row-mt", "1",
+                             base + ".webm"], check=True)
+    seek = ["-sseof", "-0.1"] if name in POSTER_FROM_END else ["-ss", str(POSTER_AT.get(name, 0))]
+    subprocess.run(["ffmpeg", "-y", "-hide_banner", "-loglevel", "error", *seek, "-i", base + ".mp4",
+                    "-frames:v", "1", "-c:v", "libwebp", "-quality", "80", base + "-poster.webp"], check=True)
+
+
+def main() -> None:
+    os.makedirs(OUT, exist_ok=True)
+    names = sorted(os.listdir(RAW))
+    for f in names:
+        stem, ext = os.path.splitext(f)
+        if ext == ".png":
+            still(stem)
+        elif ext == ".mp4":
+            video(stem)
+    for name, (source, top, bottom) in CROPS.items():
+        if source + ".png" in names:
+            crop(name, source, top, bottom)
+    for name, (source, box, radius) in CUTOUTS.items():
+        if source + ".png" in names:
+            cutout(name, source, box, radius)
+    for f in sorted(os.listdir(OUT)):
+        size = os.path.getsize(os.path.join(OUT, f))
+        flag = "  OVER 2 MB" if size > 2 * 1024 * 1024 else ""
+        print(f"{size/1024:8.0f} KB  {f}{flag}")
+
+
+if __name__ == "__main__":
+    main()

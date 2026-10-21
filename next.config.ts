@@ -2,6 +2,12 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ["mongodb"],
+  async redirects() {
+    return [
+      // The About page was removed (PRE-311). Old links land on the homepage.
+      { source: "/about", destination: "/", permanent: true },
+    ];
+  },
   async rewrites() {
     return [
       {

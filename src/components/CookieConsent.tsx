@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import posthog from "posthog-js";
 import { isAnalyticsEnabled } from "@/lib/analytics";
+import { forgetAttribution, keepPendingAttribution } from "@/lib/funnel/attributionStore";
+import { denyAnalyticsConsent, grantAnalyticsConsent } from "@/lib/posthogClient";
 import {
   COOKIE_MAX_AGE_ONE_YEAR,
   PREPIT_ANALYTICS_CONSENT_COOKIE,
@@ -12,28 +13,54 @@ import {
   setClientCookie,
 } from "@/lib/cookies";
 
+declare global {
+  interface Window {
+    /** Defined by the Meta Pixel script in the root layout when a pixel id is set. */
+    prepitLoadMetaPixel?: () => void;
+  }
+}
+
+// Accept and Reject look the same, so neither choice is pushed (ICO guidance).
+const buttonClass =
+  "inline-flex h-11 flex-1 items-center justify-center rounded-button border border-line-strong px-5 text-small font-bold text-ink transition-colors hover:bg-surface-raised focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus sm:flex-none";
+
+/** After a choice, focus goes to the page content instead of dropping to <body>. */
+function focusMain() {
+  document.getElementById("main")?.focus({ preventScroll: true });
+}
+
+/**
+ * UK and EEA visitors choose here before optional cookies (PostHog, Meta Pixel)
+ * are set. The root layout renders it straight after the skip link, so a
+ * keyboard reaches "Skip to content" first and then this; focus is not trapped.
+ */
 export default function CookieConsent() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     if (!isAnalyticsEnabled()) return;
 
-    const isEu = readCookie(PREPIT_GEO_COOKIE) === "eu";
+    // No geo cookie counts as needing consent, like the proxy and PostHog.
+    const needsConsent = readCookie(PREPIT_GEO_COOKIE) !== "non-eu";
     const consent = readCookie(PREPIT_ANALYTICS_CONSENT_COOKIE);
-    setVisible(isEu && consent !== "granted" && consent !== "denied");
+    setVisible(needsConsent && consent !== "granted" && consent !== "denied");
   }, []);
 
   function acceptAnalytics() {
     setClientCookie(PREPIT_ANALYTICS_CONSENT_COOKIE, "granted", COOKIE_MAX_AGE_ONE_YEAR);
-    posthog.opt_in_capturing();
-    posthog.startSessionRecording();
+    grantAnalyticsConsent();
+    window.prepitLoadMetaPixel?.();
+    keepPendingAttribution();
     setVisible(false);
+    focusMain();
   }
 
   function rejectAnalytics() {
     setClientCookie(PREPIT_ANALYTICS_CONSENT_COOKIE, "denied", COOKIE_MAX_AGE_ONE_YEAR);
-    posthog.opt_out_capturing();
+    denyAnalyticsConsent();
+    forgetAttribution();
     setVisible(false);
+    focusMain();
   }
 
   if (!visible) return null;
@@ -43,30 +70,27 @@ export default function CookieConsent() {
       role="dialog"
       aria-live="polite"
       aria-label="Cookie consent"
-      className="fixed inset-x-4 bottom-4 z-50 mx-auto max-w-[720px] rounded-2xl border border-black/10 bg-white p-5 shadow-lg sm:inset-x-6"
+      className="fixed inset-x-4 bottom-4 z-50 mx-auto max-w-[720px] rounded-tile border border-line-strong bg-surface p-4 text-ink shadow-phone sm:inset-x-6 sm:p-6"
     >
-      <p className="text-sm leading-relaxed text-black/80">
-        We use cookies and similar technologies to understand how our website is used and to
-        improve PrepIt. Analytics cookies are optional. See our{" "}
-        <Link href="/cookie-policy" className="underline underline-offset-2">
+      <p className="text-small text-ink-secondary text-pretty">
+        We use optional analytics and ad cookies to improve the site and our ads. They stay off
+        unless you accept. See our{" "}
+        <Link
+          href="/cookie-policy"
+          className="text-ink underline decoration-accent underline-offset-4 hover:text-accent-text"
+        >
           Cookie Policy
         </Link>
         .
       </p>
-      <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:justify-end">
-        <button
-          type="button"
-          onClick={rejectAnalytics}
-          className="rounded-2xl border border-black/15 px-4 py-3 text-sm font-medium text-black transition-opacity hover:opacity-80"
-        >
-          Reject optional cookies
+      <div className="mt-3 flex gap-3 sm:mt-4 sm:justify-end">
+        <button type="button" onClick={rejectAnalytics} className={buttonClass}>
+          <span className="sm:hidden">Reject</span>
+          <span className="hidden sm:inline">Reject optional cookies</span>
         </button>
-        <button
-          type="button"
-          onClick={acceptAnalytics}
-          className="rounded-2xl bg-black px-4 py-3 text-sm font-medium text-white transition-opacity hover:opacity-80"
-        >
-          Accept optional cookies
+        <button type="button" onClick={acceptAnalytics} className={buttonClass}>
+          <span className="sm:hidden">Accept</span>
+          <span className="hidden sm:inline">Accept optional cookies</span>
         </button>
       </div>
     </div>

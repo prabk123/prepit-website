@@ -1,357 +1,655 @@
 @import "tailwindcss";
+@import "./tokens.css";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-
-  /* PrepIt Design System Colors */
-  --lime-30: #e9f8b2;
-  --grey-5: #f4f4f5;
-  --grey-10: #e9e9ea;
-  --grey-40: #a6a6ac;
-  --grey-60: #7a7a82;
-  --grey-80: #4d4d59;
-  --coral-100: #ff644f;
-  --black-100: #000000;
-  --white-100: #ffffff;
-
-  /* Gradient colors for AI badge */
-  --gradient-blue: #809ff9;
-  --gradient-purple: #d093d9;
-  --gradient-orange: #f38c61;
-  --gradient-yellow: #f5cc77;
+  /* The site is light-led; dark bands set their own (tokens.css, .theme-dark). */
+  color-scheme: light;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
   --font-sans: var(--font-dm-sans);
-  --font-mono: var(--font-geist-mono);
 
   /* Font family utilities */
   --font-family-dm-sans: var(--font-dm-sans);
   --font-family-brand: var(--font-brand);
+
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #ffffff;
-    --foreground: #171717;
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
   }
 }
 
-html {
-  scroll-behavior: smooth;
-}
+/*
+ * Grows a short link's tap area to at least 44 x 44 px without changing the
+ * layout. Use it on standalone links, not on links stacked closer than 44 px.
+ */
+@utility tap-target {
+  position: relative;
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-dm-sans), Arial, Helvetica, sans-serif;
-}
-
-@keyframes fadeInLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
+  &::after {
+    content: "";
+    position: absolute;
+    inset-block: min(0px, calc((100% - 44px) / 2));
+    inset-inline: min(0px, calc((100% - 44px) / 2));
   }
 }
 
-.animate-fade-in-left {
-  animation: fadeInLeft 0.8s ease-out forwards;
+/* SwipeRow (PRE-284): sideways rows on phones scroll without a scrollbar
+   under them; the next item peeking in shows there is more. */
+.swipe-row {
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.swipe-row::-webkit-scrollbar {
+  display: none;
+}
+.swipe-row:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 4px;
 }
 
-@keyframes objectionCardRevealY {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes objectionCardRevealX {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-.objection-card-reveal {
-  animation: objectionCardRevealY 0.55s ease-out both;
-}
-
-.ai-icon-chrome {
-  display: inline-flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  width: 48px;
-  height: 48px;
-  padding: 2px;
-  border-radius: 12px;
-  background-image: linear-gradient(
-    90deg,
-    var(--gradient-blue) 0%,
-    var(--gradient-purple) 31%,
-    var(--gradient-orange) 63%,
-    var(--gradient-yellow) 97.5%
-  );
-}
-
-.ai-icon-chrome__inner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  border-radius: 10px;
-  background-image: linear-gradient(
-    90deg,
-    color-mix(in srgb, var(--gradient-blue) 10%, #ffffff) 0%,
-    color-mix(in srgb, var(--gradient-purple) 10%, #ffffff) 31%,
-    color-mix(in srgb, var(--gradient-orange) 10%, #ffffff) 63%,
-    color-mix(in srgb, var(--gradient-yellow) 10%, #ffffff) 97.5%
-  );
-}
-
-@media (min-width: 768px) {
-  .objection-card-reveal {
-    animation-name: objectionCardRevealX;
-  }
-}
-
-@keyframes nlDemoFadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-.nl-demo-fade {
-  animation: nlDemoFadeIn 0.35s ease-out both;
-}
-
-.hero-factor-stack-item {
-  display: grid;
-  grid-template-rows: 0fr;
-  opacity: 0;
-  margin-top: 0;
-  transition:
-    grid-template-rows 220ms cubic-bezier(0.33, 1, 0.68, 1),
-    opacity 220ms cubic-bezier(0.33, 1, 0.68, 1),
-    margin-top 220ms cubic-bezier(0.33, 1, 0.68, 1);
-}
-
-.hero-factor-stack-item--visible {
-  grid-template-rows: 1fr;
-  opacity: 1;
-}
-
-.hero-factor-stack-item--overlap.hero-factor-stack-item--visible {
-  margin-top: -10px;
-}
-
-.hero-factor-stack-item-inner {
-  overflow: hidden;
-}
-
-.hero-factor-stack-item-content {
-  transform: translateY(10px);
-  transition: transform 220ms cubic-bezier(0.33, 1, 0.68, 1);
-}
-
-.hero-factor-stack-item--visible .hero-factor-stack-item-content {
-  transform: translateY(0);
-}
-
-@keyframes heroExploreChipTap {
-  0% {
-    transform: scale(1);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-  }
-  35% {
-    transform: scale(0.9);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
-  }
-  100% {
-    transform: scale(0.94);
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.16);
-  }
-}
-
-.hero-explore-chip-tap {
-  animation: heroExploreChipTap 220ms cubic-bezier(0.33, 1, 0.68, 1) forwards;
-}
-
-@keyframes nlLoadingShimmer {
-  0% {
-    opacity: 0.55;
-  }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0.55;
-  }
-}
-
-.nl-loading-shimmer {
-  animation: nlLoadingShimmer 1.4s ease-in-out infinite;
-}
-
-@keyframes aiChatThinkingShimmer {
-  0% {
-    background-position: 200% center;
-  }
-  100% {
-    background-position: -200% center;
-  }
-}
-
-.ai-chat-thinking {
-  background: linear-gradient(
-    90deg,
-    var(--grey-60) 0%,
-    var(--grey-40) 45%,
-    var(--grey-60) 90%
-  );
-  background-size: 200% auto;
+/* Revamp helpers. Values come from tokens.css. */
+@utility text-gradient-brand {
+  background-image: var(--gradient-brand);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: aiChatThinkingShimmer 2.2s linear infinite;
+  color: transparent;
 }
 
-/* Legal content styling */
-.legal-content {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  color: black;
+/* High Contrast drops the background image but keeps the transparent fill,
+   so gradient text would vanish. Fall back to the system text colour. */
+@media (forced-colors: active) {
+  .text-gradient-brand {
+    background: none;
+    -webkit-text-fill-color: currentColor;
+    color: CanvasText;
+  }
 }
 
-.legal-content h3 {
-  font-size: 24px;
-  font-weight: 800;
-  line-height: 32px;
-  margin-top: 0;
-  margin-bottom: 16px;
+/* Clash Display ships a very narrow space; open it up wherever the display
+   face is used, so "Set up" never reads as "Setup". The wider gaps can leave
+   one word alone on a title's last line, so titles wrap "pretty" too
+   (headings with text-balance keep it: utilities win over this layer). */
+@layer base {
+  .font-display,
+  .photo-annotation__label b {
+    word-spacing: var(--word-spacing-display);
+  }
+
+  .font-display {
+    text-wrap: pretty;
+  }
 }
 
-.legal-content p {
-  font-size: 16px;
-  line-height: 24px;
-  margin-bottom: 16px;
+/* In a layer so Tailwind utilities passed as className still win. */
+@layer components {
+  /* <SpeaksUpPhone> (PRE-294): a phone whose message lifts out past the
+     frame. The wrapper is the frame's width, so cqw matches DeviceFrame's. */
+  .speaks-up-phone {
+    position: relative;
+    container-type: inline-size;
+    width: var(--device-w);
+    margin-inline: calc(var(--device-w) * 0.12);
+    /* Crop the top of the phone (status bar and empty chat), keeping the
+       pop-outs free to spill sideways; ::after fades the cut into the page. */
+    --speaks-up-crop: calc(var(--device-w) * 0.42);
+    margin-top: calc(var(--speaks-up-crop) * -1);
+    /* A short message leaves empty chat above it: its phone shows from
+       lower down (--speaks-up-crop-extra, a share of the phone's width),
+       with page space above instead of an empty screen. The phone's box
+       keeps its height, so the buttons under it don't move. */
+    --speaks-up-visible-top: calc(var(--speaks-up-crop) + var(--device-w) * var(--speaks-up-crop-extra, 0));
+    clip-path: inset(var(--speaks-up-visible-top) -50% -15% -50%);
+  }
+
+  .speaks-up-phone::after {
+    content: "";
+    position: absolute;
+    z-index: 1;
+    top: var(--speaks-up-visible-top);
+    left: -50%;
+    right: -50%;
+    height: 28px;
+    background: linear-gradient(var(--color-page), transparent);
+    pointer-events: none;
+  }
+
+  .speaks-up-phone .device-frame__screen > .speaks-up-phone__screen {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+  }
+
+  .speaks-up-phone .device-frame__screen > .speaks-up-phone__screen[data-active] {
+    opacity: 1;
+  }
+
+  .speaks-up-phone__screen img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+  }
+
+  /* Sits exactly over the screen (shell and bezel padding are 4cqw) but is
+     free to spill past it. */
+  .speaks-up-phone__pop {
+    position: absolute;
+    inset: 4cqw;
+    pointer-events: none;
+  }
+
+  .speaks-up-phone__cutout {
+    position: absolute;
+    display: block;
+    max-width: none;
+    height: auto;
+    opacity: 0;
+    filter: drop-shadow(0 22px 26px rgb(26 26 46 / 0.26)) drop-shadow(0 6px 10px rgb(26 26 46 / 0.12));
+  }
+
+  .speaks-up-phone__cutout--message {
+    transform-origin: 0% 50%;
+  }
+
+  .speaks-up-phone__cutout--highlight {
+    transform-origin: 100% 50%;
+  }
+
+  .speaks-up-phone__pop[data-active] .speaks-up-phone__cutout,
+  .speaks-up-phone__pop[data-active] .speaks-up-phone__reason {
+    opacity: 1;
+  }
+
+  /* How far the message and reply lift out. A phone can set these, as the
+     hero does on small screens to keep the message's text readable. */
+  .speaks-up-phone__pop[data-active] .speaks-up-phone__cutout--message {
+    transform: translateX(var(--speaks-up-pop-x, -14%)) scale(var(--speaks-up-pop-scale, 1.2));
+  }
+
+  .speaks-up-phone__pop[data-active] .speaks-up-phone__cutout--highlight {
+    transform: translate(var(--speaks-up-reply-x, 8%), var(--speaks-up-reply-y, 0px))
+      scale(var(--speaks-up-reply-scale, 1.08));
+  }
+
+  /* Why the message was sent, in the photo annotations' orange-dot style. */
+  /* Sits just above the message: `top` is the message's top edge, raised by
+     --speaks-up-pop-lift (the share of the message's height its scaling adds
+     above it) and --speaks-up-reason-gap. */
+  .speaks-up-phone__reason {
+    position: absolute;
+    left: -12cqw;
+    translate: 0 -100%;
+    opacity: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px 6px 9px;
+    white-space: nowrap;
+    border: 1px solid var(--color-annotation-border);
+    border-radius: var(--radius-control);
+    background: var(--color-annotation-label);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: var(--color-annotation-ink);
+    font-size: var(--text-small);
+    font-weight: 500;
+    line-height: 1.2;
+    box-shadow: 0 8px 20px -10px rgb(26 26 46 / 0.3);
+  }
+
+  .speaks-up-phone__reason::before {
+    content: "";
+    flex: none;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-annotation);
+    box-shadow: 0 0 0 4px rgb(255 100 79 / 0.18);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .speaks-up-phone .device-frame__screen > .speaks-up-phone__screen {
+      transition: opacity 300ms ease;
+    }
+
+    .speaks-up-phone__reason {
+      transition: opacity 250ms ease 200ms;
+    }
+
+    .speaks-up-phone__cutout {
+      transition:
+        transform 500ms cubic-bezier(0.2, 0.8, 0.2, 1) 120ms,
+        opacity 250ms ease 120ms;
+    }
+  }
+
+  /* <Glow>: soft orange light behind phones. */
+  .glow-warm {
+    pointer-events: none;
+    background: var(--glow-warm);
+    filter: blur(24px);
+  }
+
+  /* <Section tone="photo">: the dark gradient over a full-bleed photo. */
+  .section-photo-scrim {
+    background: var(--scrim-photo);
+  }
+
+  .section-photo-scrim-end {
+    background: var(--scrim-photo-end);
+  }
+
+  /* <PhotoBand>: shorter gradients that keep the subject clear of the text. */
+  .photo-band-scrim {
+    background: var(--scrim-band-start);
+  }
+
+  .photo-band-scrim-end {
+    background: var(--scrim-band-end);
+  }
+
+  /* The text-side scrims fade out where the photo fades into the light page,
+     so the band has no hard dark edge at its top and bottom. */
+  .photo-band-scrim,
+  .photo-band-scrim-end {
+    mask-image: var(--mask-photo-edges);
+  }
+
+  .photo-band-scrim-text {
+    background: var(--scrim-band-text);
+  }
+
+  .photo-band-wash-text {
+    background: var(--wash-band-text);
+  }
+
+  /* <BandPhoto>: a dark band's photo, fading out under the text column. */
+  .band-photo {
+    mask-image: linear-gradient(90deg, transparent 0%, #000 45%);
+  }
+
+  .band-photo__img {
+    mask-image: linear-gradient(180deg, #000 35%, transparent 100%);
+  }
+
+  /* Landing page (PRE-302). The headline's orange underline wraps with the
+     words, so a long phrase never forces sideways scroll. */
+  .landing-underline {
+    background: linear-gradient(var(--color-accent), var(--color-accent)) no-repeat 0 88% / 100% 0.13em;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+
+  /* The hero photo: from 1280 px the copy sits on its washed-out left side;
+     below that it follows the copy and only its top edge fades in. */
+  .landing-hero-media::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(180deg, var(--color-page) 0%, transparent 14%);
+  }
+
+  @media (min-width: 1280px) {
+    .landing-hero-media::after {
+      background:
+        linear-gradient(
+          90deg,
+          color-mix(in srgb, var(--color-page) 97%, transparent) 0%,
+          color-mix(in srgb, var(--color-page) 90%, transparent) 34%,
+          color-mix(in srgb, var(--color-page) 50%, transparent) 45%,
+          transparent 54%
+        ),
+        linear-gradient(180deg, transparent 84%, var(--color-page) 100%);
+    }
+  }
+
+  /* The trust band's photo, fading out towards the text and the bottom. */
+  .landing-trust-photo {
+    mask-image: linear-gradient(90deg, transparent, #000 40%), linear-gradient(180deg, #000 50%, transparent);
+    mask-composite: intersect;
+  }
+
+  .band-photo--centre {
+    mask-image: radial-gradient(ellipse 40% 60% at 50% 35%, transparent 40%, #000 100%);
+    opacity: 0.7;
+  }
+
+  /*
+   * <DeviceFrame>: iPhone 17 Pro drawn in CSS. Every measurement is a share of
+   * the frame width (cqw), so one set of proportions covers 260 to 420 px.
+   * Screen is 402 x 874 pt (1206 x 2622 px captures).
+   */
+  .device-frame {
+    container-type: inline-size;
+    width: var(--device-w, 320px);
+    flex: none;
+    rotate: var(--device-tilt, 0deg);
+  }
+
+  .device-frame__shell {
+    position: relative;
+    padding: 1.1cqw;
+    border-radius: 17cqw;
+    background: linear-gradient(
+      145deg,
+      var(--color-device-metal-edge) 0%,
+      var(--color-device-metal) 18%,
+      var(--color-device-metal-dark) 50%,
+      var(--color-device-metal) 82%,
+      var(--color-device-metal-edge) 100%
+    );
+    box-shadow: var(--shadow-phone);
+  }
+
+  .device-frame__bezel {
+    padding: 2.9cqw;
+    border-radius: 15.9cqw;
+    background: var(--color-device-bezel);
+  }
+
+  .device-frame__screen {
+    position: relative;
+    aspect-ratio: 402 / 874;
+    overflow: hidden;
+    border-radius: 13.2cqw;
+    background: var(--color-device-bezel);
+    isolation: isolate;
+  }
+
+  .device-frame__screen > picture,
+  .device-frame__screen > picture > img,
+  .device-frame__screen > img,
+  .device-frame__screen > .loop-video,
+  .device-frame__screen > .loop-video > video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+  }
+
+  .device-frame__island {
+    position: absolute;
+    z-index: 1;
+    top: 2.5cqw;
+    left: 50%;
+    width: 29cqw;
+    height: 8.6cqw;
+    translate: -50% 0;
+    border-radius: 999px;
+    background: var(--color-device-bezel);
+    pointer-events: none;
+  }
+
+  .device-frame__button {
+    position: absolute;
+    width: 0.9cqw;
+    border-radius: 0.6cqw;
+    background: linear-gradient(90deg, var(--color-device-metal-dark), var(--color-device-button));
+  }
+
+  .device-frame__button--action {
+    left: -0.55cqw;
+    top: 21%;
+    height: 7%;
+  }
+
+  .device-frame__button--volume-up {
+    left: -0.55cqw;
+    top: 31%;
+    height: 11%;
+  }
+
+  .device-frame__button--volume-down {
+    left: -0.55cqw;
+    top: 44%;
+    height: 11%;
+  }
+
+  .device-frame__button--side {
+    right: -0.55cqw;
+    top: 32%;
+    height: 16%;
+  }
+
+  .device-frame__button--camera {
+    right: -0.4cqw;
+    top: 58%;
+    height: 8%;
+    width: 0.7cqw;
+  }
+
+  /* <DevicePair>: two frames overlapping, the second slightly lower. */
+  .device-pair {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+  }
+
+  .device-pair > .device-frame + .device-frame {
+    margin-left: calc(var(--device-w, 320px) * var(--device-overlap, -0.28));
+    margin-top: calc(var(--device-w, 320px) * 0.18);
+  }
+
+  /* <AnnotatedPhoto>: orange ring, leader line and white glass label. */
+  /*
+   * <AnnotatedPhoto>: the media box is a size container, and the layer inside
+   * is sized and placed like object-fit: cover with object-position. The
+   * photo fills the layer and the labels are placed on it in % of the photo,
+   * so they stay on the food however the box crops it. Phones use the phone
+   * crop's ratio and focus.
+   */
+  .annotated-photo__media {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    container-type: size;
+  }
+
+  .annotated-photo__layer {
+    --ar: var(--photo-ar-phone);
+    --fx: var(--photo-x-phone);
+    --fy: var(--photo-y-phone);
+    --layer-w: max(100cqw, 100cqh * var(--ar));
+    --layer-h: max(100cqh, 100cqw / var(--ar));
+    position: absolute;
+    width: var(--layer-w);
+    height: var(--layer-h);
+    left: calc((100cqw - var(--layer-w)) * var(--fx));
+    top: calc((100cqh - var(--layer-h)) * var(--fy));
+  }
+
+  @media (min-width: 1024px) {
+    .annotated-photo__layer {
+      --ar: var(--photo-ar);
+      --fx: var(--photo-x);
+      --fy: var(--photo-y);
+    }
+  }
+
+  .annotated-photo__layer img {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .annotated-photo__fade {
+    pointer-events: none;
+    background: var(--fade-photo-edges);
+  }
+
+  .photo-annotation {
+    position: absolute;
+    z-index: 2;
+    width: 0;
+    height: 0;
+    --annotation-delay: calc(var(--annotation-index, 0) * var(--delay-annotation-step));
+  }
+
+  .photo-annotation__ring {
+    position: absolute;
+    left: -7px;
+    top: -7px;
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--color-annotation);
+    border-radius: 999px;
+    background: var(--color-annotation-ring-fill);
+  }
+
+  .photo-annotation__line {
+    position: absolute;
+    top: -0.75px;
+    width: var(--annotation-length);
+    height: 1.5px;
+    background: var(--color-annotation);
+  }
+
+  .photo-annotation__label {
+    position: absolute;
+    top: -21px;
+    padding: 10px 14px;
+    white-space: nowrap;
+    border: 1px solid var(--color-annotation-border);
+    border-radius: 12px;
+    background: var(--color-annotation-label);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: var(--color-annotation-ink);
+    font-size: var(--text-small);
+    line-height: 1.2;
+  }
+
+  .photo-annotation__label b {
+    margin-right: 2px;
+    color: var(--color-annotation-value);
+    font-family: var(--font-brand), system-ui, sans-serif;
+    font-weight: 500;
+  }
+
+  .photo-annotation[data-side="right"] .photo-annotation__line {
+    left: 7px;
+    transform-origin: left center;
+  }
+
+  .photo-annotation[data-side="right"] .photo-annotation__label {
+    left: calc(var(--annotation-length) + 7px);
+  }
+
+  .photo-annotation[data-side="left"] .photo-annotation__line {
+    right: 7px;
+    transform-origin: right center;
+  }
+
+  .photo-annotation[data-side="left"] .photo-annotation__label {
+    right: calc(var(--annotation-length) + 7px);
+  }
+
+  /* Draw-in: hidden while armed, then ring and line, then the label. */
+  .annotated-photo[data-annotations="armed"] .photo-annotation__ring,
+  .annotated-photo[data-annotations="armed"] .photo-annotation__label {
+    opacity: 0;
+  }
+
+  .annotated-photo[data-annotations="armed"] .photo-annotation__line {
+    scale: 0 1;
+  }
+
+  .annotated-photo[data-annotations="shown"] .photo-annotation__ring {
+    transition: opacity var(--duration-annotation-label) var(--ease-calm) var(--annotation-delay);
+  }
+
+  .annotated-photo[data-annotations="shown"] .photo-annotation__line {
+    transition: scale var(--duration-annotation-line) var(--ease-calm) var(--annotation-delay);
+  }
+
+  .annotated-photo[data-annotations="shown"] .photo-annotation__label {
+    transition: opacity var(--duration-annotation-label) var(--ease-calm)
+      calc(var(--annotation-delay) + var(--duration-annotation-line));
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .annotated-photo .photo-annotation * {
+      transition: none !important;
+    }
+  }
+
+  /* <SiteFinalCta>: a wrapper only; hidden on pages with their own App Store button. */
+  .site-final-cta {
+    display: contents;
+  }
+
+  body:has([data-hide-site-final-cta]) .site-final-cta {
+    display: none;
+  }
+
+  /* <SiteChrome>: the site header and footer; the bridge pages (<HideSiteChrome />) show their own. */
+  .site-chrome {
+    display: contents;
+  }
+
+  body:has([data-hide-site-chrome]) .site-chrome {
+    display: none;
+  }
+
+  /* <LoopVideo>: the clip plus its pause/play button. */
+  .loop-video {
+    position: relative;
+  }
+
+  .loop-video > video {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    object-position: top;
+  }
+
+  .loop-video__toggle {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    color: var(--color-video-toggle-ink);
+    background: var(--color-video-toggle);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    cursor: pointer;
+    transition: background 150ms ease;
+  }
+
+  /* Under a DeviceFrame: below the phone, lined up with its right edge. */
+  .loop-video__toggle--outside {
+    position: static;
+    margin-top: 12px;
+    margin-left: auto;
+  }
+
+  .loop-video__toggle:hover {
+    background: var(--color-video-toggle-strong);
+  }
+
+  .loop-video__toggle:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
 }
 
-.legal-content p:last-child {
-  margin-bottom: 0;
+body {
+  background: var(--color-page);
+  color: var(--color-ink);
+  font-family: var(--font-dm-sans), Arial, Helvetica, sans-serif;
 }
 
-.legal-content strong {
-  font-weight: 700;
-}
-
-.legal-content ul {
-  list-style-type: disc;
-  margin-left: 24px;
-  margin-bottom: 16px;
-  padding-left: 20px;
-}
-
-.legal-content ol {
-  list-style-type: decimal;
-  margin-left: 24px;
-  margin-bottom: 16px;
-  padding-left: 20px;
-}
-
-.legal-content li {
-  font-size: 16px;
-  line-height: 24px;
-  margin-bottom: 8px;
-  display: list-item;
-}
-
-.legal-content li:last-child {
-  margin-bottom: 0;
-}
-
-.legal-content ul ul {
-  margin-top: 8px;
-  margin-bottom: 8px;
-}
-
-.legal-content ol ol {
-  margin-top: 8px;
-  margin-bottom: 8px;
-}
-
-.legal-content a {
-  color: #000;
-  text-decoration: underline;
-}
-
-.legal-content a:hover {
-  opacity: 0.7;
-}
-
-.legal-content code {
-  background-color: #f4f4f5;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 14px;
-}
-
-.legal-content blockquote {
-  border-left: 4px solid #e5e5e7;
-  padding-left: 16px;
-  margin-left: 0;
-  margin-bottom: 16px;
-  color: #7a7a82;
-}
-
-.legal-content table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 24px;
-  font-size: 16px;
-}
-
-.legal-content table thead {
-  background-color: #f4f4f5;
-}
-
-.legal-content table th {
-  padding: 12px 16px;
-  text-align: left;
-  font-weight: 700;
-  border-bottom: 2px solid #e5e5e7;
-}
-
-.legal-content table td {
-  padding: 12px 16px;
-  border-bottom: 1px solid #e5e5e7;
-  line-height: 24px;
-}
-
-.legal-content table tbody tr:hover {
-  background-color: #f9f9f9;
-}
-
-.legal-content table tbody tr:last-child td {
-  border-bottom: none;
-}

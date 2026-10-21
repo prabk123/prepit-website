@@ -5,7 +5,7 @@ import { loadMDX } from "@/lib/loadMDX";
 export const metadata: Metadata = {
   title: "Subscription Policy",
   description:
-    "Learn about PrepIt's subscription plans, billing, renewals, and cancellation. Understand how our subscription service works and manage your account.",
+    "PrepIt's plans, prices and 7-day free trial, how renewal works, and how to cancel in the App Store or at tryprepit.app/account.",
   alternates: {
     canonical: "https://www.tryprepit.app/subscription-policy",
   },
@@ -13,10 +13,12 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  // No Smart App Banner on legal pages.
+  itunes: null,
 };
 
 export default async function SubscriptionPolicyPage() {
-  const { title, effectiveDate, content } = await loadMDX(
+  const { title, effectiveDate, content, headings } = await loadMDX(
     "subscription-policy.mdx"
   );
 
@@ -24,6 +26,7 @@ export default async function SubscriptionPolicyPage() {
     <LegalMDXPage
       title={title}
       lastUpdated={effectiveDate}
+      headings={headings}
       currentPath="/subscription-policy"
     >
       {content}

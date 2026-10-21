@@ -1,58 +1,56 @@
 ---
 title: "Cookie Policy"
-effectiveDate: "December 17, 2025"
+effectiveDate: "21 October 2026"
 ---
 
-This Policy explains how **PrepIt** ("we," "us," or "our") uses cookies and similar tracking technologies (such as pixels, SDKs, and local storage) when you visit our website or use our mobile application.
+This policy explains the cookies and similar technologies used on the PrepIt website (tryprepit.app) and in the PrepIt iPhone app. PrepIt is run by DocWhizz Ltd. Our [Privacy Policy](/privacy-policy) explains how we handle personal data more generally.
 
-### **1. WHAT ARE COOKIES AND TRACKERS?**
+## What cookies are
 
-- **Cookies:** Small text files stored in your browser when you visit a website.
-- **Mobile Identifiers/SDKs:** Code blocks within the PrepIt app that act like cookies to help us recognize your device and remember your meal preferences.
-- **Local Storage:** Data stored within your app or browser to keep you logged in and save your "offline" grocery lists.
+Cookies are small text files a website stores in your browser. Apps use similar technologies, such as software development kits (SDKs) and on-device storage. We call all of these "cookies" in this policy.
 
-### **2. WHY WE USE THEM**
+## Cookies on our website
 
-We use these technologies for three main reasons:
+| Cookie | What it does | Type | How long |
+| :--- | :--- | :--- | :--- |
+| prepit-geo | Remembers whether you're in the UK or EEA, so we know whether to ask for consent | Strictly necessary | 1 year |
+| prepit-country | Remembers which country you're in, so we show the right way to start PrepIt there | Strictly necessary | Session |
+| prepit-country-override | Only on our test previews, never on tryprepit.app: the country chosen for testing | Strictly necessary | Session |
+| prepit-analytics-consent | Remembers whether you accepted or rejected optional cookies | Strictly necessary | 1 year |
+| Stripe (__stripe_mid, __stripe_sid) | Set by Stripe on the checkout page only, to process your payment and prevent fraud | Strictly necessary | Up to 1 year |
+| PostHog (ph_*) | Measures how the site is used, including session recordings that hide what you type and don't record the quiz or checkout | Analytics: needs your consent in the UK and EEA, on by default elsewhere | Up to 1 year |
+| Meta Pixel (_fbp, _fbc) | Measures whether our ads lead to App Store visits and plans saved from the quiz | Marketing: needs your consent in the UK and EEA, on by default elsewhere | Up to 90 days |
 
-1. **To Make the App Work:** Keeping you logged in and remembering your dietary profile.
-2. **To Process Payments:** Ensuring your web-checkout session (via Stripe/Apple Pay) is secure and attributed to your account.
-3. **To Improve our AI:** Understanding which recipes are popular so we can refine our AI meal suggestions.
+Vercel Web Analytics and Speed Insights also measure page views and site speed. They don't use cookies or identify you.
 
-### **3. CATEGORIES OF COOKIES WE USE**
+## Storage in your browser
 
-| Category                  | Purpose                                                                                     | Necessity    |
-| :------------------------ | :------------------------------------------------------------------------------------------ | :----------- |
-| **Strictly Necessary**    | Used for login, security, and web-checkout. The app cannot function without these.          | **Required** |
-| **Functional**            | Remembers your settings (e.g., Metric vs. Imperial units) and "Favorite" recipes.           | **Optional** |
-| **Performance/Analytics** | Helps us see where users get stuck on the website or in the app so we can fix bugs and improve the experience (e.g., PostHog). | **Optional** |
-| **Marketing**             | Used to show you relevant PrepIt promotions or track the success of our ads.                | **Optional** |
+Some pages also keep information in your browser's local or session storage. It stays on your device unless a row says otherwise.
 
-### **4. THIRD-PARTY TRACKERS**
+| Item | What it does | Type | How long |
+| :--- | :--- | :--- | :--- |
+| prepit.quiz.v3 | Keeps your place and answers in the quiz if you reload the page | Strictly necessary | Until you close the tab |
+| prepit.bridgeHandoff | Holds your quiz answers until you sign in, then they're sent to your account | Strictly necessary | Until you sign in; not used after 30 days |
+| prepit.webSessionId | A random ID that links the plan you saved by email to your account when you sign in | Strictly necessary | Until you clear this site's data |
+| prepit.bridgeVisit, prepit.emailToken | Remember which sign-up page you came from, and the link from our email, so a reload still works | Strictly necessary | Until you close the tab |
+| Sign-in (Firebase) | Keeps you signed in on the website after you sign in with Apple or Google | Strictly necessary | Until you sign out |
+| prepit.attribution.v1 | Remembers the campaign and ad click details in the link that brought you here, so we can see which ads work. Sent to your account when you sign in | Marketing: needs your consent in the UK and EEA, on by default elsewhere | Until you close the tab |
 
-We work with trusted partners to provide our service. These include:
+## Your choices on the website
 
-- **Payment Processors (Stripe/Apple/Google):** Use cookies to prevent fraud during checkout.
-- **AI Services (OpenAI/Google Cloud):** We use session tokens to manage your AI recipe requests.
-- **Analytics (PostHog):** Helps us understand website usage, session replays, and product performance on the PrepIt website and app.
+- **In the UK and EEA, or when we can't tell where you are:** we ask before using PostHog, the Meta Pixel or campaign details. None of them runs until you choose "Accept optional cookies". You can change your mind by clearing this site's cookies in your browser, which shows the banner again.
+- **Elsewhere, including the US:** we don't show a banner. PostHog, the Meta Pixel and campaign details are on as soon as you arrive. You can block or delete them in your browser settings or with a tracker blocker, and the site, quiz and checkout will still work.
 
-### **5. YOUR CHOICES (OPTING OUT)**
+## In the app
 
-You have the right to decide whether to accept or reject optional cookies.
+The app uses on-device storage to keep you signed in, remember your settings, and save changes while you're offline. It also uses SDKs for crash reports, notifications, product analytics and session recordings, and subscriptions (Google Firebase, PostHog, Mixpanel and RevenueCat), and Meta's SDK to measure our ads.
 
-- **In the App:** You can manage tracking permissions via your device settings (iOS: "Allow Apps to Request to Track"; Android: "Delete Advertising ID").
-- **On the Web:** You can set your browser to refuse cookies. However, our web checkout may not function correctly if "Strictly Necessary" cookies are blocked.
-- **Global Privacy Control (GPC):** Our website honors "Do Not Track" signals and GPC headers from your browser.
+Meta's SDK runs whether or not you allow tracking when iOS asks. Your answer tells Meta whether it may use the data to track you across other companies' apps and websites. You can change it at any time in iPhone Settings, Privacy & Security, Tracking. Our [Privacy Policy](/privacy-policy) lists what the app sends to Meta.
 
-### **6. REGIONAL DISCLOSURES**
+## Changes to this policy
 
-- **EU/UK Users:** We will not fire any non-essential cookies until you click "Accept" on our cookie banner.
-- **California Users:** We do not "sell" your cookie data. We only "share" it with service providers for the purpose of improving PrepIt.
+We'll update this page when we add or remove cookies. The date at the top shows when it last changed.
 
-### **7. CHANGES TO THIS POLICY**
+## Contact us
 
-We may update this list as we add new features (like social sharing). Check back periodically for updates.
-
-### **CONTACT US**
-
-Questions about our use of cookies? Email us at **support@tryprepit.app**.
+Questions about cookies? Email **support@tryprepit.app**.

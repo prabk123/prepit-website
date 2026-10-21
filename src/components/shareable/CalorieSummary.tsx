@@ -1,4 +1,5 @@
 import type { PlanDay } from "@/lib/types/meal-plan";
+import { formatLongDay } from "@/lib/plan-dates";
 import PrepItIcon from "./PrepItIcon";
 
 interface CalorieSummaryProps {
@@ -15,36 +16,18 @@ function calculateDayCalories(day: PlanDay): number {
   return Math.round(total);
 }
 
-function formatDayLabel(dateStr: string): string {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString("en-US", {
-    weekday: "long",
-    day: "numeric",
-    month: "short",
-  });
-}
-
+/** The day's name and planned calories, at the top of each day panel. */
 export default function CalorieSummary({ day }: CalorieSummaryProps) {
   const totalCalories = calculateDayCalories(day);
-  const dayLabel = formatDayLabel(day.date);
 
   return (
-    <div
-      className="flex items-center gap-4 rounded-2xl p-4"
-      style={{ backgroundColor: "#F4F4F5" }}
-    >
-      <PrepItIcon name="fire" size={32} color="#FF644F" />
+    <div className="flex items-center gap-4 rounded-2xl bg-surface-raised p-4">
+      <PrepItIcon name="fire" size={30} className="text-accent-text" />
       <div className="flex-1">
-        <div className="flex items-center justify-between">
-          <span className="text-sm" style={{ color: "#7A7A82" }}>
-            {dayLabel}
-          </span>
-        </div>
-        <div className="mt-0.5 flex items-center justify-between">
-          <span className="text-base font-bold">
-            {totalCalories.toLocaleString()} cal
-          </span>
-        </div>
+        <p className="text-small text-ink-muted">{formatLongDay(day.date)}</p>
+        <p className="mt-0.5 font-display text-card-title text-ink">
+          {totalCalories.toLocaleString("en-GB")} cal
+        </p>
       </div>
     </div>
   );

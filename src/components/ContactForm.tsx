@@ -1,218 +1,254 @@
 "use client";
 
-import { useState, FormEvent, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState, type FormEvent } from "react";
+import { CONTACT_HONEYPOT_FIELD, CONTACT_LIMITS } from "@/lib/contact";
+import { trackContactFormSubmitted } from "@/lib/posthogAnalytics";
 
-export default function ContactForm() {
-  const searchParams = useSearchParams();
-  const isFeedback = searchParams?.get("type") === "feedback";
+export type ContactKind = "contact" | "feedback";
 
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    message: "",
-    type: isFeedback ? "feedback" : "contact",
-  });
-  const [errors, setErrors] = useState({
-    email: "",
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
+type Field = "name" | "email" | "message";
+type FieldErrors = Partial<Record<Field, string>>;
+type Status = "idle" | "sending" | "sent" | "failed";
 
-  const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+function validate(values: Record<Field, string>): FieldErrors {
+  const errors: FieldErrors = {};
+  if (!values.name.trim()) errors.name = "Enter your name.";
+  if (!values.email.trim()) errors.email = "Enter your email address.";
+  else if (!EMAIL_PATTERN.test(values.email.trim())) errors.email = "Enter an email address like name@example.com.";
+  if (!values.message.trim()) errors.message = "Enter a message.";
+  else if (values.message.length > CONTACT_LIMITS.message)
+    errors.message = `Keep your message under ${CONTACT_LIMITS.message.toLocaleString("en-US")} characters.`;
+  return errors;
+}
+
+const inputClass =
+  "w-full min-w-0 rounded-icon border bg-page px-4 text-body text-ink placeholder:text-ink-faint transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus";
+
+function borderFor(error?: string) {
+  return error ? "border-error" : "border-ink-faint hover:border-ink-muted";
+}
+
+function FieldError({ id, message }: { id: string; message?: string }) {
+  if (!message) return null;
+  return (
+    <p id={id} className="text-small text-error">
+      {message}
+    </p>
+  );
+}
+
+/**
+ * The contact and feedback form. Errors show under each field and are tied to
+ * it for screen readers; the sent message stays until the visitor starts a
+ * new one.
+ */
+export default function ContactForm({ kind }: { kind: ContactKind }) {
+  const isFeedback = kind === "feedback";
+  const [values, setValues] = useState<Record<Field, string>>({ name: "", email: "", message: "" });
+  const [errors, setErrors] = useState<FieldErrors>({});
+  const [status, setStatus] = useState<Status>("idle");
+  const formRef = useRef<HTMLFormElement>(null);
+  const sentRef = useRef<HTMLDivElement>(null);
+  const nameRef = useRef<HTMLInputElement>(null);
+  const focusNameOnReturn = useRef(false);
+
+  // "Send another message" removes the button it sits on, so focus would drop
+  // to the page; put it on Name instead.
   useEffect(() => {
-    setFormData((prev) => ({
-      ...prev,
-      type: isFeedback ? "feedback" : "contact",
-    }));
-  }, [isFeedback]);
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-
-    // Clear email error when user starts typing
-    if (name === "email" && errors.email) {
-      setErrors((prev) => ({ ...prev, email: "" }));
+    if (status === "idle" && focusNameOnReturn.current) {
+      focusNameOnReturn.current = false;
+      nameRef.current?.focus();
     }
-  };
+  }, [status]);
 
-  const handleSubmit = async (e: FormEvent) => {
+  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
+    const name = e.target.name as Field;
+    setValues((prev) => ({ ...prev, [name]: e.target.value }));
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: undefined }));
+  }
+
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault();
 
-    // Validate email
-    if (!validateEmail(formData.email)) {
-      setErrors({ email: "Please enter a valid email address" });
+    const found = validate(values);
+    setErrors(found);
+    const firstInvalid = (["name", "email", "message"] as Field[]).find((field) => found[field]);
+    if (firstInvalid) {
+      trackContactFormSubmitted(kind, "invalid");
+      formRef.current?.querySelector<HTMLElement>(`[name="${firstInvalid}"]`)?.focus();
       return;
     }
 
-    setIsSubmitting(true);
-    setShowSuccess(false);
-
+    setStatus("sending");
     try {
       const response = await fetch("/api/contact", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: values.name.trim(),
+          email: values.email.trim(),
+          message: values.message.trim(),
+          type: kind,
+          [CONTACT_HONEYPOT_FIELD]:
+            formRef.current?.querySelector<HTMLInputElement>(`[name="${CONTACT_HONEYPOT_FIELD}"]`)?.value ?? "",
+        }),
       });
 
-      if (response.ok) {
-        setShowSuccess(true);
-        setFormData({
-          name: "",
-          email: "",
-          message: "",
-          type: isFeedback ? "feedback" : "contact",
-        });
-        // Hide success message after 5 seconds
-        setTimeout(() => setShowSuccess(false), 5000);
-      } else {
-        alert("Failed to send message. Please try again.");
+      if (!response.ok) {
+        trackContactFormSubmitted(kind, "failed", response.status);
+        setStatus("failed");
+        return;
       }
-    } catch (error) {
-      console.error("Error submitting form:", error);
-      alert("An error occurred. Please try again.");
-    } finally {
-      setIsSubmitting(false);
+
+      trackContactFormSubmitted(kind, "sent");
+      setValues({ name: "", email: "", message: "" });
+      setStatus("sent");
+      requestAnimationFrame(() => {
+        // Keep the card clear of the fixed header rather than snapping it to the top.
+        sentRef.current?.focus({ preventScroll: true });
+        sentRef.current?.scrollIntoView({ block: "center" });
+      });
+    } catch {
+      trackContactFormSubmitted(kind, "failed");
+      setStatus("failed");
     }
-  };
+  }
+
+  const card = "rounded-card border border-line bg-surface p-6 sm:p-10";
+
+  if (status === "sent") {
+    return (
+      <div ref={sentRef} tabIndex={-1} role="status" className={`${card} flex flex-col items-start gap-6 outline-none`}>
+        <span aria-hidden className="flex h-12 w-12 items-center justify-center rounded-control bg-surface-raised text-accent-text">
+          <svg width="20" height="16" viewBox="0 0 15 12" fill="none">
+            <path d="M1.5 6L5.5 10L13.5 1.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </span>
+        <div className="flex flex-col gap-3">
+          <h2 className="font-display text-card-title text-ink">
+            {isFeedback ? "Thanks for your feedback." : "Thanks, your message is on its way."}
+          </h2>
+          <p className="text-body text-ink-secondary">
+            {isFeedback
+              ? "We read every message, and it helps decide what we build next."
+              : "We'll reply to the email address you gave us."}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            focusNameOnReturn.current = true;
+            setStatus("idle");
+          }}
+          className="inline-flex h-12 items-center rounded-button border border-line-strong px-6 text-body font-bold text-ink transition-colors hover:bg-surface-raised focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus"
+        >
+          Send another message
+        </button>
+      </div>
+    );
+  }
+
+  const sending = status === "sending";
 
   return (
-    <section className="mt-16 flex w-full flex-col items-center bg-white px-4 py-10 lg:px-14 lg:py-[120px]">
-      <div className="flex w-full max-w-[1200px] flex-col items-center gap-10">
-        {/* Title */}
-        <h1
-          className="text-[40px] font-semibold leading-normal text-black"
-          style={{ fontFamily: "var(--font-brand)" }}
+    <form ref={formRef} onSubmit={handleSubmit} noValidate aria-labelledby="contact-heading" className={`${card} relative flex flex-col gap-6`}>
+      <div className="flex flex-col gap-2">
+        <label htmlFor="contact-name" className="text-small font-medium text-ink-secondary">
+          Name
+        </label>
+        <input
+          ref={nameRef}
+          id="contact-name"
+          name="name"
+          type="text"
+          maxLength={CONTACT_LIMITS.name}
+          autoComplete="name"
+          value={values.name}
+          onChange={handleChange}
+          aria-invalid={errors.name ? true : undefined}
+          aria-describedby={errors.name ? "contact-name-error" : undefined}
+          className={`${inputClass} h-14 ${borderFor(errors.name)}`}
+        />
+        <FieldError id="contact-name-error" message={errors.name} />
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <label htmlFor="contact-email" className="text-small font-medium text-ink-secondary">
+          Email
+        </label>
+        <input
+          id="contact-email"
+          name="email"
+          type="email"
+          inputMode="email"
+          maxLength={CONTACT_LIMITS.email}
+          autoComplete="email"
+          value={values.email}
+          onChange={handleChange}
+          aria-invalid={errors.email ? true : undefined}
+          aria-describedby={errors.email ? "contact-email-error" : undefined}
+          className={`${inputClass} h-14 ${borderFor(errors.email)}`}
+        />
+        <FieldError id="contact-email-error" message={errors.email} />
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <label htmlFor="contact-message" className="text-small font-medium text-ink-secondary">
+          {isFeedback ? "Your feedback" : "Message"}
+        </label>
+        <textarea
+          id="contact-message"
+          name="message"
+          rows={6}
+          maxLength={CONTACT_LIMITS.message}
+          value={values.message}
+          onChange={handleChange}
+          placeholder={isFeedback ? "What's working, what isn't, what you'd like next" : "How can we help?"}
+          aria-invalid={errors.message ? true : undefined}
+          aria-describedby={errors.message ? "contact-message-error contact-message-count" : "contact-message-count"}
+          className={`${inputClass} resize-y py-3 ${borderFor(errors.message)}`}
+        />
+        <FieldError id="contact-message-error" message={errors.message} />
+        <p id="contact-message-count" className="text-small text-ink-faint tabular-nums">
+          {values.message.length.toLocaleString("en-US")} of {CONTACT_LIMITS.message.toLocaleString("en-US")} characters
+        </p>
+      </div>
+
+      {/* Spam trap: hidden from people and screen readers, left empty by them. */}
+      <div aria-hidden className="absolute -left-[9999px] h-px w-px overflow-hidden">
+        <label htmlFor={`contact-${CONTACT_HONEYPOT_FIELD}`}>Leave this empty</label>
+        <input
+          id={`contact-${CONTACT_HONEYPOT_FIELD}`}
+          name={CONTACT_HONEYPOT_FIELD}
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+          defaultValue=""
+        />
+      </div>
+
+      <div className="flex flex-col gap-4">
+        <button
+          type="submit"
+          disabled={sending}
+          className="inline-flex h-14 w-full items-center justify-center rounded-button bg-primary px-7 text-body font-bold text-on-primary transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus disabled:opacity-60 sm:w-fit"
         >
-          {isFeedback ? "Share your feedback" : "Contact us"}
-        </h1>
-
-        {/* Form Container */}
-        <div className="w-full max-w-[480px] rounded-[24px] bg-[#f4f4f5] p-6 lg:p-10">
-          <form onSubmit={handleSubmit} className="flex flex-col gap-8">
-            {/* Name and Email Row */}
-            <div className="flex flex-col gap-6 lg:flex-row lg:gap-6">
-              {/* Name Input */}
-              <div className="flex flex-1 flex-col gap-2">
-                <label
-                  htmlFor="name"
-                  className="text-base font-bold leading-6 text-black"
-                >
-                  Name
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  placeholder="Your name"
-                  required
-                  className="h-12 rounded-xl bg-white px-3 py-3 text-base leading-6 text-black placeholder-[#a6a6ac] focus:outline-none focus:ring-2 focus:ring-black"
-                />
-              </div>
-
-              {/* Email Input */}
-              <div className="flex flex-1 flex-col gap-2">
-                <label
-                  htmlFor="email"
-                  className="text-base font-bold leading-6 text-black"
-                >
-                  Email
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="Your email"
-                  required
-                  className={`h-12 rounded-xl bg-white px-3 py-3 text-base leading-6 text-black placeholder-[#a6a6ac] focus:outline-none focus:ring-2 ${
-                    errors.email ? "ring-2 ring-red-500" : "focus:ring-black"
-                  }`}
-                />
-                {errors.email && (
-                  <p className="text-sm text-red-500">{errors.email}</p>
-                )}
-              </div>
-            </div>
-
-            {/* Message Input */}
-            <div className="flex flex-col gap-2">
-              <label
-                htmlFor="message"
-                className="text-base font-bold leading-6 text-black"
-              >
-                {isFeedback ? "Feedback" : "Message"}
-              </label>
-              <textarea
-                id="message"
-                name="message"
-                value={formData.message}
-                onChange={handleChange}
-                placeholder={
-                  isFeedback
-                    ? "Share your thoughts, suggestions, or ideas..."
-                    : "Your message"
-                }
-                required
-                rows={6}
-                className="rounded-xl bg-white px-3 py-3 text-base leading-6 text-black placeholder-[#a6a6ac] focus:outline-none focus:ring-2 focus:ring-black"
-              />
-            </div>
-
-            {/* Submit Button and Success Message Container */}
-            <div className="flex flex-col gap-4">
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="rounded-2xl bg-black px-4 py-4 text-base font-bold leading-6 text-white transition-opacity hover:opacity-80 disabled:opacity-50"
-              >
-                {isSubmitting ? "Sending..." : "Submit"}
-              </button>
-
-              {/* Success Notification */}
-              {showSuccess && (
-                <div className="flex items-start gap-2 rounded-lg bg-[rgba(64,227,0,0.1)] p-2">
-                  <div className="flex h-5 w-5 items-center justify-center">
-                    <svg
-                      width="15"
-                      height="12"
-                      viewBox="0 0 15 12"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M1.5 6L5.5 10L13.5 1.5"
-                        stroke="#007d23"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </div>
-                  <p className="text-sm font-medium leading-[21px] text-[#007d23]">
-                    {isFeedback
-                      ? "Thank you! Your feedback has been received."
-                      : "Thank you! Your message has been sent."}
-                  </p>
-                </div>
-              )}
-            </div>
-          </form>
+          {sending ? "Sending…" : isFeedback ? "Send feedback" : "Send message"}
+        </button>
+        <div role="alert">
+          {status === "failed" && (
+            <p className="text-small text-error">
+              Your message didn&apos;t send. Try again, or email{" "}
+              <a href="mailto:support@tryprepit.app" className="font-medium underline underline-offset-4">
+                support@tryprepit.app
+              </a>
+              . Your message is still here.
+            </p>
+          )}
         </div>
       </div>
-    </section>
+    </form>
   );
 }

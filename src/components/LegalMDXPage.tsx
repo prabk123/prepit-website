@@ -1,43 +1,63 @@
 import React from "react";
+import { HideSiteFinalCta } from "@/components/pricing/SiteFinalCta";
+import Section from "@/components/ui/Section";
+import type { LegalHeading } from "@/lib/legalHeadings";
 import LegalNav from "./LegalNav";
 
 interface LegalMDXPageProps {
   title: string;
   lastUpdated?: string;
   currentPath: string;
+  /** The page's `##` headings, listed as jump links under the title. */
+  headings?: LegalHeading[];
   children: React.ReactNode;
 }
 
+/** A legal page: the guides' 720 px reading column, with a contents list under the title. */
 export default function LegalMDXPage({
   title,
   lastUpdated,
   currentPath,
+  headings = [],
   children,
 }: LegalMDXPageProps) {
   return (
-    <section className="mt-16 flex w-full flex-col items-center bg-white px-4 py-10 lg:px-40 lg:py-[120px]">
-      <div className="flex w-full max-w-[1200px] flex-col gap-10">
-        {/* Legal Navigation */}
-        <LegalNav currentPath={currentPath} />
-
-        {/* Title */}
-        <div className="flex flex-col gap-2">
-          <h1
-            className="text-[40px] font-semibold leading-normal text-black"
-            style={{ fontFamily: "var(--font-brand)" }}
-          >
-            {title}
-          </h1>
-          {lastUpdated && (
-            <p className="text-sm text-[var(--grey-60)]">
-              Last updated: {lastUpdated}
-            </p>
+    <div className="w-full bg-page pt-16 text-ink lg:pt-[72px]">
+      {/* Readers here mostly already have the app, so no download section. */}
+      <HideSiteFinalCta />
+      <Section labelledBy="legal-heading">
+        <div className="mx-auto flex max-w-[720px] flex-col gap-10">
+          <LegalNav currentPath={currentPath} />
+          <div className="flex flex-col gap-3">
+            <h1 id="legal-heading" className="font-display text-section text-ink text-balance">
+              {title}
+            </h1>
+            {lastUpdated && (
+              <p className="text-small text-ink-faint">Last updated {lastUpdated}</p>
+            )}
+          </div>
+          {headings.length > 2 && (
+            <nav aria-labelledby="legal-contents" className="rounded-tile border border-line bg-surface p-5 sm:p-6">
+              <h2 id="legal-contents" className="text-small font-medium text-ink-muted">
+                Contents
+              </h2>
+              <ol className="mt-3 flex flex-col gap-2 text-body">
+                {headings.map((heading) => (
+                  <li key={heading.id}>
+                    <a
+                      href={`#${heading.id}`}
+                      className="text-ink underline decoration-accent underline-offset-4 hover:text-accent-text"
+                    >
+                      {heading.text}
+                    </a>
+                  </li>
+                ))}
+              </ol>
+            </nav>
           )}
+          <article>{children}</article>
         </div>
-
-        {/* MDX Content with styling */}
-        <div className="legal-content">{children}</div>
-      </div>
-    </section>
+      </Section>
+    </div>
   );
 }
