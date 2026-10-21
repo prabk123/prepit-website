@@ -4,10 +4,9 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import { faqPageJsonLd, LANDING_APP_STORE_FAQ_ITEMS, LANDING_WEB_FAQ_ITEMS } from "@/lib/faq";
 import type { WebMarket } from "@/lib/markets";
 
-/** The landing FAQ in two columns, with the trial and cancel answers for where the visitor starts. */
+/** The landing FAQ (FaqAccordion lays it out in two columns), with the trial and cancel answers for where the visitor starts. */
 export default function LandingFaq({ market }: { market: WebMarket }) {
   const items = market === "web" ? LANDING_WEB_FAQ_ITEMS : LANDING_APP_STORE_FAQ_ITEMS;
-  const half = Math.ceil(items.length / 2);
   return (
     <Section id="faq" labelledBy="faq-heading" analyticsName="faq" className="[&>div]:pt-0">
       <script
@@ -15,9 +14,8 @@ export default function LandingFaq({ market }: { market: WebMarket }) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqPageJsonLd(items)).replace(/</g, "\\u003c") }}
       />
       <SectionHeading title="Questions, answered." id="faq-heading" />
-      <div className="mt-stack grid gap-x-14 min-[860px]:grid-cols-2">
-        <FaqAccordion items={items.slice(0, half)} trackingSource="landing-faq" defaultOpenId={items[0].id} />
-        <FaqAccordion items={items.slice(half)} trackingSource="landing-faq" />
+      <div className="mt-stack">
+        <FaqAccordion items={items} trackingSource="landing-faq" defaultOpenId={items[0].id} />
       </div>
     </Section>
   );

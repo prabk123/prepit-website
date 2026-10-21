@@ -56,7 +56,7 @@ export default async function LandingPage() {
       <PlansSection market={market} />
       <LoggingSection />
       <JustAskSection />
-      <TrustSection />
+      <TrustSection market={market} />
       <WeKnowSection market={market} />
       <OfferSection market={market} />
       <LandingFaq market={market} />

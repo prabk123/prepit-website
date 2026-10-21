@@ -103,13 +103,15 @@ const LANDING_SHARED_FAQ: FaqItem[] = [
     answer:
       "Three scores from 0 to 100 that show how your meals line up with steadier energy, fullness and mood, each with the reason behind it. They're estimates to guide your next meal, not a medical measurement.",
   },
-  {
+];
+
+function landingMedicalFaq(professional: string): FaqItem {
+  return {
     id: "landing-medical",
     question: "Can PrepIt help with a medical condition?",
-    answer:
-      "PrepIt gives nutrition guidance, not medical advice. Medical questions get pointed to a qualified professional, such as your GP, a pharmacist or a registered dietitian.",
-  },
-];
+    answer: `PrepIt gives nutrition guidance, not medical advice. Medical questions get pointed to a qualified professional, such as ${professional}, a pharmacist or a registered dietitian.`,
+  };
+}
 
 /**
  * The landing page FAQ for US visitors, who start on the website (PRE-302).
@@ -130,6 +132,7 @@ export const LANDING_WEB_FAQ_ITEMS: FaqItem[] = [
     link: { href: "/account", label: "Manage your subscription" },
   },
   ...LANDING_SHARED_FAQ,
+  landingMedicalFaq("your doctor"),
   {
     id: "landing-web-devices",
     question: "Which devices does PrepIt work on?",
@@ -152,6 +155,7 @@ export const LANDING_APP_STORE_FAQ_ITEMS: FaqItem[] = [
       "Go to Settings on your iPhone, then your name, then Subscriptions, at least 24 hours before the trial ends, and you won't be charged.",
   },
   ...LANDING_SHARED_FAQ,
+  landingMedicalFaq("your GP"),
   {
     id: "landing-app-store-devices",
     question: "Which devices does PrepIt work on?",

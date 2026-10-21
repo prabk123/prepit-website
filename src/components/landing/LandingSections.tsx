@@ -616,7 +616,7 @@ export function JustAskSection() {
 
 // ---------------------------------------------------------------- 8. trust (dark band)
 
-export function TrustSection() {
+export function TrustSection({ market }: { market: WebMarket }) {
   return (
     <Section id="trust" tone="dark" labelledBy="trust-heading" analyticsName="trust">
       <LandingPhoto
@@ -639,7 +639,7 @@ export function TrustSection() {
         <Bullets
           items={[
             ["Real sources", "for your food, with a confidence level on every meal you describe"],
-            ["Medical questions go to a professional:", "your GP, a pharmacist or a registered dietitian"],
+            ["Medical questions go to a professional:", `${market === "web" ? "your doctor" : "your GP"}, a pharmacist or a registered dietitian`],
             ["You stay in control:", "nothing changes until you confirm"],
           ]}
         />
