@@ -36,10 +36,10 @@ export const metadata: Metadata = {
 
 /**
  * The direct-sale landing page (PRE-302), to the landing design: no quiz.
- * US visitors start their free week on the website (sign in, pay $0, then
- * download the app); the markets waiting on web checkout go to the App
- * Store, and everywhere else to the waitlist (PRE-331). The proxy passes the
- * country.
+ * Visitors start their free week on the website (sign in, pay $0, then
+ * download the app). That is every country for now; a country listed in
+ * lib/markets.ts goes to the App Store or the waitlist instead (PRE-331).
+ * The proxy passes the country.
  */
 export default async function LandingPage() {
   const market = webMarketFor((await headers()).get(COUNTRY_HEADER));

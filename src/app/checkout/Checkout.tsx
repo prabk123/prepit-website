@@ -19,6 +19,7 @@ import {
   packageOffersTrial,
   planIdOf,
   purchasesFor,
+  saveWithdrawalConsent,
   sendMetaMatchingToRevenueCat,
   toCheckoutFailure,
   waitForPremium,
@@ -28,6 +29,7 @@ import {
 import type { Offering } from "@revenuecat/purchases-js";
 import { identifyPixelUser, trackCheckoutInitiated } from "@/lib/metaPixel";
 import { resetWebUser, trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webFunnelAnalytics";
+import { WITHDRAWAL_CONSENT_TEXT, WITHDRAWAL_CONSENT_VERSION, withdrawalConsentAttributes } from "@/lib/withdrawalConsent";
 
 const PROVIDER_NAMES = { google: "Google", apple: "Apple" } as const;
 
@@ -69,9 +71,11 @@ type Plans =
  * call, from each Web Billing product's trial eligibility setting. Around the
  * paywall this page keeps what RevenueCat can't know: sign in first with the
  * app's account, the email-in-use guard, no checkout for anyone already
- * subscribed, and the "You're in" handoff once `premium` is active.
+ * subscribed, the "You're in" handoff once `premium` is active, and for UK
+ * and EEA buyers the request to start now, which waives the 14-day right to
+ * cancel (`askWithdrawalConsent`; the paywall waits for it).
  */
-export default function Checkout() {
+export default function Checkout({ country, askWithdrawalConsent }: { country: string | null; askWithdrawalConsent: boolean }) {
   const params = useSearchParams();
   const router = useRouter();
   const funnelId = parseFunnelId(params.get("funnel"));
@@ -88,6 +92,11 @@ export default function Checkout() {
   // Bumped to show the paywall again after a purchase that didn't go through.
   const [presentKey, setPresentKey] = useState(0);
   const paywallTracked = useRef(false);
+  // UK/EEA: the consent's ISO time once ticked and confirmed; the paywall shows only after it.
+  const [consentAt, setConsentAt] = useState<string | null>(null);
+  const [consentTicked, setConsentTicked] = useState(false);
+  const [consentSaving, setConsentSaving] = useState(false);
+  const paywallAllowed = !askWithdrawalConsent || consentAt !== null;
   const paywallHost = useRef<HTMLDivElement>(null);
 
   const uid = session.status === "signedIn" ? session.user.uid : null;
@@ -219,7 +228,7 @@ export default function Checkout() {
   const trialExpected = plans.status === "ready" ? plans.trialExpected : false;
   useEffect(() => {
     const host = paywallHost.current;
-    if (!uid || !offering || !host || paying !== "idle") return;
+    if (!uid || !offering || !host || paying !== "idle" || !paywallAllowed) return;
     let active = true;
     // A fresh element per showing, so a second showing never stacks on the first.
     const target = document.createElement("div");
@@ -235,7 +244,10 @@ export default function Checkout() {
           offering,
           htmlTarget: target,
           customerEmail: email ?? undefined,
-          metadata: { funnel_id: funnelId },
+          metadata: {
+            funnel_id: funnelId,
+            ...(consentAt ? { withdrawal_waiver_version: WITHDRAWAL_CONSENT_VERSION, withdrawal_waiver_at: consentAt } : {}),
+          },
           hideBackButtons: true,
           listener: {
             onPurchaseStarted: (rcPackage) => {
@@ -304,7 +316,21 @@ export default function Checkout() {
     };
     // welcomePath and context only change with the session and URL already in the deps.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [uid, offering, presentKey]);
+  }, [uid, offering, presentKey, paywallAllowed]);
+
+  const confirmWithdrawalConsent = async () => {
+    if (!uid || !consentTicked || consentSaving) return;
+    setConsentSaving(true);
+    const attributes = withdrawalConsentAttributes(country, new Date());
+    const recorded = await saveWithdrawalConsent(uid, attributes);
+    trackWebFunnelEvent(WEB_FUNNEL_EVENTS.withdrawalConsent, {
+      funnel_id: funnelId,
+      wording_version: WITHDRAWAL_CONSENT_VERSION,
+      recorded,
+    });
+    setConsentSaving(false);
+    setConsentAt(attributes.withdrawal_waiver_at);
+  };
 
   if (keyProblem || plans.status === "no_paywall") {
     return (
@@ -353,6 +379,28 @@ export default function Checkout() {
         <p role="status" className="text-body text-ink-secondary">
           Confirming your subscription…
         </p>
+      ) : !paywallAllowed ? (
+        <form
+          className="flex w-full flex-col gap-4"
+          onSubmit={(event) => {
+            event.preventDefault();
+            void confirmWithdrawalConsent();
+          }}
+        >
+          <SectionHeading as="h2" size="title" align="center" title="Before you choose a plan" />
+          <label className="flex items-start gap-2.5 text-left text-small text-ink-secondary">
+            <input
+              type="checkbox"
+              className="mt-px size-5 flex-none accent-primary"
+              checked={consentTicked}
+              onChange={(event) => setConsentTicked(event.target.checked)}
+            />
+            {WITHDRAWAL_CONSENT_TEXT}
+          </label>
+          <button type="submit" className={PRIMARY_BUTTON_CLASS} disabled={!consentTicked || consentSaving}>
+            Continue to plans
+          </button>
+        </form>
       ) : (
         <div ref={paywallHost} className="ph-no-capture w-full" data-testid="revenuecat-paywall" />
       )}

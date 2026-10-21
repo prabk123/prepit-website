@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import QuizStartCta from "@/components/quiz/QuizStartCta";
 import { Card, CardTitle, Eyebrow, TargetTiles } from "@/components/quiz/parts";
 import { useEmailToken } from "@/components/quiz/useEmailToken";
 import { PRIMARY_BUTTON_CLASS, TEXT_BUTTON_CLASS } from "@/components/ui/buttons";
-import { bridgePath } from "@/lib/funnel/params";
+import type { WebMarket } from "@/lib/markets";
 import { PRICES } from "@/lib/pricing";
 import { fetchLeadPlan, LeadApiError, type LeadPlan } from "@/lib/quiz/leadApi";
 import { dietLabelFor, goalLabelFor, QUIZ_FUNNEL_ID, savedPlanHeadline, weightText } from "@/lib/quiz/quiz";
@@ -18,7 +19,7 @@ type State = { status: "loading" } | { status: "ready"; plan: LeadPlan } | { sta
  * link (`POST /web-leads/plan`). Nothing here is editable; "Start my free 7
  * days" goes to the bridge, where they sign in and the app finishes setup.
  */
-export default function MyPlan() {
+export default function MyPlan({ market }: { market: WebMarket }) {
   const token = useEmailToken();
   const [fetched, setFetched] = useState<State>({ status: "loading" });
   const state: State = token === null ? { status: "missing" } : fetched;
@@ -113,17 +114,17 @@ export default function MyPlan() {
         </Card>
       )}
 
-      <Card>
-        <CardTitle>Your first 7 days are free</CardTitle>
-        <p className="text-[15px] text-ink-secondary">
-          Full access and your first session today, a reminder email on day 4, and your plan starts on day 8 if you keep it: {PRICES.annual} a
-          year or {PRICES.monthly} a month. Cancel before then and you pay nothing.
-        </p>
-      </Card>
+      {market === "web" && (
+        <Card>
+          <CardTitle>Your first 7 days are free</CardTitle>
+          <p className="text-[15px] text-ink-secondary">
+            Full access and your first session today, a reminder email on day 4, and your plan starts on day 8 if you keep it: {PRICES.annual} a
+            year or {PRICES.monthly} a month. Cancel before then and you pay nothing.
+          </p>
+        </Card>
+      )}
 
-      <Link href={bridgePath({ from: "quiz", funnel: QUIZ_FUNNEL_ID })} className={PRIMARY_BUTTON_CLASS}>
-        Start my free 7 days
-      </Link>
+      <QuizStartCta market={market} className={PRIMARY_BUTTON_CLASS} trackingSource="my-plan" />
       <p className="-mt-2 text-center text-[12.5px] text-ink-muted">
         PrepIt is an iPhone app; Android is coming soon. PrepIt is a coach, not a doctor.
       </p>

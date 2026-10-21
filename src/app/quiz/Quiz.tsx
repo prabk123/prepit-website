@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import DeviceFrame from "@/components/device/DeviceFrame";
 import {
@@ -27,10 +26,11 @@ import {
   UnitField,
 } from "@/components/quiz/parts";
 import LongLogo from "@/components/ui/LongLogo";
+import QuizStartCta from "@/components/quiz/QuizStartCta";
 import { appVideo } from "@/lib/captures";
 import { readAttribution } from "@/lib/funnel/attributionStore";
 import { writeBridgeHandoff } from "@/lib/funnel/bridgeHandoff";
-import { bridgePath } from "@/lib/funnel/params";
+import type { WebMarket } from "@/lib/markets";
 import { trackQuizLead } from "@/lib/metaPixel";
 import { fetchTargets, LeadApiError, saveLead } from "@/lib/quiz/leadApi";
 import {
@@ -128,8 +128,7 @@ const BACK_ICON = (
  * (PRE-327): one screen at a time, then the plan page, which hands the
  * answers to the bridge (/start, PRE-323) in this browser's storage.
  */
-export default function Quiz({ country }: { country: string }) {
-  const router = useRouter();
+export default function Quiz({ country, market }: { country: string; market: WebMarket }) {
   const [answers, setAnswers] = useState<QuizAnswers>(emptyAnswers);
   const [screen, setScreen] = useState<ScreenId>("goal");
   const [history, setHistory] = useState<ScreenId[]>([]);
@@ -318,8 +317,7 @@ export default function Quiz({ country }: { country: string }) {
 
   const startTrial = () => {
     writeHandoff(answers);
-    trackWebFunnelEvent(WEB_FUNNEL_EVENTS.quizStartTrial, { funnel_id: QUIZ_FUNNEL_ID, targets_available: Boolean(targets) });
-    router.push(bridgePath({ from: "quiz", funnel: QUIZ_FUNNEL_ID }));
+    trackWebFunnelEvent(WEB_FUNNEL_EVENTS.quizStartTrial, { funnel_id: QUIZ_FUNNEL_ID, market, targets_available: Boolean(targets) });
   };
 
   const ok = canContinue(screen, answers);
@@ -977,10 +975,10 @@ export default function Quiz({ country }: { country: string }) {
       body = <ResultScreen answers={answers} targets={targets} />;
       footer = (
         <>
-          <button type="button" className={QUIZ_BUTTON_CLASS} onClick={startTrial}>
-            Start my free 7 days
-          </button>
-          <p className="mt-1.5 text-center text-[12.5px] text-ink-muted">$0 today. Reminder email on day 4. Cancel any time.</p>
+          <QuizStartCta market={market} className={QUIZ_BUTTON_CLASS} trackingSource="quiz-result" onStart={startTrial} />
+          {market === "web" && (
+            <p className="mt-1.5 text-center text-[12.5px] text-ink-muted">$0 today. Reminder email on day 4. Cancel any time.</p>
+          )}
         </>
       );
       break;

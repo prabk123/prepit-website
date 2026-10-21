@@ -14,7 +14,11 @@ import {
   webMarketFor,
 } from "@/lib/markets";
 
-/** Pages that sell on the web (PRE-331): US only at launch. */
+/**
+ * Pages that sell on the web (PRE-331). Every country buys on the web for
+ * now, so this only sends a country that lib/markets.ts lists for the App
+ * Store or the waitlist back to the landing page or the waitlist.
+ */
 const WEB_CHECKOUT_PATHS = ["/checkout", "/start"];
 
 export function proxy(request: NextRequest) {

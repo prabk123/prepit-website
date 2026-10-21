@@ -114,7 +114,7 @@ function landingMedicalFaq(professional: string): FaqItem {
 }
 
 /**
- * The landing page FAQ for US visitors, who start on the website (PRE-302).
+ * The landing page FAQ where visitors start on the website (PRE-302).
  * A web subscription is managed and cancelled on the website, not in the app
  * or the App Store (PRE-304), so the cancel answer says so.
  */

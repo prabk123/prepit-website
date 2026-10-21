@@ -148,6 +148,22 @@ export async function sendMetaMatchingToRevenueCat(uid: string, email: string | 
   };
 }
 
+/**
+ * Saves the UK/EEA right-to-cancel consent (lib/withdrawalConsent.ts) on the
+ * RevenueCat customer before the paywall, so the record sits with the
+ * subscription. The web SDK doesn't retry attributes: false when it failed
+ * (the purchase metadata still carries the version and time).
+ */
+export async function saveWithdrawalConsent(uid: string, attributes: Record<string, string>): Promise<boolean> {
+  try {
+    const purchases = await purchasesFor(uid);
+    await purchases.setAttributes(attributes);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /** Which plan a package is, for analytics: `$rc_annual` / `$rc_monthly`, or by its period. */
 export function planIdOf(rcPackage: Package): PlanId | null {
   if (rcPackage.identifier === "$rc_annual") return "annual";

@@ -1,21 +1,17 @@
 /**
- * Where the web funnel sells (PRE-331). Launch is US only: US visitors get
- * the landing page, quiz and bridge with USD prices. The other markets in
- * the Web2App design are waiting on checkout, so "Start my free 7 days" goes
- * to the App Store there. Everywhere else gets the waitlist page.
- *
- * Adding a country to web checkout later is a one-line change here.
+ * Where the web funnel sells (PRE-331). Since 2026-10-21 every country buys
+ * on the website (landing page, quiz, bridge, checkout), in US dollars until
+ * there are local prices. The App Store and waitlist markets stay so a
+ * country can be taken off web checkout again with a one-line change here;
+ * both lists are empty for now.
  */
 export type WebMarket = "web" | "app-store" | "waitlist";
 
-/** Countries that buy on the website (ISO 3166-1 alpha-2). */
-export const WEB_CHECKOUT_COUNTRIES: ReadonlySet<string> = new Set(["US"]);
+/** Countries sent to the App Store instead of web checkout (ISO 3166-1 alpha-2). None for now. */
+export const APP_STORE_COUNTRIES: ReadonlySet<string> = new Set<string>();
 
-/**
- * The design's other markets, waiting on local prices and checkout rules:
- * the UK, Canada, Australia, New Zealand, Ireland, Malta and Cyprus.
- */
-export const APP_STORE_COUNTRIES: ReadonlySet<string> = new Set(["GB", "CA", "AU", "NZ", "IE", "MT", "CY"]);
+/** Countries that get the waitlist page instead of web checkout. None for now. */
+export const WAITLIST_COUNTRIES: ReadonlySet<string> = new Set<string>();
 
 /** Request header the proxy passes the visitor's country to pages in. */
 export const COUNTRY_HEADER = "x-prepit-country";
@@ -37,13 +33,13 @@ export function parseCountryCode(value: string | null | undefined): string | nul
 }
 
 /**
- * The market for a country. An unknown country (no geo header, as in local
- * development) gets the App Store: never sell on the web where we can't tell.
+ * The market for a country: web checkout unless the country is on one of the
+ * lists above. An unknown country (no geo header, as in local development)
+ * buys on the web too.
  */
 export function webMarketFor(country: string | null | undefined): WebMarket {
   const code = parseCountryCode(country);
-  if (!code) return "app-store";
-  if (WEB_CHECKOUT_COUNTRIES.has(code)) return "web";
-  if (APP_STORE_COUNTRIES.has(code)) return "app-store";
-  return "waitlist";
+  if (code && APP_STORE_COUNTRIES.has(code)) return "app-store";
+  if (code && WAITLIST_COUNTRIES.has(code)) return "waitlist";
+  return "web";
 }
