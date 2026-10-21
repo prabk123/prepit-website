@@ -44,6 +44,9 @@
   --color-accent: #ff644f;
   /* Orange text and link underlines on light: 5.5:1 on white, 5.0:1 on page. */
   --color-accent-text: #b24637;
+  /* Black on accent fills (7.3:1): the landing page's tick marks, pills and
+     yearly saving (PRE-302). */
+  --color-on-accent: #000000;
   /* Keyboard focus rings. */
   --color-focus: #1a1a2e;
   /* The app's light chat background, behind real chat captures (PRE-283).

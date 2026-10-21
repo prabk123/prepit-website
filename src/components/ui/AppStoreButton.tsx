@@ -1,4 +1,5 @@
 import AppStoreLink from "@/components/AppStoreLink";
+import { PILL_BUTTON_CLASS } from "@/components/ui/buttons";
 
 export function AppleLogo() {
   return (
@@ -31,7 +32,7 @@ export default function AppStoreButton({
     <div className="flex flex-col items-start gap-3">
       <AppStoreLink
         trackingSource={trackingSource}
-        className={`inline-flex h-14 items-center gap-2.5 whitespace-nowrap rounded-button px-5 text-body font-bold transition-opacity max-[374px]:gap-2 max-[374px]:px-4 max-[374px]:text-small sm:px-7 hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-4 bg-primary text-on-primary focus-visible:outline-focus`}
+        className={PILL_BUTTON_CLASS}
       >
         <AppleLogo />
         {label}

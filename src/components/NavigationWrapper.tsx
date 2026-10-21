@@ -1,8 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import AppStoreLink from "@/components/AppStoreLink";
+import LandingHeaderCta from "@/components/landing/LandingHeaderCta";
+import { LANDING_PATH } from "@/lib/funnel/landing";
 import LongLogo from "@/components/ui/LongLogo";
 import { HEADER_SECTION_LINKS, SITE_PAGE_LINKS } from "@/lib/homeSections";
 
@@ -17,6 +20,9 @@ export default function NavigationWrapper() {
   const navRef = useRef<HTMLElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
+  // The ad landing page: its header button follows the visitor's market and
+  // the desktop section links (which lead away to the homepage) are dropped.
+  const onLanding = usePathname() === LANDING_PATH;
 
   // While the mobile menu is open, Escape closes it and Tab cycles through the
   // header and the menu only, not the page behind the backdrop.
@@ -80,21 +86,30 @@ export default function NavigationWrapper() {
 
           {/* Desktop */}
           <div className="hidden items-center gap-8 lg:flex">
-            {[...HEADER_SECTION_LINKS, ...SITE_PAGE_LINKS].map((link) => (
-              <Link key={link.href} href={link.href} className={linkClass}>
-                {link.label}
-              </Link>
-            ))}
-            <AppStoreLink trackingSource="header-desktop" className={pillClass}>
-              Get the app
-            </AppStoreLink>
+            {!onLanding &&
+              [...HEADER_SECTION_LINKS, ...SITE_PAGE_LINKS].map((link) => (
+                <Link key={link.href} href={link.href} className={linkClass}>
+                  {link.label}
+                </Link>
+              ))}
+            {onLanding ? (
+              <LandingHeaderCta trackingSource="header-desktop" className={pillClass} />
+            ) : (
+              <AppStoreLink trackingSource="header-desktop" className={pillClass}>
+                Get the app
+              </AppStoreLink>
+            )}
           </div>
 
           {/* Mobile: Get the app + menu */}
           <div className="flex items-center gap-2 lg:hidden">
-            <AppStoreLink trackingSource="header-mobile" className={pillClass}>
-              Get the app
-            </AppStoreLink>
+            {onLanding ? (
+              <LandingHeaderCta trackingSource="header-mobile" className={pillClass} />
+            ) : (
+              <AppStoreLink trackingSource="header-mobile" className={pillClass}>
+                Get the app
+              </AppStoreLink>
+            )}
             <button
               ref={toggleRef}
               type="button"
