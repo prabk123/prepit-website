@@ -29,3 +29,26 @@ export function safeNextPath(value: string | null | undefined, fallback: string)
     return fallback;
   }
 }
+
+/** Where the visitor came from; picks the bridge's header (PRE-323, contract in bridgeHandoff.ts). */
+export type BridgeSource = "landing" | "quiz";
+
+export function parseBridgeSource(value: string | null | undefined): BridgeSource {
+  return value === "quiz" ? "quiz" : "landing";
+}
+
+/** The bridge URL (`/start`) for a source, plan and funnel. */
+export function bridgePath({
+  from,
+  plan,
+  funnel,
+}: {
+  from: BridgeSource;
+  plan?: "annual" | "monthly" | null;
+  funnel?: string | null;
+}): string {
+  const query = new URLSearchParams({ from });
+  if (plan) query.set("plan", plan);
+  query.set("funnel", parseFunnelId(funnel ?? DEFAULT_FUNNEL_ID));
+  return `/start?${query}`;
+}

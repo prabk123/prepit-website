@@ -4,6 +4,7 @@ import { HideSiteFinalCta } from "@/components/pricing/SiteFinalCta";
 import AppStoreCta from "@/components/ui/AppStoreCta";
 import NarrowCard from "@/components/ui/NarrowCard";
 import { openAppUrl } from "@/lib/appStore";
+import OpenAppLink from "./OpenAppLink";
 import WelcomeDetails from "./WelcomeDetails";
 
 export const metadata: Metadata = {
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
 };
 
 /**
- * After a web purchase (PRE-269, PRE-270): get the app and sign in with the
+ * After a web purchase (PRE-269, PRE-270, PRE-325): get the app and sign in with the
  * same Google or Apple account. The QR code is for people who bought on a
  * laptop: it goes through /open, so a phone that already has PrepIt opens it
  * with their sign-in button first, and one without it gets the App Store.
@@ -35,6 +36,7 @@ export default async function WelcomePage({ searchParams }: { searchParams: Prom
         qrUrl={openAppUrl(provider)}
         className="justify-center"
       />
+      <OpenAppLink provider={provider} />
     </NarrowCard>
   );
 }

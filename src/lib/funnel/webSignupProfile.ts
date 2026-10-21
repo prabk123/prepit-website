@@ -16,6 +16,8 @@ export type WebSignupAnswer = {
 
 /** Account fields the backend copies into the account (same values as `POST /account`). */
 export type WebSignupUser = {
+  /** The quiz's name; the backend prefers it over the sign-in's, so only send it when the sign-in has none. */
+  firstName?: string;
   dob?: string;
   gender?: string;
   height?: number;
@@ -43,10 +45,13 @@ export type WebSignupInput = {
   attribution?: Attribution | null;
   /** Make the account as soon as the answers are enough. The backend's default is true. */
   createAccount?: boolean;
+  /** The quiz session id the email gate saved a lead under (PRE-327). */
+  webSessionId?: string;
 };
 
 const QUESTION_ID = /^[A-Za-z0-9_:-]{1,64}$/;
 const MAX_ANSWERS = 100;
+const WEB_SESSION_ID = /^[A-Za-z0-9_.:-]{8,128}$/;
 
 // The values `pendingProfileUserSchema` / `pendingProfileSettingsSchema` accept
 // (fresca_backend services/pendingProfile.ts and the User / Settings models).
@@ -114,7 +119,9 @@ function withoutEmpty<T extends Record<string, unknown>>(value: T): T | undefine
 /** Only the account fields, and values, the backend accepts; anything else is left out. */
 export function cleanWebSignupUser(user: WebSignupUser | undefined): WebSignupUser | undefined {
   if (!user) return undefined;
+  const firstName = typeof user.firstName === "string" ? user.firstName.trim() : "";
   return withoutEmpty({
+    firstName: firstName ? cap(firstName, 100) : undefined,
     dob: pastIsoDate(user.dob),
     gender: oneOf(user.gender, GENDERS),
     height: inRange(user.height, 50, 272),
@@ -173,5 +180,6 @@ export function buildWebSignupBody(input: WebSignupInput): Record<string, unknow
   if (settings) body.settings = settings;
   if (input.attribution && Object.keys(input.attribution).length > 0) body.attribution = input.attribution;
   if (input.createAccount !== undefined) body.createAccount = input.createAccount;
+  if (input.webSessionId && WEB_SESSION_ID.test(input.webSessionId)) body.webSessionId = input.webSessionId;
   return body;
 }

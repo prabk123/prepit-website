@@ -7,6 +7,7 @@ import { isAppleSignInEnabled } from "@/lib/firebase/config";
 import {
   isInAppBrowser,
   isSignInAvailable,
+  systemBrowserUrl,
   SignInError,
   signInWith,
   type SignInFailure,
@@ -44,17 +45,23 @@ export const SIGN_IN_FAILURE_MESSAGES: Record<SignInFailure, string | null> = {
 export default function SignInButtons({
   context,
   onSignedIn,
+  loginHint,
 }: {
   context: Record<string, string | null>;
   onSignedIn?: (provider: SignInProvider) => void;
+  /** An email to start Google's account picker on (the quiz's). */
+  loginHint?: string;
 }) {
   const [busy, setBusy] = useState<SignInProvider | null>(null);
   const [failure, setFailure] = useState<SignInFailure | null>(null);
   const [inAppBrowser, setInAppBrowser] = useState(false);
+  const [browserUrl, setBrowserUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    setInAppBrowser(isInAppBrowser(navigator.userAgent));
+    const inApp = isInAppBrowser(navigator.userAgent);
+    setInAppBrowser(inApp);
+    if (inApp) setBrowserUrl(systemBrowserUrl(window.location.href, navigator.userAgent));
   }, []);
 
   if (!isSignInAvailable()) {
@@ -66,7 +73,7 @@ export default function SignInButtons({
     setFailure(null);
     trackWebFunnelEvent(WEB_FUNNEL_EVENTS.signInStart, { ...context, signup_method: provider });
     try {
-      await signInWith(provider);
+      await signInWith(provider, { loginHint });
       onSignedIn?.(provider);
     } catch (error) {
       const code = error instanceof SignInError ? error.code : "unknown";
@@ -80,6 +87,7 @@ export default function SignInButtons({
   }
 
   async function copyLink() {
+    trackWebFunnelEvent(WEB_FUNNEL_EVENTS.inAppBrowserEscape, { ...context, action: "copy_link" });
     try {
       await navigator.clipboard.writeText(window.location.href);
       setCopied(true);
@@ -109,9 +117,25 @@ export default function SignInButtons({
             Google sign-in doesn&apos;t work inside this app&apos;s browser. Open this page in Safari or Chrome
             to continue with Google.
           </p>
+          {browserUrl && (
+            <a
+              href={browserUrl}
+              className={PRIMARY_BUTTON_CLASS}
+              onClick={() =>
+                trackWebFunnelEvent(WEB_FUNNEL_EVENTS.inAppBrowserEscape, { ...context, action: "open_browser" })
+              }
+            >
+              {browserUrl.startsWith("x-safari") ? "Open in Safari" : "Open in your browser"}
+            </a>
+          )}
           <button type="button" className={SECONDARY_BUTTON_CLASS} onClick={() => void copyLink()}>
             {copied ? "Link copied" : "Copy link"}
           </button>
+          {!browserUrl && (
+            <p className="text-small text-ink-muted">
+              Or tap the ••• menu and choose Open in browser.
+            </p>
+          )}
         </div>
       ) : (
         <button

@@ -175,12 +175,23 @@ export type WebSignupSaveResult = WebSignupState & {
  * `email_in_use` when the account it would create belongs to another sign-in.
  */
 export async function saveWebSignupProfile(input: WebSignupInput): Promise<WebSignupSaveResult> {
-  const body = await prepitFetch<{
+  type SaveResponse = {
     hasAccount?: boolean;
     accountCreated?: boolean;
     accountNotCreatedReason?: string;
     pendingProfile?: WebSignupProfile | null;
-  }>("/web-signup/profile", { method: "PATCH", body: JSON.stringify(buildWebSignupBody(input)) });
+  };
+  const patch = (value: WebSignupInput) =>
+    prepitFetch<SaveResponse>("/web-signup/profile", { method: "PATCH", body: JSON.stringify(buildWebSignupBody(value)) });
+  let body: SaveResponse;
+  try {
+    body = await patch(input);
+  } catch (error) {
+    // A backend from before PRE-327 refuses the unknown `webSessionId`; the
+    // save matters more than the lead match, so send it again without.
+    if (!(error instanceof PrepItApiError && error.status === 400 && input.webSessionId)) throw error;
+    body = await patch({ ...input, webSessionId: undefined });
+  }
   const reason = body.accountNotCreatedReason;
   return {
     hasAccount: Boolean(body.hasAccount),
