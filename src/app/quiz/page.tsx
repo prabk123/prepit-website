@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { HideSiteChrome } from "@/components/SiteChrome";
 import { HideSiteFinalCta } from "@/components/pricing/SiteFinalCta";
+import { COUNTRY_HEADER, webMarketFor } from "@/lib/markets";
 import Quiz from "./Quiz";
 
 export const metadata: Metadata = {
@@ -16,14 +17,18 @@ export const metadata: Metadata = {
  * The web quiz (PRE-322): an app-like page of its own, without the site's
  * header and footer. The country comes from Vercel's geo header, for the
  * email gate's lead (PRE-327); the quiz is US-first, so it defaults to US.
+ * The market (from the proxy, which honours the preview `?country=` pin)
+ * picks where "Start my free 7 days" goes, as on the landing page (PRE-331).
  */
 export default async function QuizPage() {
-  const country = (await headers()).get("x-vercel-ip-country")?.toUpperCase();
+  const requestHeaders = await headers();
+  const country = requestHeaders.get("x-vercel-ip-country")?.toUpperCase();
+  const market = webMarketFor(requestHeaders.get(COUNTRY_HEADER));
   return (
     <>
       <HideSiteChrome />
       <HideSiteFinalCta />
-      <Quiz country={country && /^[A-Z]{2}$/.test(country) ? country : "US"} />
+      <Quiz country={country && /^[A-Z]{2}$/.test(country) ? country : "US"} market={market} />
     </>
   );
 }
