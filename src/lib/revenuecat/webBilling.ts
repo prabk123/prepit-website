@@ -1,7 +1,10 @@
 "use client";
 
 import type { CustomerInfo, Offering, Package, Purchases } from "@revenuecat/purchases-js";
+import { readCookie } from "@/lib/cookies";
 import { isProductionDeploy } from "@/lib/firebase/config";
+import { mayKeepAttribution, readAttribution } from "@/lib/funnel/attributionStore";
+import { metaMatchingAttributes } from "@/lib/metaMatching";
 import type { PlanId } from "@/lib/pricing";
 
 /**
@@ -85,6 +88,66 @@ export function ensurePrivateCheckoutRoot(): void {
   document.body.appendChild(root);
 }
 
+export type MetaMatchingResult = {
+  has_email: boolean;
+  has_ip: boolean;
+  has_fbp: boolean;
+  has_fbc: boolean;
+  /** False when RevenueCat refused or didn't get that call (or there was nothing to send). */
+  identity_saved: boolean;
+  ids_saved: boolean;
+  browser_saved: boolean;
+};
+
+/**
+ * Gives RevenueCat what its Meta integration matches a web purchase on: the
+ * Meta Pixel's `_fbp` / `_fbc` (or one built from the ad click id), the
+ * sign-in email, the IP address (from /api/client-ip), the user agent and the
+ * page address (metaMatching.ts). Called
+ * on checkout before the paywall, so it is on the customer when RevenueCat
+ * sends the trial or purchase to Meta. Only under the pixel's own rule (known
+ * non-EU visitor, or "Accept optional cookies"); otherwise nothing is sent.
+ * The web SDK doesn't retry attributes, so a failure is reported, not thrown.
+ */
+export async function sendMetaMatchingToRevenueCat(uid: string, email: string | null): Promise<MetaMatchingResult | null> {
+  if (!mayKeepAttribution()) return null;
+  const ip = await fetch("/api/client-ip", { cache: "no-store" })
+    .then((response) => (response.ok ? (response.json() as Promise<{ ip?: string | null }>) : null))
+    .then((body) => body?.ip ?? null)
+    .catch(() => null);
+  const { identity, ids, browser } = metaMatchingAttributes({
+    fbpCookie: readCookie("_fbp"),
+    fbcCookie: readCookie("_fbc"),
+    fbclid: readAttribution()?.fbclid,
+    email,
+    ip,
+    userAgent: navigator.userAgent,
+    pageUrl: window.location.href,
+    now: Date.now(),
+  });
+  const purchases = await purchasesFor(uid);
+  const save = async (attributes: Record<string, string>) => {
+    if (Object.keys(attributes).length === 0) return false;
+    try {
+      await purchases.setAttributes(attributes);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+  // Separate calls, so one refused key can't lose the others.
+  const [identitySaved, idsSaved, browserSaved] = await Promise.all([save(identity), save(ids), save(browser)]);
+  return {
+    has_email: "$email" in identity,
+    has_ip: "$ip" in identity,
+    has_fbp: "$fbp" in ids,
+    has_fbc: "$fbc" in ids,
+    identity_saved: identitySaved,
+    ids_saved: idsSaved,
+    browser_saved: browserSaved,
+  };
+}
+
 /** Which plan a package is, for analytics: `$rc_annual` / `$rc_monthly`, or by its period. */
 export function planIdOf(rcPackage: Package): PlanId | null {
   if (rcPackage.identifier === "$rc_annual") return "annual";
@@ -93,6 +156,21 @@ export function planIdOf(rcPackage: Package): PlanId | null {
   if (unit === "year") return "annual";
   if (unit === "month") return "monthly";
   return null;
+}
+
+/**
+ * The plan the visitor came for (annual when none was picked), its id and
+ * price, for Meta's InitiateCheckout. Null when the offering has no such plan.
+ */
+export function checkoutValueFor(
+  offering: Offering,
+  requestedPlan: PlanId | null,
+): { value: number; currency: string; plan: PlanId } | null {
+  const plan = requestedPlan ?? "annual";
+  const rcPackage = offering.availablePackages.find((candidate) => planIdOf(candidate) === plan);
+  const price = rcPackage?.webBillingProduct.price;
+  if (!price) return null;
+  return { value: price.amountMicros / 1_000_000, currency: price.currency, plan };
 }
 
 export type CheckoutOffering =

@@ -13,6 +13,7 @@ import { PRIMARY_BUTTON_CLASS, TEXT_BUTTON_CLASS } from "@/components/ui/buttons
 import { providerOf, signOutOfWebsite, type SignInProvider } from "@/lib/firebase/auth";
 import { parseFunnelId, safeNextPath } from "@/lib/funnel/params";
 import { parsePlanId, PLANS, TRIAL_DAYS } from "@/lib/pricing";
+import { identifyPixelUser, trackSignupRegistration } from "@/lib/metaPixel";
 import { resetWebUser, trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webFunnelAnalytics";
 
 const PROVIDER_NAMES: Record<SignInProvider, string> = { google: "Google", apple: "Apple" };
@@ -56,12 +57,15 @@ export default function SignInBridge() {
         });
         return;
       }
+      if (session.status === "signedIn") identifyPixelUser(session.user.uid, session.user.email);
       trackWebFunnelEvent(WEB_FUNNEL_EVENTS.signupSuccess, {
         ...context,
         signup_method: justSignedIn,
         has_account: account.summary.hasAccount,
         is_subscribed: account.summary.isSubscribed,
       });
+      // New to PrepIt (no app account yet): a registration for Meta, with no details.
+      if (!account.summary.hasAccount && session.status === "signedIn") trackSignupRegistration(session.user.uid);
     }
     if (!account.summary.isSubscribed && !account.summary.hasAccount && !account.summary.emailInUse) {
       router.push(nextPath);

@@ -23,6 +23,8 @@ export const WEB_FUNNEL_EVENTS = {
   signInFailed: "web_signin_failed",
   paywallView: "web_paywall_view",
   checkoutStart: "web_checkout_start",
+  /** Meta matching details given to RevenueCat on checkout, and again on purchase start if `_fbp` was missing (`trigger`, `has_fbp`, `has_fbc`, `has_email`, `identity_saved`, `ids_saved`, `browser_saved`). Never the values. */
+  metaMatchingSent: "web_meta_matching_sent",
   checkoutSuccess: "web_checkout_success",
   checkoutFailed: "web_checkout_failed",
   /** Checkout couldn't be offered (`reason`: already_subscribed, no_paywall, not_configured…). */

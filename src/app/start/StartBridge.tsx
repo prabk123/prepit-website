@@ -30,6 +30,7 @@ import { providerOf, signOutOfWebsite } from "@/lib/firebase/auth";
 import { readBridgeHandoff, writeBridgeVisit, type BridgeHandoff } from "@/lib/funnel/bridgeHandoff";
 import { parseBridgeSource, parseFunnelId, type BridgeSource } from "@/lib/funnel/params";
 import { parsePlanId, type PlanId } from "@/lib/pricing";
+import { identifyPixelUser, trackSignupRegistration } from "@/lib/metaPixel";
 import { resetWebUser, trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webFunnelAnalytics";
 
 function faqItems(from: BridgeSource) {
@@ -134,12 +135,15 @@ export default function StartBridge() {
       });
       return;
     }
+    identifyPixelUser(session.user.uid, session.user.email);
     trackWebFunnelEvent(WEB_FUNNEL_EVENTS.signupSuccess, {
       ...context,
       has_account: summary.hasAccount,
       is_subscribed: summary.isSubscribed,
       has_quiz_answers: handoff !== null,
     });
+    // New to PrepIt (no app account yet): a registration for Meta, with no details.
+    if (!summary.hasAccount) trackSignupRegistration(session.user.uid);
   }, [session, summary, context, handoff]);
 
   const accountError = account?.status === "error" ? account.code : null;

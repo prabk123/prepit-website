@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useWebSession } from "@/components/account/useWebSession";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { PRIMARY_BUTTON_CLASS, TEXT_BUTTON_CLASS } from "@/components/ui/buttons";
@@ -10,6 +10,7 @@ import { providerOf, signOutOfWebsite } from "@/lib/firebase/auth";
 import { parseFunnelId } from "@/lib/funnel/params";
 import { parsePlanId } from "@/lib/pricing";
 import {
+  checkoutValueFor,
   ensurePrivateCheckoutRoot,
   hadPremium,
   hasPremium,
@@ -18,12 +19,14 @@ import {
   packageOffersTrial,
   planIdOf,
   purchasesFor,
+  sendMetaMatchingToRevenueCat,
   toCheckoutFailure,
   waitForPremium,
   webBillingKeyProblem,
   type CheckoutFailure,
 } from "@/lib/revenuecat/webBilling";
 import type { Offering } from "@revenuecat/purchases-js";
+import { identifyPixelUser, trackCheckoutInitiated } from "@/lib/metaPixel";
 import { resetWebUser, trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webFunnelAnalytics";
 
 const PROVIDER_NAMES = { google: "Google", apple: "Apple" } as const;
@@ -160,11 +163,45 @@ export default function Checkout() {
         plan: requestedPlan,
         ...trialProperties(offeringOffersTrial(plans.offering), plans.trialExpected),
       });
+      if (session.status === "signedIn") identifyPixelUser(session.user.uid, session.user.email);
+      trackCheckoutInitiated(checkoutValueFor(plans.offering, requestedPlan));
     }
-  }, [plans, keyProblem, context, requestedPlan]);
+  }, [plans, keyProblem, context, requestedPlan, session]);
 
   const provider = session.status === "signedIn" ? providerOf(session.user) : null;
   const email = session.status === "signedIn" ? session.user.email : null;
+
+  // Once per signed-in uid, as soon as there's a paywall to buy from: what
+  // RevenueCat's Meta integration needs to match the purchase to an ad. Sent
+  // again when the purchase starts if the pixel's _fbp cookie wasn't there yet
+  // (a pixel that first loaded on this page).
+  const metaMatchingSent = useRef<string | null>(null);
+  const metaMatchingHadFbp = useRef(true);
+  const sendMetaMatching = useCallback(
+    (forUid: string, forEmail: string | null, trigger: "paywall" | "purchase_start") => {
+      sendMetaMatchingToRevenueCat(forUid, forEmail)
+        .then((result) => {
+          if (!result) return;
+          metaMatchingHadFbp.current = result.has_fbp;
+          trackWebFunnelEvent(WEB_FUNNEL_EVENTS.metaMatchingSent, { ...context, trigger, ...result });
+        })
+        .catch(() => {
+          trackWebFunnelEvent(WEB_FUNNEL_EVENTS.metaMatchingSent, {
+            ...context,
+            trigger,
+            identity_saved: false,
+            ids_saved: false,
+            browser_saved: false,
+          });
+        });
+    },
+    [context],
+  );
+  useEffect(() => {
+    if (!uid || plans.status !== "ready" || metaMatchingSent.current === uid) return;
+    metaMatchingSent.current = uid;
+    sendMetaMatching(uid, email, "paywall");
+  }, [uid, email, plans.status, sendMetaMatching]);
   const welcomePath = (pending: boolean) =>
     `/welcome?${new URLSearchParams({ ...(provider ? { provider } : {}), ...(pending ? { pending: "1" } : {}) })}`;
 
@@ -203,6 +240,10 @@ export default function Checkout() {
           listener: {
             onPurchaseStarted: (rcPackage) => {
               purchaseStarted = true;
+              if (!metaMatchingHadFbp.current) {
+                metaMatchingHadFbp.current = true;
+                sendMetaMatching(uid, email, "purchase_start");
+              }
               plan = planIdOf(rcPackage);
               trial = trialProperties(packageOffersTrial(rcPackage), trialExpected);
               setFailure(null);
