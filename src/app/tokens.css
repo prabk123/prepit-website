@@ -44,6 +44,11 @@
   --color-accent: #ff644f;
   /* Orange text and link underlines on light: 5.5:1 on white, 5.0:1 on page. */
   --color-accent-text: #b24637;
+  /* The landing page's highlight (PRE-302 design): the headline underline,
+     tick marks, "After a few weeks" pills and the yearly saving. Fills only,
+     with black on it (13:1); never as text colour. */
+  --color-lime: #b4e800;
+  --color-on-lime: #000000;
   /* Keyboard focus rings. */
   --color-focus: #1a1a2e;
   /* The app's light chat background, behind real chat captures (PRE-283).

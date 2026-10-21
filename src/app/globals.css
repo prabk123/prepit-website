@@ -277,6 +277,45 @@
     mask-image: linear-gradient(180deg, #000 35%, transparent 100%);
   }
 
+  /* Landing page (PRE-302). The headline's lime underline wraps with the
+     words, so a long phrase never forces sideways scroll. */
+  .landing-underline {
+    background: linear-gradient(var(--color-lime), var(--color-lime)) no-repeat 0 88% / 100% 0.13em;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+
+  /* The hero photo: from 1280 px the copy sits on its washed-out left side;
+     below that it follows the copy and only its top edge fades in. */
+  .landing-hero-media::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(180deg, var(--color-page) 0%, transparent 14%);
+  }
+
+  @media (min-width: 1280px) {
+    .landing-hero-media::after {
+      background:
+        linear-gradient(
+          90deg,
+          color-mix(in srgb, var(--color-page) 97%, transparent) 0%,
+          color-mix(in srgb, var(--color-page) 90%, transparent) 34%,
+          color-mix(in srgb, var(--color-page) 50%, transparent) 45%,
+          transparent 54%
+        ),
+        linear-gradient(180deg, transparent 84%, var(--color-page) 100%);
+    }
+  }
+
+  /* The trust band's photo, fading out towards the text and the bottom. */
+  .landing-trust-photo {
+    mask-image: linear-gradient(90deg, transparent, #000 40%), linear-gradient(180deg, #000 50%, transparent);
+    mask-composite: intersect;
+  }
+
   .band-photo--centre {
     mask-image: radial-gradient(ellipse 40% 60% at 50% 35%, transparent 40%, #000 100%);
     opacity: 0.7;

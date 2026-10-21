@@ -9,6 +9,10 @@ export const PRICES = {
   annual: "$99.99",
   /** The annual price over 52 weeks, rounded. */
   annualPerWeek: "$1.92",
+  /** The annual price over 12 months, rounded down (the landing page, PRE-302). */
+  annualPerMonth: "$8.33",
+  /** Annual against 12 monthly payments: 1 - 99.99 / (14.99 x 12), rounded down. */
+  annualSavingPercent: "44%",
   monthly: "$14.99",
 } as const;
 

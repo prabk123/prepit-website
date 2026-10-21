@@ -10,6 +10,7 @@ import SiteFinalCta from "@/components/pricing/SiteFinalCta";
 import Footer from "@/components/Footer";
 import CookieConsent from "@/components/CookieConsent";
 import AttributionCapture from "@/components/funnel/AttributionCapture";
+import MarketCapture from "@/components/funnel/MarketCapture";
 import { PREPIT_ANALYTICS_CONSENT_COOKIE, PREPIT_GEO_COOKIE } from "@/lib/cookies";
 import { APP_STORE_ID } from "@/lib/appStore";
 import "./globals.css";
@@ -193,6 +194,7 @@ export default function RootLayout({
         {/* Straight after the skip link, so a keyboard reaches it before the page. */}
         <CookieConsent />
         <AttributionCapture />
+        <MarketCapture />
         <div className="flex min-h-screen flex-col items-center bg-page">
           <NavigationWrapper />
 
