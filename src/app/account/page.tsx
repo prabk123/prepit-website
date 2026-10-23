@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { HideSiteFinalCta } from "@/components/pricing/SiteFinalCta";
+import { TEXT_BUTTON_CLASS } from "@/components/ui/buttons";
 import NarrowCard from "@/components/ui/NarrowCard";
+import { AccountWithdrawalLink } from "@/components/withdrawal/WithdrawalLink";
 import ManageSubscription from "./ManageSubscription";
 
 export const metadata: Metadata = {
@@ -20,6 +22,7 @@ export default function AccountPage() {
     <NarrowCard>
       <HideSiteFinalCta />
       <ManageSubscription />
+      <AccountWithdrawalLink className={TEXT_BUTTON_CLASS} />
     </NarrowCard>
   );
 }
