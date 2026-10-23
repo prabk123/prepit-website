@@ -8,6 +8,8 @@ export const metadata: Metadata = {
   description: "Change or cancel a PrepIt subscription you bought on the website.",
   robots: { index: false, follow: false },
   alternates: { canonical: null },
+  // An email's link carries a token until the page removes it (PRE-353).
+  referrer: "no-referrer",
   itunes: null,
 };
 

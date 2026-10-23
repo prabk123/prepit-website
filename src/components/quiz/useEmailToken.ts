@@ -7,10 +7,11 @@ const TOKEN = /^[A-Za-z0-9_.~-]{8,512}$/;
 
 /**
  * The token from an email link (`?token=`), for /my-plan and
- * /email-preferences (and /account, under its own `storageKey`, so a quiz
- * token is never sent as a subscription link or the other way round). It is taken out of the address bar straight away and
- * kept for this tab, so analytics page views and a shared screenshot never
- * carry it, and a refresh still works. Undefined until read, null if none.
+ * /email-preferences, and for /account under its own `storageKey` so a quiz
+ * token is never sent as a subscription link or the other way round. It is
+ * taken out of the address bar straight away and kept for this tab, so
+ * analytics page views and a shared screenshot never carry it, and a refresh
+ * still works. Undefined until read, null if none.
  */
 export function useEmailToken(storageKey: string = DEFAULT_STORAGE_KEY): string | null | undefined {
   const [token, setToken] = useState<string | null | undefined>(undefined);
