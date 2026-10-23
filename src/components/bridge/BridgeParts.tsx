@@ -4,7 +4,7 @@ import DeviceFrame from "@/components/device/DeviceFrame";
 import LongLogo from "@/components/ui/LongLogo";
 import { appCapture } from "@/lib/captures";
 import type { BridgeSource } from "@/lib/funnel/params";
-import { PLANS, PRICES, TRIAL_DAYS, type PlanId } from "@/lib/pricing";
+import { PLANS, TRIAL_DAYS, type PlanId } from "@/lib/pricing";
 
 /**
  * The pieces of the shared bridge (PRE-323) and the "You're in" page
@@ -31,18 +31,14 @@ export const shortDate = (date: Date) =>
 export const longDate = (date: Date) =>
   date.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 
-const PLAN_COPY: Record<PlanId, { perMonth: string; billed: ReactNode; per: string; renews: string }> = {
-  annual: {
-    perMonth: ANNUAL_PER_MONTH,
-    billed: (
-      <>
-        <b className="font-bold text-ink">{PRICES.annual}</b> billed yearly
-      </>
-    ),
-    per: "a year",
-    renews: "every year",
-  },
-  monthly: { perMonth: PRICES.monthly, billed: "Billed monthly", per: "a month", renews: "every month" },
+/**
+ * Each plan's card shows what is charged (the yearly total for annual) as the
+ * big figure; the annual per-month figure is only the smaller note under it
+ * (PRE-357, UK pricing rules: the total at least as prominent).
+ */
+const PLAN_COPY: Record<PlanId, { note: string; per: string; renews: string }> = {
+  annual: { note: `Billed yearly. Works out at ${ANNUAL_PER_MONTH} a month.`, per: "a year", renews: "every year" },
+  monthly: { note: "Billed monthly", per: "a month", renews: "every month" },
 };
 
 export const planPer = (plan: PlanId) => PLAN_COPY[plan].per;
@@ -217,7 +213,7 @@ export function FreeWeekTimeline({ plan, today }: { plan: PlanId; today: Date })
   );
 }
 
-/** Annual and monthly, per-month price on both, annual preselected. */
+/** Annual and monthly in equal cards, each with the amount charged as the big figure, annual preselected. */
 export function PlanChooser({
   plan,
   onChange,
@@ -255,17 +251,13 @@ export function PlanChooser({
             />
             <span className="text-body font-bold text-ink">{PLANS[id].label}</span>
             <span className="text-right font-display text-title text-ink">
-              {PLAN_COPY[id].perMonth}
-              <small className="ml-1 font-body text-small text-ink-muted">a month</small>
+              {PLANS[id].price}
+              <small className="ml-1 font-body text-small text-ink-muted">{PLAN_COPY[id].per}</small>
             </span>
             <span className="col-span-2 col-start-2 text-small text-ink-muted">
-              {dueToday ? (
-                <>
-                  <b className="font-bold text-ink">{PLANS[id].price}</b> billed today
-                </>
-              ) : (
-                PLAN_COPY[id].billed
-              )}
+              {dueToday
+                ? `Billed today.${id === "annual" ? ` Works out at ${ANNUAL_PER_MONTH} a month.` : ""}`
+                : PLAN_COPY[id].note}
             </span>
             {id === "annual" && (
               <span className="absolute -top-3 right-4 rounded-full bg-accent px-2.5 py-0.5 text-[12px] font-bold text-ink">
