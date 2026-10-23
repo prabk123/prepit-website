@@ -36,6 +36,9 @@ export type WebSignupSettings = {
   unit?: "metric" | "imperial";
 };
 
+/** The quiz's ticked health consent box (PRE-358): its wording and version. The backend stamps the time. */
+export type HealthConsent = { version: string; text: string };
+
 export type WebSignupInput = {
   funnelId?: string;
   funnelVersion?: string;
@@ -43,6 +46,8 @@ export type WebSignupInput = {
   user?: WebSignupUser;
   settings?: WebSignupSettings;
   attribution?: Attribution | null;
+  /** The quiz's ticked health consent box; null when it was left unticked (withdraws an earlier one). */
+  healthConsent?: HealthConsent | null;
   /** Make the account as soon as the answers are enough. The backend's default is true. */
   createAccount?: boolean;
   /** The quiz session id the email gate saved a lead under (PRE-327). */
@@ -117,6 +122,14 @@ function withoutEmpty<T extends Record<string, unknown>>(value: T): T | undefine
   return Object.keys(kept).length > 0 ? kept : undefined;
 }
 
+/** A consent record the backend accepts (`healthConsentSchema`), or undefined. */
+export function cleanHealthConsent(value: unknown): HealthConsent | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  const { version, text } = value as Record<string, unknown>;
+  if (typeof version !== "string" || !version.trim() || typeof text !== "string") return undefined;
+  return { version: cap(version.trim(), 64), text: cap(text, 1000) };
+}
+
 /** Only the account fields, and values, the backend accepts; anything else is left out. */
 export function cleanWebSignupUser(user: WebSignupUser | undefined): WebSignupUser | undefined {
   if (!user) return undefined;
@@ -180,6 +193,11 @@ export function buildWebSignupBody(input: WebSignupInput): Record<string, unknow
   const settings = cleanWebSignupSettings(input.settings);
   if (settings) body.settings = settings;
   if (input.attribution && Object.keys(input.attribution).length > 0) body.attribution = input.attribution;
+  if (input.healthConsent === null) body.healthConsent = null;
+  else {
+    const healthConsent = cleanHealthConsent(input.healthConsent);
+    if (healthConsent) body.healthConsent = healthConsent;
+  }
   if (input.createAccount !== undefined) body.createAccount = input.createAccount;
   if (input.webSessionId && WEB_SESSION_ID.test(input.webSessionId)) body.webSessionId = input.webSessionId;
   return body;

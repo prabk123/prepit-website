@@ -14,7 +14,7 @@ export const WEB_FUNNEL_EVENTS = {
   bridgeView: "web_bridge_view",
   signInStart: "web_signin_start",
   signupSuccess: "web_signup_success",
-  /** The quiz's answers were sent after sign-in (`account_created`, `not_created_reason`, and `status` when the save failed). */
+  /** The quiz's answers were sent after sign-in (`account_created`, `not_created_reason`, `health_consent`, and `status` when the save failed). */
   bridgeAnswersSaved: "web_bridge_answers_saved",
   /** The bridge couldn't read the account and showed "We couldn't start your free week" (`status`). */
   bridgeError: "web_bridge_error",
@@ -39,9 +39,11 @@ export const WEB_FUNNEL_EVENTS = {
   handoffOpenApp: "web_handoff_open_app",
   /** A quiz screen was shown (`step_id`, `step_index`). Never an answer: both stop screens (under 18, eating disorder) are `stop` with a null `step_index`. */
   quizStepView: "web_quiz_step_view",
-  /** The email gate saved its lead (`marketing_consent`, `saved`: false when the request failed). */
+  /** "Build my plan" with the health consent box ticked or not (`given`, `wording_version`). Never an answer. */
+  quizHealthConsent: "web_quiz_health_consent",
+  /** The email gate saved its lead (`marketing_consent`, `health_consent`, `saved`: false when the request failed). */
   quizLeadSaved: "web_quiz_lead_saved",
-  /** "Start my free 7 days" on the quiz's plan page, on to the bridge. */
+  /** "Start my free 7 days" on the quiz's plan page, on to the bridge (`targets_available`, `health_consent`). */
   quizStartTrial: "web_quiz_start_trial",
   /** The plan page an email links to (`found`). */
   leadPlanView: "web_lead_plan_view",

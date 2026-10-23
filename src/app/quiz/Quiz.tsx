@@ -52,6 +52,9 @@ import {
   GOAL_OPTIONS,
   goalReply,
   goalWeightReply,
+  HEALTH_CONSENT_REQUIRED,
+  HEALTH_CONSENT_TEXT,
+  HEALTH_CONSENT_VERSION,
   heightCm,
   HISTORY_OPTIONS,
   HUNGER_OPTIONS,
@@ -137,6 +140,7 @@ export default function Quiz({ country, market }: { country: string; market: Web
   const [fetched, setFetched] = useState<{ key: string; targets: Targets | null } | null>(null);
   const [emailState, setEmailState] = useState<"idle" | "saving" | "invalid">("idle");
   const leadSaved = useRef(false);
+  const consentTracked = useRef<boolean | null>(null);
   const advanceTimer = useRef<number | null>(null);
   const firstScreen = useRef(true);
 
@@ -202,6 +206,7 @@ export default function Quiz({ country, market }: { country: string; market: Web
     setHistory([]);
     setFetched(null);
     leadSaved.current = false;
+    consentTracked.current = null;
     setScreen("goal");
   };
 
@@ -296,6 +301,7 @@ export default function Quiz({ country, market }: { country: string; market: Web
       funnel_id: QUIZ_FUNNEL_ID,
       saved,
       marketing_consent: answers.marketingConsent,
+      health_consent: answers.healthConsent,
       ...(errorStatus !== undefined ? { error_status: errorStatus } : {}),
     });
     if (saved) trackQuizLead();
@@ -317,7 +323,12 @@ export default function Quiz({ country, market }: { country: string; market: Web
 
   const startTrial = () => {
     writeHandoff(answers);
-    trackWebFunnelEvent(WEB_FUNNEL_EVENTS.quizStartTrial, { funnel_id: QUIZ_FUNNEL_ID, market, targets_available: Boolean(targets) });
+    trackWebFunnelEvent(WEB_FUNNEL_EVENTS.quizStartTrial, {
+      funnel_id: QUIZ_FUNNEL_ID,
+      market,
+      targets_available: Boolean(targets),
+      health_consent: answers.healthConsent,
+    });
   };
 
   const ok = canContinue(screen, answers);
@@ -856,9 +867,40 @@ export default function Quiz({ country, market }: { country: string; market: Web
               },
             ]}
           />
+          {/* PRE-358: a separate, unticked box. Health answers leave this browser only once it's ticked. */}
+          <label className="flex items-start gap-2.5 text-small text-ink-secondary">
+            <input
+              type="checkbox"
+              className="mt-px size-5 flex-none accent-primary"
+              checked={answers.healthConsent}
+              onChange={(event) => update({ healthConsent: event.target.checked })}
+            />
+            {HEALTH_CONSENT_TEXT}
+          </label>
+          <p className="-mt-2 text-[12.5px] leading-[1.45] text-ink-muted">
+            {HEALTH_CONSENT_REQUIRED
+              ? "We need this to build your plan. "
+              : "Optional. Without it, your plan comes without daily targets and the app asks these questions again. "}
+            See our{" "}
+            <Link className="text-ink-secondary underline" href="/privacy-policy">
+              Privacy Policy
+            </Link>
+            .
+          </p>
         </>
       );
-      footer = continueButton("Build my plan");
+      footer = continueButton("Build my plan", () => {
+        // Once per answer: a second pass (Back, then Build my plan again) only counts a change.
+        if (consentTracked.current !== answers.healthConsent) {
+          consentTracked.current = answers.healthConsent;
+          trackWebFunnelEvent(WEB_FUNNEL_EVENTS.quizHealthConsent, {
+            funnel_id: QUIZ_FUNNEL_ID,
+            given: answers.healthConsent,
+            wording_version: HEALTH_CONSENT_VERSION,
+          });
+        }
+        next();
+      });
       break;
 
     case "loader":

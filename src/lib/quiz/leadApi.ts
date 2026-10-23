@@ -6,7 +6,7 @@
  * body, never the request URL, so the backend's logs don't carry them.
  */
 import type { Attribution } from "@/lib/funnel/attribution";
-import type { WebSignupAnswer, WebSignupSettings, WebSignupUser } from "@/lib/funnel/webSignupProfile";
+import type { HealthConsent, WebSignupAnswer, WebSignupSettings, WebSignupUser } from "@/lib/funnel/webSignupProfile";
 import { parseTargets, type Targets } from "./quiz";
 
 export class LeadApiError extends Error {
@@ -60,6 +60,8 @@ export type LeadInput = {
   answers: WebSignupAnswer[];
   user: WebSignupUser;
   settings: WebSignupSettings;
+  /** The ticked health consent box (PRE-358); null when unticked, which withdraws an earlier tick. */
+  healthConsent?: HealthConsent | null;
   attribution?: Attribution | null;
 };
 

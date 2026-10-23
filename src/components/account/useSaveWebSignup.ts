@@ -70,6 +70,8 @@ export function useSaveWebSignup(
       answers: handoff?.answers,
       user,
       settings: handoff?.settings,
+      // A quiz handoff without a ticked box withdraws any earlier one (PRE-358).
+      healthConsent: handoff ? (handoff.healthConsent ?? null) : undefined,
       attribution: readAttribution(),
       createAccount: Boolean(handoff),
       webSessionId: readWebSessionId(),
@@ -79,6 +81,7 @@ export function useSaveWebSignup(
         if (handoff) {
           trackWebFunnelEvent(WEB_FUNNEL_EVENTS.bridgeAnswersSaved, {
             funnel_id: handoff.funnelId,
+            health_consent: Boolean(handoff.healthConsent),
             account_created: result.accountCreated,
             not_created_reason: result.accountNotCreatedReason,
           });

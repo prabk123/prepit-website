@@ -7,7 +7,7 @@
  * Answers stay in this browser until the visitor signs in on the bridge
  * (PRE-323). Only the email gate sends them earlier, to `POST /web-leads`.
  */
-import type { WebSignupAnswer, WebSignupSettings, WebSignupUser } from "../funnel/webSignupProfile";
+import type { HealthConsent, WebSignupAnswer, WebSignupSettings, WebSignupUser } from "../funnel/webSignupProfile";
 
 export const QUIZ_FUNNEL_ID = "quiz";
 /** Sent with every save, so answers can be told apart when the questions change. */
@@ -142,6 +142,8 @@ export type QuizAnswers = {
   /** The loader's two questions. */
   skipsBreakfast?: "Yes" | "No";
   eveningSnacks?: "Yes" | "No";
+  /** The separate health consent box on the "Your first 7 days" screen (PRE-358). Unticked to start. */
+  healthConsent: boolean;
   email: string;
   marketingConsent: boolean;
   firstName: string;
@@ -166,6 +168,7 @@ export function emptyAnswers(): QuizAnswers {
     goalWeightText: "",
     intolerances: [],
     rules: [],
+    healthConsent: false,
     email: "",
     marketingConsent: false,
     firstName: "",
@@ -380,6 +383,26 @@ export const LOADER_QUESTIONS: { at: number; eyebrow: string; question: string; 
   { at: 71, eyebrow: "Last one", question: "Are evenings when you snack most?", key: "eveningSnacks" },
 ];
 
+/**
+ * The health consent box (PRE-358). Its wording and version are saved with
+ * the lead and the sign-up as the consent record: change the version
+ * whenever the wording changes.
+ */
+export const HEALTH_CONSENT_TEXT =
+  "Use my health answers (like my weight, goals and any health conditions) to build my plan and save them with it. I can withdraw this any time.";
+export const HEALTH_CONSENT_VERSION = "health-v1";
+/**
+ * Whether "Build my plan" waits for the box. Off: an unticked box still
+ * builds a plan, without daily targets, and the health answers never leave
+ * this browser (the app asks them again).
+ */
+export const HEALTH_CONSENT_REQUIRED = false;
+
+/** The consent record to send, or undefined when the box isn't ticked. */
+export function healthConsentRecord(a: QuizAnswers): HealthConsent | undefined {
+  return a.healthConsent ? { version: HEALTH_CONSENT_VERSION, text: HEALTH_CONSENT_TEXT } : undefined;
+}
+
 /** The marketing box's wording, saved with the lead as the consent record. */
 export const MARKETING_CONSENT_TEXT = "Send me tips and offers from PrepIt. Unsubscribe any time.";
 
@@ -512,6 +535,8 @@ export function canContinue(id: ScreenId, a: QuizAnswers, today = new Date()): b
       return a.goalWeightKg !== undefined && a.goalWeightKg >= 20 && a.goalWeightKg <= 400 && goalWeightProblem(a) === null;
     case "diet":
       return Boolean(a.diet);
+    case "week":
+      return !HEALTH_CONSENT_REQUIRED || a.healthConsent;
     case "email":
       return isEmail(a.email);
     default:
@@ -859,8 +884,13 @@ function goalWeightForTargets(a: QuizAnswers): number | undefined {
   return weightKg(a) ?? undefined;
 }
 
-/** The body for the public `POST /onboarding/calculate-nutritional-goals`, or null if answers are missing. */
+/**
+ * The body for the public `POST /onboarding/calculate-nutritional-goals`, or
+ * null if answers are missing or the health consent box isn't ticked (the
+ * plan then shows no targets).
+ */
 export function targetsRequest(a: QuizAnswers): Record<string, unknown> | null {
+  if (!a.healthConsent) return null;
   const height = heightCm(a);
   const weight = weightKg(a);
   const dob = dobIso(a);
@@ -904,15 +934,25 @@ export function parseTargets(body: unknown): Targets | null {
   };
 }
 
-/** Quiz questions with no account field go in `answers`, as the app's nutritionist reads them. */
-const ANSWER_QUESTIONS: { id: string; text: string; read: (a: QuizAnswers) => WebSignupAnswer["answer"] | undefined }[] = [
-  { id: "afternoon_energy", text: "How's your energy most afternoons?", read: (a) => a.energy },
-  { id: "hunger_between_meals", text: "How often are you hungry between meals?", read: (a) => a.hunger },
-  { id: "food_and_mood", text: "Do you notice food changing how you feel?", read: (a) => a.mood },
+/**
+ * Quiz questions with no account field go in `answers`, as the app's
+ * nutritionist reads them. `health` ones are sent only with the health
+ * consent box ticked (PRE-358).
+ */
+const ANSWER_QUESTIONS: {
+  id: string;
+  text: string;
+  health?: boolean;
+  read: (a: QuizAnswers) => WebSignupAnswer["answer"] | undefined;
+}[] = [
+  { id: "afternoon_energy", text: "How's your energy most afternoons?", health: true, read: (a) => a.energy },
+  { id: "hunger_between_meals", text: "How often are you hungry between meals?", health: true, read: (a) => a.hunger },
+  { id: "food_and_mood", text: "Do you notice food changing how you feel?", health: true, read: (a) => a.mood },
   { id: "tracking_history", text: "Have you tried keeping track of what you eat before?", read: (a) => a.history },
   {
     id: "safety",
     text: "Does any of this apply to you right now?",
+    health: true,
     read: (a) => (a.safety.length ? a.safety : undefined),
   },
   { id: "meal_help", text: "Where would help with meals make the biggest difference?", read: (a) => a.mealHelp },
@@ -921,13 +961,21 @@ const ANSWER_QUESTIONS: { id: string; text: string; read: (a: QuizAnswers) => We
   { id: "evening_snacks", text: "Are evenings when you snack most?", read: (a) => a.eveningSnacks },
 ];
 
-/** What the bridge and the email gate send: answers, account fields and settings. */
+/**
+ * What the bridge and the email gate send: answers, account fields and
+ * settings. Without the health consent box ticked (PRE-358) the health
+ * answers are left out: goal, goal weight and pace, height, weight,
+ * allergies and intolerances, energy, hunger, mood and the safety question.
+ * The app asks those again after sign-up.
+ */
 export function buildQuizProfile(
   a: QuizAnswers,
   targets?: Targets | null,
-): { answers: WebSignupAnswer[]; user: WebSignupUser; settings: WebSignupSettings } {
+): { answers: WebSignupAnswer[]; user: WebSignupUser; settings: WebSignupSettings; healthConsent: HealthConsent | null } {
+  const consent = healthConsentRecord(a);
   const answers: WebSignupAnswer[] = [];
   for (const question of ANSWER_QUESTIONS) {
+    if (question.health && !consent) continue;
     const answer = question.read(a);
     if (answer !== undefined) answers.push({ questionId: question.id, questionText: question.text, answer });
   }
@@ -936,20 +984,20 @@ export function buildQuizProfile(
     ...(firstName ? { firstName } : {}),
     dob: dobIso(a),
     gender: a.gender,
-    height: heightCm(a) ?? undefined,
-    weight: weightKg(a) ?? undefined,
+    ...(consent ? { height: heightCm(a) ?? undefined, weight: weightKg(a) ?? undefined } : {}),
   };
-  const goalWeight = goalWeightForTargets(a);
+  const { diet, intolerances } = savedDiet(a);
   const settings: WebSignupSettings = {
-    goal: GOAL_VALUES[a.goal ?? ""],
-    goalWeight,
-    goalSpeed: targets?.resolvedGoalSpeed,
+    ...(consent
+      ? { goal: GOAL_VALUES[a.goal ?? ""], goalWeight: goalWeightForTargets(a), goalSpeed: targets?.resolvedGoalSpeed, intolerances }
+      : {}),
     dailyActivity: a.activity,
     exerciseFrequency: a.exercise,
-    ...savedDiet(a),
+    diet,
     mainBlocker: a.blockers.length ? a.blockers : undefined,
     // The app has no stones; it shows pounds for them.
     unit: a.unit === "metric" ? "metric" : "imperial",
   };
-  return { answers, user, settings };
+  // null, not left out: a save after unticking withdraws an earlier tick and clears what it saved.
+  return { answers, user, settings, healthConsent: consent ?? null };
 }

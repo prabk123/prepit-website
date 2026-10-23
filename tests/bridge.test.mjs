@@ -39,6 +39,7 @@ test("parseBridgeHandoff keeps known fields and drops stale or broken ones", () 
     answers: [{ questionId: "goal", answer: "lose weight" }],
     user: { weight: 72 },
     settings: { goal: "lose weight" },
+    healthConsent: undefined,
     firstName: "Jo",
     email: "jo@example.com",
     planSummary: { tags: ["Lose fat"], calories: 1610, proteinGrams: undefined },
