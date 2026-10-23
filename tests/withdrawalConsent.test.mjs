@@ -2,6 +2,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
+  clearedWithdrawalConsentAttributes,
   parseStartNowChoice,
   startNowChoice,
   WITHDRAWAL_CONSENT_TEXT,
@@ -47,4 +48,10 @@ test("the wording says access starts now and the used days are paid for, not tha
   assert.match(WITHDRAWAL_CONSENT_TEXT, /14-day/);
   assert.match(WITHDRAWAL_CONSENT_TEXT, /days I've used/);
   assert.doesNotMatch(WITHDRAWAL_CONSENT_TEXT, /lose/);
+});
+
+test("an unticked box clears all three attributes", () => {
+  const cleared = clearedWithdrawalConsentAttributes();
+  assert.deepEqual(Object.keys(cleared).sort(), Object.keys(withdrawalConsentAttributes("GB", new Date())).sort());
+  assert.ok(Object.values(cleared).every((value) => value === null));
 });

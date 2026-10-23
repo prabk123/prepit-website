@@ -21,7 +21,8 @@ export const WITHDRAWAL_CONSENT_TEXT =
 /**
  * RevenueCat customer attributes that record the request to start now: when
  * it was ticked (ISO time), which wording, and the country the page saw.
- * Only saved when the box was ticked. No personal data.
+ * Saved when the box was ticked; an unticked box clears them
+ * (`clearedWithdrawalConsentAttributes`). No personal data.
  */
 export function withdrawalConsentAttributes(country: string | null | undefined, at: Date): Record<string, string> {
   return {
@@ -29,6 +30,15 @@ export function withdrawalConsentAttributes(country: string | null | undefined, 
     withdrawal_waiver_version: WITHDRAWAL_CONSENT_VERSION,
     withdrawal_waiver_country: country?.trim().toUpperCase() || "unknown",
   };
+}
+
+/**
+ * An unticked box: clears an earlier record on the same customer (the old
+ * required box from 2026-10-21, or a tick on an earlier visit), so the
+ * attributes always match the latest answer.
+ */
+export function clearedWithdrawalConsentAttributes(): Record<string, null> {
+  return { withdrawal_waiver_at: null, withdrawal_waiver_version: null, withdrawal_waiver_country: null };
 }
 
 /** Where the box was answered, for analytics. */

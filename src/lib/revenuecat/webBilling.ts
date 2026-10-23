@@ -151,10 +151,10 @@ export async function sendMetaMatchingToRevenueCat(uid: string, email: string | 
 /**
  * Saves the UK/EEA right-to-cancel consent (lib/withdrawalConsent.ts) on the
  * RevenueCat customer before the paywall, so the record sits with the
- * subscription. The web SDK doesn't retry attributes: false when it failed
- * (the purchase metadata still carries the version and time).
+ * subscription (null values clear it). The web SDK doesn't retry attributes:
+ * false when it failed (the purchase metadata still carries the version and time).
  */
-export async function saveWithdrawalConsent(uid: string, attributes: Record<string, string>): Promise<boolean> {
+export async function saveWithdrawalConsent(uid: string, attributes: Record<string, string | null>): Promise<boolean> {
   try {
     const purchases = await purchasesFor(uid);
     await purchases.setAttributes(attributes);
@@ -275,6 +275,8 @@ export type PremiumDetails = {
   /** Renewal or end date, when RevenueCat has one. */
   expirationDate: Date | null;
   willRenew: boolean;
+  /** In the free trial, by RevenueCat's `periodType`; the expiration date is then the trial's end. */
+  inTrial: boolean;
 };
 
 /** The active `premium` entitlement, or null when there is none. */
@@ -295,5 +297,10 @@ export async function loadPremiumDetails(uid: string): Promise<PremiumDetails | 
           : store === "play_store"
             ? "play_store"
             : "other";
-  return { place, expirationDate: entitlement.expirationDate, willRenew: entitlement.willRenew };
+  return {
+    place,
+    expirationDate: entitlement.expirationDate,
+    willRenew: entitlement.willRenew,
+    inTrial: entitlement.periodType === "trial",
+  };
 }

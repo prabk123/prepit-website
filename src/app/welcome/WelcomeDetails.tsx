@@ -33,6 +33,8 @@ export default function WelcomeDetails({ download }: { download: ReactNode }) {
   const raw = params.get("provider");
   const provider = raw === "google" || raw === "apple" ? raw : null;
   const pending = params.get("pending") === "1";
+  // Checkout found premium already on the account: nothing new started (PRE-335).
+  const member = params.get("member") === "1";
   const tracked = useRef(false);
   const [account, setAccount] = useState<{ email: string | null; name: string | null } | null>(null);
   // Where they came from and whether they got the free week, left by the
@@ -44,8 +46,8 @@ export default function WelcomeDetails({ download }: { download: ReactNode }) {
   useEffect(() => {
     if (tracked.current) return;
     tracked.current = true;
-    trackWebFunnelEvent(WEB_FUNNEL_EVENTS.handoffView, { provider, pending, from, trial });
-  }, [provider, pending, from, trial]);
+    trackWebFunnelEvent(WEB_FUNNEL_EVENTS.handoffView, { provider, pending, from, trial, member });
+  }, [provider, pending, from, trial, member]);
 
   // The address they signed in with, so they pick the same account in the app.
   useEffect(
@@ -63,12 +65,14 @@ export default function WelcomeDetails({ download }: { download: ReactNode }) {
       <BridgeHeader />
       <BridgeProgress from={from} current="app" />
       <BridgeHead
-        eyebrow={trial ? "Free week started" : "Membership started"}
+        eyebrow={member ? "Already a member" : trial ? "Free week started" : "Membership started"}
         title={account?.name ? `You’re in, ${account.name}.` : "You’re in."}
         lead={
-          trial
-            ? "Session 1 with your AI nutritionist is waiting in the app. It takes about 5 minutes."
-            : "Your account and past logs are waiting in the app."
+          member
+            ? "Your PrepIt membership is already active on this account, so there’s nothing new to pay. Your account is waiting in the app."
+            : trial
+              ? "Session 1 with your AI nutritionist is waiting in the app. It takes about 5 minutes."
+              : "Your account and past logs are waiting in the app."
         }
       />
       {pending && (
