@@ -19,7 +19,7 @@ type Step =
   | { kind: "loading" }
   | { kind: "error" }
   | { kind: "status"; status: WithdrawalStatus }
-  | { kind: "confirm" | "sending" | "sendFailed"; status: Eligible }
+  | { kind: "confirm" | "sending" | "sendFailed" | "inProgress"; status: Eligible }
   | { kind: "done"; requestedAt: string; refunded: boolean; emailSent: boolean };
 
 function formatDate(iso: string): string {
@@ -82,7 +82,9 @@ export default function WithdrawFromContract({ country }: { country: string | nu
       } else if (result.outcome === "not_available") {
         setStep({ uid, step: { kind: "status", status: result.status } });
       } else {
-        setStep({ uid, step: { kind: "sendFailed", status } });
+        // Another tab is withdrawing right now: show that, then look again.
+        setStep({ uid, step: { kind: "inProgress", status } });
+        window.setTimeout(() => setReload((n) => n + 1), 4000);
       }
     } catch {
       trackWebFunnelEvent(WEB_FUNNEL_EVENTS.withdrawalConfirm, { outcome: "error", refunded: null });
@@ -174,6 +176,21 @@ export default function WithdrawFromContract({ country }: { country: string | nu
     );
   }
 
+  if (current.kind === "inProgress") {
+    return (
+      <>
+        <SectionHeading
+          as="h1"
+          size="title"
+          align="center"
+          title={`Your ${wording.noun} is already being processed`}
+          lead="This page will update in a moment."
+        />
+        {signedInAs}
+      </>
+    );
+  }
+
   if (current.kind === "confirm" || current.kind === "sending" || current.kind === "sendFailed") {
     const sending = current.kind === "sending";
     return (
@@ -254,8 +271,30 @@ export default function WithdrawFromContract({ country }: { country: string | nu
           size="title"
           align="center"
           title={`Your ${wording.noun} is done`}
-          lead={`We received it ${formatDateTime(status.requestedAt)} and emailed you a confirmation. There's nothing more to do.`}
+          lead={
+            status.emailSent
+              ? `We received it ${formatDateTime(status.requestedAt)} and emailed you a confirmation. There's nothing more to do.`
+              : `We received it ${formatDateTime(status.requestedAt)}. There's nothing more to do. If you'd like a confirmation email, write to support@tryprepit.app.`
+          }
         />
+        {signedInAs}
+      </>
+    );
+  }
+
+  if (status.state === "not_offered") {
+    return (
+      <>
+        <SectionHeading
+          as="h1"
+          size="title"
+          align="center"
+          title="Withdrawal isn't available for your subscription"
+          lead="The 14-day right to withdraw is for subscriptions bought in the UK and EEA. You can cancel any time to stop your subscription renewing, and our refund policy explains the rest."
+        />
+        <Link href="/account" className={PRIMARY_BUTTON_CLASS}>
+          Manage subscription
+        </Link>
         {signedInAs}
       </>
     );

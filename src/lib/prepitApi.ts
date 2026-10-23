@@ -210,8 +210,10 @@ export async function saveWebSignupProfile(input: WebSignupInput): Promise<WebSi
 /** Whether the website subscription can be withdrawn from now (PRE-360), from `GET /billing/withdrawal`. */
 export type WithdrawalStatus =
   | { state: "eligible"; inTrial: boolean; windowEndsAt: string }
-  | { state: "withdrawn"; requestedAt: string }
+  | { state: "withdrawn"; requestedAt: string; emailSent: boolean }
   | { state: "expired"; windowEndedAt: string }
+  /** Bought outside the UK and EEA, where the 14-day right doesn't apply. */
+  | { state: "not_offered" }
   | { state: "none" }
   | { state: "unavailable" };
 
@@ -220,9 +222,11 @@ function toWithdrawalStatus(body: Record<string, unknown>): WithdrawalStatus {
     case "eligible":
       return { state: "eligible", inTrial: body.inTrial === true, windowEndsAt: String(body.windowEndsAt) };
     case "withdrawn":
-      return { state: "withdrawn", requestedAt: String(body.requestedAt) };
+      return { state: "withdrawn", requestedAt: String(body.requestedAt), emailSent: body.emailSent === true };
     case "expired":
       return { state: "expired", windowEndedAt: String(body.windowEndedAt) };
+    case "not_offered":
+      return { state: "not_offered" };
     case "none":
       return { state: "none" };
     default:
