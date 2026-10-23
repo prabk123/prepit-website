@@ -51,12 +51,15 @@ export function webBillingKey(seller: WebBillingSeller) {
 }
 
 /**
- * The seller for this browser's country (the proxy's country cookie), for
- * pages that only read the customer. Checkout uses the country it was served
- * with instead.
+ * A seller whose key works, for pages that only read the customer: the one
+ * for this browser's country (the proxy's country cookie) first, else the
+ * other, since either key reads the same customer. Null when neither works.
+ * Checkout uses the country it was served with instead.
  */
-export function webBillingSellerForBrowser(): WebBillingSeller {
-  return webBillingSellerFor(readCookie(COUNTRY_COOKIE));
+export function webBillingSellerForReading(): WebBillingSeller | null {
+  const first = webBillingSellerFor(readCookie(COUNTRY_COOKIE));
+  const second: WebBillingSeller = first === "us" ? "uk" : "us";
+  return [first, second].find((seller) => webBillingKeyProblem(seller) === null) ?? null;
 }
 
 export function webBillingKeyProblem(seller: WebBillingSeller): CheckoutUnavailable | null {

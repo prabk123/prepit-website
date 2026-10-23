@@ -12,8 +12,7 @@ import { createBillingManagementUrl } from "@/lib/prepitApi";
 import { subscriptionDateLine } from "@/lib/revenuecat/subscriptionDateLine";
 import {
   loadPremiumDetails,
-  webBillingKeyProblem,
-  webBillingSellerForBrowser,
+  webBillingSellerForReading,
   type PremiumDetails,
 } from "@/lib/revenuecat/webBilling";
 import { resetWebUser, trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webFunnelAnalytics";
@@ -46,9 +45,8 @@ export default function ManageSubscription() {
     const done = (next: Details) => {
       if (!cancelled) setDetails({ uid, details: next });
     };
-    // Either seller's app reads the same customer; this is the one checkout would use.
-    const seller = webBillingSellerForBrowser();
-    if (webBillingKeyProblem(seller)) {
+    const seller = webBillingSellerForReading();
+    if (!seller) {
       done({ status: "unknown" });
       return;
     }
