@@ -5,7 +5,7 @@ import ManageSubscription from "./ManageSubscription";
 
 export const metadata: Metadata = {
   title: "Manage your subscription",
-  description: "Sign in to change or cancel a PrepIt subscription you bought on the website.",
+  description: "Change or cancel a PrepIt subscription you bought on the website.",
   robots: { index: false, follow: false },
   alternates: { canonical: null },
   itunes: null,
@@ -14,6 +14,8 @@ export const metadata: Metadata = {
 /**
  * Where web subscribers change or cancel (PRE-304): sign in, then RevenueCat's
  * Web Billing portal. Others are told where their subscription is managed.
+ * Emails link here with a signed `?token=` that opens the portal without a
+ * sign-in (PRE-353); the bare URL keeps working with sign-in.
  */
 export default function AccountPage() {
   return (
