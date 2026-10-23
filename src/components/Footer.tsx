@@ -1,6 +1,7 @@
 import Link from "next/link";
 import AppStoreLink from "@/components/AppStoreLink";
 import LongLogo from "@/components/ui/LongLogo";
+import { FooterWithdrawalLink } from "@/components/withdrawal/WithdrawalLink";
 import { FEATURE_SLUGS, FEATURES, featureHref } from "@/lib/features";
 import { HEADER_SECTION_LINKS, SITE_PAGE_LINKS } from "@/lib/homeSections";
 import { RESEARCH_PAGE_HREF } from "@/lib/research";
@@ -87,6 +88,7 @@ export default function Footer() {
               <Link href="/subscription-policy" className={linkClass}>
                 Subscription Policy
               </Link>
+              <FooterWithdrawalLink className={linkClass} />
             </Column>
           </div>
         </div>
