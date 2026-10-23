@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Checkout from "@/app/checkout/Checkout";
 import EmailInUseNotice from "@/components/account/EmailInUseNotice";
 import SignInButtons from "@/components/account/SignInButtons";
+import StartNowBox from "@/components/account/StartNowBox";
 import { useSaveWebSignup } from "@/components/account/useSaveWebSignup";
 import { useWebSession } from "@/components/account/useWebSession";
 import {
@@ -93,7 +94,7 @@ function SavingPlan({ from, provider }: { from: BridgeSource; provider: string |
  * get their own page, people who had a trial get "Welcome back", and
  * everyone else goes on to RevenueCat's checkout and then "You're in".
  */
-/** `country` and `askWithdrawalConsent` go to checkout (the UK/EEA right-to-cancel consent). */
+/** `askWithdrawalConsent`: the UK/EEA "start my access now" box above the sign-in buttons; checkout saves it with `country`. */
 export default function StartBridge({ country, askWithdrawalConsent }: { country: string | null; askWithdrawalConsent: boolean }) {
   const params = useSearchParams();
   const router = useRouter();
@@ -258,6 +259,7 @@ export default function StartBridge({ country, askWithdrawalConsent }: { country
                 Choose the account to save {from === "quiz" ? "your plan and trial" : "your free week"} to. You’ll sign
                 in to the PrepIt app with the same one.
               </p>
+              {askWithdrawalConsent && <StartNowBox askedOn="start" />}
               <SignInButtons context={context} loginHint={handoff?.email} />
             </>
           )}

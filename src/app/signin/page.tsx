@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { Suspense } from "react";
 import { HideSiteFinalCta } from "@/components/pricing/SiteFinalCta";
 import NarrowCard from "@/components/ui/NarrowCard";
+import { isEuCountry } from "@/lib/geo";
+import { COUNTRY_HEADER, parseCountryCode } from "@/lib/markets";
 import SignInBridge from "./SignInBridge";
 
 export const metadata: Metadata = {
@@ -17,12 +20,13 @@ export const metadata: Metadata = {
  * in with the Google or Apple account they'll use in the app, so the purchase
  * belongs to that PrepIt account.
  */
-export default function SignInPage() {
+export default async function SignInPage() {
+  const country = parseCountryCode((await headers()).get(COUNTRY_HEADER));
   return (
     <NarrowCard>
       <HideSiteFinalCta />
       <Suspense fallback={<p className="text-body text-ink-secondary">Loading…</p>}>
-        <SignInBridge />
+        <SignInBridge askWithdrawalConsent={isEuCountry(country ?? undefined)} />
       </Suspense>
     </NarrowCard>
   );
