@@ -127,9 +127,12 @@ export default function RootLayout({
               {`
                 window.prepitLoadMetaPixel = function () {
                   /* The plan email pages carry a token in the address until
-                     the page removes it, so PageView must not see them. */
+                     the page removes it, so PageView must not see them. So
+                     does /account when opened from a subscription email
+                     (PRE-353); a plain /account visit still loads it. */
                   var path = location.pathname;
                   if (path === '/my-plan' || path === '/email-preferences' || path.indexOf('/my-plan/') === 0 || path.indexOf('/email-preferences/') === 0) return;
+                  if ((path === '/account' || path === '/account/') && /[?&]token=/.test(location.search)) return;
                   !function(f,b,e,v,n,t,s)
                   {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
                   n.callMethod.apply(n,arguments):n.queue.push(arguments)};
