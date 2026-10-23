@@ -275,6 +275,8 @@ export type PremiumDetails = {
   /** Renewal or end date, when RevenueCat has one. */
   expirationDate: Date | null;
   willRenew: boolean;
+  /** In the free trial, by RevenueCat's `periodType`; the expiration date is then the trial's end. */
+  inTrial: boolean;
 };
 
 /** The active `premium` entitlement, or null when there is none. */
@@ -295,5 +297,10 @@ export async function loadPremiumDetails(uid: string): Promise<PremiumDetails | 
           : store === "play_store"
             ? "play_store"
             : "other";
-  return { place, expirationDate: entitlement.expirationDate, willRenew: entitlement.willRenew };
+  return {
+    place,
+    expirationDate: entitlement.expirationDate,
+    willRenew: entitlement.willRenew,
+    inTrial: entitlement.periodType === "trial",
+  };
 }

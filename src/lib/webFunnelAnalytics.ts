@@ -21,6 +21,8 @@ export const WEB_FUNNEL_EVENTS = {
   /** An in-app browser (Instagram, Facebook…) visitor tapped Open in Safari or Copy link (`action`). */
   inAppBrowserEscape: "web_in_app_browser_escape",
   signInFailed: "web_signin_failed",
+  /** The sign-in bridge asked RevenueCat about someone PrepIt's record doesn't show as subscribed (`result`: found, none, error, timeout or no_key; `has_account`). `found` shows "You already have PrepIt" instead of the plans. */
+  bridgePremiumCheck: "web_bridge_premium_check",
   paywallView: "web_paywall_view",
   checkoutStart: "web_checkout_start",
   /** A UK or EEA buyer asked for the subscription to start now, waiving the 14-day right to cancel (`wording_version`, `recorded`: false when RevenueCat refused the attributes). */
@@ -31,6 +33,7 @@ export const WEB_FUNNEL_EVENTS = {
   checkoutFailed: "web_checkout_failed",
   /** Checkout couldn't be offered (`reason`: already_subscribed, no_paywall, not_configured…). */
   checkoutUnavailable: "web_checkout_unavailable",
+  /** The "You're in" page (`provider`, `pending`, `from`, `trial`, and `member` when checkout found premium already on the account). */
   handoffView: "web_handoff_view",
   /** "Open PrepIt" on the success page, for people who already have the app. */
   handoffOpenApp: "web_handoff_open_app",
@@ -44,6 +47,7 @@ export const WEB_FUNNEL_EVENTS = {
   leadPlanView: "web_lead_plan_view",
   /** The email preferences page (`action`: unsubscribe or delete). */
   leadPreferencesAction: "web_lead_preferences_action",
+  /** The account page (`store`, `has_account`, `in_trial` and `will_renew` from RevenueCat, null when unknown). */
   manageSubscriptionView: "web_manage_subscription_view",
   manageSubscriptionPortalOpen: "web_manage_subscription_portal_open",
 } as const;
