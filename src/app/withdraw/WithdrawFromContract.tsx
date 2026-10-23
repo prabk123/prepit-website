@@ -22,8 +22,17 @@ type Step =
   | { kind: "confirm" | "sending" | "sendFailed" | "inProgress"; status: Eligible }
   | { kind: "done"; requestedAt: string; refunded: boolean; emailSent: boolean };
 
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric" });
+/**
+ * The last full day of the 14: the backend's end is midnight UTC after it
+ * plus an hour of margin, so step back two hours and read the UTC date.
+ */
+function formatLastDay(windowEnd: string): string {
+  return new Date(new Date(windowEnd).getTime() - 2 * 60 * 60 * 1000).toLocaleDateString(undefined, {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  });
 }
 
 function formatDateTime(iso: string): string {
@@ -250,7 +259,7 @@ export default function WithdrawFromContract({ country }: { country: string | nu
               : "If you withdraw, your subscription ends now and we refund your payment in full."
           }
         />
-        <p className="text-small text-ink-muted">You can withdraw until {formatDate(status.windowEndsAt)}.</p>
+        <p className="text-small text-ink-muted">You can withdraw until the end of {formatLastDay(status.windowEndsAt)}.</p>
         <button
           type="button"
           className={PRIMARY_BUTTON_CLASS}
@@ -308,7 +317,7 @@ export default function WithdrawFromContract({ country }: { country: string | nu
           size="title"
           align="center"
           title="The 14 days have passed"
-          lead={`The time to withdraw ended on ${formatDate(status.windowEndedAt)}. You can still cancel any time to stop your subscription renewing.`}
+          lead={`The time to withdraw ended at the end of ${formatLastDay(status.windowEndedAt)}. You can still cancel any time to stop your subscription renewing.`}
         />
         <Link href="/account" className={PRIMARY_BUTTON_CLASS}>
           Manage subscription
