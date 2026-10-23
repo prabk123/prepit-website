@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import EmailInUseNotice from "@/components/account/EmailInUseNotice";
 import SignInButtons from "@/components/account/SignInButtons";
+import StartNowBox from "@/components/account/StartNowBox";
 import { useSaveWebSignup } from "@/components/account/useSaveWebSignup";
 import { useWebSession } from "@/components/account/useWebSession";
 import AppStoreButton from "@/components/ui/AppStoreButton";
@@ -24,7 +25,8 @@ const PREMIUM_CHECK_TIMEOUT_MS = 4_000;
 
 type PremiumCheckResult = "found" | "none" | "error" | "timeout" | "no_key";
 
-export default function SignInBridge() {
+/** `askWithdrawalConsent`: the UK/EEA "start my access now" box above the buttons when the next step is checkout. */
+export default function SignInBridge({ askWithdrawalConsent }: { askWithdrawalConsent: boolean }) {
   const params = useSearchParams();
   const router = useRouter();
   const plan = parsePlanId(params.get("plan"));
@@ -152,6 +154,7 @@ export default function SignInBridge() {
           lead="Use the Google or Apple account you'll sign in with on your iPhone. Your subscription comes with it."
         />
         {planLine && <p className="text-small font-medium text-ink">{planLine}</p>}
+        {askWithdrawalConsent && nextPath.startsWith("/checkout") && <StartNowBox askedOn="signin" />}
         <SignInButtons context={context} onSignedIn={setJustSignedIn} />
         <p className="text-small text-ink-muted">
           By continuing you agree to our{" "}

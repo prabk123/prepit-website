@@ -5,21 +5,25 @@ import {
   PREPIT_GEO_COOKIE,
 } from "@/lib/cookies";
 import { LANDING_PATH } from "@/lib/funnel/landing";
-import { isEuCountry, resolveCountryCode } from "@/lib/geo";
+import { isEuCountry, resolveCountryCode, resolveRegionCode } from "@/lib/geo";
 import {
   COUNTRY_COOKIE,
   COUNTRY_HEADER,
   COUNTRY_OVERRIDE_COOKIE,
   parseCountryCode,
+  parseRegionCode,
+  REGION_OVERRIDE_COOKIE,
+  waitlistRegionFor,
   webMarketFor,
 } from "@/lib/markets";
 
 /**
- * Pages that sell on the web (PRE-331). Every country buys on the web for
- * now, so this only sends a country that lib/markets.ts lists for the App
- * Store or the waitlist back to the landing page or the waitlist.
+ * Pages that sell on the web (PRE-331): the bridge, the sign-in step before
+ * paying, and checkout. Every country buys on the web for now, so this only
+ * sends a country or region (Quebec, PRE-354) that lib/markets.ts lists for
+ * the App Store or the waitlist back to the landing page or the waitlist.
  */
-const WEB_CHECKOUT_PATHS = ["/checkout", "/start"];
+const WEB_CHECKOUT_PATHS = ["/checkout", "/start", "/signin"];
 
 export function proxy(request: NextRequest) {
   const isProduction = process.env.VERCEL_ENV === "production";
@@ -28,7 +32,11 @@ export function proxy(request: NextRequest) {
   const queryOverride = isProduction ? null : parseCountryCode(request.nextUrl.searchParams.get("country"));
   const cookieOverride = isProduction ? null : parseCountryCode(request.cookies.get(COUNTRY_OVERRIDE_COOKIE)?.value);
   const country = queryOverride ?? cookieOverride ?? parseCountryCode(resolveCountryCode(request));
-  const market = webMarketFor(country);
+  // `?region=QC` pins the region the same way (preview and local only).
+  const regionQuery = isProduction ? null : parseRegionCode(request.nextUrl.searchParams.get("region"));
+  const regionCookie = isProduction ? null : parseRegionCode(request.cookies.get(REGION_OVERRIDE_COOKIE)?.value);
+  const region = regionQuery ?? regionCookie ?? parseRegionCode(resolveRegionCode(request));
+  const market = webMarketFor(country, region);
 
   const path = request.nextUrl.pathname;
   const sellsHere = WEB_CHECKOUT_PATHS.some((prefix) => path === prefix || path.startsWith(`${prefix}/`));
@@ -37,6 +45,8 @@ export function proxy(request: NextRequest) {
     const target = request.nextUrl.clone();
     target.pathname = market === "waitlist" ? "/waitlist" : LANDING_PATH;
     target.search = "";
+    const blockedRegion = waitlistRegionFor(country, region);
+    if (market === "waitlist" && blockedRegion) target.searchParams.set("region", blockedRegion);
     response = NextResponse.redirect(target);
   } else {
     const headers = new Headers(request.headers);
@@ -58,6 +68,9 @@ export function proxy(request: NextRequest) {
   }
   if (queryOverride) {
     response.cookies.set(COUNTRY_OVERRIDE_COOKIE, queryOverride, { path: "/", sameSite: "lax" });
+  }
+  if (regionQuery) {
+    response.cookies.set(REGION_OVERRIDE_COOKIE, regionQuery, { path: "/", sameSite: "lax" });
   }
 
   return response;

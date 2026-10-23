@@ -730,13 +730,12 @@ export function OfferSection({ market }: { market: WebMarket }) {
           <div className="grid gap-2.5">
             <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 rounded-[18px] border-[1.5px] border-line px-4 py-3.5">
               <span className="font-bold">Yearly</span>
+              {/* The yearly total is the big figure, the per-month one the note (PRE-357). */}
               <span className="text-right font-display text-[24px] leading-tight tabular-nums">
-                {PRICES.annualPerMonth}
-                <small className="whitespace-nowrap font-sans text-small text-ink-muted"> a month</small>
+                {PRICES.annual}
+                <small className="whitespace-nowrap font-sans text-small text-ink-muted"> a year</small>
               </span>
-              <span className="text-small text-ink-secondary">
-                <b className="text-ink">{PRICES.annual}</b> billed yearly
-              </span>
+              <span className="text-small text-ink-secondary">Works out at {PRICES.annualPerMonth} a month</span>
               <span className="justify-self-end whitespace-nowrap rounded-full bg-accent px-2.5 py-0.5 text-[12px] font-bold text-on-accent">
                 Save {PRICES.annualSavingPercent} vs monthly
               </span>
@@ -792,7 +791,7 @@ export function ClosingSection({ market }: { market: WebMarket }) {
         </p>
         <LandingCta market={market} placement="closing" />
         <p className="max-w-[34em] text-small text-ink-muted">
-          Then {PRICES.annualPerMonth} a month, billed yearly at {PRICES.annual}. Or {PRICES.monthly} a month.
+          Then {PRICES.annual} a year (that works out at {PRICES.annualPerMonth} a month), or {PRICES.monthly} a month.
           {web ? " We email you a reminder on day 4." : ""} Prices in US dollars.
         </p>
       </div>
