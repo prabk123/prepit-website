@@ -142,8 +142,8 @@ export default function ResultScreen({ answers, targets }: { answers: QuizAnswer
         <CardTitle>What it costs</CardTitle>
         <p className="mb-2.5 mt-1.5 font-display text-[40px] font-medium leading-none tabular-nums text-ink">$0 today</p>
         <p className="text-[15px] text-ink-secondary">
-          Then {PER_MONTH} a month, billed yearly at <b className="text-ink">{PRICES.annual}</b>. Or <b className="text-ink">{PRICES.monthly}</b> a
-          month. You choose your plan on the next step.
+          Then <b className="text-ink">{PRICES.annual}</b> a year (that works out at {PER_MONTH} a month), or{" "}
+          <b className="text-ink">{PRICES.monthly}</b> a month. You choose your plan on the next step.
         </p>
         <p className="mt-2.5 text-[12.5px] leading-[1.45] text-ink-muted">
           Yearly saves 44% vs monthly. Renews automatically until you cancel. Prices in US dollars. PrepIt is an iPhone app; Android is coming

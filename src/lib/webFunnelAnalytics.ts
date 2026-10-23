@@ -25,7 +25,7 @@ export const WEB_FUNNEL_EVENTS = {
   bridgePremiumCheck: "web_bridge_premium_check",
   paywallView: "web_paywall_view",
   checkoutStart: "web_checkout_start",
-  /** A UK or EEA buyer asked for the subscription to start now, waiving the 14-day right to cancel (`wording_version`, `recorded`: false when RevenueCat refused the attributes). */
+  /** A UK or EEA buyer's answer to the optional "start my access now" box, saved at checkout (`start_now`, `asked_on`: start, signin or checkout, `wording_version`, `recorded`: false when RevenueCat refused the attributes, which an unticked box clears). */
   withdrawalConsent: "web_checkout_withdrawal_consent",
   /** Meta matching details given to RevenueCat on checkout, and again on purchase start if `_fbp` was missing (`trigger`, `has_fbp`, `has_fbc`, `has_email`, `identity_saved`, `ids_saved`, `browser_saved`). Never the values. */
   metaMatchingSent: "web_meta_matching_sent",
@@ -47,8 +47,9 @@ export const WEB_FUNNEL_EVENTS = {
   leadPlanView: "web_lead_plan_view",
   /** The email preferences page (`action`: unsubscribe or delete). */
   leadPreferencesAction: "web_lead_preferences_action",
-  /** The account page (`store`, `has_account`, `in_trial` and `will_renew` from RevenueCat, null when unknown). */
+  /** The account page (`via`: sign_in, or email_link with no other properties; signed in: `store`, `has_account`, `in_trial` and `will_renew` from RevenueCat, null when unknown). */
   manageSubscriptionView: "web_manage_subscription_view",
+  /** Manage subscription tapped (`via`: sign_in or email_link; `outcome`: opened, no_web_subscription, invalid_link or error; `store` for email_link with no web subscription). */
   manageSubscriptionPortalOpen: "web_manage_subscription_portal_open",
   /** The withdraw-from-contract page once the status is known (`state`: eligible, withdrawn, expired, none, unavailable; `in_trial`). */
   withdrawalView: "web_contract_withdrawal_view",
