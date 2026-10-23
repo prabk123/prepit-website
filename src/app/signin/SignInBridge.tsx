@@ -14,7 +14,7 @@ import { providerOf, signOutOfWebsite, type SignInProvider } from "@/lib/firebas
 import { parseFunnelId, safeNextPath } from "@/lib/funnel/params";
 import { parsePlanId, PLANS, TRIAL_DAYS } from "@/lib/pricing";
 import { identifyPixelUser, trackSignupRegistration } from "@/lib/metaPixel";
-import { loadPremiumDetails, webBillingKeyProblem } from "@/lib/revenuecat/webBilling";
+import { loadPremiumDetails, webBillingKeyProblem, webBillingSellerForBrowser } from "@/lib/revenuecat/webBilling";
 import { resetWebUser, trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webFunnelAnalytics";
 
 const PROVIDER_NAMES: Record<SignInProvider, string> = { google: "Google", apple: "Apple" };
@@ -103,12 +103,14 @@ export default function SignInBridge() {
       setPremium({ uid, active: result === "found" });
       trackWebFunnelEvent(WEB_FUNNEL_EVENTS.bridgePremiumCheck, { ...context, result, has_account: hasAccount });
     };
-    if (webBillingKeyProblem()) {
+    // Either seller's app reads the same customer; this is the one checkout would use.
+    const seller = webBillingSellerForBrowser();
+    if (webBillingKeyProblem(seller)) {
       done("no_key");
       return;
     }
     const timer = setTimeout(() => done("timeout"), PREMIUM_CHECK_TIMEOUT_MS);
-    loadPremiumDetails(uid)
+    loadPremiumDetails(uid, seller)
       .then((details) => done(details ? "found" : "none"))
       .catch(() => done("error"))
       .finally(() => clearTimeout(timer));

@@ -10,7 +10,12 @@ import { PRIMARY_BUTTON_CLASS, TEXT_BUTTON_CLASS } from "@/components/ui/buttons
 import { providerOf, signOutOfWebsite } from "@/lib/firebase/auth";
 import { createBillingManagementUrl } from "@/lib/prepitApi";
 import { subscriptionDateLine } from "@/lib/revenuecat/subscriptionDateLine";
-import { loadPremiumDetails, webBillingKeyProblem, type PremiumDetails } from "@/lib/revenuecat/webBilling";
+import {
+  loadPremiumDetails,
+  webBillingKeyProblem,
+  webBillingSellerForBrowser,
+  type PremiumDetails,
+} from "@/lib/revenuecat/webBilling";
 import { resetWebUser, trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webFunnelAnalytics";
 
 const PROVIDER_NAMES = { google: "Google", apple: "Apple" } as const;
@@ -41,11 +46,13 @@ export default function ManageSubscription() {
     const done = (next: Details) => {
       if (!cancelled) setDetails({ uid, details: next });
     };
-    if (webBillingKeyProblem()) {
+    // Either seller's app reads the same customer; this is the one checkout would use.
+    const seller = webBillingSellerForBrowser();
+    if (webBillingKeyProblem(seller)) {
       done({ status: "unknown" });
       return;
     }
-    loadPremiumDetails(uid)
+    loadPremiumDetails(uid, seller)
       .then((premium) => done({ status: "ready", premium }))
       .catch(() => done({ status: "unknown" }));
     return () => {
