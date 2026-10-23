@@ -13,6 +13,8 @@ import {
   emptyAnswers,
   foodRules,
   goalWeightReply,
+  HEALTH_CONSENT_TEXT,
+  HEALTH_CONSENT_VERSION,
   healthyRange,
   heightCm,
   leaveOutLine,
@@ -57,6 +59,7 @@ function answers(patch = {}) {
     activity: "mostly_sitting",
     exercise: "one_to_two",
     diet: "eat everything",
+    healthConsent: true,
     ...patch,
   };
 }
@@ -252,6 +255,40 @@ test("goals with no goal-weight screen send the current weight, so sign-in can c
     assert.equal(buildQuizProfile(a).settings.goalWeight, 79.8, goal);
   }
   assert.equal(buildQuizProfile(answers({ goal: "Build muscle", goalWeightKg: 85 })).settings.goalWeight, 85);
+});
+
+test("the health consent box starts unticked, and without it no health answer is sent (PRE-358)", () => {
+  assert.equal(emptyAnswers().healthConsent, false);
+  // Optional: "Build my plan" works either way.
+  assert.equal(canContinue("week", answers({ healthConsent: false })), true);
+
+  const a = answers({ healthConsent: false, goalWeightKg: 70, intolerances: ["Dairy"], mood: "Yes, often", skipsBreakfast: "No", firstName: "Sam" });
+  assert.equal(targetsRequest(a), null);
+  const profile = buildQuizProfile(a, { calories: 1500, protein: 120, carbs: 140, fats: 50, resolvedGoalSpeed: 0.5 });
+  assert.equal(profile.healthConsent, undefined);
+  const body = buildWebSignupBody({ funnelId: "quiz", ...profile });
+  assert.deepEqual(body.user, { firstName: "Sam", dob: "1991-05-14", gender: "female" });
+  assert.deepEqual(body.settings, {
+    dailyActivity: "mostly_sitting",
+    exerciseFrequency: "one_to_two",
+    diet: "eat everything",
+    mainBlocker: ["Logging takes too long", "I crave snacks"],
+    unit: "imperial",
+  });
+  assert.deepEqual(body.answers.map((answer) => answer.questionId), ["skips_breakfast"]);
+  assert.equal(body.healthConsent, undefined);
+  for (const value of ["168", "79.8", "lose weight", "Dairy", "Yes, often", SAFETY_NONE]) {
+    assert.ok(!JSON.stringify(body).includes(value), value);
+  }
+});
+
+test("a ticked box sends its wording version with the answers, to the lead and the bridge (PRE-358)", () => {
+  const profile = buildQuizProfile(answers());
+  assert.deepEqual(profile.healthConsent, { version: HEALTH_CONSENT_VERSION, text: HEALTH_CONSENT_TEXT });
+  assert.deepEqual(buildWebSignupBody({ funnelId: "quiz", ...profile }).healthConsent, profile.healthConsent);
+  const handoff = parseBridgeHandoff(JSON.stringify({ funnelId: "quiz", ...profile, savedAt: Date.now() }));
+  assert.deepEqual(handoff.healthConsent, profile.healthConsent);
+  assert.equal(buildWebSignupBody({ healthConsent: { text: "no version" } }).healthConsent, undefined);
 });
 
 test("halal and kosher save as the app saves them (PRE-328)", () => {

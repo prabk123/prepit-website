@@ -18,7 +18,7 @@
  * Kept free of React so it can be tested on its own.
  */
 import type { BridgeSource } from "./params";
-import type { WebSignupAnswer, WebSignupSettings, WebSignupUser } from "./webSignupProfile";
+import type { HealthConsent, WebSignupAnswer, WebSignupSettings, WebSignupUser } from "./webSignupProfile";
 
 /** What the quiz leaves for the bridge. */
 export type BridgeHandoff = {
@@ -27,6 +27,8 @@ export type BridgeHandoff = {
   answers?: WebSignupAnswer[];
   user?: WebSignupUser;
   settings?: WebSignupSettings;
+  /** The quiz's health consent box (PRE-358), only when ticked; without it the health answers aren't here. */
+  healthConsent?: HealthConsent;
   /** The name the quiz asked for; used only when the sign-in has none (Apple often sends none). */
   firstName?: string;
   /** The email gate's address; a hint for Google's account picker, never sent to the backend from here. */
@@ -72,10 +74,18 @@ export function parseBridgeHandoff(raw: string | null, now = Date.now()): Bridge
     answers: Array.isArray(value.answers) ? (value.answers as WebSignupAnswer[]) : undefined,
     user: object<WebSignupUser>(value.user),
     settings: object<WebSignupSettings>(value.settings),
+    healthConsent: parseHealthConsent(value.healthConsent),
     firstName: text(value.firstName, 100),
     email: text(value.email, 320),
     planSummary: parsePlanSummary(value.planSummary),
   };
+}
+
+function parseHealthConsent(value: unknown): HealthConsent | undefined {
+  const raw = value && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>) : null;
+  return raw && typeof raw.version === "string" && raw.version.trim() && typeof raw.text === "string"
+    ? { version: raw.version, text: raw.text }
+    : undefined;
 }
 
 function parsePlanSummary(value: unknown): BridgeHandoff["planSummary"] {
