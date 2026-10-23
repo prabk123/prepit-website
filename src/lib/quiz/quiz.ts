@@ -389,7 +389,7 @@ export const LOADER_QUESTIONS: { at: number; eyebrow: string; question: string; 
  * whenever the wording changes.
  */
 export const HEALTH_CONSENT_TEXT =
-  "Use my health answers (like my weight, goals and any health conditions) to build my plan and save it to my account. I can withdraw this any time.";
+  "Use my health answers (like my weight, goals and any health conditions) to build my plan and save them with it. I can withdraw this any time.";
 export const HEALTH_CONSENT_VERSION = "health-v1";
 /**
  * Whether "Build my plan" waits for the box. Off: an unticked box still
@@ -971,7 +971,7 @@ const ANSWER_QUESTIONS: {
 export function buildQuizProfile(
   a: QuizAnswers,
   targets?: Targets | null,
-): { answers: WebSignupAnswer[]; user: WebSignupUser; settings: WebSignupSettings; healthConsent?: HealthConsent } {
+): { answers: WebSignupAnswer[]; user: WebSignupUser; settings: WebSignupSettings; healthConsent: HealthConsent | null } {
   const consent = healthConsentRecord(a);
   const answers: WebSignupAnswer[] = [];
   for (const question of ANSWER_QUESTIONS) {
@@ -998,5 +998,6 @@ export function buildQuizProfile(
     // The app has no stones; it shows pounds for them.
     unit: a.unit === "metric" ? "metric" : "imperial",
   };
-  return { answers, user, settings, ...(consent ? { healthConsent: consent } : {}) };
+  // null, not left out: a save after unticking withdraws an earlier tick and clears what it saved.
+  return { answers, user, settings, healthConsent: consent ?? null };
 }

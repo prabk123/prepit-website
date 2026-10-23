@@ -140,6 +140,7 @@ export default function Quiz({ country, market }: { country: string; market: Web
   const [fetched, setFetched] = useState<{ key: string; targets: Targets | null } | null>(null);
   const [emailState, setEmailState] = useState<"idle" | "saving" | "invalid">("idle");
   const leadSaved = useRef(false);
+  const consentTracked = useRef<boolean | null>(null);
   const advanceTimer = useRef<number | null>(null);
   const firstScreen = useRef(true);
 
@@ -205,6 +206,7 @@ export default function Quiz({ country, market }: { country: string; market: Web
     setHistory([]);
     setFetched(null);
     leadSaved.current = false;
+    consentTracked.current = null;
     setScreen("goal");
   };
 
@@ -888,11 +890,15 @@ export default function Quiz({ country, market }: { country: string; market: Web
         </>
       );
       footer = continueButton("Build my plan", () => {
-        trackWebFunnelEvent(WEB_FUNNEL_EVENTS.quizHealthConsent, {
-          funnel_id: QUIZ_FUNNEL_ID,
-          given: answers.healthConsent,
-          wording_version: HEALTH_CONSENT_VERSION,
-        });
+        // Once per answer: a second pass (Back, then Build my plan again) only counts a change.
+        if (consentTracked.current !== answers.healthConsent) {
+          consentTracked.current = answers.healthConsent;
+          trackWebFunnelEvent(WEB_FUNNEL_EVENTS.quizHealthConsent, {
+            funnel_id: QUIZ_FUNNEL_ID,
+            given: answers.healthConsent,
+            wording_version: HEALTH_CONSENT_VERSION,
+          });
+        }
         next();
       });
       break;

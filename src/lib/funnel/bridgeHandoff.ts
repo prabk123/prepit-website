@@ -27,8 +27,8 @@ export type BridgeHandoff = {
   answers?: WebSignupAnswer[];
   user?: WebSignupUser;
   settings?: WebSignupSettings;
-  /** The quiz's health consent box (PRE-358), only when ticked; without it the health answers aren't here. */
-  healthConsent?: HealthConsent;
+  /** The quiz's health consent box (PRE-358); null when unticked, and then the health answers aren't here. */
+  healthConsent?: HealthConsent | null;
   /** The name the quiz asked for; used only when the sign-in has none (Apple often sends none). */
   firstName?: string;
   /** The email gate's address; a hint for Google's account picker, never sent to the backend from here. */
@@ -81,7 +81,8 @@ export function parseBridgeHandoff(raw: string | null, now = Date.now()): Bridge
   };
 }
 
-function parseHealthConsent(value: unknown): HealthConsent | undefined {
+function parseHealthConsent(value: unknown): HealthConsent | null | undefined {
+  if (value === null) return null;
   const raw = value && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>) : null;
   return raw && typeof raw.version === "string" && raw.version.trim() && typeof raw.text === "string"
     ? { version: raw.version, text: raw.text }

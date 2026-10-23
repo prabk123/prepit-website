@@ -70,7 +70,8 @@ export function useSaveWebSignup(
       answers: handoff?.answers,
       user,
       settings: handoff?.settings,
-      healthConsent: handoff?.healthConsent,
+      // A quiz handoff without a ticked box withdraws any earlier one (PRE-358).
+      healthConsent: handoff ? (handoff.healthConsent ?? null) : undefined,
       attribution: readAttribution(),
       createAccount: Boolean(handoff),
       webSessionId: readWebSessionId(),

@@ -265,7 +265,7 @@ test("the health consent box starts unticked, and without it no health answer is
   const a = answers({ healthConsent: false, goalWeightKg: 70, intolerances: ["Dairy"], mood: "Yes, often", skipsBreakfast: "No", firstName: "Sam" });
   assert.equal(targetsRequest(a), null);
   const profile = buildQuizProfile(a, { calories: 1500, protein: 120, carbs: 140, fats: 50, resolvedGoalSpeed: 0.5 });
-  assert.equal(profile.healthConsent, undefined);
+  assert.equal(profile.healthConsent, null);
   const body = buildWebSignupBody({ funnelId: "quiz", ...profile });
   assert.deepEqual(body.user, { firstName: "Sam", dob: "1991-05-14", gender: "female" });
   assert.deepEqual(body.settings, {
@@ -276,7 +276,10 @@ test("the health consent box starts unticked, and without it no health answer is
     unit: "imperial",
   });
   assert.deepEqual(body.answers.map((answer) => answer.questionId), ["skips_breakfast"]);
-  assert.equal(body.healthConsent, undefined);
+  // An explicit null withdraws an earlier tick on the lead and the sign-up.
+  assert.equal(body.healthConsent, null);
+  assert.equal(parseBridgeHandoff(JSON.stringify({ funnelId: "quiz", ...profile, savedAt: Date.now() })).healthConsent, null);
+  assert.equal(buildWebSignupBody({ funnelId: "quiz" }).healthConsent, undefined);
   for (const value of ["168", "79.8", "lose weight", "Dairy", "Yes, often", SAFETY_NONE]) {
     assert.ok(!JSON.stringify(body).includes(value), value);
   }

@@ -46,8 +46,8 @@ export type WebSignupInput = {
   user?: WebSignupUser;
   settings?: WebSignupSettings;
   attribution?: Attribution | null;
-  /** Only when the quiz's health consent box was ticked. */
-  healthConsent?: HealthConsent;
+  /** The quiz's ticked health consent box; null when it was left unticked (withdraws an earlier one). */
+  healthConsent?: HealthConsent | null;
   /** Make the account as soon as the answers are enough. The backend's default is true. */
   createAccount?: boolean;
   /** The quiz session id the email gate saved a lead under (PRE-327). */
@@ -193,8 +193,11 @@ export function buildWebSignupBody(input: WebSignupInput): Record<string, unknow
   const settings = cleanWebSignupSettings(input.settings);
   if (settings) body.settings = settings;
   if (input.attribution && Object.keys(input.attribution).length > 0) body.attribution = input.attribution;
-  const healthConsent = cleanHealthConsent(input.healthConsent);
-  if (healthConsent) body.healthConsent = healthConsent;
+  if (input.healthConsent === null) body.healthConsent = null;
+  else {
+    const healthConsent = cleanHealthConsent(input.healthConsent);
+    if (healthConsent) body.healthConsent = healthConsent;
+  }
   if (input.createAccount !== undefined) body.createAccount = input.createAccount;
   if (input.webSessionId && WEB_SESSION_ID.test(input.webSessionId)) body.webSessionId = input.webSessionId;
   return body;

@@ -60,8 +60,8 @@ export type LeadInput = {
   answers: WebSignupAnswer[];
   user: WebSignupUser;
   settings: WebSignupSettings;
-  /** Only when the health consent box is ticked (PRE-358). */
-  healthConsent?: HealthConsent;
+  /** The ticked health consent box (PRE-358); null when unticked, which withdraws an earlier tick. */
+  healthConsent?: HealthConsent | null;
   attribution?: Attribution | null;
 };
 
