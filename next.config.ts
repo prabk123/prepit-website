@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { firebaseAuthHandlerRewrites } from "./src/lib/firebase/authHandler";
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ["mongodb"],
@@ -14,6 +15,9 @@ const nextConfig: NextConfig = {
         source: "/.well-known/apple-app-site-association",
         destination: "/well-known/apple-app-site-association",
       },
+      // Firebase's sign-in handler on this domain, so Google and Apple show
+      // PrepIt's address instead of fresca-dev.firebaseapp.com (PRE-374).
+      ...firebaseAuthHandlerRewrites(process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID),
     ];
   },
   images: {

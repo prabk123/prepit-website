@@ -9,6 +9,7 @@ import {
   isSignInAvailable,
   systemBrowserUrl,
   SignInError,
+  signInAuthDomain,
   signInWith,
   type SignInFailure,
   type SignInProvider,
@@ -71,7 +72,11 @@ export default function SignInButtons({
   async function start(provider: SignInProvider) {
     setBusy(provider);
     setFailure(null);
-    trackWebFunnelEvent(WEB_FUNNEL_EVENTS.signInStart, { ...context, signup_method: provider });
+    trackWebFunnelEvent(WEB_FUNNEL_EVENTS.signInStart, {
+      ...context,
+      signup_method: provider,
+      auth_domain: signInAuthDomain(),
+    });
     try {
       await signInWith(provider, { loginHint });
       onSignedIn?.(provider);
@@ -79,7 +84,12 @@ export default function SignInButtons({
       const code = error instanceof SignInError ? error.code : "unknown";
       setFailure(code);
       if (code !== "cancelled") {
-        trackWebFunnelEvent(WEB_FUNNEL_EVENTS.signInFailed, { ...context, signup_method: provider, reason: code });
+        trackWebFunnelEvent(WEB_FUNNEL_EVENTS.signInFailed, {
+          ...context,
+          signup_method: provider,
+          reason: code,
+          auth_domain: signInAuthDomain(),
+        });
       }
     } finally {
       setBusy(null);

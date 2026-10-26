@@ -77,7 +77,9 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
+  // `__/` is Firebase's sign-in handler, proxied to Firebase (PRE-374): no
+  // geo redirect or cookies there.
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+    "/((?!_next/static|_next/image|__/|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
   ],
 };

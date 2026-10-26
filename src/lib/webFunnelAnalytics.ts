@@ -12,6 +12,7 @@ import { withPostHog } from "@/lib/posthogClient";
  */
 export const WEB_FUNNEL_EVENTS = {
   bridgeView: "web_bridge_view",
+  /** Google or Apple sign-in started (`signup_method`, `auth_domain`: `prepit` when sign-in runs through tryprepit.app, `firebase` through firebaseapp.com, PRE-374). */
   signInStart: "web_signin_start",
   signupSuccess: "web_signup_success",
   /** The quiz's answers were sent after sign-in (`account_created`, `not_created_reason`, and `status` when the save failed). */
@@ -20,6 +21,7 @@ export const WEB_FUNNEL_EVENTS = {
   bridgeError: "web_bridge_error",
   /** An in-app browser (Instagram, Facebook…) visitor tapped Open in Safari or Copy link (`action`). */
   inAppBrowserEscape: "web_in_app_browser_escape",
+  /** Sign-in failed (`signup_method`, `reason` code, and from the sign-in buttons `auth_domain` as on `web_signin_start`). */
   signInFailed: "web_signin_failed",
   /** The sign-in bridge asked RevenueCat about someone PrepIt's record doesn't show as subscribed (`result`: found, none, error, timeout or no_key; `has_account`). `found` shows "You already have PrepIt" instead of the plans. */
   bridgePremiumCheck: "web_bridge_premium_check",
