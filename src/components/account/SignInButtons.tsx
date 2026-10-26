@@ -9,6 +9,7 @@ import {
   isSignInAvailable,
   systemBrowserUrl,
   SignInError,
+  signInAuthDomain,
   signInWith,
   type SignInFailure,
   type SignInProvider,
@@ -71,16 +72,26 @@ export default function SignInButtons({
   async function start(provider: SignInProvider) {
     setBusy(provider);
     setFailure(null);
-    trackWebFunnelEvent(WEB_FUNNEL_EVENTS.signInStart, { ...context, signup_method: provider });
+    trackWebFunnelEvent(WEB_FUNNEL_EVENTS.signInStart, {
+      ...context,
+      signup_method: provider,
+      auth_domain: signInAuthDomain(),
+    });
     try {
       await signInWith(provider, { loginHint });
       onSignedIn?.(provider);
     } catch (error) {
       const code = error instanceof SignInError ? error.code : "unknown";
       setFailure(code);
-      if (code !== "cancelled") {
-        trackWebFunnelEvent(WEB_FUNNEL_EVENTS.signInFailed, { ...context, signup_method: provider, reason: code });
-      }
+      // A closed popup is its own event, so failure counts stay comparable
+      // with earlier weeks. It is also what a Google error page in the popup
+      // (redirect_uri_mismatch) turns into once the visitor closes it.
+      trackWebFunnelEvent(code === "cancelled" ? WEB_FUNNEL_EVENTS.signInCancelled : WEB_FUNNEL_EVENTS.signInFailed, {
+        ...context,
+        signup_method: provider,
+        ...(code === "cancelled" ? {} : { reason: code }),
+        auth_domain: signInAuthDomain(),
+      });
     } finally {
       setBusy(null);
     }

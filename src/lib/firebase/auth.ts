@@ -1,6 +1,7 @@
 "use client";
 
 import type { Auth, User } from "firebase/auth";
+import { authDomainKind } from "@/lib/firebase/authHandler";
 import { getFirebaseConfig, isProductionDeploy } from "@/lib/firebase/config";
 import { clearBridgeHandoff } from "@/lib/funnel/bridgeHandoff";
 
@@ -23,6 +24,15 @@ export type SignInFailure =
   | "unknown";
 
 let authPromise: Promise<Auth> | null = null;
+
+/**
+ * `prepit` when sign-in runs through the site's own domain (PRE-374), so
+ * Google and Apple show PrepIt's address; `firebase` while it still runs
+ * through firebaseapp.com. Sent with sign-in events.
+ */
+export function signInAuthDomain(): "prepit" | "firebase" {
+  return authDomainKind(getFirebaseConfig()?.authDomain);
+}
 
 /** True when this deployment has a Firebase project to sign in to. */
 export function isSignInAvailable(): boolean {
@@ -96,11 +106,11 @@ async function providerFor(provider: SignInProvider, loginHint?: string) {
 }
 
 /**
- * Signs in with a popup. There is no redirect fallback: with the auth domain
- * on firebaseapp.com (a different site), browsers that partition third-party
+ * Signs in with a popup. There is no redirect fallback: while the auth domain
+ * is firebaseapp.com (a different site), browsers that partition third-party
  * storage drop a redirect sign-in silently. A blocked popup shows a message
- * instead. A redirect needs the auth domain served from this site first
- * (proxy `/__/auth/*` and add it to the OAuth client's redirect URIs).
+ * instead. The site now serves `/__/auth/*` itself (PRE-374), so a redirect
+ * fallback becomes possible once Production's auth domain is the site's.
  */
 export async function signInWith(provider: SignInProvider, options: { loginHint?: string } = {}): Promise<User> {
   const auth = await loadAuth();

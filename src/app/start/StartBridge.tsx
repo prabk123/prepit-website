@@ -26,7 +26,7 @@ import SignedInChip from "@/components/bridge/SignedInChip";
 import FaqAccordion from "@/components/pricing/FaqAccordion";
 import { PRIMARY_BUTTON_CLASS, TEXT_BUTTON_CLASS } from "@/components/ui/buttons";
 import { openAppUrl } from "@/lib/appStore";
-import { providerOf, signOutOfWebsite } from "@/lib/firebase/auth";
+import { providerOf, signInAuthDomain, signOutOfWebsite } from "@/lib/firebase/auth";
 import { readBridgeHandoff, writeBridgeVisit, type BridgeHandoff } from "@/lib/funnel/bridgeHandoff";
 import { parseBridgeSource, parseFunnelId, type BridgeSource } from "@/lib/funnel/params";
 import { parsePlanId, type PlanId } from "@/lib/pricing";
@@ -142,6 +142,7 @@ export default function StartBridge({ country }: { country: string | null }) {
       has_account: summary.hasAccount,
       is_subscribed: summary.isSubscribed,
       has_quiz_answers: handoff !== null,
+      auth_domain: signInAuthDomain(),
     });
     // New to PrepIt (no app account yet): a registration for Meta, with no details.
     if (!summary.hasAccount) trackSignupRegistration(session.user.uid);

@@ -1,4 +1,5 @@
 import type { FirebaseOptions } from "firebase/app";
+import { DEFAULT_FIREBASE_PROJECT_ID } from "@/lib/firebase/authHandler";
 
 /**
  * Firebase web config for website sign-in (PRE-264). The website signs people
@@ -7,7 +8,10 @@ import type { FirebaseOptions } from "firebase/app";
  *
  * Set per deployment (Vercel → Environment Variables):
  * - NEXT_PUBLIC_FIREBASE_API_KEY
- * - NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+ * - NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: `www.tryprepit.app` on Production, so
+ *   Google and Apple show PrepIt's address. The site serves Firebase's sign-in
+ *   handler at `/__/auth/*` (next.config.ts, PRE-374); the domain also has to
+ *   be a redirect URI on the Google OAuth client and the Apple Services ID.
  * - NEXT_PUBLIC_FIREBASE_PROJECT_ID
  * - NEXT_PUBLIC_FIREBASE_APP_ID
  * - NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID (optional)
@@ -20,7 +24,7 @@ import type { FirebaseOptions } from "firebase/app";
 const DEV_PROJECT: FirebaseOptions = {
   apiKey: "AIzaSyDOPWvKFRfkoxqPYT8YVewmNInhv_ty8q4",
   authDomain: "fresca-dev.firebaseapp.com",
-  projectId: "fresca-dev",
+  projectId: DEFAULT_FIREBASE_PROJECT_ID,
   appId: "1:764630790288:web:1cb684d569cdd41293a815",
   messagingSenderId: "764630790288",
 };
