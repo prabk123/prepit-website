@@ -3,7 +3,13 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import EmailInUseNotice from "@/components/account/EmailInUseNotice";
+import ManageFromEmailLink, {
+  forgetManageLinkToken,
+  MANAGE_LINK_STORAGE_KEY,
+  STORE_NOTICES,
+} from "@/components/account/ManageFromEmailLink";
 import SignInButtons from "@/components/account/SignInButtons";
+import { useEmailToken } from "@/components/quiz/useEmailToken";
 import { useWebSession } from "@/components/account/useWebSession";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { PRIMARY_BUTTON_CLASS, TEXT_BUTTON_CLASS } from "@/components/ui/buttons";
@@ -29,7 +35,31 @@ function formatDate(date: Date): string {
   return date.toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric" });
 }
 
+/**
+ * An email's link carries a signed token (PRE-353): the billing page opens
+ * from it with no sign-in. Without one, or after "Sign in instead" or an
+ * expired link, the page asks for Google or Apple sign-in as before.
+ */
 export default function ManageSubscription() {
+  const linkToken = useEmailToken(MANAGE_LINK_STORAGE_KEY);
+  const [signInReason, setSignInReason] = useState<"chosen" | "expired" | null>(null);
+
+  if (linkToken === undefined) return <p className="text-body text-ink-secondary">Loading…</p>;
+  if (linkToken && !signInReason) {
+    return (
+      <ManageFromEmailLink
+        token={linkToken}
+        onSignIn={(reason) => {
+          forgetManageLinkToken();
+          setSignInReason(reason);
+        }}
+      />
+    );
+  }
+  return <ManageAfterSignIn linkExpired={signInReason === "expired"} />;
+}
+
+function ManageAfterSignIn({ linkExpired }: { linkExpired: boolean }) {
   const { session, reloadAccount } = useWebSession();
   const [details, setDetails] = useState<{ uid: string; details: Details } | null>(null);
   const [portal, setPortal] = useState<"idle" | "opening" | "none" | "error">("idle");
@@ -76,6 +106,7 @@ export default function ManageSubscription() {
     if (!uid || viewTrackedFor.current === uid || !summary || place === null) return;
     viewTrackedFor.current = uid;
     trackWebFunnelEvent(WEB_FUNNEL_EVENTS.manageSubscriptionView, {
+      via: "sign_in",
       store: place,
       has_account: summary.hasAccount,
       in_trial: inTrial,
@@ -93,14 +124,17 @@ export default function ManageSubscription() {
     setPortal("opening");
     try {
       const url = await createBillingManagementUrl();
-      trackWebFunnelEvent(WEB_FUNNEL_EVENTS.manageSubscriptionPortalOpen, { outcome: url ? "opened" : "no_web_subscription" });
+      trackWebFunnelEvent(WEB_FUNNEL_EVENTS.manageSubscriptionPortalOpen, {
+        via: "sign_in",
+        outcome: url ? "opened" : "no_web_subscription",
+      });
       if (url) {
         window.location.assign(url);
         return;
       }
       setPortal("none");
     } catch {
-      trackWebFunnelEvent(WEB_FUNNEL_EVENTS.manageSubscriptionPortalOpen, { outcome: "error" });
+      trackWebFunnelEvent(WEB_FUNNEL_EVENTS.manageSubscriptionPortalOpen, { via: "sign_in", outcome: "error" });
       setPortal("error");
     }
   }
@@ -114,8 +148,12 @@ export default function ManageSubscription() {
           as="h1"
           size="title"
           align="center"
-          title="Manage your subscription"
-          lead="Sign in with the Google or Apple account you use in PrepIt to change or cancel a subscription you bought on our website."
+          title={linkExpired ? "This link has expired" : "Manage your subscription"}
+          lead={
+            linkExpired
+              ? "Sign in with the Google or Apple account you use in PrepIt to change or cancel your subscription."
+              : "Sign in with the Google or Apple account you use in PrepIt to change or cancel a subscription you bought on our website."
+          }
         />
         <SignInButtons context={{ page: "account" }} />
       </>
@@ -173,8 +211,8 @@ export default function ManageSubscription() {
           as="h1"
           size="title"
           align="center"
-          title="Your subscription is with Apple"
-          lead="You subscribed in the App Store, so Apple manages it. On your iPhone, open Settings, tap your name, then Subscriptions, then PrepIt."
+          title={STORE_NOTICES.app_store.title}
+          lead={STORE_NOTICES.app_store.lead}
         />
         {dateLine && <p className="text-small text-ink-muted">{dateLine}</p>}
         {signedInAs}
@@ -189,8 +227,8 @@ export default function ManageSubscription() {
           as="h1"
           size="title"
           align="center"
-          title="Your subscription is with Google Play"
-          lead="Google Play manages it. Open the Play Store app, tap your profile picture, then Payments & subscriptions, then Subscriptions."
+          title={STORE_NOTICES.play_store.title}
+          lead={STORE_NOTICES.play_store.lead}
         />
         {dateLine && <p className="text-small text-ink-muted">{dateLine}</p>}
         {signedInAs}

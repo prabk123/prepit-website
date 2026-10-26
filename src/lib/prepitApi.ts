@@ -148,6 +148,49 @@ export async function createBillingManagementUrl(): Promise<string | null> {
   }
 }
 
+/** What the billing page link in an email opens (`POST /billing/management-url/link`). */
+export type LinkManagementResult =
+  | { kind: "portal"; url: string }
+  /** No website subscription; `store` is where one that gives access is managed (`app_store`, `play_store`…), or null. */
+  | { kind: "none"; store: string | null }
+  /** The link is old, changed or not ours: sign in instead. */
+  | { kind: "invalid" };
+
+/**
+ * The single-use RevenueCat portal link for the subscription an email was
+ * about (PRE-353), from the signed token in that email's link. No sign-in:
+ * the token is the proof. Throws `PrepItApiError` on anything else.
+ */
+export async function createBillingManagementUrlFromLink(token: string): Promise<LinkManagementResult> {
+  const base = apiBaseUrl();
+  if (!base) throw new PrepItApiError(0, "api_not_configured");
+  let response: Response;
+  try {
+    response = await fetch(`${base}/billing/management-url/link`, {
+      method: "POST",
+      headers: { Accept: "application/json", "Content-Type": "application/json" },
+      body: JSON.stringify({ token }),
+    });
+  } catch {
+    throw new PrepItApiError(0, "network");
+  }
+  let body: { url?: unknown; code?: unknown; store?: unknown } = {};
+  try {
+    body = (await response.json()) as typeof body;
+  } catch {
+    // Not JSON; the status decides.
+  }
+  if (response.ok) {
+    if (typeof body.url !== "string" || !isRevenueCatPortalUrl(body.url)) {
+      throw new PrepItApiError(502, "BILLING_MANAGEMENT_URL_UNEXPECTED");
+    }
+    return { kind: "portal", url: body.url };
+  }
+  if (response.status === 401) return { kind: "invalid" };
+  if (response.status === 404) return { kind: "none", store: typeof body.store === "string" ? body.store : null };
+  throw new PrepItApiError(response.status, typeof body.code === "string" ? body.code : undefined);
+}
+
 /** The pending profile as the web endpoints return it (fresca_backend `PendingProfileView`). */
 export type WebSignupProfile = PendingProfile & {
   answers: WebSignupAnswer[];
@@ -205,4 +248,64 @@ export async function saveWebSignupProfile(input: WebSignupInput): Promise<WebSi
     accountNotCreatedReason: reason === "no_email" || reason === "invalid" ? reason : null,
     pendingProfile: body.pendingProfile ?? null,
   };
+}
+
+/** Whether the website subscription can be withdrawn from now (PRE-360), from `GET /billing/withdrawal`. */
+export type WithdrawalStatus =
+  | { state: "eligible"; inTrial: boolean; windowEndsAt: string }
+  | { state: "withdrawn"; requestedAt: string; emailSent: boolean }
+  | { state: "expired"; windowEndedAt: string }
+  /** Bought outside the UK and EEA, where the 14-day right doesn't apply. */
+  | { state: "not_offered" }
+  | { state: "none" }
+  | { state: "unavailable" };
+
+function toWithdrawalStatus(body: Record<string, unknown>): WithdrawalStatus {
+  switch (body.state) {
+    case "eligible":
+      return { state: "eligible", inTrial: body.inTrial === true, windowEndsAt: String(body.windowEndsAt) };
+    case "withdrawn":
+      return { state: "withdrawn", requestedAt: String(body.requestedAt), emailSent: body.emailSent === true };
+    case "expired":
+      return { state: "expired", windowEndedAt: String(body.windowEndedAt) };
+    case "not_offered":
+      return { state: "not_offered" };
+    case "none":
+      return { state: "none" };
+    default:
+      return { state: "unavailable" };
+  }
+}
+
+export async function fetchWithdrawalStatus(): Promise<WithdrawalStatus> {
+  return toWithdrawalStatus(await prepitFetch<Record<string, unknown>>("/billing/withdrawal"));
+}
+
+export type WithdrawalResult =
+  | { outcome: "withdrawn"; requestedAt: string; refunded: boolean; emailSent: boolean }
+  /** Nothing to withdraw by the time it was confirmed; `status` says why. */
+  | { outcome: "not_available"; status: WithdrawalStatus }
+  | { outcome: "in_progress" };
+
+/** The confirm step: `POST /billing/withdrawal`. Throws when it failed. */
+export async function confirmWithdrawal(): Promise<WithdrawalResult> {
+  try {
+    const body = await prepitFetch<{ requestedAt?: unknown; refunded?: unknown; emailSent?: unknown }>(
+      "/billing/withdrawal",
+      { method: "POST", body: "{}" },
+    );
+    return {
+      outcome: "withdrawn",
+      requestedAt: String(body.requestedAt),
+      refunded: body.refunded === true,
+      emailSent: body.emailSent === true,
+    };
+  } catch (error) {
+    if (error instanceof PrepItApiError && error.status === 409) {
+      if (error.code === "WITHDRAWAL_IN_PROGRESS") return { outcome: "in_progress" };
+      // The 409 body's state isn't kept by prepitFetch; ask again.
+      return { outcome: "not_available", status: await fetchWithdrawalStatus() };
+    }
+    throw error;
+  }
 }

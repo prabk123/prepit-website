@@ -47,9 +47,16 @@ export const WEB_FUNNEL_EVENTS = {
   leadPlanView: "web_lead_plan_view",
   /** The email preferences page (`action`: unsubscribe or delete). */
   leadPreferencesAction: "web_lead_preferences_action",
-  /** The account page (`store`, `has_account`, `in_trial` and `will_renew` from RevenueCat, null when unknown). */
+  /** The account page (`via`: sign_in, or email_link with no other properties; signed in: `store`, `has_account`, `in_trial` and `will_renew` from RevenueCat, null when unknown). */
   manageSubscriptionView: "web_manage_subscription_view",
+  /** Manage subscription tapped (`via`: sign_in or email_link; `outcome`: opened, no_web_subscription, invalid_link or error; `store` for email_link with no web subscription). */
   manageSubscriptionPortalOpen: "web_manage_subscription_portal_open",
+  /** The withdraw-from-contract page once the status is known (`state`: eligible, withdrawn, expired, none, unavailable; `in_trial`). */
+  withdrawalView: "web_contract_withdrawal_view",
+  /** The confirm step was pressed (`outcome`: withdrawn, not_available, in_progress, error; `refunded`). */
+  withdrawalConfirm: "web_contract_withdrawal_confirm",
+  /** A withdraw-from-contract link was clicked (`placement`: footer or account). */
+  withdrawalLinkClick: "web_contract_withdrawal_link_click",
 } as const;
 
 type WebFunnelEvent = (typeof WEB_FUNNEL_EVENTS)[keyof typeof WEB_FUNNEL_EVENTS];
