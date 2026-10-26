@@ -10,7 +10,7 @@ import { useWebSession } from "@/components/account/useWebSession";
 import AppStoreButton from "@/components/ui/AppStoreButton";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { PRIMARY_BUTTON_CLASS, TEXT_BUTTON_CLASS } from "@/components/ui/buttons";
-import { providerOf, signOutOfWebsite, type SignInProvider } from "@/lib/firebase/auth";
+import { providerOf, signInAuthDomain, signOutOfWebsite, type SignInProvider } from "@/lib/firebase/auth";
 import { parseFunnelId, safeNextPath } from "@/lib/funnel/params";
 import { parsePlanId, PLANS, TRIAL_DAYS } from "@/lib/pricing";
 import { identifyPixelUser, trackSignupRegistration } from "@/lib/metaPixel";
@@ -69,6 +69,7 @@ export default function SignInBridge() {
         signup_method: justSignedIn,
         has_account: account.summary.hasAccount,
         is_subscribed: account.summary.isSubscribed,
+        auth_domain: signInAuthDomain(),
       });
       // New to PrepIt (no app account yet): a registration for Meta, with no details.
       if (!account.summary.hasAccount && session.status === "signedIn") trackSignupRegistration(session.user.uid);
