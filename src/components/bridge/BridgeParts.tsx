@@ -4,19 +4,15 @@ import DeviceFrame from "@/components/device/DeviceFrame";
 import LongLogo from "@/components/ui/LongLogo";
 import { appCapture } from "@/lib/captures";
 import type { BridgeSource } from "@/lib/funnel/params";
-import { PLANS, TRIAL_DAYS, type PlanId } from "@/lib/pricing";
+import { TRIAL_DAYS } from "@/lib/pricing";
 
 /**
  * The pieces of the shared bridge (PRE-323) and the "You're in" page
- * (PRE-325), from the bridge design. US launch: prices from pricing.ts.
+ * (PRE-325), from the bridge design. No prices here: the plans and amounts
+ * are RevenueCat's paywall, in the buyer's currency (PRE-375).
  */
 
 export const SUPPORT_EMAIL = "support@tryprepit.app";
-
-/** The annual price a month, rounded to the cent ($8.33). */
-export const ANNUAL_PER_MONTH = "$8.33";
-/** 1 - 99.99 / (12 x 14.99), rounded down. */
-const ANNUAL_SAVING = "44";
 
 /** Day 1 is today; the reminder email goes on day 4 and the first charge on day 8. */
 export function trialDay(day: number, from = new Date()): Date {
@@ -30,18 +26,6 @@ export const shortDate = (date: Date) =>
   date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
 export const longDate = (date: Date) =>
   date.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
-
-/**
- * Each plan's card shows what is charged (the yearly total for annual) as the
- * big figure; the annual per-month figure is only the smaller note under it
- * (PRE-357, UK pricing rules: the total at least as prominent).
- */
-const PLAN_COPY: Record<PlanId, { note: string; per: string; renews: string }> = {
-  annual: { note: `Billed yearly. Works out at ${ANNUAL_PER_MONTH} a month.`, per: "a year", renews: "every year" },
-  monthly: { note: "Billed monthly", per: "a month", renews: "every month" },
-};
-
-export const planPer = (plan: PlanId) => PLAN_COPY[plan].per;
 
 /** A white card on the page, the site's tile radius. */
 export function BridgeCard({ children, className, labelledBy }: { children: ReactNode; className?: string; labelledBy?: string }) {
@@ -153,13 +137,13 @@ export function QuizPlanCard({
 }
 
 /** The dated free week: nothing today, reminder on day 4, first charge on day 8. */
-export function FreeWeekTimeline({ plan, today }: { plan: PlanId; today: Date }) {
+export function FreeWeekTimeline({ today }: { today: Date }) {
   const rows = [
     {
       day: "Today",
       date: trialDay(1, today),
       title: "Session 1: Getting to know you",
-      body: "About 5 minutes in the app. Everything is unlocked, and you pay $0.",
+      body: "About 5 minutes in the app. Everything is unlocked, and there’s nothing to pay.",
     },
     {
       day: "Day 4",
@@ -176,11 +160,8 @@ export function FreeWeekTimeline({ plan, today }: { plan: PlanId; today: Date })
     {
       day: "Day 8",
       date: trialDay(8, today),
-      title: `First payment: ${PLANS[plan].price}`,
-      body:
-        plan === "annual"
-          ? `For your first year, which works out at ${ANNUAL_PER_MONTH} a month. Only if you keep PrepIt.`
-          : "For your first month. Only if you keep PrepIt.",
+      title: "First payment",
+      body: "For the plan you choose next, only if you keep PrepIt.",
     },
   ];
   return (
@@ -213,98 +194,18 @@ export function FreeWeekTimeline({ plan, today }: { plan: PlanId; today: Date })
   );
 }
 
-/** Annual and monthly in equal cards, each with the amount charged as the big figure, annual preselected. */
-export function PlanChooser({
-  plan,
-  onChange,
-  legend = "After your free week",
-  dueToday = false,
-}: {
-  plan: PlanId;
-  onChange: (plan: PlanId) => void;
-  legend?: string;
-  dueToday?: boolean;
-}) {
-  return (
-    <fieldset className="flex flex-col gap-3">
-      <legend className="mb-3 font-display text-[21px] leading-tight text-ink">{legend}</legend>
-      {(["annual", "monthly"] as const).map((id) => {
-        const selected = plan === id;
-        return (
-          <label
-            key={id}
-            className={`relative grid cursor-pointer grid-cols-[22px_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 rounded-tile border bg-surface p-4 transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-4 has-[:focus-visible]:outline-focus ${
-              selected ? "border-primary border-2" : "border-line-strong"
-            }`}
-          >
-            <input
-              type="radio"
-              name="plan"
-              value={id}
-              checked={selected}
-              onChange={() => onChange(id)}
-              className="peer sr-only"
-            />
-            <span
-              aria-hidden
-              className={`h-[22px] w-[22px] rounded-full border-2 ${selected ? "border-primary bg-[radial-gradient(circle,var(--color-primary)_45%,transparent_50%)]" : "border-line-strong"}`}
-            />
-            <span className="text-body font-bold text-ink">{PLANS[id].label}</span>
-            <span className="text-right font-display text-title text-ink">
-              {PLANS[id].price}
-              <small className="ml-1 font-body text-small text-ink-muted">{PLAN_COPY[id].per}</small>
-            </span>
-            <span className="col-span-2 col-start-2 text-small text-ink-muted">
-              {dueToday
-                ? `Billed today.${id === "annual" ? ` Works out at ${ANNUAL_PER_MONTH} a month.` : ""}`
-                : PLAN_COPY[id].note}
-            </span>
-            {id === "annual" && (
-              <span className="absolute -top-3 right-4 rounded-full bg-accent px-2.5 py-0.5 text-[12px] font-bold text-ink">
-                Save {ANNUAL_SAVING}% vs monthly
-              </span>
-            )}
-          </label>
-        );
-      })}
-    </fieldset>
-  );
-}
-
-/** What's due today, the reminder and the first charge, right above the sign-in buttons. */
-export function DueSummary({ plan, today }: { plan: PlanId; today: Date }) {
-  return (
-    <dl className="flex flex-col gap-2 rounded-tile bg-surface-raised p-4 text-small">
-      <div className="flex justify-between gap-3 text-body">
-        <dt className="font-bold text-ink">Due today</dt>
-        <dd className="font-bold text-ink">$0.00</dd>
-      </div>
-      <div className="flex justify-between gap-3 text-ink-secondary">
-        <dt>Reminder email</dt>
-        <dd>{shortDate(trialDay(4, today))}</dd>
-      </div>
-      <div className="flex justify-between gap-3 text-ink-secondary">
-        <dt>From {shortDate(trialDay(8, today))}</dt>
-        <dd>
-          <b className="font-bold text-ink">{PLANS[plan].price}</b> {PLAN_COPY[plan].per}
-        </dd>
-      </div>
-    </dl>
-  );
-}
-
-/** The one terms sentence under the buttons: amount, first charge, renewal, reminder and cancel deadline. */
-export function TrialTerms({ plan, today }: { plan: PlanId; today: Date }) {
+/**
+ * The one terms sentence under the buttons: first charge, renewal, reminder and
+ * cancel deadline. The plan and its price come next, on the paywall (PRE-375).
+ */
+export function TrialTerms({ today }: { today: Date }) {
   const charge = longDate(trialDay(8, today));
   return (
     <p className="text-[13px] leading-snug text-ink-muted">
-      $0 today. Free for {TRIAL_DAYS} days, then{" "}
-      <b className="font-bold text-ink">
-        {PLANS[plan].price} {PLAN_COPY[plan].per}
-      </b>
-      , first charged on <b className="font-bold text-ink">{charge}</b>, then {PLAN_COPY[plan].renews} until you cancel.
-      We’ll email you a reminder on {longDate(trialDay(4, today))}. Cancel online any time before {charge} and you pay
-      nothing. Prices in US dollars. By continuing you agree to the{" "}
+      Nothing to pay today. Free for {TRIAL_DAYS} days, then the plan you choose next, first charged on{" "}
+      <b className="font-bold text-ink">{charge}</b> and renewing until you cancel. You’ll see the price in your currency
+      before you start. We’ll email you a reminder on {longDate(trialDay(4, today))}. Cancel online any time before{" "}
+      {charge} and you pay nothing. By continuing you agree to the{" "}
       <Link href="/terms-and-conditions" className="underline underline-offset-4 hover:text-ink">
         Terms
       </Link>{" "}
@@ -336,7 +237,7 @@ const ICONS = {
 export function Assurances({ trial = true }: { trial?: boolean }) {
   const items = trial
     ? [
-        { icon: ICONS.card, label: "$0 today" },
+        { icon: ICONS.card, label: "Nothing to pay today" },
         { icon: ICONS.bell, label: "Reminder email on day 4" },
         { icon: ICONS.cancel, label: "Cancel online, any time" },
       ]
