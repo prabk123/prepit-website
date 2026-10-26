@@ -22,9 +22,11 @@ import {
   sendMetaMatchingToRevenueCat,
   toCheckoutFailure,
   waitForPremium,
+  webBillingKey,
   webBillingKeyProblem,
   type CheckoutFailure,
 } from "@/lib/revenuecat/webBilling";
+import { webBillingSellerFor } from "@/lib/revenuecat/sellers";
 import type { Offering } from "@revenuecat/purchases-js";
 import { identifyPixelUser, trackCheckoutInitiated } from "@/lib/metaPixel";
 import { resetWebUser, trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webFunnelAnalytics";
@@ -73,14 +75,20 @@ type Plans =
  * EEA buyers are asked nothing extra: cancelling within 14 days of signing up
  * gets a full refund (/withdraw), so there is no "start my access now" box
  * (removed in PRE-371).
+ *
+ * The country also picks the company that sells (PRE-355): US, Canada,
+ * Australia and New Zealand buy on the US company's Web Billing app, everyone
+ * else on the UK company's (lib/revenuecat/sellers.ts).
  */
-export default function Checkout() {
+export default function Checkout({ country }: { country: string | null }) {
   const params = useSearchParams();
   const router = useRouter();
   const funnelId = parseFunnelId(params.get("funnel"));
   const requestedPlan = parsePlanId(params.get("plan"));
   const { session, reloadAccount } = useWebSession();
-  const keyProblem = webBillingKeyProblem();
+  const seller = webBillingSellerFor(country);
+  const billing = webBillingKey(seller);
+  const keyProblem = webBillingKeyProblem(seller);
 
   const [plansState, setPlans] = useState<{ key: string; plans: Plans } | null>(null);
   const [paying, setPaying] = useState<"idle" | "confirming">("idle");
@@ -128,10 +136,10 @@ export default function Checkout() {
       try {
         // Premium from any store (an App Store subscription, or a web
         // purchase made before the account existed) means no checkout.
-        const purchases = await purchasesFor(uid);
+        const purchases = await purchasesFor(uid, seller);
         const customerInfo = await purchases.getCustomerInfo();
         if (hasPremium(customerInfo)) return done({ status: "already_subscribed" });
-        const loaded = await loadCheckoutOffering(uid);
+        const loaded = await loadCheckoutOffering(uid, seller);
         // A trial before (PrepIt's record, or premium at any time in RevenueCat)
         // means no second one; RevenueCat's trial eligibility enforces it.
         const hadTrial = summary.hasUsedTrial || hadPremium(customerInfo);
@@ -143,9 +151,14 @@ export default function Checkout() {
     return () => {
       cancelled = true;
     };
-  }, [uid, summary, plansKey, keyProblem]);
+  }, [uid, summary, plansKey, keyProblem, seller]);
 
-  const context = useMemo(() => ({ funnel_id: funnelId }), [funnelId]);
+  // `billing_seller`: whose Web Billing app this checkout sells on;
+  // `billing_seller_fallback`: that seller's own key isn't set, so this is on the shared pre-PRE-355 key.
+  const context = useMemo(
+    () => ({ funnel_id: funnelId, billing_seller: seller, billing_seller_fallback: billing.fellBack }),
+    [funnelId, seller, billing.fellBack],
+  );
 
   useEffect(() => {
     if (paywallTracked.current) return;
@@ -182,7 +195,7 @@ export default function Checkout() {
   const metaMatchingHadFbp = useRef(true);
   const sendMetaMatching = useCallback(
     (forUid: string, forEmail: string | null, trigger: "paywall" | "purchase_start") => {
-      sendMetaMatchingToRevenueCat(forUid, forEmail)
+      sendMetaMatchingToRevenueCat(forUid, seller, forEmail)
         .then((result) => {
           if (!result) return;
           metaMatchingHadFbp.current = result.has_fbp;
@@ -198,7 +211,7 @@ export default function Checkout() {
           });
         });
     },
-    [context],
+    [context, seller],
   );
   useEffect(() => {
     if (!uid || plans.status !== "ready" || metaMatchingSent.current === uid) return;
@@ -237,7 +250,7 @@ export default function Checkout() {
     let purchaseStarted = false;
     (async () => {
       try {
-        const purchases = await purchasesFor(uid);
+        const purchases = await purchasesFor(uid, seller);
         ensurePrivateCheckoutRoot();
         const result = await purchases.presentPaywall({
           offering,
@@ -274,7 +287,7 @@ export default function Checkout() {
         plan = planIdOf(result.selectedPackage) ?? plan;
         trial = trialProperties(packageOffersTrial(result.selectedPackage), trialExpected);
         setPaying("confirming");
-        const unlocked = await waitForPremium(uid, result.customerInfo);
+        const unlocked = await waitForPremium(uid, seller, result.customerInfo);
         if (!active) return;
         trackWebFunnelEvent(WEB_FUNNEL_EVENTS.checkoutSuccess, {
           ...context,

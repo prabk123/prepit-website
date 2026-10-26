@@ -93,7 +93,8 @@ function SavingPlan({ from, provider }: { from: BridgeSource; provider: string |
  * get their own page, people who had a trial get "Welcome back", and
  * everyone else goes on to RevenueCat's checkout and then "You're in".
  */
-export default function StartBridge() {
+/** `country` picks the company that sells at checkout (PRE-355). */
+export default function StartBridge({ country }: { country: string | null }) {
   const params = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -355,7 +356,7 @@ export default function StartBridge() {
       {/* Checkout names the signed-in account under the paywall, with Sign out. */}
       <div className="rounded-tile border border-line bg-surface p-4 sm:p-6">
         <div className="flex w-full flex-col items-center gap-6 text-center">
-          <Checkout />
+          <Checkout country={country} />
         </div>
       </div>
       <Assurances trial={!welcomeBack} />

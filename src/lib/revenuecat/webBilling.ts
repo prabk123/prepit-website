@@ -2,10 +2,12 @@
 
 import type { CustomerInfo, Offering, Package, Purchases } from "@revenuecat/purchases-js";
 import { readCookie } from "@/lib/cookies";
+import { COUNTRY_COOKIE } from "@/lib/markets";
 import { isProductionDeploy } from "@/lib/firebase/config";
 import { mayKeepAttribution, readAttribution } from "@/lib/funnel/attributionStore";
 import { metaMatchingAttributes } from "@/lib/metaMatching";
 import type { PlanId } from "@/lib/pricing";
+import { webBillingKeyFor, webBillingSellerFor, type WebBillingSeller } from "@/lib/revenuecat/sellers";
 
 /**
  * RevenueCat Web Billing checkout (PRE-269). The customer is always the
@@ -13,9 +15,19 @@ import type { PlanId } from "@/lib/pricing";
  * purchase unlocks the app. Never configured for an anonymous customer.
  *
  * Set per deployment:
- * - NEXT_PUBLIC_REVENUECAT_WEB_BILLING_API_KEY: the Web Billing public key.
- *   Sandbox keys (`rcb_sb_…`) everywhere except production; production only
- *   takes a live key. A key on the wrong side is refused.
+ * - NEXT_PUBLIC_REVENUECAT_WEB_BILLING_API_KEY_US: the public key of the Web
+ *   Billing app on the US company's Stripe account (US, Canada, Australia,
+ *   New Zealand; lib/revenuecat/sellers.ts, PRE-355).
+ * - NEXT_PUBLIC_REVENUECAT_WEB_BILLING_API_KEY_UK: the public key of the Web
+ *   Billing app on the UK company's Stripe account (everyone else).
+ * - NEXT_PUBLIC_REVENUECAT_WEB_BILLING_API_KEY: the single key from before
+ *   PRE-355 (the US company's app), used by a seller whose own key isn't set.
+ * Sandbox keys (`rcb_sb_…`) everywhere except production; production only
+ * takes live keys. A key on the wrong side is refused.
+ *
+ * Both apps are in one RevenueCat project, so either key reads the same
+ * customer and `premium` entitlement; only the products, prices and Stripe
+ * account differ. Every call below names the seller whose key it uses.
  *
  * Checkout shows the paywall of the project's current offering, so which
  * offering, plans and paywall people see is changed in RevenueCat with no
@@ -28,33 +40,56 @@ export const PREMIUM_ENTITLEMENT = "premium";
 
 export type CheckoutUnavailable = "not_configured" | "wrong_key_environment";
 
-export function webBillingKeyProblem(): CheckoutUnavailable | null {
-  const key = process.env.NEXT_PUBLIC_REVENUECAT_WEB_BILLING_API_KEY?.trim();
+/** The key a seller's calls use (sellers.ts). */
+export function webBillingKey(seller: WebBillingSeller) {
+  // Spelled out so Next inlines each NEXT_PUBLIC_ value into the browser build.
+  return webBillingKeyFor(seller, {
+    shared: process.env.NEXT_PUBLIC_REVENUECAT_WEB_BILLING_API_KEY,
+    us: process.env.NEXT_PUBLIC_REVENUECAT_WEB_BILLING_API_KEY_US,
+    uk: process.env.NEXT_PUBLIC_REVENUECAT_WEB_BILLING_API_KEY_UK,
+  });
+}
+
+/**
+ * A seller whose key works, for pages that only read the customer: the one
+ * for this browser's country (the proxy's country cookie) first, else the
+ * other, since either key reads the same customer. Null when neither works.
+ * Checkout uses the country it was served with instead.
+ */
+export function webBillingSellerForReading(): WebBillingSeller | null {
+  const first = webBillingSellerFor(readCookie(COUNTRY_COOKIE));
+  const second: WebBillingSeller = first === "us" ? "uk" : "us";
+  return [first, second].find((seller) => webBillingKeyProblem(seller) === null) ?? null;
+}
+
+export function webBillingKeyProblem(seller: WebBillingSeller): CheckoutUnavailable | null {
+  const key = webBillingKey(seller).apiKey;
   if (!key) return "not_configured";
   const sandbox = key.startsWith("rcb_sb_");
   if (isProductionDeploy() ? sandbox : !sandbox) return "wrong_key_environment";
   return null;
 }
 
-let configured: { uid: string; purchases: Promise<Purchases> } | null = null;
+let configured: { uid: string; apiKey: string; purchases: Promise<Purchases> } | null = null;
 
-/** The Purchases instance for this signed-in uid. */
-export function purchasesFor(uid: string): Promise<Purchases> {
+/** The Purchases instance for this signed-in uid, on the seller's Web Billing app. */
+export function purchasesFor(uid: string, seller: WebBillingSeller): Promise<Purchases> {
   if (!uid) return Promise.reject(new Error("RevenueCat needs the Firebase uid"));
-  if (configured?.uid === uid) return configured.purchases;
+  const apiKey = webBillingKey(seller).apiKey;
+  if (!apiKey) return Promise.reject(new Error("RevenueCat Web Billing key is not set"));
+  if (configured?.uid === uid && configured.apiKey === apiKey) return configured.purchases;
   const previous = configured;
   const purchases = import("@revenuecat/purchases-js").then(async ({ Purchases }) => {
-    if (previous) {
-      const instance = await previous.purchases;
-      await instance.changeUser(uid);
-      return instance;
+    // Same app, another person: switch the customer. Another app: start over.
+    const reused = previous ? await previous.purchases.catch(() => null) : null;
+    if (reused && previous?.apiKey === apiKey) {
+      await reused.changeUser(uid);
+      return reused;
     }
-    return Purchases.configure({
-      apiKey: process.env.NEXT_PUBLIC_REVENUECAT_WEB_BILLING_API_KEY!.trim(),
-      appUserId: uid,
-    });
+    reused?.close();
+    return Purchases.configure({ apiKey, appUserId: uid });
   });
-  configured = { uid, purchases };
+  configured = { uid, apiKey, purchases };
   // A failed load or user switch must not stick: the next call starts again.
   purchases.catch(() => {
     if (configured?.purchases === purchases) configured = null;
@@ -109,7 +144,11 @@ export type MetaMatchingResult = {
  * non-EU visitor, or "Accept optional cookies"); otherwise nothing is sent.
  * The web SDK doesn't retry attributes, so a failure is reported, not thrown.
  */
-export async function sendMetaMatchingToRevenueCat(uid: string, email: string | null): Promise<MetaMatchingResult | null> {
+export async function sendMetaMatchingToRevenueCat(
+  uid: string,
+  seller: WebBillingSeller,
+  email: string | null,
+): Promise<MetaMatchingResult | null> {
   if (!mayKeepAttribution()) return null;
   const ip = await fetch("/api/client-ip", { cache: "no-store" })
     .then((response) => (response.ok ? (response.json() as Promise<{ ip?: string | null }>) : null))
@@ -125,7 +164,7 @@ export async function sendMetaMatchingToRevenueCat(uid: string, email: string | 
     pageUrl: window.location.href,
     now: Date.now(),
   });
-  const purchases = await purchasesFor(uid);
+  const purchases = await purchasesFor(uid, seller);
   const save = async (attributes: Record<string, string>) => {
     if (Object.keys(attributes).length === 0) return false;
     try {
@@ -189,8 +228,8 @@ export function offeringOffersTrial(offering: Offering): boolean {
 }
 
 /** The current offering, whose RevenueCat paywall checkout shows. */
-export async function loadCheckoutOffering(uid: string): Promise<CheckoutOffering> {
-  const purchases = await purchasesFor(uid);
+export async function loadCheckoutOffering(uid: string, seller: WebBillingSeller): Promise<CheckoutOffering> {
+  const purchases = await purchasesFor(uid, seller);
   const offering = (await purchases.getOfferings()).current;
   if (!offering) throw new Error("No current RevenueCat offering");
   if (!offering.hasPaywall) return { status: "no_paywall" };
@@ -236,9 +275,9 @@ const ENTITLEMENT_POLL_MS = 1_500;
  * Waits until RevenueCat shows `premium` as active for this customer, so the
  * app unlocks when they sign in. True once it's active, false after the wait.
  */
-export async function waitForPremium(uid: string, first?: CustomerInfo): Promise<boolean> {
+export async function waitForPremium(uid: string, seller: WebBillingSeller, first?: CustomerInfo): Promise<boolean> {
   if (first && hasPremium(first)) return true;
-  const purchases = await purchasesFor(uid);
+  const purchases = await purchasesFor(uid, seller);
   const deadline = Date.now() + ENTITLEMENT_WAIT_MS;
   while (Date.now() < deadline) {
     await new Promise((resolve) => setTimeout(resolve, ENTITLEMENT_POLL_MS));
@@ -264,12 +303,12 @@ export type PremiumDetails = {
 };
 
 /** The active `premium` entitlement, or null when there is none. */
-export async function loadPremiumDetails(uid: string): Promise<PremiumDetails | null> {
-  const purchases = await purchasesFor(uid);
+export async function loadPremiumDetails(uid: string, seller: WebBillingSeller): Promise<PremiumDetails | null> {
+  const purchases = await purchasesFor(uid, seller);
   const entitlement = (await purchases.getCustomerInfo()).entitlements.active[PREMIUM_ENTITLEMENT];
   if (!entitlement) return null;
   const store = entitlement.store;
-  // Only Web Billing (rc_billing) has a portal the backend can open. Older
+  // Only Web Billing (rc_billing, both sellers' apps) has a portal the backend can open. Older
   // Stripe or Paddle subscriptions were bought on the web too, but go to support.
   const place: BillingPlace =
     store === "rc_billing"

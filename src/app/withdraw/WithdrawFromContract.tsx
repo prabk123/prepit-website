@@ -111,7 +111,7 @@ export default function WithdrawFromContract({ country }: { country: string | nu
           size="title"
           align="center"
           title={wording.title}
-          lead={`If you signed up for PrepIt on our website in the last 14 days, you can ${wording.verb} your subscription here, and anything you've paid is refunded in full. Sign in with the Google or Apple account you subscribed with.`}
+          lead={`If you subscribed to PrepIt on our website in the last 14 days, you can ${wording.verb} your subscription here, and anything you've paid is refunded in full. Sign in with the Google or Apple account you subscribed with.`}
         />
         <SignInButtons context={{ page: "withdraw" }} />
       </>
