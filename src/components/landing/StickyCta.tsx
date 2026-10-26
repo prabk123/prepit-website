@@ -3,13 +3,13 @@
 import { useEffect, useState } from "react";
 import LandingCta from "@/components/landing/LandingCta";
 import type { WebMarket } from "@/lib/markets";
-import { TRIAL_DAYS } from "@/lib/pricing";
+import { type Prices, TRIAL_DAYS } from "@/lib/pricing";
 
 /**
  * Phones only: a bar with "Start my free 7 days" that slides up once the
  * hero's button has scrolled away, and hides again over the closing band.
  */
-export default function StickyCta({ market }: { market: WebMarket }) {
+export default function StickyCta({ market, prices }: { market: WebMarket; prices: Prices }) {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
@@ -35,7 +35,7 @@ export default function StickyCta({ market }: { market: WebMarket }) {
     >
       <p className="text-[13px] leading-tight text-ink-secondary">
         <b className="block text-small text-ink">{TRIAL_DAYS} days free</b>
-        {market === "web" ? "$0 today" : "Cancel anytime"}
+        {market === "web" ? `${prices.free} today` : "Cancel anytime"}
       </p>
       <LandingCta market={market} placement="sticky" small />
     </div>

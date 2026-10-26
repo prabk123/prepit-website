@@ -5,7 +5,7 @@ import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { appVideo } from "@/lib/captures";
 import type { WebMarket } from "@/lib/markets";
-import { PRICES, TRIAL_DAYS } from "@/lib/pricing";
+import { type Prices, TRIAL_DAYS } from "@/lib/pricing";
 
 /**
  * The direct-sale landing page's sections (PRE-302), built to the landing
@@ -150,12 +150,12 @@ function Body({ children }: { children: ReactNode }) {
 }
 
 /** Copy that differs between web checkout and the App Store markets. */
-export function landingCopy(market: WebMarket) {
+export function landingCopy(market: WebMarket, prices: Prices) {
   const web = market === "web";
   return {
     web,
     reassure: web
-      ? { strong: "$0 today.", rest: "Reminder email on day 4. Cancel before day 8 and you pay nothing." }
+      ? { strong: `${prices.free} today.`, rest: "Reminder email on day 4. Cancel before day 8 and you pay nothing." }
       : market === "app-store"
         ? { strong: `${TRIAL_DAYS} days free.`, rest: "Cancel in your iPhone's settings at least 24 hours before the trial ends and you pay nothing." }
         : { strong: "Not in your country yet.", rest: "Join the waitlist and we'll tell you when you can start." },
@@ -190,8 +190,8 @@ function LockIcon() {
 
 const SESSIONS = ["Getting to know you", "What I've noticed so far", "Week-in-review"];
 
-export function LandingHero({ market }: { market: WebMarket }) {
-  const { reassure } = landingCopy(market);
+export function LandingHero({ market, prices }: { market: WebMarket; prices: Prices }) {
+  const { reassure } = landingCopy(market, prices);
   return (
     <section
       id="hero"
@@ -656,10 +656,10 @@ export function TrustSection({ market }: { market: WebMarket }) {
 
 // ---------------------------------------------------------------- 9. we know how it goes
 
-export function WeKnowSection({ market }: { market: WebMarket }) {
+export function WeKnowSection({ market, prices }: { market: WebMarket; prices: Prices }) {
   const chargeAnswer =
     market === "web"
-      ? "You pay $0 today, we email a reminder on day 4, and you pay nothing if you cancel before day 8."
+      ? `You pay ${prices.free} today, we email a reminder on day 4, and you pay nothing if you cancel before day 8.`
       : `The first ${TRIAL_DAYS} days are free, and you pay nothing if you cancel in your iPhone's settings at least 24 hours before they end.`;
   return (
     <Section id="we-know" labelledBy="know-heading" analyticsName="we-know">
@@ -694,10 +694,11 @@ const INCLUDED = [
   "Widgets and Apple Health",
 ];
 
-export function OfferSection({ market }: { market: WebMarket }) {
+/** `prices` are checkout's currency on the web, and the US App Store prices otherwise (PRE-373). */
+export function OfferSection({ market, prices }: { market: WebMarket; prices: Prices }) {
   const web = market === "web";
   const timeline: [string, string, boolean?][] = [
-    ["Today", web ? "Sign in, get the app and start Session 1. You pay $0." : "Get the app and start Session 1."],
+    ["Today", web ? `Sign in, get the app and start Session 1. You pay ${prices.free}.` : "Get the app and start Session 1."],
     ["Around day 3", "Session 2: your first focus and two swaps."],
     ...(web ? ([["Day 4", "We email you a reminder, 4 days before any charge.", true]] as [string, string, boolean][]) : []),
     ["Around day 7", "Session 3: your week-in-review."],
@@ -724,7 +725,7 @@ export function OfferSection({ market }: { market: WebMarket }) {
         </div>
         <div className="grid gap-5 rounded-card border-t-4 border-t-accent bg-surface p-[clamp(22px,3vw,36px)] shadow-[0_40px_80px_-48px_rgb(26_26_46/0.35)]">
           <div>
-            <p className="font-display text-[clamp(38px,30px+1.6vw,52px)] leading-none">{web ? "$0 today" : `${TRIAL_DAYS} days free`}</p>
+            <p className="font-display text-[clamp(38px,30px+1.6vw,52px)] leading-none">{web ? `${prices.free} today` : `${TRIAL_DAYS} days free`}</p>
             <p className="mt-2 text-small text-ink-muted">Then, if you keep PrepIt:</p>
           </div>
           <div className="grid gap-2.5">
@@ -732,18 +733,18 @@ export function OfferSection({ market }: { market: WebMarket }) {
               <span className="font-bold">Yearly</span>
               {/* The yearly total is the big figure, the per-month one the note (PRE-357). */}
               <span className="text-right font-display text-[24px] leading-tight tabular-nums">
-                {PRICES.annual}
+                {prices.annual}
                 <small className="whitespace-nowrap font-sans text-small text-ink-muted"> a year</small>
               </span>
-              <span className="text-small text-ink-secondary">Works out at {PRICES.annualPerMonth} a month</span>
+              <span className="text-small text-ink-secondary">Works out at {prices.annualPerMonth} a month</span>
               <span className="justify-self-end whitespace-nowrap rounded-full bg-accent px-2.5 py-0.5 text-[12px] font-bold text-on-accent">
-                Save {PRICES.annualSavingPercent} vs monthly
+                Save {prices.annualSavingPercent} vs monthly
               </span>
             </div>
             <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 rounded-[18px] border-[1.5px] border-line px-4 py-3.5">
               <span className="font-bold">Monthly</span>
               <span className="text-right font-display text-[24px] leading-tight tabular-nums">
-                {PRICES.monthly}
+                {prices.monthly}
                 <small className="whitespace-nowrap font-sans text-small text-ink-muted"> a month</small>
               </span>
               <span className="text-small text-ink-secondary">Billed monthly</span>
@@ -762,8 +763,8 @@ export function OfferSection({ market }: { market: WebMarket }) {
           <LandingCta market={market} placement="pricing" fullWidth />
           <p className="text-[13px] leading-normal text-ink-muted">
             {web
-              ? "Renews automatically until you cancel. Cancel before day 8 and you pay nothing. Prices in US dollars. For iPhone."
-              : "Renews automatically until you cancel. Prices in US dollars; the App Store shows the price for your country. For iPhone."}
+              ? `Renews automatically until you cancel. Cancel before day 8 and you pay nothing. Prices in ${prices.currencyName}. For iPhone.`
+              : `Renews automatically until you cancel. Prices in ${prices.currencyName}; the App Store shows the price for your country. For iPhone.`}
           </p>
         </div>
       </div>
@@ -773,7 +774,7 @@ export function OfferSection({ market }: { market: WebMarket }) {
 
 // ---------------------------------------------------------------- 12. closing (dark band)
 
-export function ClosingSection({ market }: { market: WebMarket }) {
+export function ClosingSection({ market, prices }: { market: WebMarket; prices: Prices }) {
   const web = market === "web";
   return (
     <Section id="start" tone="dark" labelledBy="close-heading" analyticsName="closing">
@@ -787,12 +788,12 @@ export function ClosingSection({ market }: { market: WebMarket }) {
           Start eating healthier this week.
         </h2>
         <p className="text-lead text-ink-secondary">
-          {TRIAL_DAYS} days free, with your nutrition consultation.{web ? " $0 today." : ""}
+          {TRIAL_DAYS} days free, with your nutrition consultation.{web ? ` ${prices.free} today.` : ""}
         </p>
         <LandingCta market={market} placement="closing" />
         <p className="max-w-[34em] text-small text-ink-muted">
-          Then {PRICES.annual} a year (that works out at {PRICES.annualPerMonth} a month), or {PRICES.monthly} a month.
-          {web ? " We email you a reminder on day 4." : ""} Prices in US dollars.
+          Then {prices.annual} a year (that works out at {prices.annualPerMonth} a month), or {prices.monthly} a month.
+          {web ? " We email you a reminder on day 4." : ""} Prices in {prices.currencyName}.
         </p>
       </div>
     </Section>
