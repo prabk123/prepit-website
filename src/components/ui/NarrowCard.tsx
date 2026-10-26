@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 
 /**
  * The centred white card with the logo used by the one-task pages: the email
- * sign-in link, sign-in, checkout and account. Children sit under the logo.
+ * sign-in link, sign-in and account. Children sit under the logo.
  */
 export default function NarrowCard({ children }: { children: ReactNode }) {
   return (

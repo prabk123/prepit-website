@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Checkout from "@/app/checkout/Checkout";
 import EmailInUseNotice from "@/components/account/EmailInUseNotice";
@@ -15,9 +15,7 @@ import {
   BridgeHeader,
   BridgeProgress,
   ConsultationShots,
-  DueSummary,
   FreeWeekTimeline,
-  PlanChooser,
   QuizPlanCard,
   SUPPORT_EMAIL,
   TrialTerms,
@@ -29,7 +27,7 @@ import { openAppUrl } from "@/lib/appStore";
 import { providerOf, signInAuthDomain, signOutOfWebsite } from "@/lib/firebase/auth";
 import { readBridgeHandoff, writeBridgeVisit, type BridgeHandoff } from "@/lib/funnel/bridgeHandoff";
 import { parseBridgeSource, parseFunnelId, type BridgeSource } from "@/lib/funnel/params";
-import { parsePlanId, type PlanId } from "@/lib/pricing";
+import { parsePlanId } from "@/lib/pricing";
 import { identifyPixelUser, trackSignupRegistration } from "@/lib/metaPixel";
 import { resetWebUser, trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webFunnelAnalytics";
 
@@ -88,7 +86,8 @@ function SavingPlan({ from, provider }: { from: BridgeSource; provider: string |
 /**
  * The shared bridge (PRE-323), from the bridge design, for the landing page
  * and the quiz: one page whose header follows `from`. Before sign-in it shows
- * the dated free week, the plans, what's due today and the sign-in buttons.
+ * the dated free week and the sign-in buttons; the plans and prices are
+ * RevenueCat's paywall after sign-in, in the buyer's currency (PRE-375).
  * After sign-in the quiz's answers are saved to the account, then members
  * get their own page, people who had a trial get "Welcome back", and
  * everyone else goes on to RevenueCat's checkout and then "You're in".
@@ -96,11 +95,11 @@ function SavingPlan({ from, provider }: { from: BridgeSource; provider: string |
 /** `country` picks the company that sells at checkout (PRE-355). */
 export default function StartBridge({ country }: { country: string | null }) {
   const params = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname();
   const from = parseBridgeSource(params.get("from"));
   const funnelId = parseFunnelId(params.get("funnel"));
-  const plan: PlanId = parsePlanId(params.get("plan")) ?? "annual";
+  // The plan named in the link that sent them here, or null: the plan itself is
+  // picked on RevenueCat's paywall (PRE-375).
+  const plan = parsePlanId(params.get("plan"));
   const context = useMemo(() => ({ funnel_id: funnelId, plan, from }), [funnelId, plan, from]);
 
   const { session, reloadAccount } = useWebSession();
@@ -160,12 +159,6 @@ export default function StartBridge({ country }: { country: string | null }) {
     if (atCheckout) writeBridgeVisit({ from, trial });
   }, [atCheckout, from, trial]);
 
-  function choosePlan(next: PlanId) {
-    const query = new URLSearchParams(params.toString());
-    query.set("plan", next);
-    router.replace(`${pathname}?${query}`, { scroll: false });
-  }
-
   async function signOut(keepQuizAnswers = false) {
     await signOutOfWebsite({ keepQuizAnswers });
     if (!keepQuizAnswers) setHandoff(null);
@@ -187,7 +180,7 @@ export default function StartBridge({ country }: { country: string | null }) {
         <BridgeHead
           eyebrow="Your plan is ready"
           title={name ? `${name}, your free 7 days start today.` : "Your free 7 days start today."}
-          lead="Your 3-session consultation with your AI nutritionist is included. You pay $0 today."
+          lead="Your 3-session consultation with your AI nutritionist is included. Nothing to pay today."
         />
         <QuizPlanCard name={name} summary={handoff?.planSummary} />
       </>
@@ -195,7 +188,7 @@ export default function StartBridge({ country }: { country: string | null }) {
       <BridgeHead
         eyebrow="Your AI nutritionist"
         title="Your free 7 days start today."
-        lead="Including a 3-session nutrition consultation with your AI nutritionist. You pay $0 today."
+        lead="Including a 3-session nutrition consultation with your AI nutritionist. Nothing to pay today."
       />
     );
 
@@ -240,13 +233,11 @@ export default function StartBridge({ country }: { country: string | null }) {
         </BridgeHeader>
         <BridgeProgress from={from} current="trial" />
         {intro}
-        <FreeWeekTimeline plan={plan} today={today} />
-        <PlanChooser plan={plan} onChange={choosePlan} />
+        <FreeWeekTimeline today={today} />
         <section id="signin" aria-labelledby="signin-heading" className="flex scroll-mt-28 flex-col gap-3">
           <h2 id="signin-heading" className="font-display text-title text-ink">
             Start my free 7 days
           </h2>
-          <DueSummary plan={plan} today={today} />
           {summary?.emailInUse ? (
             <EmailInUseNotice
               existingProvider={summary.emailInUse.existingProvider}
@@ -262,7 +253,7 @@ export default function StartBridge({ country }: { country: string | null }) {
               <SignInButtons context={context} loginHint={handoff?.email} />
             </>
           )}
-          <TrialTerms plan={plan} today={today} />
+          <TrialTerms today={today} />
         </section>
         <Assurances />
         <ConsultationShots />
@@ -341,7 +332,15 @@ export default function StartBridge({ country }: { country: string | null }) {
   const welcomeBack = summary.hasUsedTrial;
   return (
     <>
-      <BridgeHeader />
+      {/* The paying account, with Sign out, in the header like /checkout (PRE-375). */}
+      <BridgeHeader>
+        <SignedInChip
+          provider={provider}
+          email={session.status === "signedIn" ? session.user.email : null}
+          onSignOut={() => void signOut()}
+          compact
+        />
+      </BridgeHeader>
       <BridgeProgress from={from} current="trial" />
       {welcomeBack ? (
         <BridgeHead
@@ -354,12 +353,8 @@ export default function StartBridge({ country }: { country: string | null }) {
           Your free 7 days are one step away. Nothing was charged.
         </BridgeAlert>
       )}
-      {/* Checkout names the signed-in account under the paywall, with Sign out. */}
-      <div className="rounded-tile border border-line bg-surface p-4 sm:p-6">
-        <div className="flex w-full flex-col items-center gap-6 text-center">
-          <Checkout country={country} />
-        </div>
-      </div>
+      {/* RevenueCat's paywall, straight on the page with no card around it (PRE-375). */}
+      <Checkout country={country} header={false} />
       <Assurances trial={!welcomeBack} />
       <BridgeFooter />
     </>

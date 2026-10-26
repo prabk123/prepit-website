@@ -4,8 +4,10 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useWebSession } from "@/components/account/useWebSession";
+import { BridgeHeader } from "@/components/bridge/BridgeParts";
+import SignedInChip from "@/components/bridge/SignedInChip";
 import SectionHeading from "@/components/ui/SectionHeading";
-import { PRIMARY_BUTTON_CLASS, TEXT_BUTTON_CLASS } from "@/components/ui/buttons";
+import { PRIMARY_BUTTON_CLASS } from "@/components/ui/buttons";
 import { providerOf, signOutOfWebsite } from "@/lib/firebase/auth";
 import { parseFunnelId } from "@/lib/funnel/params";
 import { parsePlanId } from "@/lib/pricing";
@@ -26,12 +28,11 @@ import {
   webBillingKeyProblem,
   type CheckoutFailure,
 } from "@/lib/revenuecat/webBilling";
+import { forceLightPaywall, systemPrefersDark } from "@/lib/revenuecat/lightPaywall";
 import { webBillingSellerFor } from "@/lib/revenuecat/sellers";
 import type { Offering } from "@revenuecat/purchases-js";
 import { identifyPixelUser, trackCheckoutInitiated } from "@/lib/metaPixel";
 import { resetWebUser, trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webFunnelAnalytics";
-
-const PROVIDER_NAMES = { google: "Google", apple: "Apple" } as const;
 
 /**
  * `has_trial` is RevenueCat's answer for this customer; `trial_expected` is
@@ -79,8 +80,14 @@ type Plans =
  * The country also picks the company that sells (PRE-355): US, Canada,
  * Australia and New Zealand buy on the US company's Web Billing app, everyone
  * else on the UK company's (lib/revenuecat/sellers.ts).
+ *
+ * The paywall fills the page (PRE-375): no card around it, the page turns
+ * white to match the paywall's light background, and the signed-in account
+ * with Sign out sits in a slim header above it. `header={false}` is for /start,
+ * which draws its own header with the account. The paywall always shows its
+ * light colours, like the rest of the site (lightPaywall.ts).
  */
-export default function Checkout({ country }: { country: string | null }) {
+export default function Checkout({ country, header = true }: { country: string | null; header?: boolean }) {
   const params = useSearchParams();
   const router = useRouter();
   const funnelId = parseFunnelId(params.get("funnel"));
@@ -177,6 +184,8 @@ export default function Checkout({ country }: { country: string | null }) {
       trackWebFunnelEvent(WEB_FUNNEL_EVENTS.paywallView, {
         ...context,
         plan: requestedPlan,
+        // The visitor's system is dark, so the light paywall was forced (PRE-375).
+        system_dark_mode: systemPrefersDark(),
         ...trialProperties(offeringOffersTrial(plans.offering), plans.trialExpected),
       });
       if (session.status === "signedIn") identifyPixelUser(session.user.uid, session.user.email);
@@ -248,6 +257,7 @@ export default function Checkout({ country }: { country: string | null }) {
     let plan: string | null = null;
     let trial: ReturnType<typeof trialProperties> | null = null;
     let purchaseStarted = false;
+    const releaseLight = forceLightPaywall();
     (async () => {
       try {
         const purchases = await purchasesFor(uid, seller);
@@ -322,47 +332,69 @@ export default function Checkout({ country }: { country: string | null }) {
     })();
     return () => {
       active = false;
+      releaseLight();
       host.replaceChildren();
     };
     // welcomePath and context only change with the session and URL already in the deps.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uid, offering, presentKey]);
 
+  const signOut = () => {
+    void signOutOfWebsite().then(resetWebUser);
+  };
+  // Which account is paying, so an old session on the wrong account is visible.
+  const top = header ? (
+    <BridgeHeader>
+      {session.status === "signedIn" && <SignedInChip provider={provider} email={email} onSignOut={signOut} compact />}
+    </BridgeHeader>
+  ) : null;
+
   if (keyProblem || plans.status === "no_paywall") {
     return (
-      <SectionHeading
-        as="h1"
-        size="title"
-        align="center"
-        title="Checkout isn't available right now"
-        lead="Please try again later, or get PrepIt from the App Store."
-      />
+      <>
+        {top}
+        <SectionHeading
+          as="h1"
+          size="title"
+          align="center"
+          title="Checkout isn't available right now"
+          lead="Please try again later, or get PrepIt from the App Store."
+        />
+      </>
     );
   }
 
   if (session.status !== "signedIn" || account?.status === "loading" || plans.status === "loading" || plans.status === "already_subscribed" || plans.status === "email_in_use") {
-    return <p className="text-body text-ink-secondary">Loading your plans…</p>;
+    return (
+      <>
+        {top}
+        <p className="text-center text-body text-ink-secondary">Loading your plans…</p>
+      </>
+    );
   }
 
   if (account?.status === "error" || plans.status === "error" || paywallFailed) {
     return (
       <>
-        <SectionHeading as="h1" size="title" align="center" title="We couldn't load the plans" lead="Please try again in a moment." />
-        <button
-          type="button"
-          className={PRIMARY_BUTTON_CLASS}
-          onClick={() => {
-            if (paywallFailed) {
-              setPaywallFailed(false);
-              setPresentKey((key) => key + 1);
-              return;
-            }
-            reloadAccount();
-            setReloadKey((key) => key + 1);
-          }}
-        >
-          Try again
-        </button>
+        {top}
+        <div className="flex flex-col items-center gap-6 text-center">
+          <SectionHeading as="h1" size="title" align="center" title="We couldn't load the plans" lead="Please try again in a moment." />
+          <button
+            type="button"
+            className={PRIMARY_BUTTON_CLASS}
+            onClick={() => {
+              if (paywallFailed) {
+                setPaywallFailed(false);
+                setPresentKey((key) => key + 1);
+                return;
+              }
+              reloadAccount();
+              setReloadKey((key) => key + 1);
+            }}
+          >
+            Try again
+          </button>
+        </div>
       </>
     );
   }
@@ -371,15 +403,20 @@ export default function Checkout({ country }: { country: string | null }) {
 
   return (
     <>
+      {top}
       {paying === "confirming" ? (
-        <p role="status" className="text-body text-ink-secondary">
+        <p role="status" className="text-center text-body text-ink-secondary">
           Confirming your subscription…
         </p>
       ) : (
-        <div ref={paywallHost} className="ph-no-capture w-full" data-testid="revenuecat-paywall" />
+        <>
+          {/* Turns the page white like the paywall (globals.css). */}
+          <span hidden data-paywall-page="" />
+          <div ref={paywallHost} className="ph-no-capture w-full" data-paywall-host="" data-testid="revenuecat-paywall" />
+        </>
       )}
       {failure && paying === "idle" && (
-        <div className="flex w-full flex-col gap-3">
+        <div className="flex w-full flex-col items-center gap-3 text-center">
           {message && (
             <p role="alert" className="text-small text-error">
               {message}
@@ -399,21 +436,7 @@ export default function Checkout({ country }: { country: string | null }) {
           )}
         </div>
       )}
-      {/* Which account is paying, so an old session on the wrong account is visible. */}
-      <p className="ph-no-capture text-small text-ink-muted">
-        Paying for the PrepIt account signed in{provider ? ` with ${PROVIDER_NAMES[provider]}` : ""}
-        {email ? ` as ${email}` : ""}.{" "}
-        <button
-          type="button"
-          className={TEXT_BUTTON_CLASS}
-          onClick={() => {
-            void signOutOfWebsite().then(resetWebUser);
-          }}
-        >
-          Not you? Sign out
-        </button>
-      </p>
-      <p className="text-small text-ink-muted">
+      <p className="text-center text-small text-ink-muted">
         Renews automatically until you cancel. Cancel any time at tryprepit.app/account. See our{" "}
         <Link href="/terms-and-conditions" className="underline underline-offset-4 hover:text-ink">
           Terms

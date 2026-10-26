@@ -599,6 +599,23 @@
     display: none;
   }
 
+  /* While RevenueCat's paywall is on the page (<Checkout>, PRE-375), the page is white like the paywall, so it reads as one page, not a box. */
+  body:has([data-paywall-page]) {
+    --color-page: var(--color-surface);
+  }
+
+  /*
+   * RevenueCat's paywall pins its logo row to the top of the screen, with no
+   * background, so on a phone the logo slid over the text as the page
+   * scrolled (PRE-375). On the website it scrolls with the page. The plans and
+   * button stay pinned to the bottom, as in the app. If RevenueCat renames
+   * the class, the logo just stays pinned again. `!important` because this
+   * sheet is layered and RevenueCat's own styles are not.
+   */
+  [data-paywall-host] .header-wrapper {
+    position: static !important;
+  }
+
   /* <LoopVideo>: the clip plus its pause/play button. */
   .loop-video {
     position: relative;
