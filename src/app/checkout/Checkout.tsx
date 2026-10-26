@@ -23,9 +23,11 @@ import {
   sendMetaMatchingToRevenueCat,
   toCheckoutFailure,
   waitForPremium,
+  webBillingKey,
   webBillingKeyProblem,
   type CheckoutFailure,
 } from "@/lib/revenuecat/webBilling";
+import { webBillingSellerFor } from "@/lib/revenuecat/sellers";
 import type { Offering } from "@revenuecat/purchases-js";
 import { identifyPixelUser, trackCheckoutInitiated } from "@/lib/metaPixel";
 import { resetWebUser, trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webFunnelAnalytics";
@@ -84,6 +86,10 @@ type Plans =
  * access now (PRE-356). That box sits above the sign-in buttons; this page
  * saves the answer on the RevenueCat customer before the paywall, and asks
  * here only when the buyer never saw it (already signed in).
+ *
+ * The country also picks the company that sells (PRE-355): US, Canada,
+ * Australia and New Zealand buy on the US company's Web Billing app, everyone
+ * else on the UK company's (lib/revenuecat/sellers.ts).
  */
 export default function Checkout({ country, askWithdrawalConsent }: { country: string | null; askWithdrawalConsent: boolean }) {
   const params = useSearchParams();
@@ -91,7 +97,9 @@ export default function Checkout({ country, askWithdrawalConsent }: { country: s
   const funnelId = parseFunnelId(params.get("funnel"));
   const requestedPlan = parsePlanId(params.get("plan"));
   const { session, reloadAccount } = useWebSession();
-  const keyProblem = webBillingKeyProblem();
+  const seller = webBillingSellerFor(country);
+  const billing = webBillingKey(seller);
+  const keyProblem = webBillingKeyProblem(seller);
 
   const [plansState, setPlans] = useState<{ key: string; plans: Plans } | null>(null);
   const [paying, setPaying] = useState<"idle" | "confirming">("idle");
@@ -147,10 +155,10 @@ export default function Checkout({ country, askWithdrawalConsent }: { country: s
       try {
         // Premium from any store (an App Store subscription, or a web
         // purchase made before the account existed) means no checkout.
-        const purchases = await purchasesFor(uid);
+        const purchases = await purchasesFor(uid, seller);
         const customerInfo = await purchases.getCustomerInfo();
         if (hasPremium(customerInfo)) return done({ status: "already_subscribed" });
-        const loaded = await loadCheckoutOffering(uid);
+        const loaded = await loadCheckoutOffering(uid, seller);
         // A trial before (PrepIt's record, or premium at any time in RevenueCat)
         // means no second one; RevenueCat's trial eligibility enforces it.
         const hadTrial = summary.hasUsedTrial || hadPremium(customerInfo);
@@ -162,9 +170,14 @@ export default function Checkout({ country, askWithdrawalConsent }: { country: s
     return () => {
       cancelled = true;
     };
-  }, [uid, summary, plansKey, keyProblem]);
+  }, [uid, summary, plansKey, keyProblem, seller]);
 
-  const context = useMemo(() => ({ funnel_id: funnelId }), [funnelId]);
+  // `billing_seller`: whose Web Billing app this checkout sells on;
+  // `billing_seller_fallback`: that seller's own key isn't set, so this is on the shared pre-PRE-355 key.
+  const context = useMemo(
+    () => ({ funnel_id: funnelId, billing_seller: seller, billing_seller_fallback: billing.fellBack }),
+    [funnelId, seller, billing.fellBack],
+  );
 
   useEffect(() => {
     if (paywallTracked.current) return;
@@ -201,7 +214,7 @@ export default function Checkout({ country, askWithdrawalConsent }: { country: s
   const metaMatchingHadFbp = useRef(true);
   const sendMetaMatching = useCallback(
     (forUid: string, forEmail: string | null, trigger: "paywall" | "purchase_start") => {
-      sendMetaMatchingToRevenueCat(forUid, forEmail)
+      sendMetaMatchingToRevenueCat(forUid, seller, forEmail)
         .then((result) => {
           if (!result) return;
           metaMatchingHadFbp.current = result.has_fbp;
@@ -217,7 +230,7 @@ export default function Checkout({ country, askWithdrawalConsent }: { country: s
           });
         });
     },
-    [context],
+    [context, seller],
   );
   useEffect(() => {
     if (!uid || plans.status !== "ready" || metaMatchingSent.current === uid) return;
@@ -256,7 +269,7 @@ export default function Checkout({ country, askWithdrawalConsent }: { country: s
     let purchaseStarted = false;
     (async () => {
       try {
-        const purchases = await purchasesFor(uid);
+        const purchases = await purchasesFor(uid, seller);
         ensurePrivateCheckoutRoot();
         const result = await purchases.presentPaywall({
           offering,
@@ -296,7 +309,7 @@ export default function Checkout({ country, askWithdrawalConsent }: { country: s
         plan = planIdOf(result.selectedPackage) ?? plan;
         trial = trialProperties(packageOffersTrial(result.selectedPackage), trialExpected);
         setPaying("confirming");
-        const unlocked = await waitForPremium(uid, result.customerInfo);
+        const unlocked = await waitForPremium(uid, seller, result.customerInfo);
         if (!active) return;
         trackWebFunnelEvent(WEB_FUNNEL_EVENTS.checkoutSuccess, {
           ...context,
@@ -346,12 +359,13 @@ export default function Checkout({ country, askWithdrawalConsent }: { country: s
     (async () => {
       const recorded = await saveWithdrawalConsent(
         uid,
+        seller,
         startNow.startNow && startNow.at
           ? withdrawalConsentAttributes(country, new Date(startNow.at))
           : clearedWithdrawalConsentAttributes(),
       );
       trackWebFunnelEvent(WEB_FUNNEL_EVENTS.withdrawalConsent, {
-        funnel_id: funnelId,
+        ...context,
         wording_version: startNow.version,
         start_now: startNow.startNow,
         asked_on: startNow.askedOn,
@@ -364,7 +378,7 @@ export default function Checkout({ country, askWithdrawalConsent }: { country: s
       // Unmounted before it finished: the next showing tries again.
       if (startNowSaving.current === uid) startNowSaving.current = null;
     };
-  }, [askWithdrawalConsent, uid, startNow, country, funnelId]);
+  }, [askWithdrawalConsent, uid, startNow, country, seller, context]);
 
   if (keyProblem || plans.status === "no_paywall") {
     return (

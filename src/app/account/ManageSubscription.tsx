@@ -16,7 +16,11 @@ import { PRIMARY_BUTTON_CLASS, TEXT_BUTTON_CLASS } from "@/components/ui/buttons
 import { providerOf, signOutOfWebsite } from "@/lib/firebase/auth";
 import { createBillingManagementUrl } from "@/lib/prepitApi";
 import { subscriptionDateLine } from "@/lib/revenuecat/subscriptionDateLine";
-import { loadPremiumDetails, webBillingKeyProblem, type PremiumDetails } from "@/lib/revenuecat/webBilling";
+import {
+  loadPremiumDetails,
+  webBillingSellerForReading,
+  type PremiumDetails,
+} from "@/lib/revenuecat/webBilling";
 import { resetWebUser, trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webFunnelAnalytics";
 
 const PROVIDER_NAMES = { google: "Google", apple: "Apple" } as const;
@@ -71,11 +75,12 @@ function ManageAfterSignIn({ linkExpired }: { linkExpired: boolean }) {
     const done = (next: Details) => {
       if (!cancelled) setDetails({ uid, details: next });
     };
-    if (webBillingKeyProblem()) {
+    const seller = webBillingSellerForReading();
+    if (!seller) {
       done({ status: "unknown" });
       return;
     }
-    loadPremiumDetails(uid)
+    loadPremiumDetails(uid, seller)
       .then((premium) => done({ status: "ready", premium }))
       .catch(() => done({ status: "unknown" }));
     return () => {

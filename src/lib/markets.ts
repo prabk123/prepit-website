@@ -3,7 +3,9 @@
  * on the website (landing page, quiz, bridge, checkout), in US dollars until
  * there are local prices. The App Store and waitlist markets stay so a
  * country can be taken off web checkout again with a one-line change here;
- * both lists are empty for now.
+ * both lists are empty for now. Which company bills each country, and so
+ * which Web Billing app and currency checkout uses, is lib/revenuecat/sellers.ts
+ * (PRE-355).
  */
 export type WebMarket = "web" | "app-store" | "waitlist";
 
