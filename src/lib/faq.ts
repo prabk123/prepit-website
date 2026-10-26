@@ -1,4 +1,4 @@
-import { PRICES, TRIAL_DAYS } from "@/lib/pricing";
+import { PRICES, type Prices, TRIAL_DAYS } from "@/lib/pricing";
 import { RESEARCH_PAGE_HREF } from "@/lib/research";
 
 export type FaqItem = {
@@ -116,13 +116,14 @@ function landingMedicalFaq(professional: string): FaqItem {
 /**
  * The landing page FAQ where visitors start on the website (PRE-302).
  * A web subscription is managed and cancelled on the website, not in the app
- * or the App Store (PRE-304), so the cancel answer says so.
+ * or the App Store (PRE-304), so the cancel answer says so. The prices are
+ * in the currency checkout charges this visitor (PRE-373).
  */
-export const LANDING_WEB_FAQ_ITEMS: FaqItem[] = [
+export const landingWebFaqItems = (prices: Prices): FaqItem[] => [
   {
     id: "landing-web-trial",
     question: "How does the free trial work?",
-    answer: `You get ${TRIAL_DAYS} days with everything included, starting with your nutrition consultation. You pay $0 today, and we email you a reminder on day 4. If you keep PrepIt, your plan starts on day 8: ${PRICES.annual} a year (that works out at ${PRICES.annualPerMonth} a month) or ${PRICES.monthly} a month. Cancel before day 8 and you pay nothing.`,
+    answer: `You get ${TRIAL_DAYS} days with everything included, starting with your nutrition consultation. You pay ${prices.free} today, and we email you a reminder on day 4. If you keep PrepIt, your plan starts on day 8: ${prices.annual} a year (that works out at ${prices.annualPerMonth} a month) or ${prices.monthly} a month. Cancel before day 8 and you pay nothing.`,
   },
   {
     id: "landing-web-cancel",

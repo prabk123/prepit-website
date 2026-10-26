@@ -19,7 +19,8 @@ import LandingViewTracker from "@/components/landing/LandingViewTracker";
 import StickyCta from "@/components/landing/StickyCta";
 import { HideSiteFinalCta } from "@/components/pricing/SiteFinalCta";
 import { COUNTRY_HEADER, webMarketFor } from "@/lib/markets";
-import { TRIAL_DAYS } from "@/lib/pricing";
+import { PRICES, TRIAL_DAYS, WEB_PRICES } from "@/lib/pricing";
+import { webBillingSellerFor } from "@/lib/revenuecat/sellers";
 
 const TITLE = "PrepIt | Eat healthier, one change at a time";
 const DESCRIPTION = `Tell your AI nutritionist what you eat. It finds the one thing to change first and plans your week. ${TRIAL_DAYS} days free, with a nutrition consultation.`;
@@ -39,17 +40,20 @@ export const metadata: Metadata = {
  * Visitors start their free week on the website (sign in, pay $0, then
  * download the app). That is every country for now; a country listed in
  * lib/markets.ts goes to the App Store or the waitlist instead (PRE-331).
- * The proxy passes the country.
+ * The proxy passes the country, which also picks the currency of the prices:
+ * the one checkout charges, or US dollars for the App Store (PRE-373).
  */
 export default async function LandingPage() {
-  const market = webMarketFor((await headers()).get(COUNTRY_HEADER));
+  const country = (await headers()).get(COUNTRY_HEADER);
+  const market = webMarketFor(country);
+  const prices = market === "web" ? WEB_PRICES[webBillingSellerFor(country)] : PRICES;
 
   return (
     <div className="bg-page text-ink">
       <HideSiteFinalCta />
       <SectionViewTracker />
-      <LandingViewTracker market={market} />
-      <LandingHero market={market} />
+      <LandingViewTracker market={market} priceCurrency={prices.currency} />
+      <LandingHero market={market} prices={prices} />
       <FreeWeekSection market={market} />
       <WhyItWorksSection />
       <SignalsSection />
@@ -57,11 +61,11 @@ export default async function LandingPage() {
       <LoggingSection />
       <JustAskSection />
       <TrustSection market={market} />
-      <WeKnowSection market={market} />
-      <OfferSection market={market} />
-      <LandingFaq market={market} />
-      <ClosingSection market={market} />
-      <StickyCta market={market} />
+      <WeKnowSection market={market} prices={prices} />
+      <OfferSection market={market} prices={prices} />
+      <LandingFaq market={market} prices={prices} />
+      <ClosingSection market={market} prices={prices} />
+      <StickyCta market={market} prices={prices} />
     </div>
   );
 }

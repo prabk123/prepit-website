@@ -1,5 +1,5 @@
 import { Caption, Card, CardTitle, ESTIMATES, Eyebrow, MiniPhone, Question, REAL_SCREENS, Shot, TargetTiles, Timeline } from "@/components/quiz/parts";
-import { PRICES } from "@/lib/pricing";
+import type { Prices } from "@/lib/pricing";
 import { proteinFirst, type QuizAnswers, resultHeadline, resultTags, startingPoint, type Targets, trialDay } from "@/lib/quiz/quiz";
 
 const STRIP = [
@@ -43,15 +43,21 @@ const INCLUDED = [
   "Widgets and Apple Health",
 ];
 
-/** $99.99 a year as a monthly figure, e.g. "$8.33". */
-const PER_MONTH = `$${(Number.parseFloat(PRICES.annual.replace(/[^\d.]/g, "")) / 12).toFixed(2)}`;
-
 /**
  * The quiz's plan page: the starting point, daily targets from the backend,
  * the free week with its dates, what's included and the price. The plan
  * itself is chosen on the bridge.
  */
-export default function ResultScreen({ answers, targets }: { answers: QuizAnswers; targets: Targets | null | undefined }) {
+export default function ResultScreen({
+  answers,
+  targets,
+  prices,
+}: {
+  answers: QuizAnswers;
+  targets: Targets | null | undefined;
+  /** In the currency checkout charges (PRE-373). */
+  prices: Prices;
+}) {
   const point = startingPoint(answers);
   return (
     <>
@@ -105,7 +111,7 @@ export default function ResultScreen({ answers, targets }: { answers: QuizAnswer
         <div className="mt-3">
           <Timeline
             items={[
-              { when: "Today", what: "Full access and your first session", how: "Getting to know you, about 5 minutes. You pay $0.", state: "now" },
+              { when: "Today", what: "Full access and your first session", how: `Getting to know you, about 5 minutes. You pay ${prices.free}.`, state: "now" },
               { when: "After about 3 days", what: "What I've noticed so far", how: "Your patterns, and one focus to work on." },
               { when: `Day 4, ${trialDay(4)}`, what: "Reminder email", how: "We email you a reminder, 4 days before any charge." },
               { when: `Around day 7, ${trialDay(7)}`, what: "Week-in-review", how: "Your first weekly check-in." },
@@ -140,13 +146,13 @@ export default function ResultScreen({ answers, targets }: { answers: QuizAnswer
 
       <Card>
         <CardTitle>What it costs</CardTitle>
-        <p className="mb-2.5 mt-1.5 font-display text-[40px] font-medium leading-none tabular-nums text-ink">$0 today</p>
+        <p className="mb-2.5 mt-1.5 font-display text-[40px] font-medium leading-none tabular-nums text-ink">{prices.free} today</p>
         <p className="text-[15px] text-ink-secondary">
-          Then <b className="text-ink">{PRICES.annual}</b> a year (that works out at {PER_MONTH} a month), or{" "}
-          <b className="text-ink">{PRICES.monthly}</b> a month. You choose your plan on the next step.
+          Then <b className="text-ink">{prices.annual}</b> a year (that works out at {prices.annualPerMonth} a month), or{" "}
+          <b className="text-ink">{prices.monthly}</b> a month. You choose your plan on the next step.
         </p>
         <p className="mt-2.5 text-[12.5px] leading-[1.45] text-ink-muted">
-          Yearly saves 44% vs monthly. Renews automatically until you cancel. Prices in US dollars. PrepIt is an iPhone app; Android is coming
+          Yearly saves {prices.annualSavingPercent} vs monthly. Renews automatically until you cancel. Prices in {prices.currencyName}. PrepIt is an iPhone app; Android is coming
           soon. PrepIt is a coach, not a doctor.
         </p>
       </Card>
@@ -159,7 +165,7 @@ export default function ResultScreen({ answers, targets }: { answers: QuizAnswer
           },
           {
             q: "What happens on day 8?",
-            a: `If you keep PrepIt, your plan starts: ${PRICES.annual} for the year (that works out at ${PER_MONTH} a month), or ${PRICES.monthly} a month if you pick monthly. We email you a reminder on day 4, and you can cancel any time before day 8 and pay nothing.`,
+            a: `If you keep PrepIt, your plan starts: ${prices.annual} for the year (that works out at ${prices.annualPerMonth} a month), or ${prices.monthly} a month if you pick monthly. We email you a reminder on day 4, and you can cancel any time before day 8 and pay nothing.`,
           },
           {
             q: "Is the nutritionist a person?",

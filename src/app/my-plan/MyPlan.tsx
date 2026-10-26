@@ -7,7 +7,7 @@ import { Card, CardTitle, Eyebrow, TargetTiles } from "@/components/quiz/parts";
 import { useEmailToken } from "@/components/quiz/useEmailToken";
 import { PRIMARY_BUTTON_CLASS, TEXT_BUTTON_CLASS } from "@/components/ui/buttons";
 import type { WebMarket } from "@/lib/markets";
-import { PRICES } from "@/lib/pricing";
+import type { Prices } from "@/lib/pricing";
 import { fetchLeadPlan, LeadApiError, type LeadPlan } from "@/lib/quiz/leadApi";
 import { dietLabelFor, goalLabelFor, QUIZ_FUNNEL_ID, savedPlanHeadline, weightText } from "@/lib/quiz/quiz";
 import { trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webFunnelAnalytics";
@@ -19,7 +19,7 @@ type State = { status: "loading" } | { status: "ready"; plan: LeadPlan } | { sta
  * link (`POST /web-leads/plan`). Nothing here is editable; "Start my free 7
  * days" goes to the bridge, where they sign in and the app finishes setup.
  */
-export default function MyPlan({ market }: { market: WebMarket }) {
+export default function MyPlan({ market, prices }: { market: WebMarket; prices: Prices }) {
   const token = useEmailToken();
   const [fetched, setFetched] = useState<State>({ status: "loading" });
   const state: State = token === null ? { status: "missing" } : fetched;
@@ -118,8 +118,8 @@ export default function MyPlan({ market }: { market: WebMarket }) {
         <Card>
           <CardTitle>Your first 7 days are free</CardTitle>
           <p className="text-[15px] text-ink-secondary">
-            Full access and your first session today, a reminder email on day 4, and your plan starts on day 8 if you keep it: {PRICES.annual} a
-            year or {PRICES.monthly} a month. Cancel before then and you pay nothing.
+            Full access and your first session today, a reminder email on day 4, and your plan starts on day 8 if you keep it: {prices.annual} a
+            year or {prices.monthly} a month. Cancel before then and you pay nothing.
           </p>
         </Card>
       )}

@@ -12,8 +12,9 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import { PRIMARY_BUTTON_CLASS, TEXT_BUTTON_CLASS } from "@/components/ui/buttons";
 import { providerOf, signInAuthDomain, signOutOfWebsite, type SignInProvider } from "@/lib/firebase/auth";
 import { parseFunnelId, safeNextPath } from "@/lib/funnel/params";
-import { parsePlanId, PLANS, TRIAL_DAYS } from "@/lib/pricing";
+import { parsePlanId, PLANS, TRIAL_DAYS, WEB_PRICES } from "@/lib/pricing";
 import { identifyPixelUser, trackSignupRegistration } from "@/lib/metaPixel";
+import { webBillingSellerFor } from "@/lib/revenuecat/sellers";
 import { loadPremiumDetails, webBillingSellerForReading } from "@/lib/revenuecat/webBilling";
 import { resetWebUser, trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webFunnelAnalytics";
 
@@ -24,7 +25,8 @@ const PREMIUM_CHECK_TIMEOUT_MS = 4_000;
 
 type PremiumCheckResult = "found" | "none" | "error" | "timeout" | "no_key";
 
-export default function SignInBridge() {
+/** `country` picks the currency in the plan line, as checkout does (PRE-373). */
+export default function SignInBridge({ country }: { country: string | null }) {
   const params = useSearchParams();
   const router = useRouter();
   const plan = parsePlanId(params.get("plan"));
@@ -141,7 +143,7 @@ export default function SignInBridge() {
 
   if (session.status === "signedOut") {
     const planLine = plan
-      ? `${PLANS[plan].label} plan: ${TRIAL_DAYS} days free, then ${PLANS[plan].price} a ${PLANS[plan].period}.`
+      ? `${PLANS[plan].label} plan: ${TRIAL_DAYS} days free, then ${WEB_PRICES[webBillingSellerFor(country)][plan]} a ${PLANS[plan].period}.`
       : null;
     return (
       <>

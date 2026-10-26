@@ -31,6 +31,7 @@ import { appVideo } from "@/lib/captures";
 import { readAttribution } from "@/lib/funnel/attributionStore";
 import { writeBridgeHandoff } from "@/lib/funnel/bridgeHandoff";
 import type { WebMarket } from "@/lib/markets";
+import type { Prices } from "@/lib/pricing";
 import { trackQuizLead } from "@/lib/metaPixel";
 import { fetchTargets, LeadApiError, saveLead } from "@/lib/quiz/leadApi";
 import {
@@ -128,7 +129,7 @@ const BACK_ICON = (
  * (PRE-327): one screen at a time, then the plan page, which hands the
  * answers to the bridge (/start, PRE-323) in this browser's storage.
  */
-export default function Quiz({ country, market }: { country: string; market: WebMarket }) {
+export default function Quiz({ country, market, prices }: { country: string; market: WebMarket; prices: Prices }) {
   const [answers, setAnswers] = useState<QuizAnswers>(emptyAnswers);
   const [screen, setScreen] = useState<ScreenId>("goal");
   const [history, setHistory] = useState<ScreenId[]>([]);
@@ -317,7 +318,12 @@ export default function Quiz({ country, market }: { country: string; market: Web
 
   const startTrial = () => {
     writeHandoff(answers);
-    trackWebFunnelEvent(WEB_FUNNEL_EVENTS.quizStartTrial, { funnel_id: QUIZ_FUNNEL_ID, market, targets_available: Boolean(targets) });
+    trackWebFunnelEvent(WEB_FUNNEL_EVENTS.quizStartTrial, {
+      funnel_id: QUIZ_FUNNEL_ID,
+      market,
+      targets_available: Boolean(targets),
+      price_currency: prices.currency,
+    });
   };
 
   const ok = canContinue(screen, answers);
@@ -972,12 +978,12 @@ export default function Quiz({ country, market }: { country: string; market: Web
       break;
 
     case "result":
-      body = <ResultScreen answers={answers} targets={targets} />;
+      body = <ResultScreen answers={answers} targets={targets} prices={prices} />;
       footer = (
         <>
           <QuizStartCta market={market} className={QUIZ_BUTTON_CLASS} trackingSource="quiz-result" onStart={startTrial} />
           {market === "web" && (
-            <p className="mt-1.5 text-center text-[12.5px] text-ink-muted">$0 today. Reminder email on day 4. Cancel any time.</p>
+            <p className="mt-1.5 text-center text-[12.5px] text-ink-muted">{prices.free} today. Reminder email on day 4. Cancel any time.</p>
           )}
         </>
       );
