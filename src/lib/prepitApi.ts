@@ -249,3 +249,63 @@ export async function saveWebSignupProfile(input: WebSignupInput): Promise<WebSi
     pendingProfile: body.pendingProfile ?? null,
   };
 }
+
+/** Whether the website subscription can be withdrawn from now (PRE-360), from `GET /billing/withdrawal`. */
+export type WithdrawalStatus =
+  | { state: "eligible"; inTrial: boolean; windowEndsAt: string }
+  | { state: "withdrawn"; requestedAt: string; emailSent: boolean }
+  | { state: "expired"; windowEndedAt: string }
+  /** Bought outside the UK and EEA, where the 14-day right doesn't apply. */
+  | { state: "not_offered" }
+  | { state: "none" }
+  | { state: "unavailable" };
+
+function toWithdrawalStatus(body: Record<string, unknown>): WithdrawalStatus {
+  switch (body.state) {
+    case "eligible":
+      return { state: "eligible", inTrial: body.inTrial === true, windowEndsAt: String(body.windowEndsAt) };
+    case "withdrawn":
+      return { state: "withdrawn", requestedAt: String(body.requestedAt), emailSent: body.emailSent === true };
+    case "expired":
+      return { state: "expired", windowEndedAt: String(body.windowEndedAt) };
+    case "not_offered":
+      return { state: "not_offered" };
+    case "none":
+      return { state: "none" };
+    default:
+      return { state: "unavailable" };
+  }
+}
+
+export async function fetchWithdrawalStatus(): Promise<WithdrawalStatus> {
+  return toWithdrawalStatus(await prepitFetch<Record<string, unknown>>("/billing/withdrawal"));
+}
+
+export type WithdrawalResult =
+  | { outcome: "withdrawn"; requestedAt: string; refunded: boolean; emailSent: boolean }
+  /** Nothing to withdraw by the time it was confirmed; `status` says why. */
+  | { outcome: "not_available"; status: WithdrawalStatus }
+  | { outcome: "in_progress" };
+
+/** The confirm step: `POST /billing/withdrawal`. Throws when it failed. */
+export async function confirmWithdrawal(): Promise<WithdrawalResult> {
+  try {
+    const body = await prepitFetch<{ requestedAt?: unknown; refunded?: unknown; emailSent?: unknown }>(
+      "/billing/withdrawal",
+      { method: "POST", body: "{}" },
+    );
+    return {
+      outcome: "withdrawn",
+      requestedAt: String(body.requestedAt),
+      refunded: body.refunded === true,
+      emailSent: body.emailSent === true,
+    };
+  } catch (error) {
+    if (error instanceof PrepItApiError && error.status === 409) {
+      if (error.code === "WITHDRAWAL_IN_PROGRESS") return { outcome: "in_progress" };
+      // The 409 body's state isn't kept by prepitFetch; ask again.
+      return { outcome: "not_available", status: await fetchWithdrawalStatus() };
+    }
+    throw error;
+  }
+}
