@@ -19,7 +19,6 @@ import {
   packageOffersTrial,
   planIdOf,
   purchasesFor,
-  saveWithdrawalConsent,
   sendMetaMatchingToRevenueCat,
   toCheckoutFailure,
   waitForPremium,
@@ -29,15 +28,6 @@ import {
 import type { Offering } from "@revenuecat/purchases-js";
 import { identifyPixelUser, trackCheckoutInitiated } from "@/lib/metaPixel";
 import { resetWebUser, trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webFunnelAnalytics";
-import {
-  clearedWithdrawalConsentAttributes,
-  readStartNowChoice,
-  startNowChoice,
-  WITHDRAWAL_CONSENT_TEXT,
-  withdrawalConsentAttributes,
-  writeStartNowChoice,
-  type StartNowChoice,
-} from "@/lib/withdrawalConsent";
 
 const PROVIDER_NAMES = { google: "Google", apple: "Apple" } as const;
 
@@ -79,13 +69,12 @@ type Plans =
  * call, from each Web Billing product's trial eligibility setting. Around the
  * paywall this page keeps what RevenueCat can't know: sign in first with the
  * app's account, the email-in-use guard, no checkout for anyone already
- * subscribed, the "You're in" handoff once `premium` is active, and for UK
- * and EEA buyers (`askWithdrawalConsent`) the optional request to start their
- * access now (PRE-356). That box sits above the sign-in buttons; this page
- * saves the answer on the RevenueCat customer before the paywall, and asks
- * here only when the buyer never saw it (already signed in).
+ * subscribed, and the "You're in" handoff once `premium` is active. UK and
+ * EEA buyers are asked nothing extra: cancelling within 14 days of signing up
+ * gets a full refund (/withdraw), so there is no "start my access now" box
+ * (removed in PRE-371).
  */
-export default function Checkout({ country, askWithdrawalConsent }: { country: string | null; askWithdrawalConsent: boolean }) {
+export default function Checkout() {
   const params = useSearchParams();
   const router = useRouter();
   const funnelId = parseFunnelId(params.get("funnel"));
@@ -102,17 +91,9 @@ export default function Checkout({ country, askWithdrawalConsent }: { country: s
   // Bumped to show the paywall again after a purchase that didn't go through.
   const [presentKey, setPresentKey] = useState(0);
   const paywallTracked = useRef(false);
-  // UK/EEA: the start-now answer (from above the sign-in buttons, or asked
-  // here), and the uid it has been saved for; the paywall shows only after that.
-  const [startNow, setStartNow] = useState<StartNowChoice | null>(() => (askWithdrawalConsent ? readStartNowChoice() : null));
-  const [startNowTicked, setStartNowTicked] = useState(false);
-  const [startNowSavedFor, setStartNowSavedFor] = useState<string | null>(null);
-  const startNowSaving = useRef<string | null>(null);
   const paywallHost = useRef<HTMLDivElement>(null);
 
   const uid = session.status === "signedIn" ? session.user.uid : null;
-  const paywallAllowed = !askWithdrawalConsent || (uid !== null && startNowSavedFor === uid);
-  const consentAt = askWithdrawalConsent && startNow?.startNow ? startNow.at : null;
   const account = session.status === "signedIn" ? session.account : null;
   const summary = account?.status === "ready" ? account.summary : null;
   const plansKey = uid && summary ? `${uid}:${summary.hasUsedTrial}:${summary.isSubscribed}:${reloadKey}` : null;
@@ -246,7 +227,7 @@ export default function Checkout({ country, askWithdrawalConsent }: { country: s
   const trialExpected = plans.status === "ready" ? plans.trialExpected : false;
   useEffect(() => {
     const host = paywallHost.current;
-    if (!uid || !offering || !host || paying !== "idle" || !paywallAllowed) return;
+    if (!uid || !offering || !host || paying !== "idle") return;
     let active = true;
     // A fresh element per showing, so a second showing never stacks on the first.
     const target = document.createElement("div");
@@ -262,10 +243,7 @@ export default function Checkout({ country, askWithdrawalConsent }: { country: s
           offering,
           htmlTarget: target,
           customerEmail: email ?? undefined,
-          metadata: {
-            funnel_id: funnelId,
-            ...(consentAt && startNow ? { withdrawal_waiver_version: startNow.version, withdrawal_waiver_at: consentAt } : {}),
-          },
+          metadata: { funnel_id: funnelId },
           hideBackButtons: true,
           listener: {
             onPurchaseStarted: (rcPackage) => {
@@ -335,36 +313,7 @@ export default function Checkout({ country, askWithdrawalConsent }: { country: s
     };
     // welcomePath and context only change with the session and URL already in the deps.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [uid, offering, presentKey, paywallAllowed]);
-
-  // Once per signed-in uid: a ticked box goes on the RevenueCat customer
-  // (with the time it was ticked); an unticked one clears any earlier record.
-  useEffect(() => {
-    if (!askWithdrawalConsent || !uid || !startNow || startNowSaving.current === uid) return;
-    startNowSaving.current = uid;
-    let active = true;
-    (async () => {
-      const recorded = await saveWithdrawalConsent(
-        uid,
-        startNow.startNow && startNow.at
-          ? withdrawalConsentAttributes(country, new Date(startNow.at))
-          : clearedWithdrawalConsentAttributes(),
-      );
-      trackWebFunnelEvent(WEB_FUNNEL_EVENTS.withdrawalConsent, {
-        funnel_id: funnelId,
-        wording_version: startNow.version,
-        start_now: startNow.startNow,
-        asked_on: startNow.askedOn,
-        recorded,
-      });
-      if (active) setStartNowSavedFor(uid);
-    })();
-    return () => {
-      active = false;
-      // Unmounted before it finished: the next showing tries again.
-      if (startNowSaving.current === uid) startNowSaving.current = null;
-    };
-  }, [askWithdrawalConsent, uid, startNow, country, funnelId]);
+  }, [uid, offering, presentKey]);
 
   if (keyProblem || plans.status === "no_paywall") {
     return (
@@ -412,36 +361,6 @@ export default function Checkout({ country, askWithdrawalConsent }: { country: s
       {paying === "confirming" ? (
         <p role="status" className="text-body text-ink-secondary">
           Confirming your subscription…
-        </p>
-      ) : askWithdrawalConsent && !startNow ? (
-        // Signed in before seeing the box above the sign-in buttons: the same
-        // optional box here, and the button works ticked or not.
-        <form
-          className="flex w-full flex-col gap-4"
-          onSubmit={(event) => {
-            event.preventDefault();
-            const choice = startNowChoice(startNowTicked, "checkout", new Date());
-            writeStartNowChoice(choice);
-            setStartNow(choice);
-          }}
-        >
-          <SectionHeading as="h2" size="title" align="center" title="Before you choose a plan" />
-          <label className="flex items-start gap-2.5 text-left text-small text-ink-secondary">
-            <input
-              type="checkbox"
-              className="mt-px size-5 flex-none accent-primary"
-              checked={startNowTicked}
-              onChange={(event) => setStartNowTicked(event.target.checked)}
-            />
-            {WITHDRAWAL_CONSENT_TEXT}
-          </label>
-          <button type="submit" className={PRIMARY_BUTTON_CLASS}>
-            Continue to plans
-          </button>
-        </form>
-      ) : !paywallAllowed ? (
-        <p role="status" className="text-body text-ink-secondary">
-          Loading your plans…
         </p>
       ) : (
         <div ref={paywallHost} className="ph-no-capture w-full" data-testid="revenuecat-paywall" />

@@ -5,7 +5,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Checkout from "@/app/checkout/Checkout";
 import EmailInUseNotice from "@/components/account/EmailInUseNotice";
 import SignInButtons from "@/components/account/SignInButtons";
-import StartNowBox from "@/components/account/StartNowBox";
 import { useSaveWebSignup } from "@/components/account/useSaveWebSignup";
 import { useWebSession } from "@/components/account/useWebSession";
 import {
@@ -94,8 +93,7 @@ function SavingPlan({ from, provider }: { from: BridgeSource; provider: string |
  * get their own page, people who had a trial get "Welcome back", and
  * everyone else goes on to RevenueCat's checkout and then "You're in".
  */
-/** `askWithdrawalConsent`: the UK/EEA "start my access now" box above the sign-in buttons; checkout saves it with `country`. */
-export default function StartBridge({ country, askWithdrawalConsent }: { country: string | null; askWithdrawalConsent: boolean }) {
+export default function StartBridge() {
   const params = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -259,7 +257,6 @@ export default function StartBridge({ country, askWithdrawalConsent }: { country
                 Choose the account to save {from === "quiz" ? "your plan and trial" : "your free week"} to. You’ll sign
                 in to the PrepIt app with the same one.
               </p>
-              {askWithdrawalConsent && <StartNowBox askedOn="start" />}
               <SignInButtons context={context} loginHint={handoff?.email} />
             </>
           )}
@@ -358,7 +355,7 @@ export default function StartBridge({ country, askWithdrawalConsent }: { country
       {/* Checkout names the signed-in account under the paywall, with Sign out. */}
       <div className="rounded-tile border border-line bg-surface p-4 sm:p-6">
         <div className="flex w-full flex-col items-center gap-6 text-center">
-          <Checkout country={country} askWithdrawalConsent={askWithdrawalConsent} />
+          <Checkout />
         </div>
       </div>
       <Assurances trial={!welcomeBack} />
