@@ -27,7 +27,7 @@ import { openAppUrl } from "@/lib/appStore";
 import { providerOf, signOutOfWebsite } from "@/lib/firebase/auth";
 import { readBridgeHandoff, writeBridgeVisit, type BridgeHandoff } from "@/lib/funnel/bridgeHandoff";
 import { parseBridgeSource, parseFunnelId, type BridgeSource } from "@/lib/funnel/params";
-import { parsePlanId, type PlanId } from "@/lib/pricing";
+import { parsePlanId } from "@/lib/pricing";
 import { identifyPixelUser, trackSignupRegistration } from "@/lib/metaPixel";
 import { resetWebUser, trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webFunnelAnalytics";
 
@@ -97,7 +97,9 @@ export default function StartBridge({ country }: { country: string | null }) {
   const params = useSearchParams();
   const from = parseBridgeSource(params.get("from"));
   const funnelId = parseFunnelId(params.get("funnel"));
-  const plan: PlanId = parsePlanId(params.get("plan")) ?? "annual";
+  // The plan named in the link that sent them here, or null: the plan itself is
+  // picked on RevenueCat's paywall (PRE-375).
+  const plan = parsePlanId(params.get("plan"));
   const context = useMemo(() => ({ funnel_id: funnelId, plan, from }), [funnelId, plan, from]);
 
   const { session, reloadAccount } = useWebSession();
