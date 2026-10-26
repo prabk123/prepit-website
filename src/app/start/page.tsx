@@ -3,7 +3,6 @@ import { headers } from "next/headers";
 import { Suspense } from "react";
 import { HideSiteFinalCta } from "@/components/pricing/SiteFinalCta";
 import { HideSiteChrome } from "@/components/SiteChrome";
-import { isEuCountry } from "@/lib/geo";
 import { COUNTRY_HEADER, parseCountryCode } from "@/lib/markets";
 import StartBridge from "./StartBridge";
 
@@ -28,7 +27,7 @@ export default async function StartPage() {
       <HideSiteFinalCta />
       <div className="flex w-full max-w-[560px] flex-col gap-6">
         <Suspense fallback={<p className="text-body text-ink-secondary">Loading…</p>}>
-          <StartBridge country={country} askWithdrawalConsent={isEuCountry(country ?? undefined)} />
+          <StartBridge country={country} />
         </Suspense>
       </div>
     </div>

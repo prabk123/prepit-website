@@ -7,7 +7,7 @@ import WithdrawFromContract from "./WithdrawFromContract";
 
 export const metadata: Metadata = {
   title: "Withdraw from your contract",
-  description: "Withdraw from a PrepIt subscription you bought on the website within 14 days.",
+  description: "Withdraw from a PrepIt subscription within 14 days of subscribing on the website, for a full refund.",
   robots: { index: false, follow: false },
   alternates: { canonical: null },
   itunes: null,
