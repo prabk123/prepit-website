@@ -10,7 +10,6 @@ import {
 test("the handler is proxied to the project's firebaseapp.com host", () => {
   assert.deepEqual(firebaseAuthHandlerRewrites("fresca-dev"), [
     { source: "/__/auth/:path*", destination: "https://fresca-dev.firebaseapp.com/__/auth/:path*" },
-    { source: "/__/firebase/init.json", destination: "https://fresca-dev.firebaseapp.com/__/firebase/init.json" },
   ]);
 });
 

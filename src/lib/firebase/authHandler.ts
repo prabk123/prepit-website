@@ -17,8 +17,13 @@
 /** The Firebase project the website signs in to when no env value names one. */
 export const DEFAULT_FIREBASE_PROJECT_ID = "fresca-dev";
 
-/** Paths Firebase's sign-in handler serves (the handler, its iframe and scripts, and the web config it reads). */
-export const FIREBASE_AUTH_HANDLER_SOURCES = ["/__/auth/:path*", "/__/firebase/init.json"] as const;
+/**
+ * Paths Firebase's sign-in handler serves: the handler, its iframe and their
+ * scripts. `/__/firebase/init.json` is left out on purpose: it only exists on
+ * a Firebase Hosting site, which this project doesn't deploy (it 404s on
+ * firebaseapp.com too), and the handler gets its config from the URL.
+ */
+export const FIREBASE_AUTH_HANDLER_SOURCES = ["/__/auth/:path*"] as const;
 
 /** `https://<project>.firebaseapp.com`, where Firebase Hosting serves the sign-in handler. */
 export function firebaseHostingOrigin(projectId?: string | null): string {
