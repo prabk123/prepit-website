@@ -2,7 +2,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { contactSlackMessage, waitlistSlackMessage } from "../src/lib/contact.ts";
-import { createRateLimiter, FORM_RATE_LIMIT } from "../src/lib/rateLimit.ts";
+import { createRateLimiter, FORM_RATE_LIMIT, rateLimitKey } from "../src/lib/rateLimit.ts";
 
 test("the form limit lets five posts through in ten minutes, then refuses", () => {
   const limit = createRateLimiter(FORM_RATE_LIMIT);
@@ -44,6 +44,38 @@ test("the limiter forgets the least recently seen visitors past maxKeys", () => 
   limit("c", 2); // drops "a"
   assert.equal(limit("a", 3).allowed, true);
   assert.equal(limit("c", 4).allowed, false);
+});
+
+test("a refunded post doesn't count, so failures on our side don't lock a visitor out", () => {
+  const limit = createRateLimiter({ limit: 2, windowMs: 60_000 });
+  for (let t = 0; t < 10; t++) {
+    const result = limit("a", t);
+    assert.equal(result.allowed, true, `attempt ${t + 1}`);
+    result.refund();
+  }
+  assert.equal(limit("a", 11).allowed, true);
+  assert.equal(limit("a", 12).allowed, true);
+  assert.equal(limit("a", 13).allowed, false);
+});
+
+test("a refused visitor stays recently seen, so a flood of new addresses doesn't reset them", () => {
+  const limit = createRateLimiter({ limit: 1, windowMs: 60_000, maxKeys: 2 });
+  limit("abuser", 0);
+  limit("b", 1);
+  assert.equal(limit("abuser", 2).allowed, false);
+  limit("c", 3); // drops "b", the least recently seen
+  assert.equal(limit("abuser", 4).allowed, false);
+  assert.equal(limit("b", 5).allowed, true);
+});
+
+test("rate-limit keys: IPv4 as is, IPv6 by its /64, nothing without an address", () => {
+  assert.equal(rateLimitKey("203.0.113.7"), "203.0.113.7");
+  assert.equal(rateLimitKey("2001:db8:abcd:12:1:2:3:4"), "2001:db8:abcd:12::/64");
+  assert.equal(rateLimitKey("2001:0DB8:abcd:0012:ffff::1"), "2001:db8:abcd:12::/64");
+  assert.equal(rateLimitKey("2001:db8::1"), "2001:db8:0:0::/64");
+  assert.equal(rateLimitKey("::1"), "0:0:0:0::/64");
+  assert.equal(rateLimitKey(undefined), null);
+  assert.equal(rateLimitKey(""), null);
 });
 
 function textObjects(message) {

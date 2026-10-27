@@ -1,11 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { CONTACT_HONEYPOT_FIELD, CONTACT_LIMITS, contactSlackMessage } from "@/lib/contact";
-import { formRateLimitResponse } from "@/lib/formRateLimit";
+import { withFormRateLimit } from "@/lib/formRateLimit";
 
-export async function POST(request: NextRequest) {
-  const limited = formRateLimitResponse(request, "contact");
-  if (limited) return limited;
-
+export const POST = withFormRateLimit("contact", async (request: NextRequest) => {
   try {
     const body = await request.json();
     const { name, email, message, type = "contact" } = body;
@@ -91,4 +88,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
