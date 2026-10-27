@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import { firebaseAuthHandlerRewrites } from "./src/lib/firebase/authHandler";
+import { securityHeadersRule } from "./src/lib/securityHeaders";
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ["mongodb"],
@@ -42,6 +43,8 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [
+      // Framing protection, nosniff, referrer policy and HSTS (PRE-379).
+      securityHeadersRule(),
       {
         source: "/.well-known/apple-app-site-association",
         headers: [
