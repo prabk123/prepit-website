@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { CONTACT_HONEYPOT_FIELD, CONTACT_LIMITS, escapeSlackText } from "@/lib/contact";
+import { CONTACT_HONEYPOT_FIELD, CONTACT_LIMITS, contactSlackMessage } from "@/lib/contact";
+import { formRateLimitResponse } from "@/lib/formRateLimit";
 
 export async function POST(request: NextRequest) {
+  const limited = formRateLimitResponse(request, "contact");
+  if (limited) return limited;
+
   try {
     const body = await request.json();
     const { name, email, message, type = "contact" } = body;
@@ -57,53 +61,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Format message for Slack
-    const isFeedback = type === "feedback";
-    const slackMessage = {
-      blocks: [
-        {
-          type: "header",
-          text: {
-            type: "plain_text",
-            text: isFeedback
-              ? "💬 New Feedback Submission"
-              : "🍃 New Contact Form Submission",
-            emoji: true,
-          },
-        },
-        {
-          type: "section",
-          fields: [
-            {
-              type: "mrkdwn",
-              text: `*Name:*\n${escapeSlackText(name)}`,
-            },
-            {
-              type: "mrkdwn",
-              text: `*Email:*\n${escapeSlackText(email)}`,
-            },
-          ],
-        },
-        {
-          type: "section",
-          text: {
-            type: "mrkdwn",
-            text: `*Message:*\n${escapeSlackText(message)}`,
-          },
-        },
-        {
-          type: "context",
-          elements: [
-            {
-              type: "mrkdwn",
-              text: `Submitted at: <!date^${Math.floor(
-                Date.now() / 1000
-              )}^{date_short_pretty} at {time}|${new Date().toISOString()}>`,
-            },
-          ],
-        },
-      ],
-    };
+    const slackMessage = contactSlackMessage({ name, email, message, isFeedback: type === "feedback" });
 
     // Send to Slack
     const slackResponse = await fetch(slackWebhookUrl, {
