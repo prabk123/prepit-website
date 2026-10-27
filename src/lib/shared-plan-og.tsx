@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { getMealPlanById } from "@/lib/meal-plan";
+import { getSharedMealPlan } from "@/lib/meal-plan";
 import { loadOgFonts, loadOgLogo, loadOgPhone, OgPhone, OgWordmark, ogTokens } from "@/lib/og-card";
 import { countRecipes, formatPlanRange } from "@/lib/plan-dates";
 
@@ -13,7 +13,7 @@ const tokens = ogTokens;
 export async function renderSharedPlanOg(id: string): Promise<ImageResponse> {
   // A database failure is already logged by the loader; fall back to the
   // generic card rather than no preview at all.
-  const plan = await getMealPlanById(id).catch(() => null);
+  const plan = await getSharedMealPlan(id).catch(() => null);
   const [fonts, logo, phone] = await Promise.all([loadOgFonts(), loadOgLogo(), loadOgPhone("meal-plans")]);
 
   const title = plan ? formatPlanRange(plan.days) : "Meal plan";

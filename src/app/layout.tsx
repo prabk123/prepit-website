@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import { DM_Sans } from "next/font/google";
-import { SpeedInsights } from "@vercel/speed-insights/next";
-import { Analytics } from "@vercel/analytics/next";
 import Script from "next/script";
 import localFont from "next/font/local";
 import NavigationWrapper from "@/components/NavigationWrapper";
@@ -10,6 +8,7 @@ import SiteFinalCta from "@/components/pricing/SiteFinalCta";
 import Footer from "@/components/Footer";
 import SiteChrome from "@/components/SiteChrome";
 import CookieConsent from "@/components/CookieConsent";
+import VercelMetrics from "@/components/VercelMetrics";
 import AttributionCapture from "@/components/funnel/AttributionCapture";
 import MarketCapture from "@/components/funnel/MarketCapture";
 import { PREPIT_ANALYTICS_CONSENT_COOKIE, PREPIT_GEO_COOKIE } from "@/lib/cookies";
@@ -221,8 +220,7 @@ export default function RootLayout({
             <Footer />
           </SiteChrome>
         </div>
-        <SpeedInsights />
-        <Analytics />
+        <VercelMetrics />
       </body>
     </html>
   );

@@ -12,7 +12,6 @@ import { NextResponse } from "next/server";
  * Only the paths the iPhone app handles open the app (PRE-270). Every other
  * page, including the funnel, sign-in, checkout and /account, stays in the
  * browser even when PrepIt is installed:
- * - /auth/link: the email sign-in link (fresca_app AppRoute.emailSignin).
  * - /open: "open PrepIt" links in emails, messages and QR codes. Without the
  *   app, the page itself offers the App Store. App builds without an /open
  *   route land on their start screen.
@@ -21,6 +20,8 @@ import { NextResponse } from "next/server";
  *   such pages.
  * - /plans/create: New Meal Plan, the "Plan your week" email button
  *   (AppRoute.createPlan).
+ * /auth/link (email-link sign-in) was removed in PRE-378: neither the app nor
+ * the website signs in by email link any more.
  * Add a path here only once a released app build handles it, and only if the
  * website has no page there.
  *
@@ -29,7 +30,7 @@ import { NextResponse } from "next/server";
  * the host users tap (same host as NEXT_PUBLIC_SITE_URL, without https://).
  */
 /** The website paths the app opens for. */
-const APP_PATHS = ["/auth/link", "/open", "/tips", "/plans/create"] as const;
+const APP_PATHS = ["/open", "/tips", "/plans/create"] as const;
 
 export async function GET() {
   const teamId = process.env.APPLE_TEAM_ID?.trim();
