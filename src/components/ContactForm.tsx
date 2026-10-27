@@ -8,7 +8,7 @@ export type ContactKind = "contact" | "feedback";
 
 type Field = "name" | "email" | "message";
 type FieldErrors = Partial<Record<Field, string>>;
-type Status = "idle" | "sending" | "sent" | "failed";
+type Status = "idle" | "sending" | "sent" | "failed" | "rateLimited";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -98,7 +98,7 @@ export default function ContactForm({ kind }: { kind: ContactKind }) {
 
       if (!response.ok) {
         trackContactFormSubmitted(kind, "failed", response.status);
-        setStatus("failed");
+        setStatus(response.status === 429 ? "rateLimited" : "failed");
         return;
       }
 
@@ -241,6 +241,15 @@ export default function ContactForm({ kind }: { kind: ContactKind }) {
           {status === "failed" && (
             <p className="text-small text-error">
               Your message didn&apos;t send. Try again, or email{" "}
+              <a href="mailto:support@tryprepit.app" className="font-medium underline underline-offset-4">
+                support@tryprepit.app
+              </a>
+              . Your message is still here.
+            </p>
+          )}
+          {status === "rateLimited" && (
+            <p className="text-small text-error">
+              You&apos;ve sent a few messages in a row. Wait a few minutes and try again, or email{" "}
               <a href="mailto:support@tryprepit.app" className="font-medium underline underline-offset-4">
                 support@tryprepit.app
               </a>
