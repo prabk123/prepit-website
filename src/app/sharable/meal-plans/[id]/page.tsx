@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
-import { getMealPlanById } from "@/lib/meal-plan";
+import { getSharedMealPlan } from "@/lib/meal-plan";
+import { isPlanIdLink } from "@/lib/share-token";
 import { countRecipes, formatPlanRange } from "@/lib/plan-dates";
 import MealPlanView from "@/components/shareable/MealPlanView";
 import MakeYourOwnPlan from "@/components/shareable/MakeYourOwnPlan";
 import SharedPlanBanner from "@/components/shareable/SharedPlanBanner";
+import SharedPlanUnavailable from "@/components/shareable/SharedPlanUnavailable";
 import SharedPlanViewTracker from "@/components/shareable/SharedPlanViewTracker";
 import { APP_STORE_ID } from "@/lib/appStore";
 import { defaultUnitSystemForCountry } from "@/lib/unit-conversion";
@@ -20,9 +22,9 @@ function plural(count: number, word: string): string {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  let plan: Awaited<ReturnType<typeof getMealPlanById>>;
+  let plan: Awaited<ReturnType<typeof getSharedMealPlan>>;
   try {
-    plan = await getMealPlanById(id);
+    plan = await getSharedMealPlan(id);
   } catch {
     // The page itself throws on the same failure, logs it and shows error.tsx;
     // this only keeps the tab title.
@@ -58,7 +60,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function SharableMealPlanPage({ params }: Props) {
   const { id } = await params;
-  const plan = await getMealPlanById(id);
+  const plan = await getSharedMealPlan(id);
+
+  if (!plan && isPlanIdLink(id)) {
+    // App builds 1.2.0 to 1.8.0 shared plans by database id. Those links are
+    // refused (PRE-377); this line counts them without logging the id.
+    console.info("[shared-meal-plan] Refused a plan id link");
+    return (
+      <SharedPlanUnavailable lead="Meal plan links shared from older versions of the PrepIt app no longer open. Make your own plan with PrepIt instead." />
+    );
+  }
 
   if (!plan) {
     notFound();

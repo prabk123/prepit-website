@@ -1,6 +1,6 @@
 import { cache } from "react";
-import { ObjectId } from "mongodb";
 import { getSharedPlanFixture } from "./meal-plan-fixtures";
+import { isShareToken, sharedMealPlansEnabled } from "./share-token";
 import type { SharedMealPlan } from "./types/meal-plan";
 
 const RECIPE_PROJECTION = {
@@ -20,25 +20,51 @@ const RECIPE_PROJECTION = {
 };
 
 /**
- * One shared plan by id, or null when the id is not a plan. Cached per
- * request, so the page, its metadata and its preview image read Mongo once.
- * A database failure is logged (plan id only) and rethrown, so the page shows
- * its error state rather than "not found".
+ * Only the plan fields the shared page shows. Anything else on a plan (skipped
+ * meal reasons and advice, owner, grocery prices) never leaves the database.
  */
-export const getMealPlanById = cache(
-  async (id: string): Promise<SharedMealPlan | null> => {
-    if (!ObjectId.isValid(id)) {
+const PLAN_PROJECTION = {
+  "days.date": 1,
+  "days.breakfast.recipe": 1,
+  "days.breakfast.servings": 1,
+  "days.lunch.recipe": 1,
+  "days.lunch.servings": 1,
+  "days.dinner.recipe": 1,
+  "days.dinner.servings": 1,
+  "days.snack.recipe": 1,
+  "days.snack.servings": 1,
+  "groceries.category": 1,
+  "groceries.raw": 1,
+  "groceries.quantity": 1,
+  "groceries.ingredient": 1,
+  "groceries.emoji": 1,
+  "groceries.trailing_text": 1,
+  "groceries.unit": 1,
+  "groceries.ingredient_conversion": 1,
+  created: 1,
+  "meta.lastUpdate.at": 1,
+};
+
+/**
+ * One shared plan by its share token (the link's last segment), or null when
+ * no plan was shared with that token. Plans are never looked up by database
+ * id (PRE-377). Cached per request, so the page, its metadata and its preview
+ * image read Mongo once. A database failure is logged (no token) and rethrown,
+ * so the page shows its error state rather than "not found".
+ */
+export const getSharedMealPlan = cache(
+  async (token: string): Promise<SharedMealPlan | null> => {
+    const fixture = getSharedPlanFixture(token);
+    if (fixture) return fixture;
+
+    if (!sharedMealPlansEnabled() || !isShareToken(token)) {
       return null;
     }
 
-    const fixture = getSharedPlanFixture(id);
-    if (fixture) return fixture;
-
     try {
-      return await loadMealPlan(id);
+      return await loadMealPlan(token);
     } catch (error) {
       console.error("[shared-meal-plan] Failed to load plan", {
-        planId: id,
         error: error instanceof Error ? error.message : String(error),
       });
       throw error;
@@ -66,7 +92,7 @@ export function groceriesMayStillArrive(
   });
 }
 
-async function loadMealPlan(id: string): Promise<SharedMealPlan | null> {
+async function loadMealPlan(shareToken: string): Promise<SharedMealPlan | null> {
   // Imported here so a missing MONGODB_URI fails inside the logged try block.
   const { getDatabase } = await import("./mongodb");
   const db = await getDatabase();
@@ -74,7 +100,9 @@ async function loadMealPlan(id: string): Promise<SharedMealPlan | null> {
   const results = await db
     .collection("plans")
     .aggregate([
-      { $match: { _id: new ObjectId(id) } },
+      { $match: { shareToken } },
+      { $limit: 1 },
+      { $project: PLAN_PROJECTION },
       { $unwind: { path: "$days", preserveNullAndEmptyArrays: true } },
       // Lookup each meal's recipe
       {
