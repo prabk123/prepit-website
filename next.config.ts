@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import { firebaseAuthHandlerRewrites } from "./src/lib/firebase/authHandler";
+import { optimisedImageRemotePatterns } from "./src/lib/images/remoteImages";
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ["mongodb"],
@@ -21,24 +22,14 @@ const nextConfig: NextConfig = {
     ];
   },
   images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "api.tryprepit.app",
-      },
-      {
-        protocol: "https",
-        hostname: "api.m1a.dev",
-      },
-      {
-        protocol: "https",
-        hostname: "images.m1a.dev",
-      },
-      {
-        protocol: "https",
-        hostname: "**.amazonaws.com",
-      },
-    ],
+    // Only the recipe image CDN and the PrepIt API, not every AWS host, so
+    // /_next/image isn't an open image proxy (PRE-380). Other recipe image
+    // hosts render unoptimized in RecipeThumb.
+    remotePatterns: optimisedImageRemotePatterns(),
+    // Pinned so a request can't ask for widths or qualities outside these.
+    qualities: [75],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
+    imageSizes: [32, 48, 64, 96, 128, 256, 384],
   },
   async headers() {
     return [

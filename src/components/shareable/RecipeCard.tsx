@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { canOptimiseImage } from "@/lib/images/remoteImages";
 import type { Recipe } from "@/lib/types/meal-plan";
 import PrepItIcon from "./PrepItIcon";
 
@@ -36,6 +37,7 @@ export function RecipeThumb({
         className="object-cover"
         sizes={sizes}
         priority={priority}
+        unoptimized={!canOptimiseImage(recipe.image)}
       />
     );
   }
