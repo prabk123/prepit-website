@@ -287,12 +287,16 @@ test("analytics URLs never keep an email link's token", () => {
   assert.equal(withoutUrlSecrets("https://tryprepit.app/p?mytoken=1"), "https://tryprepit.app/p?mytoken=1");
 });
 
-test("analytics URLs drop the whole query on pages that carry a credential", () => {
+test("analytics URLs keep only utm_* on pages that carry a credential", () => {
   assert.equal(
     withoutUrlSecrets("https://www.tryprepit.app/auth/link?mode=signIn&oobCode=abc&apiKey=xyz&lang=en"),
     "https://www.tryprepit.app/auth/link",
   );
   assert.equal(withoutUrlSecrets("https://tryprepit.app/my-plan?t=abc&x=1"), "https://tryprepit.app/my-plan");
+  assert.equal(
+    withoutUrlSecrets("https://tryprepit.app/my-plan?token=abc&utm_source=email&utm_campaign=plan"),
+    "https://tryprepit.app/my-plan?utm_source=email&utm_campaign=plan",
+  );
   assert.equal(withoutUrlSecrets("https://tryprepit.app/email-preferences/x?k=1#top"), "https://tryprepit.app/email-preferences/x#top");
   assert.equal(withoutUrlSecrets("https://tryprepit.app/account?token=abc"), "https://tryprepit.app/account");
   assert.equal(withoutUrlSecrets("https://tryprepit.app/accounting?a=1"), "https://tryprepit.app/accounting?a=1");
@@ -306,6 +310,8 @@ test("analytics URLs never keep a sign-in code on any page", () => {
     "https://tryprepit.app/p?mode=signIn&lang=en#x",
   );
   assert.equal(withoutUrlSecrets("https://tryprepit.app/p?token=a&oobCode=b"), "https://tryprepit.app/p");
+  assert.equal(withoutUrlSecrets("https://tryprepit.app/p?token=a&token=b&x=1"), "https://tryprepit.app/p?x=1");
+  assert.equal(withoutUrlSecrets("/p?mode=signIn&oobCode=abc&apiKey=k"), "/p?mode=signIn");
   assert.equal(withoutUrlSecrets("Plan your week"), "Plan your week");
   assert.equal(withoutUrlSecrets("/my-plan"), "/my-plan");
 });
