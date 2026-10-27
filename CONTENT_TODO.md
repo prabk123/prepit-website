@@ -70,4 +70,3 @@ After adding content, test these pages:
 
 - ✅ Homepage (`/`)
 - ✅ Contact page (`/contact`) - with Slack integration
-- ✅ Auth link handler (`/auth/link`)
