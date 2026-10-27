@@ -10,7 +10,7 @@ const inputClass =
 
 /** `place`: a region name (like Quebec) when the visitor was sent here from checkout for their region. */
 export default function WaitlistForm({ place }: { place?: string }) {
-  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error" | "rateLimited">("idle");
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -25,7 +25,7 @@ export default function WaitlistForm({ place }: { place?: string }) {
       }),
     }).catch(() => null);
     const ok = Boolean(response?.ok);
-    setStatus(ok ? "sent" : "error");
+    setStatus(ok ? "sent" : response?.status === 429 ? "rateLimited" : "error");
     trackLandingEvent(LANDING_EVENTS.waitlistSubmit, "waitlist", {
       result: ok ? "ok" : "error",
       waitlist_region: place ?? null,
@@ -64,6 +64,11 @@ export default function WaitlistForm({ place }: { place?: string }) {
       {status === "error" && (
         <p role="alert" className="text-small text-error">
           That didn&apos;t go through. Please try again.
+        </p>
+      )}
+      {status === "rateLimited" && (
+        <p role="alert" className="text-small text-error">
+          Too many tries in a row. Wait a few minutes and try again.
         </p>
       )}
       <p className="text-small text-ink-muted">We&apos;ll only use your email to tell you when PrepIt launches where you are.</p>

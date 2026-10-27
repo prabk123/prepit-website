@@ -1,6 +1,5 @@
-import { ipAddress } from "@vercel/functions";
 import { NextRequest, NextResponse } from "next/server";
-import { cleanIpAddress } from "@/lib/metaMatching";
+import { visitorIp } from "@/lib/visitorIp";
 
 /**
  * The visitor's own IP address, which the browser can't read itself. Checkout
@@ -9,6 +8,6 @@ import { cleanIpAddress } from "@/lib/metaMatching";
  * same visitor, never stored or logged here.
  */
 export function GET(request: NextRequest) {
-  const ip = cleanIpAddress(ipAddress(request) ?? request.headers.get("x-forwarded-for")?.split(",")[0]);
+  const ip = visitorIp(request);
   return NextResponse.json({ ip: ip ?? null }, { headers: { "Cache-Control": "private, no-store" } });
 }

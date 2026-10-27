@@ -15,7 +15,51 @@ export const CONTACT_LIMITS = {
  */
 export const CONTACT_HONEYPOT_FIELD = "website";
 
-/** Slack's documented mrkdwn escaping, so text can't ping @channel or fake links. */
-export function escapeSlackText(text: string): string {
-  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+/** A Slack Block Kit block, loosely typed: these messages only go to a webhook. */
+type SlackBlock = Record<string, unknown>;
+
+/**
+ * Visitor text goes to Slack as `plain_text`, which Slack never parses: no
+ * @channel or @here pings, no links, no formatting (PRE-382). Only our own
+ * labels and the timestamp use mrkdwn.
+ */
+function visitorText(label: string, value: string) {
+  return { type: "plain_text", text: `${label}:\n${value}`, emoji: false };
+}
+
+function header(text: string): SlackBlock {
+  return { type: "header", text: { type: "plain_text", text, emoji: true } };
+}
+
+/** The Slack message for a contact or feedback form submission. */
+export function contactSlackMessage(
+  { name, email, message, isFeedback }: { name: string; email: string; message: string; isFeedback: boolean },
+  now = new Date()
+): { blocks: SlackBlock[] } {
+  return {
+    blocks: [
+      header(isFeedback ? "💬 New Feedback Submission" : "🍃 New Contact Form Submission"),
+      { type: "section", fields: [visitorText("Name", name), visitorText("Email", email)] },
+      { type: "section", text: visitorText("Message", message) },
+      {
+        type: "context",
+        elements: [
+          {
+            type: "mrkdwn",
+            text: `Submitted at: <!date^${Math.floor(now.getTime() / 1000)}^{date_short_pretty} at {time}|${now.toISOString()}>`,
+          },
+        ],
+      },
+    ],
+  };
+}
+
+/** The Slack message for a waitlist sign-up. `country` is a two-letter code or "unknown". */
+export function waitlistSlackMessage({ email, country }: { email: string; country: string }): { blocks: SlackBlock[] } {
+  return {
+    blocks: [
+      header("🌍 New waitlist sign-up"),
+      { type: "section", fields: [visitorText("Email", email), visitorText("Country", country)] },
+    ],
+  };
 }

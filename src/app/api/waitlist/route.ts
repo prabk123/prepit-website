@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { CONTACT_HONEYPOT_FIELD, CONTACT_LIMITS, escapeSlackText } from "@/lib/contact";
+import { CONTACT_HONEYPOT_FIELD, CONTACT_LIMITS, waitlistSlackMessage } from "@/lib/contact";
+import { withFormRateLimit } from "@/lib/formRateLimit";
 import { COUNTRY_HEADER, parseCountryCode } from "@/lib/markets";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -10,7 +11,7 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
  * the same Slack channel as the contact form. Nothing is logged but failures,
  * and those without the email.
  */
-export async function POST(request: NextRequest) {
+export const POST = withFormRateLimit("waitlist", async (request: NextRequest) => {
   let body: Record<string, unknown>;
   try {
     body = await request.json();
@@ -38,18 +39,7 @@ export async function POST(request: NextRequest) {
   const response = await fetch(slackWebhookUrl, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      blocks: [
-        { type: "header", text: { type: "plain_text", text: "🌍 New waitlist sign-up", emoji: true } },
-        {
-          type: "section",
-          fields: [
-            { type: "mrkdwn", text: `*Email:*\n${escapeSlackText(email)}` },
-            { type: "mrkdwn", text: `*Country:*\n${country}` },
-          ],
-        },
-      ],
-    }),
+    body: JSON.stringify(waitlistSlackMessage({ email, country })),
   }).catch(() => null);
 
   if (!response?.ok) {
@@ -57,4 +47,4 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Failed to join the waitlist" }, { status: 502 });
   }
   return NextResponse.json({ success: true });
-}
+});
