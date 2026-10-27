@@ -301,6 +301,11 @@ test("analytics URLs drop the whole query on pages that carry a credential", () 
 test("analytics URLs never keep a sign-in code on any page", () => {
   assert.equal(withoutUrlSecrets("https://tryprepit.app/?oobCode=abc&utm_source=x"), "https://tryprepit.app/?utm_source=x");
   assert.equal(withoutUrlSecrets("https://tryprepit.app/p?apiKey=k"), "https://tryprepit.app/p");
+  assert.equal(
+    withoutUrlSecrets("https://tryprepit.app/p?mode=signIn&oobCode=abc&apiKey=k&lang=en#x"),
+    "https://tryprepit.app/p?mode=signIn&lang=en#x",
+  );
+  assert.equal(withoutUrlSecrets("https://tryprepit.app/p?token=a&oobCode=b"), "https://tryprepit.app/p");
   assert.equal(withoutUrlSecrets("Plan your week"), "Plan your week");
   assert.equal(withoutUrlSecrets("/my-plan"), "/my-plan");
 });

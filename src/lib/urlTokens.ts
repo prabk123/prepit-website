@@ -9,7 +9,7 @@
 const CREDENTIAL_PATHS = ["/auth/link", "/my-plan", "/email-preferences", "/account"];
 
 /** Query parameters that are credentials on any page. */
-const SECRET_PARAMS = /([?&])(?:token|oobCode|apiKey)=[^&#]*&?/g;
+const SECRET_PARAM = /^(?:token|oobCode|apiKey)=/;
 
 function isCredentialPath(pathname: string): boolean {
   return CREDENTIAL_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));
@@ -33,5 +33,8 @@ export function withoutUrlSecrets(value: string): string {
     }
   }
   if (!/[?&](?:token|oobCode|apiKey)=/.test(value)) return value;
-  return value.replace(SECRET_PARAMS, "$1").replace(/[?&](?=#|$)/, "");
+  return value.replace(/\?([^#]*)/, (_, query: string) => {
+    const kept = query.split("&").filter((param) => !SECRET_PARAM.test(param));
+    return kept.length ? `?${kept.join("&")}` : "";
+  });
 }

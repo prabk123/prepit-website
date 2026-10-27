@@ -126,14 +126,20 @@ export default function RootLayout({
               {`
                 window.prepitLoadMetaPixel = function () {
                   /* The plan email pages carry a token in the address until
-                     the page removes it, so PageView must not see them. Nor
-                     any page opened with a credential in the address: /account
-                     from a subscription email (PRE-353), or an old sign-in
-                     email link to /auth/link (PRE-378). A plain /account visit
-                     still loads it. */
+                     the page removes it, so PageView must not see them. So
+                     does /account when opened from a subscription email
+                     (PRE-353); a plain /account visit still loads it. */
                   var path = location.pathname;
                   if (path === '/my-plan' || path === '/email-preferences' || path.indexOf('/my-plan/') === 0 || path.indexOf('/email-preferences/') === 0) return;
-                  if (/[?&](token|oobCode|apiKey)=/.test(location.search)) return;
+                  if ((path === '/account' || path === '/account/') && /[?&]token=/.test(location.search)) return;
+                  /* An old sign-in email link (PRE-378: the page is gone, it
+                     now 404s) carries a Firebase sign-in code. Take it out of
+                     the address before PageView reads it, and still send the
+                     PageView. */
+                  if (/[?&](oobCode|apiKey)=/.test(location.search)) {
+                    var kept = location.search.slice(1).split('&').filter(function (param) { return !/^(oobCode|apiKey)=/.test(param); });
+                    history.replaceState(history.state, '', path + (kept.length ? '?' + kept.join('&') : '') + location.hash);
+                  }
                   !function(f,b,e,v,n,t,s)
                   {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
                   n.callMethod.apply(n,arguments):n.queue.push(arguments)};
