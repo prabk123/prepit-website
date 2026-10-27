@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
-import { firebaseAuthHandlerRewrites } from "./src/lib/firebase/authHandler";
+import { FIREBASE_AUTH_HANDLER_SOURCES, firebaseAuthHandlerRewrites } from "./src/lib/firebase/authHandler";
+import { securityHeaderRules } from "./src/lib/securityHeaders";
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ["mongodb"],
@@ -42,6 +43,8 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [
+      // Framing protection, nosniff, referrer policy and HSTS (PRE-379).
+      ...securityHeaderRules(FIREBASE_AUTH_HANDLER_SOURCES, process.env.NEXT_PUBLIC_POSTHOG_UI_HOST),
       {
         source: "/.well-known/apple-app-site-association",
         headers: [
