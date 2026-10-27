@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
-import { getMealPlanById } from "@/lib/meal-plan";
+import { getSharedMealPlan } from "@/lib/meal-plan";
 import { countRecipes, formatPlanRange } from "@/lib/plan-dates";
 import MealPlanView from "@/components/shareable/MealPlanView";
 import MakeYourOwnPlan from "@/components/shareable/MakeYourOwnPlan";
@@ -20,9 +20,9 @@ function plural(count: number, word: string): string {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  let plan: Awaited<ReturnType<typeof getMealPlanById>>;
+  let plan: Awaited<ReturnType<typeof getSharedMealPlan>>;
   try {
-    plan = await getMealPlanById(id);
+    plan = await getSharedMealPlan(id);
   } catch {
     // The page itself throws on the same failure, logs it and shows error.tsx;
     // this only keeps the tab title.
@@ -58,7 +58,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function SharableMealPlanPage({ params }: Props) {
   const { id } = await params;
-  const plan = await getMealPlanById(id);
+  const plan = await getSharedMealPlan(id);
 
   if (!plan) {
     notFound();
