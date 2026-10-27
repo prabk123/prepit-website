@@ -1,7 +1,7 @@
 // Unit tests for shared meal plan link tokens (PRE-377). Run with `yarn test`.
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { isShareToken, sharedMealPlansEnabled } from "../src/lib/share-token.ts";
+import { isPlanIdLink, isShareToken, sharedMealPlansEnabled } from "../src/lib/share-token.ts";
 
 test("isShareToken refuses database ids and short or odd values", () => {
   for (const value of [
@@ -30,4 +30,12 @@ test("shared plan lookups stay off unless explicitly enabled", () => {
   assert.equal(sharedMealPlansEnabled({ SHARED_MEAL_PLANS_ENABLED: "1" }), false);
   assert.equal(sharedMealPlansEnabled({ SHARED_MEAL_PLANS_ENABLED: "false" }), false);
   assert.equal(sharedMealPlansEnabled({ SHARED_MEAL_PLANS_ENABLED: "true" }), true);
+});
+
+test("isPlanIdLink spots database ids from older app share links", () => {
+  assert.equal(isPlanIdLink("65f0000000000000000156a0"), true);
+  assert.equal(isPlanIdLink("65F0000000000000000156A0"), true);
+  assert.equal(isPlanIdLink("Q2hlY2tpbmcgYSBzaGFyZSB0b2tlbiBoZXJl"), false);
+  assert.equal(isPlanIdLink("65f0000000000000000156a"), false);
+  assert.equal(isPlanIdLink("not-an-id"), false);
 });

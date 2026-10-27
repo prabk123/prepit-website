@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { getSharedMealPlan } from "@/lib/meal-plan";
+import { isPlanIdLink } from "@/lib/share-token";
 import { countRecipes, formatPlanRange } from "@/lib/plan-dates";
 import MealPlanView from "@/components/shareable/MealPlanView";
 import MakeYourOwnPlan from "@/components/shareable/MakeYourOwnPlan";
 import SharedPlanBanner from "@/components/shareable/SharedPlanBanner";
+import SharedPlanUnavailable from "@/components/shareable/SharedPlanUnavailable";
 import SharedPlanViewTracker from "@/components/shareable/SharedPlanViewTracker";
 import { APP_STORE_ID } from "@/lib/appStore";
 import { defaultUnitSystemForCountry } from "@/lib/unit-conversion";
@@ -59,6 +61,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function SharableMealPlanPage({ params }: Props) {
   const { id } = await params;
   const plan = await getSharedMealPlan(id);
+
+  if (!plan && isPlanIdLink(id)) {
+    // App builds 1.2.0 to 1.8.0 shared plans by database id. Those links are
+    // refused (PRE-377); this line counts them without logging the id.
+    console.info("[shared-meal-plan] Refused a plan id link");
+    return (
+      <SharedPlanUnavailable lead="Meal plan links shared from older versions of the PrepIt app no longer open. Make your own plan with PrepIt instead." />
+    );
+  }
 
   if (!plan) {
     notFound();

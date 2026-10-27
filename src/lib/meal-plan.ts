@@ -25,10 +25,14 @@ const RECIPE_PROJECTION = {
  */
 const PLAN_PROJECTION = {
   "days.date": 1,
-  "days.breakfast": 1,
-  "days.lunch": 1,
-  "days.dinner": 1,
-  "days.snack": 1,
+  "days.breakfast.recipe": 1,
+  "days.breakfast.servings": 1,
+  "days.lunch.recipe": 1,
+  "days.lunch.servings": 1,
+  "days.dinner.recipe": 1,
+  "days.dinner.servings": 1,
+  "days.snack.recipe": 1,
+  "days.snack.servings": 1,
   "groceries.category": 1,
   "groceries.raw": 1,
   "groceries.quantity": 1,
