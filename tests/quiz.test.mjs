@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { parseBridgeHandoff } from "../src/lib/funnel/bridgeHandoff.ts";
 import { buildWebSignupBody } from "../src/lib/funnel/webSignupProfile.ts";
-import { withoutEmailToken } from "../src/lib/urlTokens.ts";
+import { withoutUrlSecrets } from "../src/lib/urlTokens.ts";
 import {
   ageFrom,
   analyticsStepId,
@@ -281,8 +281,26 @@ test("the starting point only repeats what they said", () => {
 });
 
 test("analytics URLs never keep an email link's token", () => {
-  assert.equal(withoutEmailToken("https://tryprepit.app/my-plan?token=abc"), "https://tryprepit.app/my-plan");
-  assert.equal(withoutEmailToken("https://tryprepit.app/my-plan?token=abc&utm_source=email"), "https://tryprepit.app/my-plan?utm_source=email");
-  assert.equal(withoutEmailToken("https://tryprepit.app/p?a=1&token=abc#x"), "https://tryprepit.app/p?a=1#x");
-  assert.equal(withoutEmailToken("https://tryprepit.app/p?mytoken=1"), "https://tryprepit.app/p?mytoken=1");
+  assert.equal(withoutUrlSecrets("https://tryprepit.app/my-plan?token=abc"), "https://tryprepit.app/my-plan");
+  assert.equal(withoutUrlSecrets("https://tryprepit.app/p?token=abc&utm_source=email"), "https://tryprepit.app/p?utm_source=email");
+  assert.equal(withoutUrlSecrets("https://tryprepit.app/p?a=1&token=abc#x"), "https://tryprepit.app/p?a=1#x");
+  assert.equal(withoutUrlSecrets("https://tryprepit.app/p?mytoken=1"), "https://tryprepit.app/p?mytoken=1");
+});
+
+test("analytics URLs drop the whole query on pages that carry a credential", () => {
+  assert.equal(
+    withoutUrlSecrets("https://www.tryprepit.app/auth/link?mode=signIn&oobCode=abc&apiKey=xyz&lang=en"),
+    "https://www.tryprepit.app/auth/link",
+  );
+  assert.equal(withoutUrlSecrets("https://tryprepit.app/my-plan?t=abc&x=1"), "https://tryprepit.app/my-plan");
+  assert.equal(withoutUrlSecrets("https://tryprepit.app/email-preferences/x?k=1#top"), "https://tryprepit.app/email-preferences/x#top");
+  assert.equal(withoutUrlSecrets("https://tryprepit.app/account?token=abc"), "https://tryprepit.app/account");
+  assert.equal(withoutUrlSecrets("https://tryprepit.app/accounting?a=1"), "https://tryprepit.app/accounting?a=1");
+});
+
+test("analytics URLs never keep a sign-in code on any page", () => {
+  assert.equal(withoutUrlSecrets("https://tryprepit.app/?oobCode=abc&utm_source=x"), "https://tryprepit.app/?utm_source=x");
+  assert.equal(withoutUrlSecrets("https://tryprepit.app/p?apiKey=k"), "https://tryprepit.app/p");
+  assert.equal(withoutUrlSecrets("Plan your week"), "Plan your week");
+  assert.equal(withoutUrlSecrets("/my-plan"), "/my-plan");
 });

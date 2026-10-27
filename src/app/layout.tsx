@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import { DM_Sans } from "next/font/google";
-import { SpeedInsights } from "@vercel/speed-insights/next";
-import { Analytics } from "@vercel/analytics/next";
 import Script from "next/script";
 import localFont from "next/font/local";
 import NavigationWrapper from "@/components/NavigationWrapper";
@@ -10,6 +8,7 @@ import SiteFinalCta from "@/components/pricing/SiteFinalCta";
 import Footer from "@/components/Footer";
 import SiteChrome from "@/components/SiteChrome";
 import CookieConsent from "@/components/CookieConsent";
+import VercelMetrics from "@/components/VercelMetrics";
 import AttributionCapture from "@/components/funnel/AttributionCapture";
 import MarketCapture from "@/components/funnel/MarketCapture";
 import { PREPIT_ANALYTICS_CONSENT_COOKIE, PREPIT_GEO_COOKIE } from "@/lib/cookies";
@@ -127,12 +126,14 @@ export default function RootLayout({
               {`
                 window.prepitLoadMetaPixel = function () {
                   /* The plan email pages carry a token in the address until
-                     the page removes it, so PageView must not see them. So
-                     does /account when opened from a subscription email
-                     (PRE-353); a plain /account visit still loads it. */
+                     the page removes it, so PageView must not see them. Nor
+                     any page opened with a credential in the address: /account
+                     from a subscription email (PRE-353), or an old sign-in
+                     email link to /auth/link (PRE-378). A plain /account visit
+                     still loads it. */
                   var path = location.pathname;
                   if (path === '/my-plan' || path === '/email-preferences' || path.indexOf('/my-plan/') === 0 || path.indexOf('/email-preferences/') === 0) return;
-                  if ((path === '/account' || path === '/account/') && /[?&]token=/.test(location.search)) return;
+                  if (/[?&](token|oobCode|apiKey)=/.test(location.search)) return;
                   !function(f,b,e,v,n,t,s)
                   {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
                   n.callMethod.apply(n,arguments):n.queue.push(arguments)};
@@ -221,8 +222,7 @@ export default function RootLayout({
             <Footer />
           </SiteChrome>
         </div>
-        <SpeedInsights />
-        <Analytics />
+        <VercelMetrics />
       </body>
     </html>
   );
