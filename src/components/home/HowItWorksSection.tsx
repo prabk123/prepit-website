@@ -4,9 +4,9 @@ import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
 
 /**
- * How it works in one 15 second take (website motion experiment): type what
- * you ate, it's logged, you see how it will make you feel, and your
- * nutritionist speaks up. The film is drawn in code (see HowItWorksFilm).
+ * How it works in one 22 second take (website motion experiment): the
+ * nutritionist speaks up, you act on it, and logging the meal lands the day.
+ * The film is drawn in code (see HowItWorksFilm).
  */
 export default function HowItWorksSection() {
   return (
@@ -17,7 +17,7 @@ export default function HowItWorksSection() {
     >
       <FeatureSplit
         media={
-          <HowItWorksFilm label="An animation of the PrepIt app: someone types chicken wrap, an apple and a flat white. PrepIt logs it at 487 calories, scores Energy 68, Satiety 52 and Mood 71, notes that afternoon Energy looks soft, and the nutritionist explains that the lunch is light on protein and suggests a Greek yogurt." />
+          <HowItWorksFilm label="An animation of the PrepIt app. The nutritionist notices protein has been under target on 18 of 21 days, mostly at dinner, and suggests a bigger portion of protein at dinner. That reply is tapped. Then a Mediterranean salmon bowl with quinoa is logged from the plus button at 6:45 PM: 454 calories, and the day's Eaten goes from 1,027 to 1,481 of 1,570 calories, on track, with Energy 84, Satiety 96 and Mood 87." />
         }
       >
         <SectionHeading

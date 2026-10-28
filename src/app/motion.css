@@ -407,11 +407,12 @@
 }
 
 /*
- * <HowItWorksFilm>: the app's Get started demo redrawn in app points on a
- * 400 x 400 stage, scaled to its box by --film-scale (set by the component;
- * the container steps below get the first paint close before it runs).
- * Colours, sizes and radii are the app's light theme (PrepItColors.light).
- * Before the script runs, and under reduced motion, it rests on the meal.
+ * <HowItWorksFilm>: a real flow in the app (the protein check-in, then
+ * logging a meal from +) drawn in app points on a 400 x 400 stage, scaled to
+ * its box by --film-scale (set by the component; the container steps below
+ * get the first paint close before it runs). Colours, sizes and radii are
+ * the app's light theme (PrepItColors.light). With no script it shows Home
+ * with the meal logged.
  */
 .how-film {
   container-type: inline-size;
@@ -422,9 +423,7 @@
   margin-inline: auto;
   overflow: hidden;
   border-radius: var(--radius-card);
-  background:
-    radial-gradient(closest-side at 50% 55%, rgb(255 100 79 / 0.07), transparent),
-    var(--color-surface-raised);
+  background: #f4f4f5;
   border: 1px solid var(--color-line);
   color: #000;
   font-family: var(--font-body);
@@ -444,6 +443,7 @@
   top: 0;
   width: 400px;
   height: 400px;
+  overflow: hidden;
   transform: scale(var(--film-scale, var(--film-scale-css, 1.4)));
   transform-origin: 0 0;
 }
@@ -454,6 +454,16 @@
   transform-origin: 50% 50%;
 }
 
+/* Without the script the world sits where Eaten and the Log show. */
+.hf-world {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 400px;
+  height: 400px;
+  transform: translateY(-40px);
+}
+
 .how-film p {
   margin: 0;
 }
@@ -462,49 +472,486 @@
   font-weight: 700;
 }
 
+.how-film i {
+  font-style: normal;
+}
+
 .how-film small {
   display: block;
-  font-size: 11px;
-  line-height: 14px;
+  font-size: 12px;
+  line-height: 16px;
   font-weight: 500;
   color: #7a7a82;
 }
 
-/* The card that morphs (the app's _DemoCard: white, 16 radius, hairline). */
-.how-film__shape {
-  position: absolute;
-  left: 30px;
-  top: 0;
-  width: 340px;
-  height: 352px;
-  transform: translateY(24px);
-  border-radius: 16px;
-  background: #fff;
-  border: 1px solid #e9e9ea;
-  box-shadow: 0 12px 36px rgb(0 0 0 / 0.16);
+.hf-green {
+  color: #40e300;
+}
+
+.hf-grey {
+  color: #a6a6ac;
 }
 
 .hf-layer {
   position: absolute;
-  left: 30px;
-  width: 340px;
   opacity: 0;
   visibility: hidden;
 }
 
+/* Home */
+.hf-card {
+  position: absolute;
+  left: 15px;
+  width: 370px;
+  background: #fff;
+  border: 1px solid #e9e9ea;
+  border-radius: 16px;
+}
+
+.hf-rings {
+  top: -178px;
+  height: 166px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.hf-ring {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+}
+
+.hf-ring__dial {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 98px;
+  height: 98px;
+}
+
+.hf-ring__dial svg {
+  position: absolute;
+  inset: 0;
+}
+
+.hf-ring__dial b {
+  font-family: var(--font-display);
+  font-size: 30px;
+  line-height: 1;
+  font-weight: 600;
+}
+
+.hf-ring__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.hf-eaten {
+  top: 0;
+  height: 228px;
+  padding: 16px;
+}
+
+.hf-eaten__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hf-eaten__flame {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgb(255 100 79 / 0.12);
+  color: #ff644f;
+}
+
+.hf-big b {
+  font-family: var(--font-display);
+  font-size: 26px;
+  line-height: 30px;
+  font-weight: 600;
+}
+
+.hf-big i,
+.hf-mid i {
+  font-size: 13px;
+  color: #7a7a82;
+}
+
+.hf-on-track {
+  margin-left: auto;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgb(64 227 0 / 0.16);
+  color: #258400;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+}
+
+.hf-eaten__chevron {
+  margin-left: 2px;
+}
+
+.hf-eaten__stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin-top: 14px;
+}
+
+.hf-mid b {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.hf-bar {
+  display: block;
+  height: 8px;
+  margin-top: 12px;
+  border-radius: 999px;
+  background: #f4f4f5;
+  overflow: hidden;
+}
+
+.hf-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #ffb09f, #ff644f);
+  transform-origin: 0 50%;
+}
+
+.hf-macros {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid #e9e9ea;
+}
+
+.hf-macro {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hf-macro b {
+  display: block;
+  font-size: 13px;
+  line-height: 16px;
+}
+
+/* The Log */
+.hf-log__head {
+  position: absolute;
+  left: 15px;
+  width: 370px;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 12px;
+  line-height: 18px;
+  color: #7a7a82;
+  white-space: nowrap;
+}
+
+.hf-log__head--yogurt {
+  top: 246px;
+}
+
+.hf-log__head--new {
+  top: 348px;
+}
+
+.hf-log__hour {
+  width: 59px;
+  color: #a6a6ac;
+}
+
+.hf-log__time {
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+.hf-log__card {
+  position: absolute;
+  left: 82px;
+  width: 303px;
+  padding: 12px 14px;
+  background: #fff;
+  border: 1px solid #e9e9ea;
+  border-radius: 16px;
+}
+
+.hf-log__card--yogurt {
+  top: 268px;
+  height: 70px;
+}
+
+.hf-log__card p {
+  font-size: 16px;
+  line-height: 20px;
+  font-weight: 500;
+}
+
+.hf-chips {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.hf-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.hf-chip--kcal {
+  background: rgb(255 100 79 / 0.12);
+  color: #b24637;
+}
+
+.hf-chip--kcal svg {
+  color: #ff644f;
+}
+
+.hf-chip--signal {
+  background: #f4f4f5;
+  color: #1a1a2e;
+}
+
+.hf-chip--signal svg {
+  color: #40e300;
+}
+
+.hf-new-chips {
+  position: absolute;
+  left: 96px;
+  top: 424px;
+}
+
+.hf-scrim {
+  position: absolute;
+  left: -50px;
+  top: -400px;
+  width: 500px;
+  height: 1400px;
+  background: #000;
+  opacity: 0;
+}
+
+/* The one shape. With no script it is the salmon bowl's row. */
+.how-film__shape {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 303px;
+  height: 90px;
+  transform: translate(82px, 370px);
+  border: 1px solid rgb(233 233 234);
+  border-radius: 16px;
+  background: #fff;
+}
+
+/* 1. The Nutritionist sheet */
+.hf-chat {
+  left: 0;
+  top: 20px;
+  width: 400px;
+  padding: 0 16px;
+}
+
 .hf-grabber {
   display: block;
-  width: 40px;
-  height: 4px;
-  margin-inline: auto;
-  border-radius: 999px;
+  width: 36px;
+  height: 5px;
+  margin: 8px auto 0;
+  border-radius: 3px;
   background: #d3d3d5;
 }
 
-/* Composer: field and tiles (HeroComposer). */
+.hf-chat__head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 10px;
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.hf-new {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  color: #d93c27;
+}
+
+.hf-new::before,
+.hf-new::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: rgb(217 60 39 / 0.35);
+}
+
+.hf-bubble {
+  width: 330px;
+  margin-top: 12px;
+  padding: 12px 16px;
+  background: #fff;
+  border-radius: 12px 12px 12px 2px;
+  font-size: 15px;
+  line-height: 21px;
+  color: #1a1a2e;
+}
+
+.hf-replies {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.hf-reply {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 48px;
+  padding: 0 14px;
+  background: #fff;
+  border: 1px solid #e9e9ea;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.hf-reply__n {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: 1px solid currentColor;
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.7;
+}
+
+.hf-reply__label {
+  flex: 1;
+}
+
+.hf-plus,
+.hf-fab {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  color: #fff;
+}
+
+.hf-plus {
+  left: 328px;
+  top: 328px;
+}
+
+/* The sheets (their white is the shape) */
+.hf-sheet {
+  left: 0;
+  width: 400px;
+  padding: 0 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.hf-sheet__title {
+  margin-top: 12px;
+  font-family: var(--font-display);
+  font-size: 22px;
+  line-height: 28px;
+  font-weight: 600;
+}
+
+.hf-sheet__helper {
+  margin-top: 6px;
+  font-size: 13px;
+  line-height: 18px;
+  color: #7a7a82;
+}
+
+.hf-add {
+  top: 170px;
+}
+
+.hf-add__tiles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.hf-add__tile {
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+  height: 80px;
+  padding: 14px;
+  border: 1px solid #e9e9ea;
+  border-radius: 16px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.hf-add__list {
+  display: grid;
+  margin-top: 12px;
+  padding: 2px 14px;
+  border-radius: 16px;
+  background: #f4f4f5;
+}
+
+.hf-add__list span {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 34px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.hf-add__list svg {
+  width: 18px;
+  color: #4d4d59;
+}
+
+.hf-describe {
+  top: 140px;
+}
+
 .hf-composer {
   display: flex;
-  gap: 6px;
+  gap: 8px;
+  margin-top: 12px;
+  height: 48px;
 }
 
 .hf-composer__field {
@@ -512,83 +959,19 @@
   min-width: 0;
   display: flex;
   align-items: center;
-  padding-inline: 12px;
+  padding: 0 12px;
+  border: 1px solid #d3d3d5;
   border-radius: 12px;
-  background: #f4f4f5;
   overflow: hidden;
 }
 
-.hf-hint {
-  color: #a6a6ac;
-  white-space: nowrap;
-}
-
-.hf-tile {
-  display: grid;
-  place-items: center;
-  flex: none;
-  border-radius: 12px;
-  background: #f4f4f5;
-  color: #000;
-}
-
-/* 1. Describe your meal. */
-.hf-log {
-  top: 120px;
-  padding: 8px 12px 12px;
-}
-
-.hf-sheet-title {
-  margin-top: 10px !important;
-  font-size: 18px;
-  line-height: 24px;
-  font-weight: 600;
-}
-
-.hf-helper {
-  margin: 2px 0 10px !important;
-  font-size: 12px;
-  line-height: 16px;
-  color: #7a7a82;
-}
-
-.hf-log__composer {
-  position: relative;
-  --hf-send: 0;
-}
-
-.hf-log__composer .hf-composer {
-  position: relative;
-  z-index: 1;
-  padding-right: calc(46px * var(--hf-send));
-  gap: 0;
-}
-
-.hf-log__composer .hf-tile--media {
-  width: calc(40px * (1 - var(--hf-send))) !important;
-  margin-left: calc(6px * (1 - var(--hf-send)));
-  opacity: calc(1 - var(--hf-send));
-  overflow: hidden;
-}
-
-.hf-tile--send {
-  position: absolute;
-  z-index: 1;
-  right: 0;
-  top: 0;
-  width: 40px;
-  height: 40px;
-  background: #000;
-  color: #fff;
-  opacity: var(--hf-send);
-}
-
-/* The typed line keeps its end in view, as the field scrolls in the app. */
 .hf-typing {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
   width: max-content;
   min-width: 100%;
+  font-size: 15px;
   white-space: nowrap;
 }
 
@@ -597,336 +980,185 @@
 }
 
 .hf-caret {
-  width: 1.5px;
+  width: 2px;
   height: 18px;
   margin-left: 1px;
-  align-self: center;
-  background: #000;
+  background: #ff644f;
 }
 
-/* SpinningAiGlow round the field while it works. */
-.hf-glow {
-  position: absolute;
-  inset: -3px;
-  border-radius: 14px;
-  background: conic-gradient(from var(--beam-angle), #809ff9, #d093d9, #f38c61, #f5cc77, #809ff9);
-  filter: blur(5px);
-  opacity: 0;
-}
-
-/* LoadingMessagePill. */
-.hf-pill {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: max-content;
-  margin: 16px auto 0;
-  padding: 8px 12px;
-  border-radius: 24px;
-  background: #000;
-  color: #fff;
-  font-size: 12px;
-  line-height: 16px;
-  font-weight: 500;
-  opacity: 0;
-}
-
-/* 2. The logged meal. */
-.hf-meal {
-  top: 24px;
-  padding: 16px;
-  opacity: 1;
-  visibility: visible;
-}
-
-.hf-meal__title {
-  font-family: var(--font-display);
-  font-size: 16px;
-  line-height: 24px;
-  font-weight: 600;
-}
-
-.hf-chips {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  margin: 12px 0 14px;
-}
-
-.hf-chip {
-  padding: 8px 6px;
-  border-radius: 12px;
-  background: #f4f4f5;
-  text-align: center;
-}
-
-.hf-chip b {
-  display: block;
-  font-size: 16px;
-  line-height: 16px;
-  margin-bottom: 4px;
-}
-
-.hf-items {
-  display: grid;
-  gap: 10px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid #e9e9ea;
-}
-
-.hf-item {
-  display: flex;
-  justify-content: space-between;
-  font-weight: 500;
-}
-
-.hf-cal {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 12px;
-  font-weight: 700;
-  color: #ff644f;
-}
-
-.hf-confidence {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin: 14px 0 12px;
-}
-
-.hf-gauge {
-  position: relative;
-  display: block;
-  width: 88px;
-  height: 46px;
-}
-
-.hf-gauge b {
-  position: absolute;
-  inset: auto 0 0;
-  text-align: center;
-  font-size: 16px;
-  line-height: 18px;
-}
-
-.hf-gauge svg {
-  display: block;
-}
-
-.hf-confidence__level {
-  display: block;
-  font-size: 16px;
-  line-height: 24px;
-}
-
-.hf-notes {
-  font-size: 12px;
-  line-height: 18px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-/* 3. Energy, Satiety and Mood. */
-.hf-signals {
-  top: 141px;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  padding: 16px 12px 12px;
-}
-
-.hf-signal {
-  display: grid;
-  justify-items: center;
-  gap: 6px;
-}
-
-.hf-ring {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 66px;
-  height: 66px;
-}
-
-.hf-ring svg {
-  position: absolute;
-  inset: 0;
-}
-
-.hf-ring b {
-  font-family: var(--font-display);
-  font-size: 16px;
-}
-
-.hf-signal__label {
-  display: flex;
-  align-items: center;
-  font-size: 13px;
-  line-height: 18px;
-  font-weight: 500;
-  color: #4d4d59;
-}
-
-.hf-signal__label svg {
+.hf-hint {
   color: #a6a6ac;
 }
 
-/* 4. The insight: AiInsightCardChrome and AiInsightActionChip. */
-.hf-insight {
-  top: 132px;
-}
-
-.hf-insight__card {
-  padding: 16px 16px 30px;
-  border: 1.5px solid transparent;
-  border-radius: 16px;
-  background:
-    linear-gradient(90deg, #f2f5fe, #faf4fb, #fef3ef, #fefaf2) padding-box,
-    linear-gradient(90deg, #809ff9, #d093d9, #f38c61, #f3cd7f) border-box;
-}
-
-.hf-insight__title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  line-height: 21px !important;
-  font-weight: 700;
-}
-
-.hf-insight__title svg {
-  margin: 3px;
-}
-
-.hf-insight__body {
-  margin-top: 8px !important;
-  font-weight: 500;
+.hf-tile {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 40px;
+  height: 48px;
+  border-radius: 12px;
+  background: #f4f4f5;
   color: #4d4d59;
+  overflow: hidden;
 }
 
-.hf-action {
-  position: absolute;
-  right: 12px;
-  bottom: -16px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  border-radius: 24px;
+.hf-tile--send {
+  width: 48px;
   background: #000;
   color: #fff;
-  font-size: 12px;
-  line-height: 16px;
-  font-weight: 500;
-  box-shadow: 0 2px 4px rgb(0 0 0 / 0.12);
+  opacity: 0;
 }
 
-/* 5. The conversation: grey sheet, bubbles, composer strip. */
-.hf-chat {
-  top: 60px;
-  height: 330px;
-  display: flex;
-  flex-direction: column;
-  padding-top: 8px;
-  border-radius: 16px;
-  overflow: hidden;
+.hf-recent {
+  margin-top: 14px;
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
 }
 
-.hf-chat__head {
+.hf-search {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 6px;
-  margin: 10px 0 !important;
-  font-size: 15px;
-  font-weight: 700;
+  gap: 8px;
+  height: 40px;
+  margin-top: 8px;
+  padding: 0 12px;
+  border-radius: 12px;
+  background: #f4f4f5;
+  color: #a6a6ac;
 }
 
-.hf-chat__messages {
-  flex: 1;
-  min-height: 0;
+.hf-when {
+  top: 90px;
+}
+
+.hf-when__date {
   display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: 0 12px 10px;
-  overflow: hidden;
+  align-items: center;
+  gap: 6px;
+  height: 20px;
+  margin-top: 6px;
+  font-size: 14px;
+  font-weight: 600;
 }
 
-.hf-grow {
+.hf-wheel {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  height: 110px;
+  margin-top: 44px;
+  overflow: hidden;
+  font-size: 18px;
+  -webkit-mask-image: linear-gradient(transparent, #000 35%, #000 65%, transparent);
+  mask-image: linear-gradient(transparent, #000 35%, #000 65%, transparent);
+}
+
+.hf-wheel__band {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 44px;
+  height: 22px;
+  border-radius: 8px;
+  background: #f4f4f5;
+}
+
+.hf-wheel__col {
+  position: relative;
+  height: 110px;
+}
+
+.hf-wheel__list {
   display: grid;
-  grid-template-rows: 1fr;
+  text-align: center;
+  translate: 0 -88px;
 }
 
-.hf-grow > div {
-  min-height: 0;
-  overflow: hidden;
+.hf-wheel__list span {
+  height: 22px;
+  line-height: 22px;
 }
 
-.hf-grow + .hf-grow > div {
-  padding-top: 4px;
+.hf-wheel__list--ampm {
+  translate: 0 22px;
 }
 
-.hf-grow--user + .hf-grow > div {
-  padding-top: 10px;
+.hf-confirm {
+  display: grid;
+  place-items: center;
+  height: 48px;
+  margin-top: 12px;
+  border-radius: 999px;
+  background: #000;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
 }
 
-.hf-bubble {
-  width: fit-content;
-  max-width: 85%;
-  padding: 8px 12px;
-  border-radius: 12px 12px 12px 2px;
-  background: #fff;
+/* The meal's name and its calories, flying between screens. */
+.hf-fly {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 275px;
+  transform: translate(96px, 380px);
+  font-size: 16px;
+  line-height: 20px;
+  font-weight: 500;
 }
 
-.hf-bubble--user {
-  max-width: 80%;
-  margin-left: auto !important;
-  border-radius: 12px 12px 2px 12px;
-  background: #d3d3d5;
+.hf-fly > span {
+  opacity: 0;
 }
 
-/* AiChatTypingDots. */
-.hf-dots {
-  display: none;
+.hf-kcal-fly {
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  transform-origin: 0 50%;
+  box-shadow: 0 6px 16px rgb(255 100 79 / 0.25);
+}
+
+/* The tab bar and + button */
+.hf-nav {
+  left: 15px;
+  bottom: 16px;
+  display: flex;
+  align-items: center;
   gap: 4px;
-  padding: 8px 2px 0;
+  height: 56px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.92);
+  border: 1px solid #e9e9ea;
+  box-shadow: 0 6px 20px rgb(0 0 0 / 0.08);
 }
 
-.hf-dots i {
-  width: 6px;
-  height: 6px;
+.hf-nav__tab {
+  display: grid;
+  justify-items: center;
+  width: 72px;
+  font-size: 11px;
+  line-height: 14px;
+  font-weight: 600;
+  color: #7a7a82;
+}
+
+.hf-nav__tab--on {
+  color: #000;
+}
+
+.hf-fab {
+  right: 16px;
+  bottom: 16px;
   border-radius: 50%;
-  background: #a6a6ac;
+  background: #000;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .hf-dots i {
-    animation: hf-dot 900ms ease-in-out infinite;
-  }
-
-  .hf-dots i:nth-child(2) {
-    animation-delay: 150ms;
-  }
-
-  .hf-dots i:nth-child(3) {
-    animation-delay: 300ms;
-  }
-}
-
-@keyframes hf-dot {
-  0%, 60%, 100% { translate: 0 0; opacity: 0.5; }
-  30% { translate: 0 -4px; opacity: 1; }
-}
-
-.hf-chat__composer {
-  padding: 8px 12px 12px;
-  background: #fff;
-}
-
-/* 6. The dark and the closing line. */
+/* The dark and the closing line */
 .how-film__flood {
   position: absolute;
   inset: 0;
@@ -966,6 +1198,7 @@
 }
 
 .how-film .loop-video__toggle {
+  top: 14px;
   right: 14px;
-  bottom: 14px;
+  bottom: auto;
 }
