@@ -1,9 +1,8 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import { ICON as APP_ICON } from "@/components/ui/LongLogo";
 import type { FilmIconName } from "./filmIcons";
-import { Film, Icon, cameraAt, clamp01, columns, ease, easeIn, mix, moves, spring, track, useFilm } from "./filmKit";
+import { AppMark, Film, Icon, Plus, cameraAt, clamp01, columns, ease, easeIn, mix, moves, spring, track, useFilm } from "./filmKit";
 
 /*
  * The homepage hero film (website motion experiment), staged after the
@@ -90,22 +89,6 @@ const CAMERA: [number, number, number, number][] = [
   [14.0, 1, 200, 196],
   [18.75, 1.15, 200, 112], // back on the check-in for the next loop
 ];
-
-function AppMark({ size }: { size: number }) {
-  return (
-    <svg viewBox="0 0 256 256" width={size} height={size} aria-hidden>
-      <path fillRule="evenodd" clipRule="evenodd" d={APP_ICON} fill="currentColor" />
-    </svg>
-  );
-}
-
-function Plus({ size }: { size: number }) {
-  return (
-    <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden>
-      <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
-    </svg>
-  );
-}
 
 function Wheel({ items, list, width }: { items: (string | number)[]; list: (el: HTMLElement | null) => void; width: number }) {
   return (

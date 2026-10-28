@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { trackVideoPlayed } from "@/lib/posthogAnalytics";
+import { ICON as APP_ICON } from "@/components/ui/LongLogo";
 import { FILM_ICONS, type FilmIconName } from "./filmIcons";
 
 /*
@@ -226,6 +227,23 @@ export function Icon({ name, size, className }: { name: FilmIconName; size: numb
   return (
     <svg viewBox={icon.box} width={size} height={size} className={className} aria-hidden>
       <path d={icon.d} fill="currentColor" />
+    </svg>
+  );
+}
+
+/** The app's mark, as on the nutritionist's avatar and the Add sheet. */
+export function AppMark({ size }: { size: number }) {
+  return (
+    <svg viewBox="0 0 256 256" width={size} height={size} aria-hidden>
+      <path fillRule="evenodd" clipRule="evenodd" d={APP_ICON} fill="currentColor" />
+    </svg>
+  );
+}
+
+export function Plus({ size }: { size: number }) {
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden>
+      <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
     </svg>
   );
 }

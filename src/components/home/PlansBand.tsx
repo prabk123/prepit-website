@@ -1,12 +1,12 @@
-import DeviceFrame from "@/components/device/DeviceFrame";
-import Glow from "@/components/ui/Glow";
+import PlansFilm from "@/components/motion/PlansFilm";
 import PhotoBand from "@/components/ui/PhotoBand";
 import SectionHeading from "@/components/ui/SectionHeading";
-import TextLink from "@/components/ui/TextLink";
-import { appVideo } from "@/lib/captures";
 import { plansKitchen } from "@/content/lifestyle";
 
-/** "Your week, planned": the meal plan, with its grocery list in the kitchen photo. */
+/**
+ * "Your week, planned": the kitchen photo, then a film of the meal plan and
+ * its grocery list (see PlansFilm). Swapping a meal follows in PlanSwapSection.
+ */
 export default function PlansBand() {
   return (
     <PhotoBand
@@ -18,23 +18,8 @@ export default function PlansBand() {
       annotations={plansKitchen.annotations}
       textSide={plansKitchen.textSide}
       textOnBrightPhoto
-      aside={
-        <>
-          <SectionHeading as="h3" id="plans-swap-heading" size="section" title="Change anything, just ask." />
-          <p className="text-body text-ink-secondary text-pretty">
-            Want a different dinner on Thursday? Ask, and it swaps it.
-          </p>
-          <TextLink href="/features/meal-plans">More about meal plans</TextLink>
-        </>
-      }
       media={
-        <div className="relative">
-          <Glow />
-          <DeviceFrame
-            className="[--device-w:260px] sm:[--device-w:300px] lg:[--device-w:clamp(260px,22vw,320px)]"
-            video={appVideo("12-plan-week", "Scrolling a week of planned meals, each with a photo of the dish")}
-          />
-        </div>
+        <PlansFilm label="An animation of a PrepIt meal plan for 17 to 23 October, 21 meals. Saturday: protein overnight oats with apple, a chicken burrito bowl and a Korean beef rice bowl, 1,580 kcal against a 1,570 target. Sunday: a berry yogurt parfait, Thai peanut chicken noodles and a salmon teriyaki rice bowl, 1,470 kcal. Then the grocery list, estimated at £48 to £66 and sorted by aisle, has its items ticked off." />
       }
     >
       <SectionHeading

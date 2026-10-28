@@ -4,6 +4,7 @@ import HomeHero from "@/components/home/HomeHero";
 import KnowsYouSection from "@/components/home/KnowsYouSection";
 import ObjectionsSection from "@/components/home/ObjectionsSection";
 import PlansBand from "@/components/home/PlansBand";
+import PlanSwapSection from "@/components/home/PlanSwapSection";
 import ResearchSection from "@/components/home/ResearchSection";
 import SignalsSection from "@/components/home/SignalsSection";
 import SpeaksUpBand from "@/components/home/SpeaksUpBand";
@@ -53,6 +54,7 @@ export default function Home() {
       <SignalsSection />
       <ResearchSection />
       <PlansBand />
+      <PlanSwapSection />
       <ObjectionsSection />
       <PricingSection />
       <FaqSection />
