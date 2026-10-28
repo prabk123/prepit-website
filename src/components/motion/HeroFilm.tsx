@@ -24,13 +24,20 @@ import { AppMark, Film, Icon, Plus, cameraAt, clamp01, columns, ease, easeIn, mi
  * 7. the row becomes the Energy, Satiety and Mood card;
  * 8. that card shrinks back into the check-in bubble, and the loop starts again.
  *
+ * Before the loop, once, the film opens on Home in a phone, earlier that
+ * evening (the four meals before the salmon bowl, Eaten 1,027). The check-in
+ * lands as a new message on the Ask Nutritionist button, which is tapped and
+ * grows into the check-in bubble.
+ *
  * Prabodh agreed (28 Oct 2026) that this film may draw the app in code. The
  * numbers before the salmon bowl are the day's totals minus that meal.
  */
 
 const LOOP = 19.6;
+/** The opening on Home, played once before the loop. */
+const INTRO = 3.3;
 /** Where the film rests before it plays, and under reduced motion. */
-const REST = 16.0;
+const REST = INTRO + 16.0;
 
 const NUDGE =
   "Over the past few weeks protein has been a little low: under your target on 18 of 21 logged days, about 127g a day against 158g. Most of the gap is at dinner, which averages about 39g. Two easy fixes that don't change what you cook: a bigger portion of the protein you already have at dinner, or a pot of Greek yogurt after dinner. Want to try one?";
@@ -52,6 +59,18 @@ const RINGS: { label: string; icon: FilmIconName; score: number }[] = [
   { label: "Satiety", icon: "apple", score: 96 },
   { label: "Mood", icon: "spa", score: 87 },
 ];
+/** The day's Log before the salmon bowl (the showcase account's captures). */
+const EARLIER = [
+  { hour: "7 AM", time: "7:45 AM", name: "Protein overnight oats with apple and cinnamon", kcal: 357, macros: "40g C · 34g P · 7g F" },
+  { hour: "8 AM", time: "8:15 AM", name: "Coffee with milk", kcal: 40, macros: "4g C · 2g P · 1g F" },
+  { hour: "12 PM", time: "12:30 PM", name: "Chicken wrap with hummus and salad", kcal: 462, macros: "39g C · 61g P · 10g F" },
+  { hour: "3 PM", time: "3:45 PM", name: "Greek yogurt with raspberries", kcal: 168, macros: "17g C · 13g P · 7g F" },
+];
+/** The phone, in stage points, and Home drawn at app size inside it. */
+const PHONE = { left: 112, top: 20, width: 176, height: 360, border: 6 };
+const HOME_SCALE = (PHONE.width - 2 * PHONE.border) / 390;
+/** The centre of the Ask Nutritionist button on Home, in app points. */
+const CHAT_BUTTON = { x: 348, y: 768, size: 52 };
 const HOURS = [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
 const MINUTES = Array.from({ length: 60 }, (_, m) => String(m).padStart(2, "0"));
 /** Wheel rows are 22 pt; the picked row sits third of five. */
@@ -69,7 +88,7 @@ const SHAPE: [number, number, number, number, number, number, number][] = [
   [0, 200, REPLY_TOP + 24, 340, 48, 12, 0], // the tapped reply
   [4.15, 200, 200, 64, 64, 32, 0], // the + button
   [5.45, 200, 200, 340, 236, 24, 1], // the Add sheet
-  [7.05, 200, 200, 360, 200, 24, 1], // Describe your meal
+  [7.05, 200, 200, 360, 176, 24, 1], // Describe your meal
   [9.75, 200, 200, 340, 300, 24, 1], // When did you eat this?
   [12.25, 200, 250, 330, 96, 16, 1], // the meal on the Log
   [14.0, 200, 330, 330, 96, 16, 1], // ...moved down for Eaten
@@ -159,11 +178,13 @@ function seek(t: number, put: (key: string, prop: string, value: string) => void
   put("caret", "opacity", t < 9.4 && Math.floor(t * 2.4) % 2 === 0 ? "1" : "0");
   const sending = clamp01((t - 7.9) / 0.25);
   [0, 1].forEach((i) => {
-    put(`media${i}`, "width", `${mix(40, 0, sending).toFixed(1)}px`);
+    put(`media${i}`, "width", `${mix(48, 0, sending).toFixed(1)}px`);
     put(`media${i}`, "opacity", (1 - sending).toFixed(2));
     // Their gap closes with them, so the field meets the send button.
     put(`media${i}`, "margin-left", `${mix(8, 0, sending).toFixed(1)}px`);
   });
+  put("send", "width", `${mix(0, 48, sending).toFixed(1)}px`);
+  put("send", "margin-left", `${mix(0, 8, sending).toFixed(1)}px`);
   pop("send", t, 7.95);
   if (t > 9.25 && t < 9.65) press("send", t, 9.4);
 
@@ -227,12 +248,202 @@ function seek(t: number, put: (key: string, prop: string, value: string) => void
   });
 }
 
+/** The opening: Home in a phone, and the tapped Ask Nutritionist button
+ *  growing into the check-in bubble. `t` is the film's own time. */
+function seekIntro(t: number, put: (key: string, prop: string, value: string) => void) {
+  const { press, pop } = moves(put);
+  // The phone settles, then pushes in on the button as it is tapped.
+  const settle = 0.94 + 0.06 * spring(t, 0.8, 0.9);
+  const push = mix(1, 1.9, ease((t - 1.95) / 0.7));
+  put("phone", "visibility", t < 2.55 ? "visible" : "hidden");
+  put("phone", "opacity", (1 - clamp01((t - 2.0) / 0.4)).toFixed(2));
+  put("phone", "scale", (settle * push).toFixed(4));
+  // Home scrolls a little, down to the afternoon.
+  put("homeScroll", "translate", `0 ${(-110 * ease((t - 0.6) / 1.1)).toFixed(1)}px`);
+  pop("chatBadge", t, 0.95);
+  press("chatButton", t, 1.85);
+
+  // The button, in camera points, grows into the bubble. The camera opens
+  // at 1.15 on the bubble (CAMERA's first key).
+  const sx = PHONE.left + PHONE.border + CHAT_BUTTON.x * HOME_SCALE;
+  const sy = PHONE.top + PHONE.border + CHAT_BUTTON.y * HOME_SCALE;
+  const from = { x: 200 + (sx - 200) / 1.15, y: 112 + (sy - 200) / 1.15, size: (CHAT_BUTTON.size * HOME_SCALE) / 1.15 };
+  const p = ease((t - 1.95) / 0.65);
+  const w = mix(from.size, 340, p);
+  const h = mix(from.size, BUBBLE.height, p);
+  const cx = mix(from.x, 200, p);
+  const cy = mix(from.y, BUBBLE.top + BUBBLE.height / 2, p);
+  const r = mix(from.size * 0.3, 12, p);
+  put("introShape", "visibility", t >= 1.95 && t < INTRO - 0.6 ? "visible" : "hidden");
+  put("introShape", "width", `${w.toFixed(1)}px`);
+  put("introShape", "height", `${h.toFixed(1)}px`);
+  put("introShape", "transform", `translate(${(cx - w / 2).toFixed(1)}px, ${(cy - h / 2).toFixed(1)}px)`);
+  put("introShape", "border-radius", `${r.toFixed(1)}px ${r.toFixed(1)}px ${r.toFixed(1)}px ${mix(r, 2, p).toFixed(1)}px`);
+}
+
+/** The whole film: the opening once, then the loop. */
+function seekFilm(t: number, put: (key: string, prop: string, value: string) => void) {
+  seekIntro(t, put);
+  seek(t - INTRO, put);
+}
+
 export default function HeroFilm({ label, className }: { label: string; className?: string }) {
-  const { set, ...film } = useFilm({ loop: LOOP, rest: REST, name: "hero-film", seek });
+  const { set, ...film } = useFilm({ loop: LOOP, rest: REST, intro: INTRO, name: "hero-film", seek: seekFilm });
 
   return (
     <Film {...film} label={label} className={`hero-film ${className ?? ""}`}>
+      {/* The opening: Home, earlier that evening, in a phone. */}
+      <div
+        ref={set("phone")}
+        className="hf-c hf-phone"
+        style={
+          {
+            left: PHONE.left,
+            top: PHONE.top,
+            width: PHONE.width,
+            height: PHONE.height,
+            borderWidth: PHONE.border,
+            transformOrigin: `${PHONE.border + CHAT_BUTTON.x * HOME_SCALE}px ${PHONE.border + CHAT_BUTTON.y * HOME_SCALE}px`,
+          } as CSSProperties
+        }
+        aria-hidden
+      >
+        <div className="hf-home" style={{ scale: String(HOME_SCALE) } as CSSProperties}>
+          <div ref={set("homeScroll")} className="hf-home__scroll">
+            <div className="hf-card hf-eaten hf-home__card">
+              <div className="hf-eaten__head">
+                <span className="hf-eaten__flame">
+                  <Icon name="fire" size={20} />
+                </span>
+                <span>
+                  <small>Eaten</small>
+                  <span className="hf-big">
+                    <b>{EATEN.before.toLocaleString("en-GB")}</b> <i>kcal</i>
+                  </span>
+                </span>
+                <Icon name="chevronRight" size={12} className="hf-grey" />
+              </div>
+              <div className="hf-eaten__stats">
+                <span>
+                  <small>Burned</small>
+                  <span className="hf-mid">
+                    <b>0</b> <i>kcal</i>
+                  </span>
+                </span>
+                <span>
+                  <small>Left</small>
+                  <span className="hf-mid">
+                    <b>{EATEN.goal - EATEN.before}</b> <i>kcal</i>
+                  </span>
+                </span>
+                <span>
+                  <small>Goal</small>
+                  <span className="hf-mid">
+                    <b>1,570</b> <i>kcal</i>
+                  </span>
+                </span>
+              </div>
+              <span className="hf-bar">
+                <span style={{ scale: `${EATEN.before / EATEN.goal} 1` } as CSSProperties} />
+              </span>
+              <div className="hf-macros">
+                {MACROS.map((m) => (
+                  <span key={m.label} className="hf-macro">
+                    <svg viewBox="0 0 22 22" width="22" height="22" aria-hidden>
+                      <circle cx="11" cy="11" r="9" fill="none" stroke="#ff644f" strokeOpacity="0.2" strokeWidth="2.4" />
+                      <circle
+                        cx="11"
+                        cy="11"
+                        r="9"
+                        fill="none"
+                        stroke="#ff644f"
+                        strokeWidth="2.4"
+                        strokeLinecap="round"
+                        pathLength={1}
+                        strokeDasharray="1"
+                        strokeDashoffset={1 - m.before / m.goal}
+                        transform="rotate(-90 11 11)"
+                      />
+                    </svg>
+                    <span>
+                      <b>{m.label}</b>
+                      <small>
+                        {m.before}/{m.goal}g
+                      </small>
+                    </span>
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div className="hf-card hf-home__card hf-home__log">
+              <span className="hf-home__log-title">Log</span>
+              {EARLIER.map((meal) => (
+                <div key={meal.name} className="hf-home__meal">
+                  <p className="hf-row__head">
+                    <span className="hf-row__hour">{meal.hour}</span>
+                    <span className="hf-row__time">{meal.time}</span>
+                    <span>
+                      {meal.kcal} kcal · {meal.macros}
+                    </span>
+                  </p>
+                  <span className="hf-home__item">
+                    {meal.name}
+                    <span className="hf-chip hf-chip--kcal">
+                      <Icon name="fire" size={12} />
+                      {meal.kcal} kcal
+                    </span>
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="hf-home__top">
+            <span className="hf-home__status">
+              <b>22:50</b>
+              <span className="hf-home__battery" />
+            </span>
+            <span className="hf-home__head">
+              <span className="hf-home__mark">
+                <AppMark size={24} />
+              </span>
+              <span className="hf-home__date">Today, 16 Oct</span>
+              <Icon name="chevronRight" size={14} className="hf-home__chevron" />
+              <span className="hf-home__streak">
+                <Icon name="fire" size={16} />
+                15
+              </span>
+              <span className="hf-home__avatar" />
+            </span>
+          </div>
+          <span className="hf-home__nav">
+            <span className="hf-home__tabs">
+              <span className="hf-home__tab hf-home__tab--on">
+                <Icon name="homeLeaf" size={22} />
+              </span>
+              <span className="hf-home__tab">
+                <Icon name="goal" size={22} />
+              </span>
+              <span className="hf-home__tab">
+                <Icon name="calendarDay" size={22} />
+              </span>
+            </span>
+            <span className="hf-home__add">
+              <Plus size={26} />
+            </span>
+            <span ref={set("chatButton")} className="hf-home__chat">
+              <AppMark size={24} />
+              <span ref={set("chatBadge")} className="hf-home__badge">
+                1
+              </span>
+            </span>
+          </span>
+        </div>
+        <span className="hf-phone__island" />
+      </div>
+
       <div ref={set("camera")} className="film__camera" aria-hidden>
+        {/* The Ask Nutritionist button, growing into the check-in. */}
+        <div ref={set("introShape")} className="hf-intro-shape" />
         {/* 1. The nutritionist's protein check-in. */}
         <p ref={set("bubble")} className="hf-bubble" style={{ top: BUBBLE.top, height: BUBBLE.height }}>
           <span className="hf-bubble__mask">
@@ -310,10 +521,10 @@ export default function HeroFilm({ label, className }: { label: string; classNam
               </span>
             </span>
             <span ref={set("media0")} className="hf-tile">
-              <Icon name="microphone" size={17} />
+              <Icon name="microphone" size={21} />
             </span>
             <span ref={set("media1")} className="hf-tile">
-              <Icon name="camera" size={17} />
+              <Icon name="camera" size={21} />
             </span>
             <span ref={set("send")} className="hf-tile hf-tile--send">
               <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden>
@@ -321,7 +532,6 @@ export default function HeroFilm({ label, className }: { label: string; classNam
               </svg>
             </span>
           </span>
-          <span className="hf-recent">Recent</span>
         </div>
 
         {/* 4. When did you eat this? */}

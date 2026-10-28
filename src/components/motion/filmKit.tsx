@@ -99,8 +99,22 @@ export function moves(put: Put) {
  * Plays a film while it is on screen: on its own unless motion is reduced or
  * turned off with ?motion=off, otherwise once Play is pressed. Paused always
  * wins. `rest` is the frame shown when it will not play (reduced motion).
+ * `intro` seconds play once at the start and the loop is the `loop` seconds
+ * after them, so a film can open on something it never comes back to.
  */
-export function useFilm({ loop, rest, name, seek }: { loop: number; rest: number; name: string; seek: (t: number, put: Put) => void }) {
+export function useFilm({
+  loop,
+  rest,
+  name,
+  seek,
+  intro = 0,
+}: {
+  loop: number;
+  rest: number;
+  name: string;
+  seek: (t: number, put: Put) => void;
+  intro?: number;
+}) {
   const boxRef = useRef<HTMLDivElement>(null);
   const refs = useRef<Record<string, HTMLElement | SVGElement | null>>({});
   const written = useRef(new Map<string, string>());
@@ -177,7 +191,8 @@ export function useFilm({ loop, rest, name, seek }: { loop: number; rest: number
     clock.current.last = performance.now();
     const tick = (now: number) => {
       const c = clock.current;
-      c.t = (c.t + Math.min(0.1, (now - c.last) / 1000)) % loop;
+      c.t += Math.min(0.1, (now - c.last) / 1000);
+      if (c.t >= intro + loop) c.t = intro + ((c.t - intro) % loop);
       c.last = now;
       seekRef.current(c.t, putRef.current);
       frame = requestAnimationFrame(tick);
@@ -186,7 +201,7 @@ export function useFilm({ loop, rest, name, seek }: { loop: number; rest: number
     return () => cancelAnimationFrame(frame);
     // userState only names the first play; the loop restarts on `running`.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [running, loop, name]);
+  }, [running, loop, intro, name]);
 
   const showsPause = userState === "playing" || (userState === "auto" && allowed);
   const toggle = () => setUserState(showsPause ? "paused" : "playing");

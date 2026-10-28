@@ -656,7 +656,7 @@
 /* 3. Describe your meal */
 .hf-describe {
   left: 20px;
-  top: 100px;
+  top: 112px;
   width: 360px;
   padding: 16px;
   display: flex;
@@ -688,9 +688,9 @@
   min-width: 0;
   display: flex;
   align-items: center;
-  padding: 0 12px;
-  border: 1px solid #d3d3d5;
+  padding: 0 14px;
   border-radius: 12px;
+  background: #f4f4f5;
   overflow: hidden;
 }
 
@@ -724,26 +724,21 @@
   place-items: center;
   flex: none;
   margin-left: 8px;
-  width: 40px;
+  width: 48px;
   height: 48px;
   border-radius: 12px;
   background: #f4f4f5;
-  color: #4d4d59;
+  color: #000;
   overflow: hidden;
 }
 
+/* The send button only takes room once something is typed, as in the app. */
 .hf-tile--send {
-  width: 48px;
+  width: 0;
+  margin-left: 0;
   background: #000;
   color: #fff;
   opacity: 0;
-}
-
-.hf-recent {
-  margin-top: 12px;
-  font-family: var(--font-display);
-  font-size: 17px;
-  font-weight: 600;
 }
 
 /* 4. When did you eat this? */
@@ -1394,43 +1389,92 @@
   backdrop-filter: blur(18px) saturate(1.6);
 }
 
-/* The lock screen each notification lands on: the top of an iPhone, its
-   bottom fading into the page with the stage's edge. */
+/* The lock screen each notification lands on: the top of an iPhone with a
+   blue and teal wallpaper drawn in CSS, its bottom fading into the page with
+   the stage's edge (after Prabodh's Figma, node 3350:57437). */
 .nf-phone {
   left: 56px;
   top: 4px;
   width: 288px;
   height: 470px;
-  border: 9px solid #111114;
-  border-radius: 52px;
-  background: linear-gradient(165deg, #f4e6da 0%, #ebe3ee 50%, #dde6ef 100%);
+  border: 1.5px solid #111114;
+  border-radius: 46px;
+  background:
+    radial-gradient(70% 45% at 92% 18%, #0a1a5c 0%, #1f44b0 45%, rgb(31 68 176 / 0) 75%),
+    radial-gradient(85% 55% at 8% 78%, #2c8c86 0%, #3b8597 45%, rgb(59 133 151 / 0) 75%),
+    linear-gradient(170deg, #9dbdbb 0%, #6d9fae 40%, #2b5fa6 75%, #0f2f7a 100%);
   box-shadow: 0 20px 50px rgb(26 26 46 / 0.14);
   display: grid;
   justify-items: center;
   align-content: start;
-  color: rgb(26 26 46 / 0.85);
+  color: #fff;
+  overflow: hidden;
+}
+
+.nf-phone__status {
+  position: absolute;
+  left: 30px;
+  right: 22px;
+  top: 14px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.nf-phone__status b {
+  margin-right: auto;
+  font-weight: 600;
+}
+
+.nf-phone__bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 1.5px;
+  height: 8px;
+}
+
+.nf-phone__bars i {
+  width: 2.5px;
+  border-radius: 1px;
+  background: #fff;
+}
+
+.nf-phone__bars i:nth-child(1) { height: 3px; }
+.nf-phone__bars i:nth-child(2) { height: 4.5px; }
+.nf-phone__bars i:nth-child(3) { height: 6px; }
+.nf-phone__bars i:nth-child(4) { height: 8px; }
+
+.nf-phone__battery {
+  width: 18px;
+  height: 9px;
+  border-radius: 3px;
+  background: #fff;
 }
 
 .nf-phone__island {
-  width: 86px;
-  height: 25px;
+  width: 78px;
+  height: 22px;
   margin-top: 10px;
   border-radius: 999px;
   background: #111114;
 }
 
 .nf-phone__date {
-  margin-top: 22px;
-  font-size: 13px;
-  font-weight: 600;
+  margin-top: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: rgb(255 255 255 / 0.9);
 }
 
 .nf-phone__time {
   font-family: var(--font-display);
-  font-size: 66px;
+  font-size: 68px;
   line-height: 1;
   font-weight: 600;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
+  color: rgb(255 255 255 / 0.92);
 }
 
 .nf-banner {
@@ -1441,15 +1485,16 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  color: #fff;
 }
 
 .nf-banner__icon {
   display: grid;
   place-items: center;
   flex: none;
-  width: 34px;
-  height: 34px;
-  border-radius: 8px;
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
   background: #000;
   color: #fff;
 }
@@ -1467,9 +1512,13 @@
   line-height: 17px;
 }
 
+.nf-banner__top b {
+  font-weight: 600;
+}
+
 .nf-banner__top span {
   font-size: 12px;
-  color: #7a7a82;
+  color: rgb(255 255 255 / 0.6);
 }
 
 .nf-banner__text {
@@ -1479,6 +1528,29 @@
   overflow: hidden;
   font-size: 13px;
   line-height: 17px;
+}
+
+/* The older notifications stacked under it, as two glass slivers. */
+.nf-banner__stack {
+  position: absolute;
+  left: 0;
+  top: 68px;
+  width: 240px;
+  height: 7px;
+  border: 1px solid rgb(255 255 255 / 0.3);
+  border-top: 0;
+  border-radius: 0 0 14px 14px;
+  background: rgb(255 255 255 / 0.14);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+}
+
+.nf-banner__stack--back {
+  left: 12px;
+  top: 75px;
+  width: 216px;
+  height: 6px;
+  opacity: 0.7;
 }
 
 .nf-bubble {
@@ -2019,4 +2091,240 @@
   to {
     background-position: -150% 0;
   }
+}
+
+/* The hero's opening: Home, drawn at app size in a phone and scaled down. */
+.hf-phone {
+  border: 6px solid #111114;
+  border-radius: 34px;
+  background: #f4f4f5;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgb(26 26 46 / 0.14);
+}
+
+.hf-phone__island {
+  position: absolute;
+  left: 50%;
+  top: 5px;
+  width: 52px;
+  height: 15px;
+  translate: -50% 0;
+  border-radius: 999px;
+  background: #111114;
+}
+
+.hf-home {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 390px;
+  height: 828px;
+  transform-origin: 0 0;
+  overflow: hidden;
+}
+
+.hf-home__top {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 118px;
+  padding: 0 16px;
+  background: linear-gradient(#f4f4f5 90%, rgb(244 244 245 / 0));
+}
+
+.hf-home__status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 54px;
+  padding: 0 18px 0 26px;
+  font-size: 16px;
+}
+
+.hf-home__battery {
+  width: 26px;
+  height: 12px;
+  border-radius: 4px;
+  background: #000;
+}
+
+.hf-home__head {
+  display: flex;
+  align-items: center;
+  height: 52px;
+}
+
+.hf-home__mark {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: #000;
+  color: #fff;
+}
+
+.hf-home__date {
+  margin-left: 12px;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.hf-home__chevron {
+  margin-left: 6px;
+  rotate: 90deg;
+}
+
+.hf-home__streak {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 36px;
+  margin-left: auto;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: #fff;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.hf-home__streak svg {
+  color: #ff644f;
+}
+
+.hf-home__avatar {
+  width: 38px;
+  height: 38px;
+  margin-left: 8px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #c9bdb4, #8a7f79);
+}
+
+.hf-home__scroll {
+  position: absolute;
+  left: 16px;
+  top: 122px;
+  width: 358px;
+  display: grid;
+  gap: 16px;
+}
+
+.hf-home__card {
+  position: relative;
+  left: auto;
+  top: auto;
+  width: auto;
+  visibility: visible;
+  box-shadow: none;
+  border-radius: 20px;
+}
+
+.hf-home__log {
+  height: auto;
+  padding: 16px;
+}
+
+.hf-home__log-title {
+  display: block;
+  margin-bottom: 4px;
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.hf-home__meal {
+  padding-top: 12px;
+}
+
+.hf-home__item {
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+  margin: 6px 0 0 44px;
+  padding: 12px;
+  border: 1px solid #e9e9ea;
+  border-radius: 14px;
+  font-size: 15px;
+  line-height: 20px;
+}
+
+.hf-home__nav {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 34px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hf-home__tabs {
+  display: flex;
+  flex: 1;
+  height: 56px;
+  padding: 4px;
+  border: 1px solid #e9e9ea;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.92);
+}
+
+.hf-home__tab {
+  display: grid;
+  flex: 1;
+  place-items: center;
+  border-radius: 999px;
+  color: #4d4d59;
+}
+
+.hf-home__tab--on {
+  background: #ececee;
+  color: #000;
+}
+
+.hf-home__add {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #000;
+  color: #fff;
+}
+
+.hf-home__chat {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border: 2px solid #000;
+  border-radius: 16px 16px 16px 4px;
+  background: #fff;
+}
+
+.hf-home__badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  display: grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: #ff644f;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  scale: 0;
+}
+
+/* The tapped button growing into the check-in bubble. */
+.hf-intro-shape {
+  position: absolute;
+  left: 0;
+  top: 0;
+  visibility: hidden;
+  border: 1px solid #e9e9ea;
+  background: #fff;
+  box-shadow: 0 14px 40px rgb(26 26 46 / 0.08);
 }

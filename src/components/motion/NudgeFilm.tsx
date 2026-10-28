@@ -104,6 +104,9 @@ const CAMERA: [number, number, number, number][] = [
   [PATTERN_AT, 1, 200, 200],
 ];
 
+/** "12:30" as the notification's time, "12:30 PM". */
+const clock = (time: string) => `${time} ${Number(time.split(":")[0]) < 12 ? "AM" : "PM"}`;
+
 function seek(t: number, put: (key: string, prop: string, value: string) => void) {
   const { enter, press, rise } = moves(put);
   put("camera", "transform", cameraAt(CAMERA, t));
@@ -127,8 +130,10 @@ function seek(t: number, put: (key: string, prop: string, value: string) => void
     enter(`phone${k}`, time, at - (k === 0 ? 0.7 : 0.1), tapped - 0.05, [0, 30]);
     enter(`banner${k}`, time, at + 0.45, tapped - 0.1, [0, 0]);
   });
-  put("shape", "background-color", onLockScreen ? "rgb(255 255 255 / 0.8)" : "#fff");
-  put("shape", "border-color", onLockScreen ? "rgb(255 255 255 / 0.6)" : "#e9e9ea");
+  // Clear glass on the lock screen; the app's white once it's opened.
+  put("shape", "background-color", onLockScreen ? "rgb(255 255 255 / 0.2)" : "#fff");
+  put("shape", "border-color", onLockScreen ? "rgb(255 255 255 / 0.35)" : "#e9e9ea");
+  put("shape", "box-shadow", onLockScreen ? "none" : "0 14px 40px rgb(26 26 46 / 0.1)");
 
   // 1–2. The message, its replies, and the one that's tapped.
   NUDGES.forEach((n, k) => {
@@ -170,18 +175,22 @@ function seek(t: number, put: (key: string, prop: string, value: string) => void
 export default function NudgeFilm({ label, className }: { label: string; className?: string }) {
   const { set, ...film } = useFilm({ loop: LOOP, rest: REST, name: "nudge-film", seek });
 
-  const banner = (key: string, text: string) => (
+  // An iOS notification on the lock screen (Prabodh's Figma, node
+  // 3350:57437): clear glass, white type, older ones stacked under it.
+  const banner = (key: string, text: string, time: string) => (
     <span ref={set(key)} className="nf-c nf-banner">
       <span className="nf-banner__icon">
-        <AppMark size={20} />
+        <AppMark size={18} />
       </span>
       <span className="nf-banner__body">
         <span className="nf-banner__top">
           <b>PrepIt</b>
-          <span>now</span>
+          <span>{clock(time)}</span>
         </span>
         <span className="nf-banner__text">{text}</span>
       </span>
+      <span className="nf-banner__stack" />
+      <span className="nf-banner__stack nf-banner__stack--back" />
     </span>
   );
 
@@ -191,15 +200,25 @@ export default function NudgeFilm({ label, className }: { label: string; classNa
         {/* The lock screen each notification arrives on, under the shape. */}
         {ARRIVALS.map(({ time, date }, k) => (
           <span key={k} ref={set(`phone${k}`)} className="nf-c nf-phone">
+            <span className="nf-phone__status">
+              <b>{time}</b>
+              <span className="nf-phone__bars">
+                <i />
+                <i />
+                <i />
+                <i />
+              </span>
+              <span className="nf-phone__battery" />
+            </span>
             <span className="nf-phone__island" />
             <span className="nf-phone__date">{date}</span>
             <span className="nf-phone__time">{time}</span>
           </span>
         ))}
         <div ref={set("shape")} className="nf-shape" />
-        {banner("banner0", NUDGES[0].banner)}
-        {banner("banner1", NUDGES[1].banner)}
-        {banner("banner2", PATTERN_BANNER)}
+        {banner("banner0", NUDGES[0].banner, NUDGES[0].time)}
+        {banner("banner1", NUDGES[1].banner, NUDGES[1].time)}
+        {banner("banner2", PATTERN_BANNER, PATTERN_TIME)}
 
         {NUDGES.map((n, k) => (
           <div key={n.banner}>
