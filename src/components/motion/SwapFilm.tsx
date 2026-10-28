@@ -14,8 +14,7 @@ import { AppMark, Film, Icon, cameraAt, clamp01, columns, moves, track, useFilm 
  * 3. the pick becomes the Update plan card, and Apply Changes, because a
  *    change waits for the OK;
  * 4. the card becomes the new dinner on the plan. There is no capture of
- *    this dish, so its photo is still loading and its numbers are a fair
- *    estimate, not the app's.
+ *    this dish, so its photo and numbers are still loading.
  */
 
 const LOOP = 13.4;
@@ -190,13 +189,7 @@ export default function SwapFilm({ label, className }: { label: string; classNam
           <span className="pf-meal__body">
             <b className="pf-meal__title">Chicken &amp; Vegetable Stir-Fry</b>
             <span className="pf-meal__chips">
-              <span className="hf-chip hf-chip--kcal">
-                <Icon name="fire" size={11} />
-                520 kcal
-              </span>
-              <span className="pf-chip">C 52g</span>
-              <span className="pf-chip">P 44g</span>
-              <span className="pf-chip">F 14g</span>
+              <span className="sf-loading sf-loading--chips" />
             </span>
           </span>
         </span>

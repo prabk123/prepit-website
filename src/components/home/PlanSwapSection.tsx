@@ -21,7 +21,7 @@ export default function PlanSwapSection() {
           id="plans-swap-heading"
           size="section"
           title="Change anything, just ask."
-          lead="Want a different dinner on Thursday? Ask, and it swaps it."
+          lead="Want a different dinner on Saturday? Ask, and it swaps it."
         />
         <TextLink href="/features/meal-plans">More about meal plans</TextLink>
       </FeatureSplit>

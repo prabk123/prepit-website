@@ -1958,6 +1958,13 @@
   background: linear-gradient(100deg, #ececee 30%, #f6f6f7 50%, #ececee 70%) 0 0 / 300% 100%;
 }
 
+/* Where the new dinner's kcal and macro chips will be. */
+.sf-loading--chips {
+  width: 170px;
+  height: 20px;
+  border-radius: 6px;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .sf-loading {
     animation: sf-shimmer 1.4s linear infinite;
