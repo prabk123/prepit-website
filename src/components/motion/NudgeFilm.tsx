@@ -42,7 +42,7 @@ const NUDGES: Nudge[] = [
     at: 0,
     height: 106,
     time: "9:40",
-    date: "Thursday 15 October",
+    date: "Monday 19 October",
   },
   {
     banner: "It's been 8 days since your last weigh-in. Next time you hop on the scales, just send me…",
@@ -52,12 +52,12 @@ const NUDGES: Nudge[] = [
     at: 6.3,
     height: 86,
     time: "12:30",
-    date: "Friday 16 October",
+    date: "Tuesday 20 October",
   },
 ];
 const PATTERN_AT = 12.6;
 const PATTERN_TIME = "12:30";
-const PATTERN_DATE = "Saturday 17 October";
+const PATTERN_DATE = "Wednesday 21 October";
 const PATTERN_BANNER =
   "Tuesdays and Wednesdays have run about 520 kcal over your goal in most of the last four weeks…";
 const DAYS = [
