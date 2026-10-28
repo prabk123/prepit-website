@@ -1,5 +1,6 @@
 import AnnotatedPhoto from "@/components/media/AnnotatedPhoto";
 import PreloadImage from "@/components/media/PreloadImage";
+import SplitWords from "@/components/motion/SplitWords";
 import AppStoreCta from "@/components/ui/AppStoreCta";
 import { heroCafe } from "@/content/lifestyle";
 import { TRIAL_DAYS } from "@/lib/pricing";
@@ -45,16 +46,39 @@ export default function HomeHero() {
               className="photo-band-wash-text pointer-events-none absolute -inset-x-[30%] -inset-y-[20%] -z-10 max-lg:hidden"
             />
             <p className="text-eyebrow font-medium uppercase">
-              <span className="text-gradient-brand">Your AI nutritionist</span>
+              <span className="text-gradient-brand gradient-drift">Your AI nutritionist</span>
             </p>
-            <h1 id="hero-heading" className="font-display text-hero text-ink text-balance">
-              The nutritionist that notices.
+            <h1 id="hero-heading" className="hero-words font-display text-hero text-ink text-balance">
+              <SplitWords
+                text="The nutritionist that notices."
+                last={(word) => (
+                  <span className="relative inline-block">
+                    {word}
+                    {/* An orange stroke drawn under "notices." once the words are in. */}
+                    <svg
+                      aria-hidden
+                      viewBox="0 0 220 18"
+                      preserveAspectRatio="none"
+                      className="hero-underline absolute -bottom-[0.12em] left-0 h-[0.22em] w-[92%] text-accent"
+                    >
+                      <path
+                        d="M3 12 C 50 4, 120 3, 217 9"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="5"
+                        strokeLinecap="round"
+                        pathLength={1}
+                      />
+                    </svg>
+                  </span>
+                )}
+              />
             </h1>
-            <p className="max-w-[44ch] text-lead text-ink-secondary text-pretty">
+            <p className="hero-rise max-w-[44ch] text-lead text-ink-secondary text-pretty">
               Tell PrepIt what you eat. It spots what&apos;s behind the 3pm slump and the evening snacking, and tells
               you the one thing to change first.
             </p>
-            <AppStoreCta trackingSource="home-hero" note={`${TRIAL_DAYS} days free. Cancel anytime.`} />
+            <AppStoreCta className="hero-rise [--rise-delay:600ms]" trackingSource="home-hero" note={`${TRIAL_DAYS} days free. Cancel anytime.`} />
           </div>
         </div>
 

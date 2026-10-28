@@ -32,7 +32,8 @@ export default function AppStoreButton({
     <div className="flex flex-col items-start gap-3">
       <AppStoreLink
         trackingSource={trackingSource}
-        className={PILL_BUTTON_CLASS}
+        data-magnet
+        className={`magnet ${PILL_BUTTON_CLASS}`}
       >
         <AppleLogo />
         {label}

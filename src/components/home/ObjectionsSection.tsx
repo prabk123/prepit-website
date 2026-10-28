@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import DeviceFrame from "@/components/device/DeviceFrame";
 import Glow from "@/components/ui/Glow";
 import Section from "@/components/ui/Section";
@@ -45,10 +46,13 @@ export default function ObjectionsSection() {
           />
           {/* Cards you swipe on phones, ruled rows beside the phone from 1024 px (PRE-284). */}
           <SwipeRow label="Questions people ask" desktop="stack" className="lg:gap-0 lg:border-b lg:border-line">
-            {QUESTIONS.map((item) => (
+            {QUESTIONS.map((item, i) => (
               <div
                 key={item.question}
-                className="flex w-full flex-col gap-2 rounded-card border border-line bg-surface-raised p-5 lg:rounded-none lg:border-x-0 lg:border-b-0 lg:bg-transparent lg:px-0 lg:py-7"
+                data-reveal="rise"
+                data-spotlight
+                style={{ "--i": i } as CSSProperties}
+                className="spotlight flex w-full flex-col gap-2 rounded-card border border-line bg-surface-raised p-5 lg:rounded-none lg:border-x-0 lg:border-b-0 lg:bg-transparent lg:px-0 lg:py-7"
               >
                 <h3 className="font-display text-card-title text-ink">{item.question}</h3>
                 <p className="max-w-[58ch] text-body text-ink-secondary text-pretty">{item.answer}</p>

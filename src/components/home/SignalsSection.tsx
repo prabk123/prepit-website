@@ -22,7 +22,7 @@ export default function SignalsSection() {
         media={
           // The lunch photo's 4:5 crop around the phone (PRE-282): Home with
           // Energy 84, Satiety 96 and Mood 87 beside the meal behind them.
-          <picture>
+          <picture data-reveal="rise">
             {lunchRings.mobile.avif && (
               <source srcSet={lunchRings.mobile.avif} sizes="(min-width: 1024px) 460px, 100vw" type="image/avif" />
             )}
@@ -50,7 +50,7 @@ export default function SignalsSection() {
         <ul aria-label="The three scores" className="flex flex-wrap gap-x-6 gap-y-2">
           {SIGNAL_DOTS.map((signal) => (
             <li key={signal.name} className="flex items-center gap-2 text-small font-medium text-ink">
-              <span aria-hidden className="h-2.5 w-2.5 rounded-full" style={{ background: signal.color }} />
+              <span aria-hidden className="signal-pulse h-2.5 w-2.5 rounded-full" style={{ background: signal.color }} />
               {signal.name}
             </li>
           ))}

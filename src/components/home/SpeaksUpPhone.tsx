@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState, type CSSProperties } from "react";
+import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
 import DeviceFrame, { CAPTURE_HEIGHT, CAPTURE_WIDTH } from "@/components/device/DeviceFrame";
 import { speaksUpPhoneMessages, type SpeaksUpPhoneMessage } from "@/content/nutritionistMessages";
 import type { ChatCutout } from "@/lib/captures";
@@ -63,6 +63,71 @@ function Screen({ message, active, loading }: { message: SpeaksUpPhoneMessage; a
   );
 }
 
+/** How long each message stays up while the phone plays through them. */
+const AUTOPLAY_MS = 6000;
+
+/**
+ * Plays through the messages while the phone is on screen, as if each had
+ * just arrived (website motion experiment). It stops for good once someone
+ * picks a message, pauses while focus is on its buttons or the tab is
+ * hidden, and never runs under reduced motion or `?motion=off`.
+ */
+function useAutoplay(enabled: boolean, count: number, advance: () => void) {
+  const ref = useRef<HTMLElement>(null);
+  const [playing, setPlaying] = useState(false);
+  const [stopped, setStopped] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!enabled || stopped || count < 2 || !el) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (new URLSearchParams(window.location.search).get("motion") === "off") return;
+
+    let inView = false;
+    let held = false;
+    const sync = () => setPlaying(inView && !held && document.visibilityState === "visible");
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        inView = entry.isIntersecting;
+        sync();
+      },
+      { threshold: 0.5 },
+    );
+    observer.observe(el);
+    const hold = () => {
+      held = true;
+      sync();
+    };
+    const release = (event: FocusEvent) => {
+      if (el.contains(event.relatedTarget as Node | null)) return;
+      held = false;
+      sync();
+    };
+    el.addEventListener("focusin", hold);
+    el.addEventListener("focusout", release);
+    document.addEventListener("visibilitychange", sync);
+    return () => {
+      observer.disconnect();
+      el.removeEventListener("focusin", hold);
+      el.removeEventListener("focusout", release);
+      document.removeEventListener("visibilitychange", sync);
+      setPlaying(false);
+    };
+  }, [enabled, stopped, count]);
+
+  const advanceRef = useRef(advance);
+  useEffect(() => {
+    advanceRef.current = advance;
+  });
+  useEffect(() => {
+    if (!playing) return;
+    const timer = window.setInterval(() => advanceRef.current(), AUTOPLAY_MS);
+    return () => window.clearInterval(timer);
+  }, [playing]);
+
+  return { ref, playing: playing && !stopped, stop: () => setStopped(true) };
+}
+
 /**
  * The nutritionist's own messages in a phone (PRE-294): the real chat screen,
  * with the message and the part to look at cut from the same capture and
@@ -75,20 +140,37 @@ export default function SpeaksUpPhone({
   messages = speaksUpPhoneMessages,
   className = "[--device-w:216px] sm:[--device-w:240px] lg:[--device-w:300px]",
   loading = "lazy",
+  autoplay = false,
 }: {
   messages?: readonly SpeaksUpPhoneMessage[];
   className?: string;
   /** `eager` for a phone in the first screen, such as the hero's. */
   loading?: Loading;
+  /** Play through the messages on their own while the phone is on screen. */
+  autoplay?: boolean;
 }) {
   const [index, setIndex] = useState(0);
+  // Counts arrivals, so the phone's buzz restarts on each one.
+  const [arrivals, setArrivals] = useState(0);
   const captionId = useId();
   const current = messages[index];
+  const show = (i: number) => {
+    setIndex(i);
+    setArrivals((n) => n + 1);
+  };
+  const { ref, playing, stop } = useAutoplay(autoplay, messages.length, () => show((index + 1) % messages.length));
 
   return (
-    <figure className="flex w-full min-w-0 flex-col items-center gap-4 lg:gap-6" aria-labelledby={captionId}>
+    <figure
+      ref={ref}
+      className="flex w-full min-w-0 flex-col items-center gap-4 lg:gap-6"
+      aria-labelledby={captionId}
+      data-playing={playing || undefined}
+      style={{ "--speaks-up-autoplay": `${AUTOPLAY_MS}ms` } as CSSProperties}
+    >
       <div
         className={`speaks-up-phone ${className}`}
+        data-buzz={arrivals === 0 ? undefined : arrivals % 2 ? "a" : "b"}
         style={{ "--speaks-up-crop-extra": current.cropExtra } as CSSProperties}
       >
         <DeviceFrame>
@@ -123,11 +205,12 @@ export default function SpeaksUpPhone({
               type="button"
               aria-pressed={i === index}
               onClick={() => {
+                stop();
                 if (i === index) return;
-                setIndex(i);
+                show(i);
                 trackMessageSelected(message.id);
               }}
-              className="min-h-11 rounded-control border px-4 text-small font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus aria-pressed:border-primary aria-pressed:bg-primary aria-pressed:text-on-primary border-line-strong bg-surface text-ink hover:border-ink-faint"
+              className="speaks-up-phone__pick relative overflow-hidden min-h-11 rounded-control border px-4 text-small font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus aria-pressed:border-primary aria-pressed:bg-primary aria-pressed:text-on-primary border-line-strong bg-surface text-ink hover:border-ink-faint"
             >
               {message.label}
             </button>

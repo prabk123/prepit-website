@@ -1,0 +1,317 @@
+/*
+ * Homepage motion experiment, after React Bits (reactbits.dev) and the
+ * Prompt Motion gallery: Blur Text on headlines, Animated Content on blocks,
+ * Gradient Text on the hero eyebrow, Tilted Card on phones, Spotlight Card on
+ * cards, Magnet on the App Store button and a scroll progress line.
+ *
+ * <MotionLayer> sets html[data-motion="on"] and marks [data-reveal] blocks
+ * `data-revealed` as they scroll in. Nothing is hidden unless motion is on, so
+ * the page reads the same without JavaScript, under reduced motion and with
+ * ?motion=off. The hero plays on load in CSS alone, so it never waits for
+ * the script.
+ */
+
+@theme static {
+  --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-reveal: 900ms;
+  /* Gap between words in a headline, and between items in a list. */
+  --stagger-word: 55ms;
+  --stagger-item: 110ms;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* ---- Hero, on load ---------------------------------------------------- */
+  html:not([data-motion="off"]) .hero-words .split-word {
+    display: inline-block;
+    animation: blur-in var(--duration-reveal) var(--ease-out-soft) both;
+    animation-delay: calc(120ms + var(--i, 0) * 70ms);
+  }
+
+  html:not([data-motion="off"]) .hero-underline path {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: draw-line 700ms var(--ease-out-soft) 750ms forwards;
+  }
+
+  html:not([data-motion="off"]) .hero-rise {
+    animation: rise-in var(--duration-reveal) var(--ease-out-soft) both;
+    animation-delay: var(--rise-delay, 450ms);
+  }
+
+  html:not([data-motion="off"]) .gradient-drift {
+    background-size: 220% 100%;
+    animation: gradient-drift 7s ease-in-out infinite alternate;
+  }
+
+  /* ---- Scroll reveals --------------------------------------------------- */
+  html[data-motion="on"] [data-reveal="words"] .split-word {
+    display: inline-block;
+    transition:
+      opacity 700ms var(--ease-out-soft),
+      filter 700ms var(--ease-out-soft),
+      translate 700ms var(--ease-out-soft);
+    transition-delay: calc(var(--i, 0) * var(--stagger-word));
+  }
+
+  html[data-motion="on"] [data-reveal="words"] .reveal-follow {
+    transition:
+      opacity 800ms var(--ease-out-soft) 250ms,
+      translate 800ms var(--ease-out-soft) 250ms;
+  }
+
+  html[data-motion="on"] [data-reveal="words"]:not([data-revealed]) .split-word {
+    opacity: 0;
+    filter: blur(10px);
+    translate: 0 0.35em;
+  }
+
+  html[data-motion="on"] [data-reveal="words"]:not([data-revealed]) .reveal-follow {
+    opacity: 0;
+    translate: 0 16px;
+  }
+
+  html[data-motion="on"] [data-reveal="rise"] {
+    transition:
+      opacity var(--duration-reveal) var(--ease-out-soft),
+      translate var(--duration-reveal) var(--ease-out-soft),
+      scale var(--duration-reveal) var(--ease-out-soft);
+    transition-delay: calc(var(--i, 0) * var(--stagger-item));
+  }
+
+  html[data-motion="on"] [data-reveal="rise"]:not([data-revealed]) {
+    opacity: 0;
+    translate: 0 36px;
+    scale: 0.97;
+  }
+
+  /* ---- Phones tilt towards the pointer ---------------------------------- */
+  @media (hover: hover) and (pointer: fine) {
+    html[data-motion="on"] .device-frame__shell {
+      transform: perspective(1400px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+      transition: transform 600ms var(--ease-out-soft);
+    }
+
+    html[data-motion="on"] .magnet {
+      translate: var(--magnet-x, 0) var(--magnet-y, 0);
+      transition:
+        translate 350ms var(--ease-out-soft),
+        opacity 150ms ease;
+    }
+  }
+
+  /* ---- Soft light behind phones breathes -------------------------------- */
+  html[data-motion="on"] .glow-warm {
+    animation: glow-breathe 9s ease-in-out infinite alternate;
+  }
+
+  /* ---- Signal dots pulse once their section is in ----------------------- */
+  html[data-motion="on"] .signal-pulse {
+    position: relative;
+  }
+
+  html[data-motion="on"] .signal-pulse::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: inherit;
+    animation: dot-pulse 2.4s var(--ease-out-soft) infinite;
+  }
+
+  html[data-motion="on"] li:nth-child(2) > .signal-pulse::after {
+    animation-delay: 0.8s;
+  }
+
+  html[data-motion="on"] li:nth-child(3) > .signal-pulse::after {
+    animation-delay: 1.6s;
+  }
+
+  /* ---- "It speaks up": messages arrive one after another --------------- */
+  /* Each arrival nudges the phone, the message lifts out, then the reply,
+     then the tag saying why it was sent. */
+  html[data-motion="on"] .speaks-up-phone[data-buzz="a"] .device-frame {
+    animation: phone-buzz-a 520ms var(--ease-out-soft);
+  }
+
+  html[data-motion="on"] .speaks-up-phone[data-buzz="b"] .device-frame {
+    animation: phone-buzz-b 520ms var(--ease-out-soft);
+  }
+
+  html[data-motion="on"] .speaks-up-phone__pop[data-active] .speaks-up-phone__cutout--highlight {
+    transition-delay: 520ms;
+  }
+
+  html[data-motion="on"] .speaks-up-phone__pop[data-active] .speaks-up-phone__reason {
+    transition-delay: 820ms;
+  }
+
+  /* A line filling under the current message's button while it plays. */
+  html[data-motion="on"] [data-playing] .speaks-up-phone__pick[aria-pressed="true"]::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0;
+    height: 3px;
+    background: var(--color-accent);
+    transform-origin: 0 50%;
+    animation: grow-x var(--speaks-up-autoplay, 5s) linear both;
+  }
+
+  /* ---- Scroll progress -------------------------------------------------- */
+  @supports (animation-timeline: scroll()) {
+    html[data-motion="on"] .scroll-progress {
+      display: block;
+      animation: grow-x linear both;
+      animation-timeline: scroll(root block);
+    }
+  }
+}
+
+/* Spotlight: a soft orange light under the pointer. Only drawn once the
+   pointer has set --spot-x, so touch screens never see it. */
+@media (hover: hover) and (pointer: fine) {
+  html[data-motion="on"] .spotlight {
+    position: relative;
+    isolation: isolate;
+  }
+
+  html[data-motion="on"] .spotlight::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    background: radial-gradient(
+      420px circle at var(--spot-x, 50%) var(--spot-y, 50%),
+      rgb(255 100 79 / 0.1),
+      transparent 65%
+    );
+    transition: opacity 400ms ease;
+  }
+
+  html[data-motion="on"] .spotlight:hover::before {
+    opacity: 1;
+  }
+}
+
+.scroll-progress {
+  display: none;
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 55;
+  height: 3px;
+  background: var(--color-accent);
+  transform-origin: 0 50%;
+  pointer-events: none;
+}
+
+@keyframes blur-in {
+  from {
+    opacity: 0;
+    filter: blur(12px);
+    translate: 0 0.3em;
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    translate: 0 0;
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    translate: 0 18px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes draw-line {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes gradient-drift {
+  from {
+    background-position: 0% 50%;
+  }
+  to {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes glow-breathe {
+  from {
+    opacity: 0.75;
+    scale: 0.94;
+  }
+  to {
+    opacity: 1;
+    scale: 1.06;
+  }
+}
+
+@keyframes dot-pulse {
+  0% {
+    opacity: 0.6;
+    scale: 1;
+  }
+  70%,
+  100% {
+    opacity: 0;
+    scale: 2.6;
+  }
+}
+
+@keyframes phone-buzz-a {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  20% {
+    translate: -3px 0;
+  }
+  40% {
+    translate: 3px 0;
+  }
+  60% {
+    translate: -2px 0;
+  }
+  80% {
+    translate: 1px 0;
+  }
+}
+
+/* The same keyframes under another name, so back-to-back arrivals restart. */
+@keyframes phone-buzz-b {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  20% {
+    translate: -3px 0;
+  }
+  40% {
+    translate: 3px 0;
+  }
+  60% {
+    translate: -2px 0;
+  }
+  80% {
+    translate: 1px 0;
+  }
+}
+
+@keyframes grow-x {
+  from {
+    scale: 0 1;
+  }
+  to {
+    scale: 1 1;
+  }
+}

@@ -38,6 +38,7 @@ export default function FeatureSplit({
         {children}
       </div>
       <div
+        data-reveal="rise"
         className={`relative flex min-w-0 justify-center ${reverse ? "lg:order-1" : ""} ${mediaClassName ?? ""}`}
       >
         {media}

@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import SplitWords from "@/components/motion/SplitWords";
 
 type SectionHeadingProps = {
   eyebrow?: string;
@@ -45,7 +46,9 @@ export default function SectionHeading({
   const centered = align === "center";
 
   return (
+    // Words blur in when the page's motion layer is on (src/app/motion.css).
     <div
+      data-reveal="words"
       className={`flex flex-col gap-5 ${centered ? "items-center text-center" : ""} ${className ?? ""}`}
     >
       {eyebrow && (
@@ -59,11 +62,11 @@ export default function SectionHeading({
         id={id}
         className={`font-display ${titleSize[size]} text-ink text-balance`}
       >
-        {title}
+        <SplitWords text={title} />
       </Heading>
       {lead && (
         <p
-          className={`text-lead text-ink-secondary ${centered ? "max-w-[36ch]" : "max-w-[40ch]"} text-pretty`}
+          className={`reveal-follow text-lead text-ink-secondary ${centered ? "max-w-[36ch]" : "max-w-[40ch]"} text-pretty`}
         >
           {lead}
         </p>

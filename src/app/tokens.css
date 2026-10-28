@@ -154,8 +154,9 @@
   /* Shadows. Cards are flat; phones float. */
   --shadow-phone: 0 40px 80px -28px rgb(26 26 46 / 0.35), 0 12px 24px -12px rgb(26 26 46 / 0.2);
 
-  /* Motion: one moment only (photo labels drawing in, PRE-201).
-     Nothing else on the page animates. */
+  /* Motion: photo labels drawing in (PRE-201). The homepage's other motion
+     (headline blur-ins, reveals, tilt, spotlight, magnet, the speaks-up
+     phone playing through its messages) has its own tokens in motion.css. */
   --ease-calm: cubic-bezier(0.22, 1, 0.36, 1);
   /* Labels draw in one after another: line, then label, about a second for
      a photo's set. Under reduced motion they are simply shown. */

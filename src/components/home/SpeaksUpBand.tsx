@@ -36,7 +36,7 @@ export default function SpeaksUpBand() {
           <TextLink href="/features/ai-nutritionist">More about your nutritionist</TextLink>
         </>
       }
-      media={<SpeaksUpPhone />}
+      media={<SpeaksUpPhone autoplay />}
     >
       <SectionHeading
         id="speaks-up-heading"

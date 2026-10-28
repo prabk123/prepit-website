@@ -7,6 +7,7 @@ import PlansBand from "@/components/home/PlansBand";
 import ResearchSection from "@/components/home/ResearchSection";
 import SignalsSection from "@/components/home/SignalsSection";
 import SpeaksUpBand from "@/components/home/SpeaksUpBand";
+import MotionLayer from "@/components/motion/MotionLayer";
 import FaqSection from "@/components/pricing/FaqSection";
 import PricingSection from "@/components/pricing/PricingSection";
 
@@ -45,6 +46,7 @@ export default function Home() {
   return (
     <div className="bg-page text-ink">
       <SectionViewTracker />
+      <MotionLayer />
       <HomeHero />
       <SpeaksUpBand />
       <KnowsYouSection />
