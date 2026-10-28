@@ -407,12 +407,12 @@
 }
 
 /*
- * <HowItWorksFilm>: a real flow in the app (the protein check-in, then
- * logging a meal from +) drawn in app points on a 400 x 400 stage, scaled to
- * its box by --film-scale (set by the component; the container steps below
- * get the first paint close before it runs). Colours, sizes and radii are
- * the app's light theme (PrepItColors.light). With no script it shows Home
- * with the meal logged.
+ * <HowItWorksFilm>: the app's real components floating on their own (no
+ * phone screen) through a real flow, in app points on a 400 x 400 stage,
+ * scaled to its box by --film-scale (set by the component; the container
+ * steps below get the first paint close before it runs). Colours, sizes and
+ * radii are the app's light theme (PrepItColors.light). With no script it
+ * shows the day's Energy, Satiety and Mood.
  */
 .how-film {
   container-type: inline-size;
@@ -423,7 +423,9 @@
   margin-inline: auto;
   overflow: hidden;
   border-radius: var(--radius-card);
-  background: #f4f4f5;
+  background:
+    radial-gradient(closest-side at 50% 50%, rgb(255 100 79 / 0.08), transparent),
+    #f4f4f5;
   border: 1px solid var(--color-line);
   color: #000;
   font-family: var(--font-body);
@@ -450,18 +452,11 @@
 
 .how-film__camera {
   position: absolute;
-  inset: 0;
-  transform-origin: 50% 50%;
-}
-
-/* Without the script the world sits where Eaten and the Log show. */
-.hf-world {
-  position: absolute;
   left: 0;
   top: 0;
   width: 400px;
   height: 400px;
-  transform: translateY(-40px);
+  transform-origin: 0 0;
 }
 
 .how-film p {
@@ -492,356 +487,91 @@
   color: #a6a6ac;
 }
 
-.hf-layer {
+/* Each component floats on its own and is hidden until the script runs. */
+.hf-c {
   position: absolute;
   opacity: 0;
   visibility: hidden;
 }
 
-/* Home */
-.hf-card {
-  position: absolute;
-  left: 15px;
-  width: 370px;
-  background: #fff;
-  border: 1px solid #e9e9ea;
-  border-radius: 16px;
+.hf-lift {
+  box-shadow: 0 14px 40px rgb(26 26 46 / 0.1);
 }
 
-.hf-rings {
-  top: -178px;
-  height: 166px;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-}
-
-.hf-ring {
-  display: grid;
-  justify-items: center;
-  gap: 10px;
-}
-
-.hf-ring__dial {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 98px;
-  height: 98px;
-}
-
-.hf-ring__dial svg {
-  position: absolute;
-  inset: 0;
-}
-
-.hf-ring__dial b {
-  font-family: var(--font-display);
-  font-size: 30px;
-  line-height: 1;
-  font-weight: 600;
-}
-
-.hf-ring__label {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.hf-eaten {
-  top: 0;
-  height: 228px;
-  padding: 16px;
-}
-
-.hf-eaten__head {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.hf-eaten__flame {
-  display: grid;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  background: rgb(255 100 79 / 0.12);
-  color: #ff644f;
-}
-
-.hf-big b {
-  font-family: var(--font-display);
-  font-size: 26px;
-  line-height: 30px;
-  font-weight: 600;
-}
-
-.hf-big i,
-.hf-mid i {
-  font-size: 13px;
-  color: #7a7a82;
-}
-
-.hf-on-track {
-  margin-left: auto;
-  padding: 3px 10px;
-  border-radius: 999px;
-  background: rgb(64 227 0 / 0.16);
-  color: #258400;
-  font-size: 12px;
-  line-height: 16px;
-  font-weight: 600;
-}
-
-.hf-eaten__chevron {
-  margin-left: 2px;
-}
-
-.hf-eaten__stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  margin-top: 14px;
-}
-
-.hf-mid b {
-  font-family: var(--font-display);
-  font-size: 17px;
-  font-weight: 600;
-}
-
-.hf-bar {
-  display: block;
-  height: 8px;
-  margin-top: 12px;
-  border-radius: 999px;
-  background: #f4f4f5;
-  overflow: hidden;
-}
-
-.hf-bar span {
-  display: block;
-  height: 100%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, #ffb09f, #ff644f);
-  transform-origin: 0 50%;
-}
-
-.hf-macros {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  margin-top: 16px;
-  padding-top: 14px;
-  border-top: 1px solid #e9e9ea;
-}
-
-.hf-macro {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.hf-macro b {
-  display: block;
-  font-size: 13px;
-  line-height: 16px;
-}
-
-/* The Log */
-.hf-log__head {
-  position: absolute;
-  left: 15px;
-  width: 370px;
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  font-size: 12px;
-  line-height: 18px;
-  color: #7a7a82;
-  white-space: nowrap;
-}
-
-.hf-log__head--yogurt {
-  top: 246px;
-}
-
-.hf-log__head--new {
-  top: 348px;
-}
-
-.hf-log__hour {
-  width: 59px;
-  color: #a6a6ac;
-}
-
-.hf-log__time {
-  font-weight: 600;
-  color: #1a1a2e;
-}
-
-.hf-log__card {
-  position: absolute;
-  left: 82px;
-  width: 303px;
-  padding: 12px 14px;
-  background: #fff;
-  border: 1px solid #e9e9ea;
-  border-radius: 16px;
-}
-
-.hf-log__card--yogurt {
-  top: 268px;
-  height: 70px;
-}
-
-.hf-log__card p {
-  font-size: 16px;
-  line-height: 20px;
-  font-weight: 500;
-}
-
-.hf-chips {
-  display: flex;
-  gap: 6px;
-  margin-top: 4px;
-}
-
-.hf-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  height: 22px;
-  padding: 0 8px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.hf-chip--kcal {
-  background: rgb(255 100 79 / 0.12);
-  color: #b24637;
-}
-
-.hf-chip--kcal svg {
-  color: #ff644f;
-}
-
-.hf-chip--signal {
-  background: #f4f4f5;
-  color: #1a1a2e;
-}
-
-.hf-chip--signal svg {
-  color: #40e300;
-}
-
-.hf-new-chips {
-  position: absolute;
-  left: 96px;
-  top: 424px;
-}
-
-.hf-scrim {
-  position: absolute;
-  left: -50px;
-  top: -400px;
-  width: 500px;
-  height: 1400px;
-  background: #000;
-  opacity: 0;
-}
-
-/* The one shape. With no script it is the salmon bowl's row. */
+/* The one shape. With no script it is the Energy, Satiety and Mood card. */
 .how-film__shape {
   position: absolute;
   left: 0;
   top: 0;
-  width: 303px;
-  height: 90px;
-  transform: translate(82px, 370px);
+  width: 360px;
+  height: 170px;
+  transform: translate(20px, 115px);
   border: 1px solid rgb(233 233 234);
-  border-radius: 16px;
+  border-radius: 24px;
   background: #fff;
+  box-shadow: 0 14px 40px rgb(26 26 46 / 0.1);
 }
 
-/* 1. The Nutritionist sheet */
-.hf-chat {
-  left: 0;
-  top: 20px;
-  width: 400px;
-  padding: 0 16px;
-}
-
-.hf-grabber {
-  display: block;
-  width: 36px;
-  height: 5px;
-  margin: 8px auto 0;
-  border-radius: 3px;
-  background: #d3d3d5;
-}
-
-.hf-chat__head {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 10px;
-  font-family: var(--font-display);
-  font-size: 17px;
-  font-weight: 600;
-}
-
-.hf-new {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 12px;
-  font-size: 12px;
-  line-height: 16px;
-  font-weight: 600;
-  color: #d93c27;
-}
-
-.hf-new::before,
-.hf-new::after {
-  content: "";
-  flex: 1;
-  height: 1px;
-  background: rgb(217 60 39 / 0.35);
-}
-
-.hf-bubble {
-  width: 330px;
-  margin-top: 12px;
-  padding: 12px 16px;
-  background: #fff;
-  border-radius: 12px 12px 12px 2px;
-  font-size: 15px;
-  line-height: 21px;
-  color: #1a1a2e;
-}
-
-.hf-replies {
-  display: grid;
-  gap: 8px;
-  margin-top: 14px;
-}
-
-.hf-reply {
+/* 1. The check-in */
+.hf-chat-head {
+  left: 127px;
+  top: 8px;
   display: flex;
   align-items: center;
   gap: 10px;
-  height: 48px;
-  padding: 0 14px;
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.hf-avatar {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--color-ink);
+  color: #fff;
+}
+
+.hf-bubble {
+  left: 30px;
+  top: 50px;
+  width: 340px;
+  padding: 12px 16px;
   background: #fff;
-  border: 1px solid #e9e9ea;
+  border-radius: 12px 12px 12px 2px;
+  font-size: 14px;
+  line-height: 20px;
+  color: #1a1a2e;
+  transform-origin: 0 100%;
+  box-shadow: 0 14px 40px rgb(26 26 46 / 0.08);
+}
+
+.hf-reply,
+.hf-tap-label {
+  left: 30px;
+  width: 340px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
   border-radius: 12px;
   font-size: 14px;
   font-weight: 500;
+}
+
+.hf-reply {
+  background: #fff;
+  border: 1px solid #e9e9ea;
+  box-shadow: 0 8px 24px rgb(26 26 46 / 0.06);
+}
+
+.hf-tap-label {
+  top: 246px;
+  color: #fff;
 }
 
 .hf-reply__n {
@@ -860,8 +590,9 @@
   flex: 1;
 }
 
-.hf-plus,
-.hf-fab {
+.hf-plus {
+  left: 172px;
+  top: 172px;
   display: grid;
   place-items: center;
   width: 56px;
@@ -869,44 +600,18 @@
   color: #fff;
 }
 
-.hf-plus {
-  left: 328px;
-  top: 328px;
-}
-
-/* The sheets (their white is the shape) */
-.hf-sheet {
-  left: 0;
-  width: 400px;
-  padding: 0 16px;
-  display: flex;
-  flex-direction: column;
-}
-
-.hf-sheet__title {
-  margin-top: 12px;
-  font-family: var(--font-display);
-  font-size: 22px;
-  line-height: 28px;
-  font-weight: 600;
-}
-
-.hf-sheet__helper {
-  margin-top: 6px;
-  font-size: 13px;
-  line-height: 18px;
-  color: #7a7a82;
-}
-
+/* 2. The Add sheet */
 .hf-add {
-  top: 170px;
+  left: 30px;
+  top: 82px;
+  width: 340px;
+  padding: 16px;
 }
 
 .hf-add__tiles {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
-  margin-top: 14px;
 }
 
 .hf-add__tile {
@@ -917,6 +622,7 @@
   padding: 14px;
   border: 1px solid #e9e9ea;
   border-radius: 16px;
+  background: #fff;
   font-size: 15px;
   font-weight: 600;
 }
@@ -933,7 +639,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  height: 34px;
+  height: 28px;
   font-size: 14px;
   font-weight: 500;
 }
@@ -943,15 +649,35 @@
   color: #4d4d59;
 }
 
+/* 3. Describe your meal */
 .hf-describe {
-  top: 140px;
+  left: 20px;
+  top: 100px;
+  width: 360px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.hf-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  line-height: 28px;
+  font-weight: 600;
+}
+
+.hf-helper {
+  margin-top: 4px;
+  font-size: 13px;
+  line-height: 18px;
+  color: #7a7a82;
 }
 
 .hf-composer {
   display: flex;
   gap: 8px;
-  margin-top: 12px;
   height: 48px;
+  margin-top: 12px;
 }
 
 .hf-composer__field {
@@ -1010,26 +736,20 @@
 }
 
 .hf-recent {
-  margin-top: 14px;
+  margin-top: 12px;
   font-family: var(--font-display);
   font-size: 17px;
   font-weight: 600;
 }
 
-.hf-search {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  height: 40px;
-  margin-top: 8px;
-  padding: 0 12px;
-  border-radius: 12px;
-  background: #f4f4f5;
-  color: #a6a6ac;
-}
-
+/* 4. When did you eat this? */
 .hf-when {
-  top: 90px;
+  left: 30px;
+  top: 50px;
+  width: 340px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
 }
 
 .hf-when__date {
@@ -1048,7 +768,7 @@
   justify-content: center;
   gap: 8px;
   height: 110px;
-  margin-top: 44px;
+  margin-top: 36px;
   overflow: hidden;
   font-size: 18px;
   -webkit-mask-image: linear-gradient(transparent, #000 35%, #000 65%, transparent);
@@ -1089,7 +809,7 @@
   display: grid;
   place-items: center;
   height: 48px;
-  margin-top: 12px;
+  margin-top: 20px;
   border-radius: 999px;
   background: #000;
   color: #fff;
@@ -1097,16 +817,91 @@
   font-weight: 600;
 }
 
-/* The meal's name and its calories, flying between screens. */
+/* 5. The meal on the Log */
+.hf-row {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 400px;
+  height: 400px;
+  pointer-events: none;
+}
+
+.hf-row__head {
+  left: 35px;
+  top: 180px;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 12px;
+  line-height: 18px;
+  color: #7a7a82;
+  white-space: nowrap;
+}
+
+.hf-row__hour {
+  color: #a6a6ac;
+}
+
+.hf-row__time {
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+.hf-row .hf-chips {
+  position: absolute;
+  left: 49px;
+  top: 264px;
+}
+
+.hf-row .hf-chip {
+  opacity: 0;
+}
+
+.hf-chips {
+  display: flex;
+  gap: 6px;
+}
+
+.hf-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.hf-chip--kcal {
+  background: #ffe8e4;
+  color: #b24637;
+}
+
+.hf-chip--kcal svg {
+  color: #ff644f;
+}
+
+.hf-chip--signal {
+  background: #f4f4f5;
+  color: #1a1a2e;
+}
+
+.hf-chip--signal svg {
+  color: #40e300;
+}
+
 .hf-fly {
   position: absolute;
   left: 0;
   top: 0;
-  width: 275px;
-  transform: translate(96px, 380px);
+  width: 302px;
   font-size: 16px;
   line-height: 20px;
   font-weight: 500;
+  visibility: hidden;
 }
 
 .hf-fly > span {
@@ -1122,43 +917,161 @@
   box-shadow: 0 6px 16px rgb(255 100 79 / 0.25);
 }
 
-/* The tab bar and + button */
-.hf-nav {
-  left: 15px;
-  bottom: 16px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  height: 56px;
-  padding: 0 6px;
-  border-radius: 999px;
-  background: rgb(255 255 255 / 0.92);
+/* 6. Eaten */
+.hf-card {
+  position: absolute;
+  background: #fff;
   border: 1px solid #e9e9ea;
-  box-shadow: 0 6px 20px rgb(0 0 0 / 0.08);
+  border-radius: 16px;
+  box-shadow: 0 14px 40px rgb(26 26 46 / 0.1);
 }
 
-.hf-nav__tab {
+.hf-eaten {
+  left: 30px;
+  top: 14px;
+  width: 340px;
+  height: 228px;
+  padding: 16px;
+  visibility: hidden;
+}
+
+.hf-eaten__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hf-eaten__flame {
   display: grid;
-  justify-items: center;
-  width: 72px;
-  font-size: 11px;
-  line-height: 14px;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: #ffe8e4;
+  color: #ff644f;
+}
+
+.hf-big b {
+  font-family: var(--font-display);
+  font-size: 26px;
+  line-height: 30px;
   font-weight: 600;
+}
+
+.hf-big i,
+.hf-mid i {
+  font-size: 13px;
   color: #7a7a82;
 }
 
-.hf-nav__tab--on {
-  color: #000;
+.hf-on-track {
+  margin-left: auto;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgb(64 227 0 / 0.16);
+  color: #258400;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
 }
 
-.hf-fab {
-  right: 16px;
-  bottom: 16px;
-  border-radius: 50%;
-  background: #000;
+.hf-eaten__stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin-top: 14px;
 }
 
-/* The dark and the closing line */
+.hf-mid b {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.hf-bar {
+  display: block;
+  height: 8px;
+  margin-top: 12px;
+  border-radius: 999px;
+  background: #f4f4f5;
+  overflow: hidden;
+}
+
+.hf-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #ffb09f, #ff644f);
+  transform-origin: 0 50%;
+}
+
+.hf-macros {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid #e9e9ea;
+}
+
+.hf-macro {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hf-macro b {
+  display: block;
+  font-size: 13px;
+  line-height: 16px;
+}
+
+/* 7. Energy, Satiety and Mood (shown with no script) */
+.hf-rings {
+  left: 20px;
+  top: 115px;
+  width: 360px;
+  height: 170px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  opacity: 1;
+  visibility: visible;
+}
+
+.hf-ring {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+}
+
+.hf-ring__dial {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 98px;
+  height: 98px;
+}
+
+.hf-ring__dial svg {
+  position: absolute;
+  inset: 0;
+}
+
+.hf-ring__dial b {
+  font-family: var(--font-display);
+  font-size: 30px;
+  line-height: 1;
+  font-weight: 600;
+}
+
+.hf-ring__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* 8. The dark and the closing line */
 .how-film__flood {
   position: absolute;
   inset: 0;
@@ -1167,6 +1080,7 @@
 }
 
 .hf-closing {
+  position: absolute;
   left: 40px;
   top: 150px;
   width: 320px;
@@ -1176,6 +1090,7 @@
   font-weight: 500;
   letter-spacing: -0.01em;
   color: #f4f4f5;
+  visibility: hidden;
 }
 
 .hf-mask {

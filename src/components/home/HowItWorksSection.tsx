@@ -17,7 +17,7 @@ export default function HowItWorksSection() {
     >
       <FeatureSplit
         media={
-          <HowItWorksFilm label="An animation of the PrepIt app. The nutritionist notices protein has been under target on 18 of 21 days, mostly at dinner, and suggests a bigger portion of protein at dinner. That reply is tapped. Then a Mediterranean salmon bowl with quinoa is logged from the plus button at 6:45 PM: 454 calories, and the day's Eaten goes from 1,027 to 1,481 of 1,570 calories, on track, with Energy 84, Satiety 96 and Mood 87." />
+          <HowItWorksFilm label="An animation of PrepIt's app screens. The nutritionist notices protein has been under target on 18 of 21 days, mostly at dinner, and suggests a bigger portion of protein at dinner. That reply is tapped. Then a Mediterranean salmon bowl with quinoa is logged from the plus button at 6:45 PM: 454 calories. The day's Eaten goes from 1,027 to 1,481 of 1,570 calories, on track, with Energy 84, Satiety 96 and Mood 87." />
         }
       >
         <SectionHeading
