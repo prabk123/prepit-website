@@ -75,10 +75,6 @@
     animation-delay: var(--rise-delay, 500ms);
   }
 
-  html:not([data-motion="off"]) .hero-settle .annotated-photo__layer {
-    animation: photo-settle 1800ms var(--ease-out-soft) both;
-  }
-
   html:not([data-motion="off"]) .gradient-drift {
     background-size: 220% 100%;
     animation: gradient-drift 7s ease-in-out infinite alternate;
@@ -311,17 +307,6 @@
   to {
     opacity: 1;
     translate: 0 0;
-    filter: blur(0);
-  }
-}
-
-@keyframes photo-settle {
-  from {
-    scale: 1.08;
-    filter: blur(6px);
-  }
-  to {
-    scale: 1;
     filter: blur(0);
   }
 }
