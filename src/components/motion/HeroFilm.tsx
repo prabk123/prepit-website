@@ -2,7 +2,7 @@
 
 import type { CSSProperties } from "react";
 import type { FilmIconName } from "./filmIcons";
-import { AppMark, Film, Icon, Plus, cameraAt, clamp01, columns, ease, easeIn, mix, moves, spring, track, useFilm } from "./filmKit";
+import { AppMark, Film, Icon, Plus, cameraAt, clamp01, columns, ease, easeIn, mix, moves, pressScale, spring, track, useFilm } from "./filmKit";
 
 /*
  * The homepage hero film (website motion experiment), staged after the
@@ -82,8 +82,6 @@ const SHAPE_TRACKS = columns(SHAPE, 6);
 const CAMERA: [number, number, number, number][] = [
   [0, 1.15, 200, 112],
   [0.7, 1, 200, 200], // back from the check-in to its replies
-  [3.95, 1.18, 200, 220], // in on the tap
-  [5.45, 1, 200, 200],
   [7.6, 1.06, 200, 205], // a little closer on the composer, the card still whole
   [9.75, 1, 200, 200],
   [14.0, 1, 200, 196],
@@ -117,12 +115,11 @@ function seek(t: number, put: (key: string, prop: string, value: string) => void
   put("shape", "visibility", t >= 3.85 ? "visible" : "hidden");
   put("shape", "width", `${w.toFixed(1)}px`);
   put("shape", "height", `${h.toFixed(1)}px`);
-  put("shape", "transform", `translate(${(cx - w / 2).toFixed(1)}px, ${(cy - h / 2).toFixed(1)}px)`);
+  put("shape", "transform", `translate(${(cx - w / 2).toFixed(1)}px, ${(cy - h / 2).toFixed(1)}px) scale(${pressScale(t, 5.15).toFixed(3)})`);
   put("shape", "border-radius", `${r.toFixed(1)}px ${r.toFixed(1)}px ${r.toFixed(1)}px ${tail.toFixed(1)}px`);
   const level = Math.round(grey * 255);
   put("shape", "background-color", `rgb(${level} ${level} ${level})`);
   put("shape", "border-color", `rgb(233 233 234 / ${grey.toFixed(2)})`);
-  press("shape", t, 5.15);
 
   // 1. The check-in's words rise; its replies follow; the first is tapped.
   // At the end the shape has become the bubble, so its words start rising
@@ -164,6 +161,8 @@ function seek(t: number, put: (key: string, prop: string, value: string) => void
   [0, 1].forEach((i) => {
     put(`media${i}`, "width", `${mix(40, 0, sending).toFixed(1)}px`);
     put(`media${i}`, "opacity", (1 - sending).toFixed(2));
+    // Their gap closes with them, so the field meets the send button.
+    put(`media${i}`, "margin-left", `${mix(8, 0, sending).toFixed(1)}px`);
   });
   pop("send", t, 7.95);
   if (t > 9.25 && t < 9.65) press("send", t, 9.4);
@@ -474,7 +473,7 @@ export default function HeroFilm({ label, className }: { label: string; classNam
                 <b ref={set(`ringNum${i}`)}>{ring.score}</b>
               </span>
               <span className="hf-ring__label">
-                <Icon name={ring.icon} size={13} className="hf-green" />
+                <Icon name={ring.icon} size={13} className="hf-grey" />
                 {ring.label}
                 <Icon name="chevronRight" size={10} className="hf-grey" />
               </span>

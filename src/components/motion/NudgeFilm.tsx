@@ -1,6 +1,6 @@
 "use client";
 
-import { AppMark, Film, Icon, cameraAt, clamp01, columns, ease, moves, track, useFilm } from "./filmKit";
+import { AppMark, Film, Icon, cameraAt, clamp01, columns, ease, moves, pressScale, track, useFilm } from "./filmKit";
 
 /*
  * "A nudge, not a nag." film (website motion experiment): three of the
@@ -15,10 +15,21 @@ import { AppMark, Film, Icon, cameraAt, clamp01, columns, ease, moves, track, us
  * Each one shrinks back into the next notification; the last into the first.
  */
 
-const LOOP = 18;
-const REST = 15.9;
+/** How long each notification shows on the lock screen before it's tapped. */
+const BANNER_FOR = 2.6;
+const LOOP = 20.7;
+const REST = 19.0;
 
-type Nudge = { banner: string; text: string; replies: string[]; tap: number; at: number; height: number };
+type Nudge = {
+  banner: string;
+  text: string;
+  replies: string[];
+  tap: number;
+  at: number;
+  height: number;
+  /** The lock screen's time, when the backend sends this nudge. */
+  time: string;
+};
 
 const NUDGES: Nudge[] = [
   {
@@ -28,17 +39,20 @@ const NUDGES: Nudge[] = [
     tap: 1,
     at: 0,
     height: 106,
+    time: "9:40",
   },
   {
     banner: "It's been 8 days since your last weigh-in. Next time you hop on the scales, just send me…",
     text: "It's been 8 days since your last weigh-in. Next time you hop on the scales, just send me the number and I'll log it for you :)",
     replies: ["Log my weight", "Not this week", "Type your own"],
     tap: 0,
-    at: 5.6,
+    at: 6.3,
     height: 86,
+    time: "12:30",
   },
 ];
-const PATTERN_AT = 11.2;
+const PATTERN_AT = 12.6;
+const PATTERN_TIME = "12:30";
 const PATTERN_BANNER =
   "Tuesdays and Wednesdays have run about 520 kcal over your goal in most of the last four weeks…";
 const DAYS = [
@@ -50,31 +64,36 @@ const DAYS = [
   { day: "Sat", kcal: "1,500", diff: "-70" },
   { day: "Sun", kcal: "1,510", diff: "-60" },
 ];
+/** When each notification arrives, and the lock screen's time then. */
+const ARRIVALS = [...NUDGES.map((n) => ({ at: n.at, time: n.time })), { at: PATTERN_AT, time: PATTERN_TIME }];
 
 const BUBBLE_TOP = 60;
-const BANNER: [number, number, number, number, number] = [200, 52, 368, 76, 22];
+/** The notification, on the phone's lock screen. */
+const BANNER: [number, number, number, number, number] = [200, 216, 264, 80, 20];
+const CARD: [number, number, number, number, number] = [200, 200, 360, 390, 16];
 const bubbleRect = (n: Nudge): [number, number, number, number, number] => [200, BUBBLE_TOP + n.height / 2, 340, n.height, 12];
 const replyTop = (n: Nudge, i: number) => BUBBLE_TOP + n.height + 12 + i * 56;
+/** The card leaves, and the shape heads back to the first notification. */
+const CARD_OUT = 19.65;
 
 /* The one shape: [time, centre x, centre y, width, height, radius]. */
 const SHAPE: [number, number, number, number, number, number][] = [
   [0, ...BANNER],
-  [NUDGES[0].at + 1.3, ...bubbleRect(NUDGES[0])],
+  [NUDGES[0].at + BANNER_FOR, ...bubbleRect(NUDGES[0])],
   [NUDGES[1].at, ...BANNER],
-  [NUDGES[1].at + 1.3, ...bubbleRect(NUDGES[1])],
+  [NUDGES[1].at + BANNER_FOR, ...bubbleRect(NUDGES[1])],
   [PATTERN_AT, ...BANNER],
-  [PATTERN_AT + 1.3, 200, 200, 360, 390, 16],
-  [17.3, ...BANNER],
+  [PATTERN_AT + BANNER_FOR, ...CARD],
+  [CARD_OUT + 0.15, ...BANNER],
 ];
 const SHAPE_TRACKS = columns(SHAPE, 5);
 
 const CAMERA: [number, number, number, number][] = [
   [0, 1, 200, 200],
-  [3.2, 1.05, 200, 230], // in on the replies
-  [5.6, 1, 200, 200],
-  [8.8, 1.05, 200, 230],
+  [NUDGES[0].at + BANNER_FOR + 1.9, 1.05, 200, 230], // in on the replies
+  [NUDGES[1].at, 1, 200, 200],
+  [NUDGES[1].at + BANNER_FOR + 1.9, 1.05, 200, 230],
   [PATTERN_AT, 1, 200, 200],
-  [17.3, 1, 200, 200],
 ];
 
 function seek(t: number, put: (key: string, prop: string, value: string) => void) {
@@ -82,28 +101,38 @@ function seek(t: number, put: (key: string, prop: string, value: string) => void
   put("camera", "transform", cameraAt(CAMERA, t));
 
   const [cx, cy, w, h, r] = SHAPE_TRACKS.map((keys) => track(keys, t));
+  // The tap on the notification: a press on the shape.
+  const tap = ARRIVALS.map(({ at }) => at + BANNER_FOR - 0.3).find((at) => Math.abs(t - at) < 1) ?? -9;
   put("shape", "width", `${w.toFixed(1)}px`);
   put("shape", "height", `${h.toFixed(1)}px`);
-  put("shape", "transform", `translate(${(cx - w / 2).toFixed(1)}px, ${(cy - h / 2).toFixed(1)}px)`);
+  put("shape", "transform", `translate(${(cx - w / 2).toFixed(1)}px, ${(cy - h / 2).toFixed(1)}px) scale(${pressScale(t, tap).toFixed(3)})`);
   put("shape", "border-radius", `${r.toFixed(1)}px`);
 
-  // Each notification's words, while the shape is the banner. The first one
-  // starts before the loop wraps, as the last card becomes its banner.
-  const wrap = t > LOOP - 0.7 ? t - LOOP : t;
-  enter("banner0", wrap, -0.5, NUDGES[0].at + 1.0, [0, -10]);
-  enter("banner1", t, NUDGES[1].at + 0.25, NUDGES[1].at + 1.0, [0, -10]);
-  enter("banner2", t, PATTERN_AT + 0.25, PATTERN_AT + 1.0, [0, -10]);
+  // Each notification on the lock screen, then it's tapped. The first one
+  // starts before the loop wraps, as the last card becomes it.
+  const wrap = t > LOOP - 1.0 ? t - LOOP : t;
+  let onLockScreen = false;
+  ARRIVALS.forEach(({ at }, k) => {
+    const time = k === 0 ? wrap : t;
+    const tapped = at + BANNER_FOR;
+    if (time > at - 0.9 && time < tapped + 0.1) onLockScreen = true;
+    enter(`phone${k}`, time, at - (k === 0 ? 0.7 : 0.1), tapped - 0.05, [0, 30]);
+    enter(`banner${k}`, time, at + 0.45, tapped - 0.1, [0, 0]);
+  });
+  put("shape", "background-color", onLockScreen ? "rgb(255 255 255 / 0.8)" : "#fff");
+  put("shape", "border-color", onLockScreen ? "rgb(255 255 255 / 0.6)" : "#e9e9ea");
 
   // 1–2. The message, its replies, and the one that's tapped.
   NUDGES.forEach((n, k) => {
-    const shown = t > n.at + 1.35 && t < n.at + 5.55;
+    const b = n.at + BANNER_FOR;
+    const shown = t > b + 0.05 && t < b + 3.55;
     put(`bubble${k}`, "visibility", shown ? "visible" : "hidden");
-    put(`bubble${k}`, "opacity", (1 - clamp01((t - n.at - 5.35) / 0.2)).toFixed(2));
-    rise(`bubbleText${k}`, t, n.at + 1.4);
+    put(`bubble${k}`, "opacity", (1 - clamp01((t - b - 3.35) / 0.2)).toFixed(2));
+    rise(`bubbleText${k}`, t, b + 0.1);
     n.replies.forEach((_, i) => {
-      enter(`reply${k}.${i}`, t, n.at + 1.8 + i * 0.12, n.at + 5.2 + i * 0.05, [i % 2 ? 420 : -420, 0]);
+      enter(`reply${k}.${i}`, t, b + 0.5 + i * 0.12, b + 3.2 + i * 0.05, [i % 2 ? 420 : -420, 0]);
     });
-    const tapAt = n.at + 3.9;
+    const tapAt = b + 2.2;
     press(`reply${k}.${n.tap}`, t, tapAt);
     const picked = t > tapAt;
     put(`reply${k}.${n.tap}`, "background-color", picked ? "#000" : "#fff");
@@ -112,8 +141,8 @@ function seek(t: number, put: (key: string, prop: string, value: string) => void
   });
 
   // 3. The Weekly calorie pattern card, and its OK.
-  const out = 17.15;
-  const a = PATTERN_AT + 1.35;
+  const out = CARD_OUT;
+  const a = PATTERN_AT + BANNER_FOR + 0.05;
   enter("patternHead", t, a, out);
   enter("patternSub", t, a + 0.1, out);
   DAYS.forEach((_, i) => enter(`day${i}`, t, a + 0.3 + i * 0.08, out, [0, 0]));
@@ -122,7 +151,7 @@ function seek(t: number, put: (key: string, prop: string, value: string) => void
   put("dayBand2", "scale", `${(ease((t - a - 1.2) / 0.5) * bandOut).toFixed(3)} 1`);
   enter("patternTotals", t, a + 1.0, out);
   enter("useIt", t, a + 1.2, out, [0, 30]);
-  const okAt = 15.4;
+  const okAt = a + 3.0;
   press("useIt", t, okAt);
   const done = t > okAt && t < out + 0.3;
   put("useIt", "background-color", done ? "#e9e9ea" : "#000");
@@ -136,7 +165,7 @@ export default function NudgeFilm({ label, className }: { label: string; classNa
   const banner = (key: string, text: string) => (
     <span ref={set(key)} className="nf-c nf-banner">
       <span className="nf-banner__icon">
-        <AppMark size={22} />
+        <AppMark size={20} />
       </span>
       <span className="nf-banner__body">
         <span className="nf-banner__top">
@@ -151,6 +180,14 @@ export default function NudgeFilm({ label, className }: { label: string; classNa
   return (
     <Film {...film} label={label} className={`nudge-film ${className ?? ""}`}>
       <div ref={set("camera")} className="film__camera" aria-hidden>
+        {/* The lock screen each notification arrives on, under the shape. */}
+        {ARRIVALS.map(({ time }, k) => (
+          <span key={k} ref={set(`phone${k}`)} className="nf-c nf-phone">
+            <span className="nf-phone__island" />
+            <span className="nf-phone__date">Saturday 17 October</span>
+            <span className="nf-phone__time">{time}</span>
+          </span>
+        ))}
         <div ref={set("shape")} className="nf-shape" />
         {banner("banner0", NUDGES[0].banner)}
         {banner("banner1", NUDGES[1].banner)}

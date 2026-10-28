@@ -60,6 +60,12 @@ export function cameraAt(keys: [number, number, number, number][], t: number) {
 type Put = (key: string, prop: string, value: string) => void;
 export type Setter = (key: string) => (el: HTMLElement | SVGElement | null) => void;
 
+/**
+ * A press's scale around `at`. A shape placed by `transform: translate()`
+ * folds this into its transform, after the translate, so it dips in place.
+ */
+export const pressScale = (t: number, at: number) => 1 - 0.07 * windowed(t, at - 0.1, at + 0.08, 0.08);
+
 /** The motions every film uses, writing through `put`. */
 export function moves(put: Put) {
   return {
@@ -74,7 +80,7 @@ export function moves(put: Put) {
     },
     /** A press: a quick dip in scale around `at`. */
     press(key: string, t: number, at: number) {
-      put(key, "scale", (1 - 0.07 * windowed(t, at - 0.1, at + 0.08, 0.08)).toFixed(3));
+      put(key, "scale", pressScale(t, at).toFixed(3));
     },
     /** A pop: springs in from nothing at `at`, gone again from `until`. */
     pop(key: string, t: number, at: number, until = 99) {
@@ -92,7 +98,7 @@ export function moves(put: Put) {
 /**
  * Plays a film while it is on screen: on its own unless motion is reduced or
  * turned off with ?motion=off, otherwise once Play is pressed. Paused always
- * wins. `rest` is the frame shown before it plays.
+ * wins. `rest` is the frame shown when it will not play (reduced motion).
  */
 export function useFilm({ loop, rest, name, seek }: { loop: number; rest: number; name: string; seek: (t: number, put: Put) => void }) {
   const boxRef = useRef<HTMLDivElement>(null);
@@ -141,8 +147,15 @@ export function useFilm({ loop, rest, name, seek }: { loop: number; rest: number
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const optedOut = new URLSearchParams(window.location.search).get("motion") === "off";
     setAllowed(!reduced && !optedOut);
+    // A film that will play starts from its first frame when it comes into
+    // view; one that won't rests on its `rest` frame.
+    if (!reduced && !optedOut) clock.current.t = 0;
     seekRef.current(clock.current.t, putRef.current);
-    const observer = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), { threshold: 0.35 });
+    // Plays only while most of it is on screen, and picks up where it
+    // stopped when it comes back.
+    const observer = new IntersectionObserver(([entry]) => setInView(entry.intersectionRatio >= 0.6), {
+      threshold: [0, 0.6],
+    });
     observer.observe(box);
     return () => observer.disconnect();
   }, []);

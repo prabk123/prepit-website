@@ -503,10 +503,6 @@
   max-width: 600px;
 }
 
-.hf-green {
-  color: #40e300;
-}
-
 .hf-grey {
   color: #a6a6ac;
 }
@@ -683,7 +679,6 @@
 
 .hf-composer {
   display: flex;
-  gap: 8px;
   height: 48px;
   margin-top: 12px;
 }
@@ -728,6 +723,7 @@
   display: grid;
   place-items: center;
   flex: none;
+  margin-left: 8px;
   width: 40px;
   height: 48px;
   border-radius: 12px;
@@ -898,7 +894,7 @@
 }
 
 .hf-chip--signal svg {
-  color: #40e300;
+  color: #7a7a82;
 }
 
 .hf-fly {
@@ -914,6 +910,13 @@
 
 .hf-fly > span {
   opacity: 0;
+}
+
+/* The opening quote hangs outside the text, so the words line up with the
+   row's title when they land. */
+.hf-fly > span:first-child {
+  position: absolute;
+  translate: -100% 0;
 }
 
 .hf-kcal-fly {
@@ -1383,17 +1386,58 @@
 }
 
 .nf-shape {
-  width: 368px;
-  height: 76px;
-  transform: translate(16px, 14px);
-  border-radius: 22px;
+  width: 264px;
+  height: 80px;
+  transform: translate(68px, 176px);
+  border-radius: 20px;
+  -webkit-backdrop-filter: blur(18px) saturate(1.6);
+  backdrop-filter: blur(18px) saturate(1.6);
+}
+
+/* The lock screen each notification lands on: the top of an iPhone, its
+   bottom fading into the page with the stage's edge. */
+.nf-phone {
+  left: 56px;
+  top: 4px;
+  width: 288px;
+  height: 470px;
+  border: 9px solid #111114;
+  border-radius: 52px;
+  background: linear-gradient(165deg, #f4e6da 0%, #ebe3ee 50%, #dde6ef 100%);
+  box-shadow: 0 20px 50px rgb(26 26 46 / 0.14);
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  color: rgb(26 26 46 / 0.85);
+}
+
+.nf-phone__island {
+  width: 86px;
+  height: 25px;
+  margin-top: 10px;
+  border-radius: 999px;
+  background: #111114;
+}
+
+.nf-phone__date {
+  margin-top: 22px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.nf-phone__time {
+  font-family: var(--font-display);
+  font-size: 66px;
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: -0.02em;
 }
 
 .nf-banner {
-  left: 28px;
-  top: 26px;
-  width: 344px;
-  height: 52px;
+  left: 80px;
+  top: 188px;
+  width: 240px;
+  height: 56px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -1403,9 +1447,9 @@
   display: grid;
   place-items: center;
   flex: none;
-  width: 38px;
-  height: 38px;
-  border-radius: 9px;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
   background: #000;
   color: #fff;
 }
