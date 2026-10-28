@@ -3,7 +3,8 @@ import type { CSSProperties, ReactNode } from "react";
 /**
  * A line of text split into words for the mask rise (src/app/motion.css):
  * each word sits in a clipping box and rises into it from below, with its
- * index in `--i`. Screen readers get the line once, unsplit. Anything that
+ * index in `--i`. The words are the only copy of the text, with their spaces,
+ * so find-in-page, copying and crawlers see the line once. Anything that
  * isn't a plain string is returned as it is.
  */
 export default function SplitWords({
@@ -18,20 +19,24 @@ export default function SplitWords({
   const words = text.split(" ");
   return (
     <>
-      <span className="sr-only">{text}</span>
-      <span aria-hidden>
-        {words.map((word, i) => (
-          <span key={i} className={i === words.length - 1 && lastAfter ? "relative inline-block" : undefined}>
-            <span className="split-mask">
-              <span className="split-word" style={{ "--i": i } as CSSProperties}>
-                {word}
-              </span>
+      {words.map((word, i) => (
+        <span
+          key={i}
+          className={
+            i === words.length - 1 && lastAfter
+              ? "relative inline-block"
+              : undefined
+          }
+        >
+          <span className="split-mask">
+            <span className="split-word" style={{ "--i": i } as CSSProperties}>
+              {word}
             </span>
-            {i === words.length - 1 && lastAfter}
-            {i < words.length - 1 && " "}
           </span>
-        ))}
-      </span>
+          {i === words.length - 1 && lastAfter}
+          {i < words.length - 1 && " "}
+        </span>
+      ))}
     </>
   );
 }

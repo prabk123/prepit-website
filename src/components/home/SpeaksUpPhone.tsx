@@ -219,7 +219,7 @@ export default function SpeaksUpPhone({
           ))}
         </div>
       )}
-      <figcaption id={captionId} aria-live="polite" className="text-center text-small text-ink-faint">
+      <figcaption id={captionId} aria-live={playing ? "off" : "polite"} className="text-center text-small text-ink-faint">
         {current.caption}. {messages.length > 1 ? "Real messages from the app." : "A real message from the app."}
       </figcaption>
     </figure>

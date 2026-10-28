@@ -219,11 +219,23 @@
       transition: transform 600ms var(--ease-out-soft);
     }
 
+    /* The lean uses transform, so a button that also reveals keeps the
+       reveal's translate, blur and stagger. */
     html[data-motion="on"] .magnet {
-      translate: var(--magnet-x, 0) var(--magnet-y, 0);
+      transform: translate(var(--magnet-x, 0), var(--magnet-y, 0));
       transition:
-        translate 350ms var(--ease-out-soft),
+        transform 350ms var(--ease-out-soft),
         opacity 150ms ease;
+    }
+
+    html[data-motion="on"] .magnet[data-reveal="rise"] {
+      transition:
+        transform 350ms var(--ease-out-soft),
+        opacity 900ms var(--ease-out-soft),
+        translate 1000ms var(--ease-out-soft),
+        filter 900ms var(--ease-out-soft);
+      transition-delay: 0ms, calc(var(--order, 0) * var(--stagger-block)), calc(var(--order, 0) * var(--stagger-block)),
+        calc(var(--order, 0) * var(--stagger-block));
     }
 
     html[data-motion="on"] .spotlight {
@@ -395,11 +407,14 @@
 }
 
 /*
- * <HowItWorksFilm>: an 800 x 800 stage scaled to its box by --film-scale.
- * Before the script runs (and under reduced motion) it rests on the logged
- * meal; seek(t) sets every inline style from then on.
+ * <HowItWorksFilm>: the app's Get started demo redrawn in app points on a
+ * 400 x 400 stage, scaled to its box by --film-scale (set by the component;
+ * the container steps below get the first paint close before it runs).
+ * Colours, sizes and radii are the app's light theme (PrepItColors.light).
+ * Before the script runs, and under reduced motion, it rests on the meal.
  */
 .how-film {
+  container-type: inline-size;
   position: relative;
   width: 100%;
   max-width: 560px;
@@ -411,17 +426,25 @@
     radial-gradient(closest-side at 50% 55%, rgb(255 100 79 / 0.07), transparent),
     var(--color-surface-raised);
   border: 1px solid var(--color-line);
-  color: var(--color-ink);
+  color: #000;
   font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 20px;
+  --film-scale-css: 1.4;
 }
+
+@container (max-width: 520px) { .how-film__stage { --film-scale-css: 1.25; } }
+@container (max-width: 460px) { .how-film__stage { --film-scale-css: 1.1; } }
+@container (max-width: 400px) { .how-film__stage { --film-scale-css: 0.95; } }
+@container (max-width: 350px) { .how-film__stage { --film-scale-css: 0.82; } }
 
 .how-film__stage {
   position: absolute;
   left: 0;
   top: 0;
-  width: 800px;
-  height: 800px;
-  transform: scale(var(--film-scale, 0.7));
+  width: 400px;
+  height: 400px;
+  transform: scale(var(--film-scale, var(--film-scale-css, 1.4)));
   transform-origin: 0 0;
 }
 
@@ -431,278 +454,510 @@
   transform-origin: 50% 50%;
 }
 
-.how-film__camera > * {
-  position: absolute;
-}
-
-.how-film__shape {
-  left: 0;
-  top: 0;
-  width: 560px;
-  height: 430px;
-  transform: translate(120px, 215px);
-  border-radius: 36px;
-  background: #fff;
-  box-shadow:
-    0 30px 60px -30px rgb(26 26 46 / 0.35),
-    0 8px 18px -8px rgb(26 26 46 / 0.12);
-}
-
-.how-film__glow {
-  left: 90px;
-  top: 348px;
-  width: 620px;
-  height: 104px;
-  border-radius: 999px;
-  opacity: 0;
-  background: conic-gradient(#809ff9, #d093d9, #f38c61, #f5cc77, #809ff9);
-  filter: blur(22px);
-}
-
-.how-film__flood {
-  inset: 0;
-  background: var(--color-ink);
-  clip-path: circle(0 at 400px 400px);
-}
-
-.how-film__ripple {
-  left: 598px;
-  top: 340px;
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  background: var(--color-accent);
-  opacity: 0;
-}
-
-.how-film__composer,
-.how-film__sent,
-.how-film__rings,
-.how-film__nudge,
-.how-film__closing {
-  opacity: 0;
-}
-
-.how-film__composer {
-  left: 100px;
-  top: 358px;
-  width: 600px;
-  height: 84px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 14px 0 34px;
-  font-size: 27px;
-}
-
-.how-film__typed {
-  display: inline-flex;
-  align-items: center;
-}
-
-.how-film__caret {
-  display: inline-block;
-  width: 3px;
-  height: 32px;
-  margin-left: 2px;
-  background: var(--color-accent);
-}
-
-.how-film__send {
-  display: grid;
-  place-items: center;
-  width: 58px;
-  height: 58px;
-  border-radius: 50%;
-  background: var(--color-primary);
-  color: var(--color-on-primary);
-}
-
-.how-film__sent {
-  left: 290px;
-  top: 174px;
-  width: 420px;
-  height: 72px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 23px;
-}
-
-.how-film__meal {
-  left: 120px;
-  top: 215px;
-  width: 560px;
-  height: 430px;
-  padding: 40px 44px;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  font-size: 22px;
-}
-
-.how-film__meal-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  font-size: 30px;
-}
-
-.how-film__meal-head .how-film__muted {
-  font-size: 18px;
-}
-
-.how-film__muted {
-  color: var(--color-ink-muted);
-}
-
-.how-film__item {
-  display: flex;
-  justify-content: space-between;
-  padding-bottom: 14px;
-  border-bottom: 1px solid var(--color-line);
-}
-
-.how-film__total {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  font-size: 22px;
-}
-
-.how-film__total .font-display {
-  font-size: 64px;
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-}
-
-.how-film__macros {
-  display: grid;
-  gap: 10px;
-  font-size: 19px;
-}
-
-.how-film__macro {
-  display: grid;
-  grid-template-columns: 90px 1fr 50px;
-  align-items: center;
-  gap: 14px;
-  text-align: right;
-}
-
-.how-film__macro .how-film__muted {
-  text-align: left;
-}
-
-.how-film__track {
-  height: 10px;
-  border-radius: 999px;
-  background: var(--color-surface-raised);
-  overflow: hidden;
-}
-
-.how-film__bar {
-  display: block;
-  height: 100%;
-  border-radius: inherit;
-  background: var(--color-accent);
-  transform-origin: 0 50%;
-}
-
-.how-film__rings {
-  left: 100px;
-  top: 310px;
-  width: 600px;
-  height: 220px;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  align-items: center;
-  font-size: 21px;
-  font-weight: 500;
-}
-
-.how-film__ring {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-}
-
-.how-film__ring-dial {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 118px;
-  height: 118px;
-  font-size: 38px;
-  font-variant-numeric: tabular-nums;
-}
-
-.how-film__ring-dial svg {
-  position: absolute;
-  inset: 0;
-  rotate: -90deg;
-}
-
-.how-film__nudge {
-  left: 80px;
-  top: 285px;
-  width: 600px;
-  height: 230px;
-  padding: 34px 40px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  font-size: 27px;
-  line-height: 1.35;
-}
-
-.how-film__nudge p {
+.how-film p {
   margin: 0;
 }
 
-.how-film__from {
+.how-film b {
+  font-weight: 700;
+}
+
+.how-film small {
+  display: block;
+  font-size: 11px;
+  line-height: 14px;
+  font-weight: 500;
+  color: #7a7a82;
+}
+
+/* The card that morphs (the app's _DemoCard: white, 16 radius, hairline). */
+.how-film__shape {
+  position: absolute;
+  left: 30px;
+  top: 0;
+  width: 340px;
+  height: 352px;
+  transform: translateY(24px);
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid #e9e9ea;
+  box-shadow: 0 12px 36px rgb(0 0 0 / 0.16);
+}
+
+.hf-layer {
+  position: absolute;
+  left: 30px;
+  width: 340px;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.hf-grabber {
+  display: block;
+  width: 40px;
+  height: 4px;
+  margin-inline: auto;
+  border-radius: 999px;
+  background: #d3d3d5;
+}
+
+/* Composer: field and tiles (HeroComposer). */
+.hf-composer {
+  display: flex;
+  gap: 6px;
+}
+
+.hf-composer__field {
+  flex: 1;
+  min-width: 0;
   display: flex;
   align-items: center;
-  gap: 10px;
+  padding-inline: 12px;
+  border-radius: 12px;
+  background: #f4f4f5;
+  overflow: hidden;
+}
+
+.hf-hint {
+  color: #a6a6ac;
+  white-space: nowrap;
+}
+
+.hf-tile {
+  display: grid;
+  place-items: center;
+  flex: none;
+  border-radius: 12px;
+  background: #f4f4f5;
+  color: #000;
+}
+
+/* 1. Describe your meal. */
+.hf-log {
+  top: 120px;
+  padding: 8px 12px 12px;
+}
+
+.hf-sheet-title {
+  margin-top: 10px !important;
   font-size: 18px;
-  font-weight: 500;
-  color: var(--color-ink-muted);
+  line-height: 24px;
+  font-weight: 600;
 }
 
-.how-film__dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--color-accent);
-  box-shadow: 0 0 0 5px rgb(255 100 79 / 0.18);
+.hf-helper {
+  margin: 2px 0 10px !important;
+  font-size: 12px;
+  line-height: 16px;
+  color: #7a7a82;
 }
 
-.how-film__closing {
-  left: 80px;
-  top: 300px;
-  width: 640px;
+.hf-log__composer {
+  position: relative;
+  --hf-send: 0;
+}
+
+.hf-log__composer .hf-composer {
+  position: relative;
+  z-index: 1;
+  padding-right: calc(46px * var(--hf-send));
+  gap: 0;
+}
+
+.hf-log__composer .hf-tile--media {
+  width: calc(40px * (1 - var(--hf-send))) !important;
+  margin-left: calc(6px * (1 - var(--hf-send)));
+  opacity: calc(1 - var(--hf-send));
+  overflow: hidden;
+}
+
+.hf-tile--send {
+  position: absolute;
+  z-index: 1;
+  right: 0;
+  top: 0;
+  width: 40px;
+  height: 40px;
+  background: #000;
+  color: #fff;
+  opacity: var(--hf-send);
+}
+
+/* The typed line keeps its end in view, as the field scrolls in the app. */
+.hf-typing {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0 0.28em;
-  font-size: 84px;
-  line-height: 1.05;
+  justify-content: flex-end;
+  width: max-content;
+  min-width: 100%;
+  white-space: nowrap;
+}
+
+.hf-typing__end {
+  flex: 1 0 0;
+}
+
+.hf-caret {
+  width: 1.5px;
+  height: 18px;
+  margin-left: 1px;
+  align-self: center;
+  background: #000;
+}
+
+/* SpinningAiGlow round the field while it works. */
+.hf-glow {
+  position: absolute;
+  inset: -3px;
+  border-radius: 14px;
+  background: conic-gradient(from var(--beam-angle), #809ff9, #d093d9, #f38c61, #f5cc77, #809ff9);
+  filter: blur(5px);
+  opacity: 0;
+}
+
+/* LoadingMessagePill. */
+.hf-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: max-content;
+  margin: 16px auto 0;
+  padding: 8px 12px;
+  border-radius: 24px;
+  background: #000;
+  color: #fff;
+  font-size: 12px;
+  line-height: 16px;
   font-weight: 500;
+  opacity: 0;
+}
+
+/* 2. The logged meal. */
+.hf-meal {
+  top: 24px;
+  padding: 16px;
+  opacity: 1;
+  visibility: visible;
+}
+
+.hf-meal__title {
+  font-family: var(--font-display);
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 600;
+}
+
+.hf-chips {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin: 12px 0 14px;
+}
+
+.hf-chip {
+  padding: 8px 6px;
+  border-radius: 12px;
+  background: #f4f4f5;
+  text-align: center;
+}
+
+.hf-chip b {
+  display: block;
+  font-size: 16px;
+  line-height: 16px;
+  margin-bottom: 4px;
+}
+
+.hf-items {
+  display: grid;
+  gap: 10px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #e9e9ea;
+}
+
+.hf-item {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 500;
+}
+
+.hf-cal {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #ff644f;
+}
+
+.hf-confidence {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 14px 0 12px;
+}
+
+.hf-gauge {
+  position: relative;
+  display: block;
+  width: 88px;
+  height: 46px;
+}
+
+.hf-gauge b {
+  position: absolute;
+  inset: auto 0 0;
+  text-align: center;
+  font-size: 16px;
+  line-height: 18px;
+}
+
+.hf-gauge svg {
+  display: block;
+}
+
+.hf-confidence__level {
+  display: block;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.hf-notes {
+  font-size: 12px;
+  line-height: 18px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 3. Energy, Satiety and Mood. */
+.hf-signals {
+  top: 141px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  padding: 16px 12px 12px;
+}
+
+.hf-signal {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+}
+
+.hf-ring {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 66px;
+  height: 66px;
+}
+
+.hf-ring svg {
+  position: absolute;
+  inset: 0;
+}
+
+.hf-ring b {
+  font-family: var(--font-display);
+  font-size: 16px;
+}
+
+.hf-signal__label {
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 500;
+  color: #4d4d59;
+}
+
+.hf-signal__label svg {
+  color: #a6a6ac;
+}
+
+/* 4. The insight: AiInsightCardChrome and AiInsightActionChip. */
+.hf-insight {
+  top: 132px;
+}
+
+.hf-insight__card {
+  padding: 16px 16px 30px;
+  border: 1.5px solid transparent;
+  border-radius: 16px;
+  background:
+    linear-gradient(90deg, #f2f5fe, #faf4fb, #fef3ef, #fefaf2) padding-box,
+    linear-gradient(90deg, #809ff9, #d093d9, #f38c61, #f3cd7f) border-box;
+}
+
+.hf-insight__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  line-height: 21px !important;
+  font-weight: 700;
+}
+
+.hf-insight__title svg {
+  margin: 3px;
+}
+
+.hf-insight__body {
+  margin-top: 8px !important;
+  font-weight: 500;
+  color: #4d4d59;
+}
+
+.hf-action {
+  position: absolute;
+  right: 12px;
+  bottom: -16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 24px;
+  background: #000;
+  color: #fff;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgb(0 0 0 / 0.12);
+}
+
+/* 5. The conversation: grey sheet, bubbles, composer strip. */
+.hf-chat {
+  top: 60px;
+  height: 330px;
+  display: flex;
+  flex-direction: column;
+  padding-top: 8px;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.hf-chat__head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 10px 0 !important;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.hf-chat__messages {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 0 12px 10px;
+  overflow: hidden;
+}
+
+.hf-grow {
+  display: grid;
+  grid-template-rows: 1fr;
+}
+
+.hf-grow > div {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.hf-grow + .hf-grow > div {
+  padding-top: 4px;
+}
+
+.hf-grow--user + .hf-grow > div {
+  padding-top: 10px;
+}
+
+.hf-bubble {
+  width: fit-content;
+  max-width: 85%;
+  padding: 8px 12px;
+  border-radius: 12px 12px 12px 2px;
+  background: #fff;
+}
+
+.hf-bubble--user {
+  max-width: 80%;
+  margin-left: auto !important;
+  border-radius: 12px 12px 2px 12px;
+  background: #d3d3d5;
+}
+
+/* AiChatTypingDots. */
+.hf-dots {
+  display: none;
+  gap: 4px;
+  padding: 8px 2px 0;
+}
+
+.hf-dots i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #a6a6ac;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hf-dots i {
+    animation: hf-dot 900ms ease-in-out infinite;
+  }
+
+  .hf-dots i:nth-child(2) {
+    animation-delay: 150ms;
+  }
+
+  .hf-dots i:nth-child(3) {
+    animation-delay: 300ms;
+  }
+}
+
+@keyframes hf-dot {
+  0%, 60%, 100% { translate: 0 0; opacity: 0.5; }
+  30% { translate: 0 -4px; opacity: 1; }
+}
+
+.hf-chat__composer {
+  padding: 8px 12px 12px;
+  background: #fff;
+}
+
+/* 6. The dark and the closing line. */
+.how-film__flood {
+  position: absolute;
+  inset: 0;
+  background: var(--color-ink);
+  clip-path: circle(0 at 200px 200px);
+}
+
+.hf-closing {
+  left: 40px;
+  top: 150px;
+  width: 320px;
+  font-family: var(--font-display);
+  font-size: 42px;
+  line-height: 1.12;
+  font-weight: 500;
+  letter-spacing: -0.01em;
   color: #f4f4f5;
 }
 
-.how-film__mask {
+.hf-mask {
   display: inline-block;
   overflow: hidden;
   padding-bottom: 0.14em;
   margin-bottom: -0.14em;
 }
 
-.how-film__closing-word {
+.hf-closing__word {
   display: inline-block;
 }
 
-.how-film__underline {
+.hf-underline {
   position: absolute;
   left: 0;
   bottom: -0.1em;

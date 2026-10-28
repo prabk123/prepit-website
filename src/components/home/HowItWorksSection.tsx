@@ -10,10 +10,14 @@ import SectionHeading from "@/components/ui/SectionHeading";
  */
 export default function HowItWorksSection() {
   return (
-    <Section id="how-it-works" labelledBy="how-it-works-heading" analyticsName="how-it-works">
+    <Section
+      id="how-it-works"
+      labelledBy="how-it-works-heading"
+      analyticsName="how-it-works"
+    >
       <FeatureSplit
         media={
-          <HowItWorksFilm label="An animation: someone types two eggs and buttered toast, PrepIt logs it at 273 kcal with 16g of protein, shows Energy, Satiety and Mood filling, and the nutritionist replies that 16g of protein at breakfast keeps the 3pm dip away." />
+          <HowItWorksFilm label="An animation of the PrepIt app: someone types chicken wrap, an apple and a flat white. PrepIt logs it at 487 calories, scores Energy 68, Satiety 52 and Mood 71, notes that afternoon Energy looks soft, and the nutritionist explains that the lunch is light on protein and suggests a Greek yogurt." />
         }
       >
         <SectionHeading

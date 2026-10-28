@@ -1,60 +1,98 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from "react";
 import { trackVideoPlayed } from "@/lib/posthogAnalytics";
+import { ICON as APP_ICON } from "@/components/ui/LongLogo";
+import { FILM_ICONS, type FilmIconName } from "./filmIcons";
 
 /*
  * "How it works" film (website motion experiment, after the Prompt Motion
- * pieces twoclipping-5cba86 and ultimaxbt-2ddf1e). A 15 second loop drawn in
- * code, one continuous take: one shape morphs from the message box into the
- * sent message, the logged meal, the Energy, Satiety and Mood rings, the
- * nutritionist's reply, and finally floods the frame for the closing line.
+ * pieces twoclipping-5cba86 and ultimaxbt-2ddf1e). An 18.6 second loop drawn
+ * in code, one continuous take: one card morphs from the Log Meal sheet into
+ * the logged meal, the Energy, Satiety and Mood rings, the insight and the
+ * nutritionist's conversation, then the frame floods for the closing line.
  *
- * Prabodh agreed (28 Oct 2026) that this film may draw the app in a
- * stylised way; every other phone on the site stays a real capture. The
- * nutrition figures are a typical estimate for two boiled eggs and a slice
- * of buttered wholemeal toast, and the three scores are illustrative.
+ * Prabodh agreed (28 Oct 2026) that this film may draw the app; every other
+ * phone on the site stays a real capture. It redraws the app's own animated
+ * demo on the Get started screen (fresca_app lib/widgets/get_started_hero_demo):
+ * the same meal, numbers, insight and replies, and the same sizes, colours,
+ * radii and icons, in app points on a 400 x 400 stage scaled to its box.
  *
  * Every style is computed from the time inside seek(t), with closed-form
- * springs, so a frame never depends on the one before it. The stage is drawn
- * at 800 x 800 and scaled to its box.
+ * springs, so a frame never depends on the one before it.
  */
 
-const LOOP = 15;
-const STAGE = 800;
+const LOOP = 18.6;
+const STAGE = 400;
 
-const TYPED = "Two eggs and buttered toast";
-const NUDGE = "Good start. 16g of protein at breakfast is what keeps the 3pm dip away.";
+// GetStartedHeroDemoData in the app.
+const TYPED = "chicken wrap, an apple and a flat white";
+const MEAL = {
+  title: "Chicken wrap, an apple and a flat white",
+  calories: 487,
+  chips: [
+    { value: 42, unit: "g", label: "Carbs" },
+    { value: 26, unit: "g", label: "Protein" },
+    { value: 19, unit: "g", label: "Fat" },
+  ],
+  items: [
+    { name: "Chicken wrap", calories: 385 },
+    { name: "Apple", calories: 52 },
+    { name: "Flat white", calories: 50 },
+  ],
+  confidence: 78,
+  notes:
+    "Assumed a standard café chicken wrap (~280g). One medium apple (~182g). Regular flat white with whole milk (~240ml).",
+};
+const LOADING = [
+  "Searching...",
+  "Extracting items...",
+  "Checking sources...",
+  "Finalizing details...",
+];
+const SIGNALS = [
+  { label: "Energy", score: 68 },
+  { label: "Satiety", score: 52 },
+  { label: "Mood", score: 71 },
+];
+const INSIGHT = {
+  title: "Afternoon Energy looks soft",
+  body: "Your wrap and flat white are light on protein. A Greek yogurt now would help hold Satiety until dinner.",
+};
+const CHAT_QUESTION = "Why is my afternoon energy soft after this lunch?";
+const CHAT_REPLY = [
+  "Your wrap and flat white are light on protein, which can leave Energy dipping mid-afternoon.",
+  "A Greek yogurt now adds ~15g protein and helps hold Satiety until dinner.",
+];
 const CLOSING = ["The", "nutritionist", "that", "notices."];
 
-const ITEMS = [
-  { name: "2 boiled eggs", kcal: 143 },
-  { name: "Buttered wholemeal toast", kcal: 130 },
-];
-const TOTAL_KCAL = 273;
-const MACROS = [
-  { name: "Protein", grams: 16, share: 0.62 },
-  { name: "Carbs", grams: 15, share: 0.4 },
-  { name: "Fat", grams: 16, share: 0.55 },
-];
-const SCORES = [
-  { name: "Energy", score: 78, color: "var(--color-energy)" },
-  { name: "Satiety", score: 82, color: "var(--color-satiety)" },
-  { name: "Mood", score: 74, color: "var(--color-mood)" },
-];
+/** The app's ring colours (ScoreRing.ringColorFor). */
+const ringColor = (score: number) =>
+  score >= 70 ? "#40e300" : score >= 40 ? "#ffb800" : "#ff644f";
 
 /** Step response of a spring with a very small overshoot, 0 before it starts. */
-function spring(t: number, period = 0.55, damping = 0.82) {
+function spring(t: number, period = 0.55, damping = 0.8) {
   if (t <= 0) return 0;
   const w = (2 * Math.PI) / period;
   const wd = w * Math.sqrt(1 - damping * damping);
-  return 1 - Math.exp(-damping * w * t) * (Math.cos(wd * t) + ((damping * w) / wd) * Math.sin(wd * t));
+  return (
+    1 -
+    Math.exp(-damping * w * t) *
+      (Math.cos(wd * t) + ((damping * w) / wd) * Math.sin(wd * t))
+  );
 }
 
 /** A value that springs to each new target at its time: [time, value][]. */
 function track(keys: [number, number][], t: number, period?: number) {
   let v = keys[0][1];
-  for (let i = 1; i < keys.length; i++) v += (keys[i][1] - keys[i - 1][1]) * spring(t - keys[i][0], period);
+  for (let i = 1; i < keys.length; i++)
+    v += (keys[i][1] - keys[i - 1][1]) * spring(t - keys[i][0], period);
   return v;
 }
 
@@ -62,173 +100,308 @@ const clamp01 = (x: number) => Math.min(1, Math.max(0, x));
 const ease = (x: number) => 1 - Math.pow(1 - clamp01(x), 3);
 
 /** 0 to 1 over a window, in at `a` and out at `b`, with short soft edges. */
-function windowed(t: number, a: number, b: number, edge = 0.28) {
+function windowed(t: number, a: number, b: number, edge = 0.25) {
   return clamp01((t - a) / edge) * (1 - clamp01((t - b) / (edge * 0.8)));
 }
 
-// The shape's states: [time, x centre, y centre, width, height, radius].
-const SHAPE: [number, number, number, number, number, number][] = [
-  [0, 400, 400, 600, 84, 42], // the message box
-  [3.25, 500, 210, 420, 72, 26], // the sent message
-  [4.25, 400, 430, 560, 430, 36], // the logged meal
-  [7.7, 400, 420, 600, 220, 110], // the three rings
-  [10.2, 380, 400, 600, 230, 32], // the nutritionist's reply
-  [14.2, 400, 400, 600, 84, 42], // back to the message box, under the dark
+// The card's states: [time, centre y, height, grey (the chat sheet) 0..1].
+const SHAPE: [number, number, number, number][] = [
+  [0, 191, 142, 0], // Describe your meal
+  [2.8, 215, 190, 0], // ... with the loading pill
+  [4.7, 200, 352, 0], // the logged meal
+  [8.6, 200, 118, 0], // Energy, Satiety, Mood
+  [10.8, 200, 136, 0], // the insight
+  [13.1, 225, 330, 1], // the conversation
+  [17.6, 191, 142, 0], // back to the sheet, under the dark
 ];
 
-function shapeAt(t: number) {
-  const keys = (i: number) => SHAPE.map((s) => [s[0], s[i]] as [number, number]);
-  return {
-    x: track(keys(1), t),
-    y: track(keys(2), t),
-    w: track(keys(3), t),
-    h: track(keys(4), t),
-    r: Math.max(0, track(keys(5), t)),
-  };
+/** One of the app's icon font glyphs. */
+function Icon({
+  name,
+  size,
+  className,
+}: {
+  name: FilmIconName;
+  size: number;
+  className?: string;
+}) {
+  return (
+    <svg
+      viewBox="0 0 1000 1000"
+      width={size}
+      height={size}
+      className={className}
+      aria-hidden
+    >
+      <path d={FILM_ICONS[name]} fill="currentColor" />
+    </svg>
+  );
 }
 
-function layer(el: HTMLElement | null, opacity: number, lift = 14) {
-  if (!el) return;
-  el.style.opacity = opacity.toFixed(3);
-  el.style.filter = opacity < 0.999 ? `blur(${((1 - opacity) * 8).toFixed(2)}px)` : "";
-  el.style.translate = `0 ${((1 - opacity) * lift).toFixed(1)}px`;
-  el.style.visibility = opacity <= 0.001 ? "hidden" : "";
+function ArrowUp({ size }: { size: number }) {
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden>
+      <path
+        d="M12 19V5M5.5 11.5 12 5l6.5 6.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+/** The composer: a grey field, then microphone and camera tiles that become a send button. */
+function Composer({
+  hint,
+  size,
+  field,
+}: {
+  hint: string;
+  size: number;
+  field?: ReactNode;
+}) {
+  const tile = { width: size, height: size } as CSSProperties;
+  return (
+    <div className="hf-composer" style={{ height: size }}>
+      <div className="hf-composer__field">
+        {field ?? <span className="hf-hint">{hint}</span>}
+      </div>
+      <span className="hf-tile hf-tile--media" style={tile}>
+        <Icon name="microphone" size={size * 0.4} />
+      </span>
+      <span className="hf-tile hf-tile--media" style={tile}>
+        <Icon name="camera" size={size * 0.4} />
+      </span>
+    </div>
+  );
 }
 
 export default function HowItWorksFilm({ label }: { label: string }) {
   const boxRef = useRef<HTMLDivElement>(null);
-  const refs = useRef<Record<string, HTMLElement | null>>({});
-  const set = (key: string) => (el: HTMLElement | null) => {
+  const refs = useRef<Record<string, HTMLElement | SVGElement | null>>({});
+  const written = useRef(new Map<string, string>());
+  const set = (key: string) => (el: HTMLElement | SVGElement | null) => {
     refs.current[key] = el;
   };
-  const [playing, setPlaying] = useState(false);
-  const [userPaused, setUserPaused] = useState(false);
+  const [inView, setInView] = useState(false);
   const [allowed, setAllowed] = useState(false);
+  const [userState, setUserState] = useState<"auto" | "paused" | "playing">(
+    "auto",
+  );
   const clock = useRef({ t: 6.6, last: 0, tracked: false });
 
-  const seek = (t: number) => {
-    const r = refs.current;
-    const s = shapeAt(t);
-
-    // Camera: pushed in on the message box, pulls back once it's sent.
-    const zoom = track([[0, 1.14], [3.2, 1], [7.7, 1.04], [10.2, 1], [14.45, 1.14]], t, 0.9);
-    if (r.camera) r.camera.style.transform = `scale(${zoom.toFixed(4)})`;
-
-    if (r.shape) {
-      r.shape.style.width = `${s.w.toFixed(1)}px`;
-      r.shape.style.height = `${s.h.toFixed(1)}px`;
-      r.shape.style.transform = `translate(${(s.x - s.w / 2).toFixed(1)}px, ${(s.y - s.h / 2).toFixed(1)}px)`;
-      r.shape.style.borderRadius = `${s.r.toFixed(1)}px`;
-    }
-
-    // The glow round the message box while it waits.
-    const glow = windowed(t, -1, 3.1, 0.3) + windowed(t, 14.5, 99, 0.4);
-    if (r.glow) {
-      r.glow.style.opacity = (glow * 0.9).toFixed(3);
-      // The colours turn round the box; the box itself stays put.
-      r.glow.style.background = `conic-gradient(from ${(t * 60).toFixed(1)}deg at 50% 50%, #809ff9, #d093d9, #f38c61, #f5cc77, #809ff9)`;
-    }
-
-    // Scene 1: typing.
-    const typed = Math.floor(clamp01((t - 0.6) / 2.1) * TYPED.length);
-    if (r.typed) r.typed.textContent = TYPED.slice(0, typed);
-    if (r.caret) r.caret.style.opacity = t < 3.1 && Math.floor(t * 2.4) % 2 === 0 ? "1" : "0";
-    layer(r.composer, windowed(t, -1, 3.15, 0.2) + windowed(t, 14.45, 99, 0.25), 0);
-    if (r.send) {
-      const press = 1 - 0.14 * windowed(t, 2.95, 3.15, 0.08);
-      r.send.style.scale = press.toFixed(3);
-    }
-    const ripple = clamp01((t - 3.1) / 0.6);
-    if (r.ripple) {
-      r.ripple.style.opacity = ripple > 0 && ripple < 1 ? (0.5 * (1 - ripple)).toFixed(3) : "0";
-      r.ripple.style.scale = (0.2 + ease(ripple) * 3).toFixed(3);
-    }
-
-    // Scene 2: the sent message.
-    layer(r.sent, windowed(t, 3.35, 4.2, 0.22));
-
-    // Scene 3: the logged meal.
-    layer(r.meal, windowed(t, 4.4, 7.65));
-    ITEMS.forEach((_, i) => layer(r[`item${i}`], windowed(t, 4.75 + i * 0.16, 99), 10));
-    const kcal = Math.round(TOTAL_KCAL * ease((t - 5.1) / 1.1));
-    if (r.kcal) r.kcal.textContent = String(Math.max(0, kcal));
-    MACROS.forEach((m, i) => {
-      const bar = r[`bar${i}`];
-      if (bar) bar.style.scale = `${(m.share * ease((t - 5.4 - i * 0.12) / 1)).toFixed(3)} 1`;
-    });
-
-    // Scene 4: the rings.
-    layer(r.rings, windowed(t, 7.85, 10.1));
-    SCORES.forEach((s2, i) => {
-      const p = ease((t - 8.1 - i * 0.18) / 1.3);
-      const arc = r[`arc${i}`];
-      if (arc) arc.style.strokeDashoffset = (100 - s2.score * p).toFixed(2);
-      const n = r[`score${i}`];
-      if (n) n.textContent = String(Math.round(s2.score * p));
-    });
-
-    // Scene 5: the nutritionist's reply, word by word.
-    layer(r.nudge, windowed(t, 10.3, 12.6));
-    const words = NUDGE.split(" ");
-    const shown = Math.floor(clamp01((t - 10.5) / 1.3) * words.length);
-    words.forEach((_, i) => {
-      const w = r[`nw${i}`];
-      if (w) w.style.opacity = i < shown ? "1" : "0";
-    });
-
-    // Scene 6: dark floods out from the reply, the closing line rises on it,
-    // then the dark closes in on the message box and the loop starts again.
-    if (r.flood) {
-      const radius = 1150 * ease((t - 12.6) / 0.6) * (1 - ease((t - 14.1) / 0.5));
-      r.flood.style.clipPath = `circle(${radius.toFixed(1)}px at 400px 400px)`;
-    }
-
-    // The closing line, white on the dark.
-    layer(r.closing, windowed(t, 13.0, 14.0, 0.2), 0);
-    CLOSING.forEach((_, i) => {
-      const w = r[`cw${i}`];
-      if (w) w.style.translate = `0 ${(110 * (1 - ease((t - 13.05 - i * 0.09) / 0.6))).toFixed(1)}%`;
-    });
-    if (r.underline) r.underline.style.strokeDashoffset = (1 - ease((t - 13.6) / 0.6)).toFixed(3);
+  /** Sets a style (or "text") only when it changed since the last frame. */
+  const put = (key: string, prop: string, value: string) => {
+    const el = refs.current[key];
+    if (!el) return;
+    const id = `${key}.${prop}`;
+    if (written.current.get(id) === value) return;
+    written.current.set(id, value);
+    if (prop === "text") el.textContent = value;
+    else el.style.setProperty(prop, value);
   };
 
-  // Scale the 800 px stage to the box.
+  /** Fades a layer in or out with a little rise and blur. */
+  const layer = (key: string, opacity: number, lift = 8) => {
+    const o = Math.round(opacity * 100) / 100;
+    put(key, "opacity", String(o));
+    put(key, "visibility", o <= 0 ? "hidden" : "visible");
+    put(key, "filter", o < 1 ? `blur(${((1 - o) * 4).toFixed(1)}px)` : "none");
+    put(key, "translate", o < 1 ? `0 ${((1 - o) * lift).toFixed(1)}px` : "0 0");
+  };
+
+  /** Grows a grid row from 0 to its height (bubbles arriving in the chat). */
+  const grow = (key: string, p: number) => {
+    const v = Math.round(clamp01(p) * 100) / 100;
+    put(key, "grid-template-rows", `${v}fr`);
+    put(key, "opacity", String(v));
+  };
+
+  const seek = (t: number) => {
+    const keys = (i: number) =>
+      SHAPE.map((s) => [s[0], s[i]] as [number, number]);
+    const cy = track(keys(1), t);
+    const h = track(keys(2), t);
+    const grey = clamp01(track(keys(3), t, 0.4));
+
+    // Camera: pushed in on the sheet while typing, eases back for the cards.
+    const zoom = track(
+      [
+        [0, 1.12],
+        [2.8, 1.04],
+        [4.7, 1],
+        [8.6, 1.08],
+        [10.8, 1.05],
+        [13.1, 1],
+        [17.6, 1.12],
+      ],
+      t,
+      0.9,
+    );
+    put("camera", "transform", `scale(${zoom.toFixed(3)})`);
+
+    put("shape", "height", `${h.toFixed(1)}px`);
+    put("shape", "transform", `translateY(${(cy - h / 2).toFixed(1)}px)`);
+    const shade = Math.round(255 - grey * (255 - 244));
+    put(
+      "shape",
+      "background-color",
+      `rgb(${shade} ${shade} ${Math.round(255 - grey * (255 - 245))})`,
+    );
+
+    // 1. Describe your meal: typing, send, then the loading pill and glow.
+    layer("log", windowed(t, -1, 4.55, 0.2) + windowed(t, 17.9, 99, 0.2), 0);
+    const typed = TYPED.slice(
+      0,
+      Math.floor(clamp01((t - 0.5) / 1.8) * TYPED.length),
+    );
+    put("typed", "text", typed);
+    put("hint", "display", typed ? "none" : "inline");
+    put(
+      "caret",
+      "opacity",
+      t < 2.7 && Math.floor(t * 2.4) % 2 === 0 ? "1" : "0",
+    );
+    const sending = typed.length > 0;
+    put("logComposer", "--hf-send", sending ? "1" : "0");
+    put("send", "scale", (1 - 0.12 * windowed(t, 2.55, 2.8, 0.06)).toFixed(3));
+    const loading = windowed(t, 2.8, 4.5, 0.2);
+    put("glow", "opacity", loading.toFixed(2));
+    if (loading > 0)
+      put("glow", "--beam-angle", `${((t * 220) % 360).toFixed(0)}deg`);
+    layer("pill", loading, 6);
+    const stage = Math.min(
+      LOADING.length - 1,
+      Math.max(0, Math.floor((t - 2.8) / 0.42)),
+    );
+    put("pillText", "text", LOADING[stage]);
+
+    // 2. The logged meal.
+    layer("meal", windowed(t, 4.85, 8.45));
+    put(
+      "calories",
+      "text",
+      Math.round(MEAL.calories * ease((t - 5.0) / 1)).toLocaleString("en-GB"),
+    );
+    MEAL.chips.forEach((c, i) =>
+      put(
+        `chip${i}`,
+        "text",
+        `${Math.round(c.value * ease((t - 5.05 - i * 0.08) / 1))}${c.unit}`,
+      ),
+    );
+    MEAL.items.forEach((_, i) =>
+      layer(`item${i}`, windowed(t, 5.2 + i * 0.12, 99, 0.3), 6),
+    );
+    const gauge = ease((t - 5.6) / 1.1);
+    put(
+      "gaugeArc",
+      "stroke-dashoffset",
+      (1 - (MEAL.confidence / 100) * gauge).toFixed(3),
+    );
+    put("gaugeText", "text", String(Math.round(MEAL.confidence * gauge)));
+
+    // 3. Energy, Satiety and Mood.
+    layer("signals", windowed(t, 8.75, 10.65));
+    SIGNALS.forEach((s, i) => {
+      const p = ease((t - 9.0 - i * 0.06) / 1.1);
+      put(
+        `ring${i}`,
+        "stroke-dashoffset",
+        (1 - (s.score / 100) * p).toFixed(3),
+      );
+    });
+
+    // 4. The insight, and a tap on its chip.
+    layer("insight", windowed(t, 10.95, 12.95));
+    put(
+      "chip",
+      "scale",
+      (1 - 0.06 * windowed(t, 12.35, 12.6, 0.08)).toFixed(3),
+    );
+
+    // 5. The conversation: the question, then the reply one bubble at a time.
+    layer("chat", windowed(t, 13.25, 16.35), 16);
+    grow("q", (t - 13.4) / 0.3);
+    put(
+      "dots",
+      "display",
+      (t > 13.8 && t < 14.6) || (t > 15.0 && t < 15.7) ? "flex" : "none",
+    );
+    grow("a0", (t - 14.6) / 0.25);
+    grow("a1", (t - 15.7) / 0.25);
+
+    // 6. The dark floods out from the middle, the closing line rises on it,
+    //    then it closes on the sheet and the loop starts again.
+    const radius = 300 * ease((t - 16.35) / 0.6) * (1 - ease((t - 17.9) / 0.5));
+    put("flood", "clip-path", `circle(${radius.toFixed(1)}px at 200px 200px)`);
+    layer("closing", windowed(t, 16.6, 17.85, 0.2), 0);
+    CLOSING.forEach((_, i) =>
+      put(
+        `cw${i}`,
+        "translate",
+        `0 ${(110 * (1 - ease((t - 16.7 - i * 0.09) / 0.6))).toFixed(1)}%`,
+      ),
+    );
+    put(
+      "underline",
+      "stroke-dashoffset",
+      (1 - ease((t - 17.25) / 0.5)).toFixed(3),
+    );
+  };
+
+  // Scale the 400 pt stage to the box.
   useEffect(() => {
     const box = boxRef.current;
     if (!box) return;
-    const fit = () => box.style.setProperty("--film-scale", String(box.clientWidth / STAGE));
+    const fit = () =>
+      box.style.setProperty("--film-scale", String(box.clientWidth / STAGE));
     fit();
     const observer = new ResizeObserver(fit);
     observer.observe(box);
     return () => observer.disconnect();
   }, []);
 
-  // Plays while on screen, unless motion is reduced or turned off, or paused.
+  // Plays while on screen: on its own unless motion is reduced or turned off,
+  // otherwise once Play is pressed. Paused always wins.
   useEffect(() => {
     const box = boxRef.current;
     if (!box) return;
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const optedOut = new URLSearchParams(window.location.search).get("motion") === "off";
+    const reduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    const optedOut =
+      new URLSearchParams(window.location.search).get("motion") === "off";
     setAllowed(!reduced && !optedOut);
     seek(clock.current.t);
-    if (reduced || optedOut) return;
-    const observer = new IntersectionObserver(([entry]) => setPlaying(entry.isIntersecting), { threshold: 0.35 });
+    const observer = new IntersectionObserver(
+      ([entry]) => setInView(entry.isIntersecting),
+      { threshold: 0.35 },
+    );
     observer.observe(box);
     return () => observer.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const running = playing && !userPaused;
+  const running =
+    inView && (userState === "playing" || (userState === "auto" && allowed));
   useEffect(() => {
     if (!running) return;
     if (!clock.current.tracked) {
       clock.current.tracked = true;
-      trackVideoPlayed("how-it-works-film", allowed ? "auto" : "button");
+      trackVideoPlayed(
+        "how-it-works-film",
+        userState === "playing" ? "button" : "auto",
+      );
     }
     let frame = 0;
     clock.current.last = performance.now();
     const tick = (now: number) => {
       const c = clock.current;
-      c.t = (c.t + (now - c.last) / 1000) % LOOP;
+      c.t = (c.t + Math.min(0.1, (now - c.last) / 1000)) % LOOP;
       c.last = now;
       seek(c.t);
       frame = requestAnimationFrame(tick);
@@ -238,135 +411,227 @@ export default function HowItWorksFilm({ label }: { label: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [running]);
 
-  const toggle = () => {
-    if (running) {
-      setUserPaused(true);
-    } else {
-      setUserPaused(false);
-      setPlaying(true);
-    }
-  };
+  const showsPause =
+    userState === "playing" || (userState === "auto" && allowed);
 
   return (
-    <div ref={boxRef} className="how-film" role="img" aria-label={label} data-reveal="rise">
-      <div className="how-film__stage" aria-hidden>
-        <div ref={set("camera")} className="how-film__camera">
-          <div ref={set("glow")} className="how-film__glow" />
+    <div ref={boxRef} className="how-film" data-reveal="rise">
+      <div className="how-film__stage" role="img" aria-label={label}>
+        <div ref={set("camera")} className="how-film__camera" aria-hidden>
           <div ref={set("shape")} className="how-film__shape" />
-          <div ref={set("ripple")} className="how-film__ripple" />
-          <div ref={set("flood")} className="how-film__flood" />
 
-          {/* 1. The message box. */}
-          <div ref={set("composer")} className="how-film__composer">
-            <span className="how-film__typed">
-              <span ref={set("typed")} />
-              <span ref={set("caret")} className="how-film__caret" />
-            </span>
-            <span ref={set("send")} className="how-film__send">
-              <svg viewBox="0 0 24 24" width="26" height="26">
-                <path d="M12 19V5M5 12l7-7 7 7" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </span>
-          </div>
-
-          {/* 2. Sent. */}
-          <div ref={set("sent")} className="how-film__sent">
-            {TYPED}
-          </div>
-
-          {/* 3. The logged meal. */}
-          <div ref={set("meal")} className="how-film__meal">
-            <div className="how-film__meal-head">
-              <span className="font-display">Breakfast</span>
-              <span className="how-film__muted">Logged 8:05 AM</span>
-            </div>
-            {ITEMS.map((item, i) => (
-              <div key={item.name} ref={set(`item${i}`)} className="how-film__item">
-                <span>{item.name}</span>
-                <span className="how-film__muted">{item.kcal} kcal</span>
-              </div>
-            ))}
-            <div className="how-film__total">
-              <span ref={set("kcal")} className="font-display">
-                {TOTAL_KCAL}
-              </span>
-              <span className="how-film__muted">kcal</span>
-            </div>
-            <div className="how-film__macros">
-              {MACROS.map((m, i) => (
-                <div key={m.name} className="how-film__macro">
-                  <span className="how-film__muted">{m.name}</span>
-                  <span className="how-film__track">
-                    <span
-                      ref={set(`bar${i}`)}
-                      className="how-film__bar"
-                      style={{ scale: `${m.share} 1` } as CSSProperties}
-                    />
+          {/* 1. Describe your meal (HeroDemoLogPhase). */}
+          <div ref={set("log")} className="hf-layer hf-log">
+            <span className="hf-grabber" />
+            <p className="hf-sheet-title">Describe your meal</p>
+            <p className="hf-helper">
+              Amount, brand, and restaurant details help improve accuracy.{" "}
+              <u>Learn more</u>
+            </p>
+            <div ref={set("logComposer")} className="hf-log__composer">
+              <span ref={set("glow")} className="hf-glow" />
+              <Composer
+                hint="What did you eat?"
+                size={40}
+                field={
+                  <span className="hf-typing">
+                    <span ref={set("typed")} />
+                    <span ref={set("caret")} className="hf-caret" />
+                    <span ref={set("hint")} className="hf-hint">
+                      What did you eat?
+                    </span>
+                    <span className="hf-typing__end" />
                   </span>
-                  <span>{m.grams}g</span>
+                }
+              />
+              <span ref={set("send")} className="hf-tile hf-tile--send">
+                <ArrowUp size={18} />
+              </span>
+            </div>
+            <span ref={set("pill")} className="hf-pill">
+              <Icon name="sparkles" size={12} />
+              <span ref={set("pillText")}>{LOADING[0]}</span>
+            </span>
+          </div>
+
+          {/* 2. The logged meal (HeroDemoMealPhase). */}
+          <div ref={set("meal")} className="hf-layer hf-meal">
+            <p className="hf-meal__title">{MEAL.title}</p>
+            <div className="hf-chips">
+              <span className="hf-chip">
+                <b ref={set("calories")}>{MEAL.calories}</b>
+                <small>Calories</small>
+              </span>
+              {MEAL.chips.map((c, i) => (
+                <span key={c.label} className="hf-chip">
+                  <b ref={set(`chip${i}`)}>
+                    {c.value}
+                    {c.unit}
+                  </b>
+                  <small>{c.label}</small>
+                </span>
+              ))}
+            </div>
+            <div className="hf-items">
+              {MEAL.items.map((item, i) => (
+                <div key={item.name} ref={set(`item${i}`)} className="hf-item">
+                  <span>{item.name}</span>
+                  <span className="hf-cal">
+                    <Icon name="fire" size={13} />
+                    {item.calories} cal
+                  </span>
                 </div>
               ))}
             </div>
+            <div className="hf-confidence">
+              <span className="hf-gauge">
+                <svg viewBox="0 0 88 46" width="88" height="46" aria-hidden>
+                  <path
+                    d="M6 42 A38 38 0 0 1 82 42"
+                    fill="none"
+                    stroke="#e9e9ea"
+                    strokeWidth="8"
+                    strokeLinecap="round"
+                  />
+                  <path
+                    ref={set("gaugeArc")}
+                    d="M6 42 A38 38 0 0 1 82 42"
+                    fill="none"
+                    stroke="#258400"
+                    strokeWidth="8"
+                    strokeLinecap="round"
+                    pathLength={1}
+                    strokeDasharray="1"
+                    strokeDashoffset={1 - MEAL.confidence / 100}
+                  />
+                </svg>
+                <b ref={set("gaugeText")}>{MEAL.confidence}</b>
+              </span>
+              <span>
+                <b className="hf-confidence__level">High</b>
+                <small>Confidence Level</small>
+              </span>
+            </div>
+            <p className="hf-notes">{MEAL.notes}</p>
           </div>
 
-          {/* 4. How it will make you feel. */}
-          <div ref={set("rings")} className="how-film__rings">
-            {SCORES.map((s, i) => (
-              <div key={s.name} className="how-film__ring">
-                <span className="how-film__ring-dial">
-                  <svg viewBox="0 0 56 56">
-                    <circle cx="28" cy="28" r="23" fill="none" stroke="var(--color-line)" strokeWidth="5" />
+          {/* 3. Energy, Satiety and Mood (HeroDemoSignalsPhase). */}
+          <div ref={set("signals")} className="hf-layer hf-signals">
+            {SIGNALS.map((s, i) => (
+              <div key={s.label} className="hf-signal">
+                <span className="hf-ring">
+                  <svg viewBox="0 0 66 66" width="66" height="66" aria-hidden>
                     <circle
-                      ref={set(`arc${i}`) as (el: SVGCircleElement | null) => void}
-                      cx="28"
-                      cy="28"
-                      r="23"
+                      cx="33"
+                      cy="33"
+                      r="30.5"
                       fill="none"
-                      stroke={s.color}
+                      stroke={ringColor(s.score)}
+                      strokeOpacity="0.15"
+                      strokeWidth="5"
+                    />
+                    <circle
+                      ref={set(`ring${i}`)}
+                      cx="33"
+                      cy="33"
+                      r="30.5"
+                      fill="none"
+                      stroke={ringColor(s.score)}
                       strokeWidth="5"
                       strokeLinecap="round"
-                      pathLength={100}
-                      strokeDasharray="100"
-                      strokeDashoffset={100 - s.score}
+                      pathLength={1}
+                      strokeDasharray="1"
+                      strokeDashoffset={1 - s.score / 100}
+                      transform="rotate(-90 33 33)"
                     />
                   </svg>
-                  <span ref={set(`score${i}`)} className="font-display">
-                    {s.score}
-                  </span>
+                  <b>{s.score}</b>
                 </span>
-                <span>{s.name}</span>
+                <span className="hf-signal__label">
+                  {s.label}
+                  <Icon name="chevronRight" size={12} />
+                </span>
               </div>
             ))}
           </div>
 
-          {/* 5. The nutritionist speaks up. */}
-          <div ref={set("nudge")} className="how-film__nudge">
-            <span className="how-film__from">
-              <span className="how-film__dot" />
-              Your nutritionist
+          {/* 4. The insight (HeroDemoInsightPhase). */}
+          <div ref={set("insight")} className="hf-layer hf-insight">
+            <div className="hf-insight__card">
+              <p className="hf-insight__title">
+                <Icon name="sparkles" size={18} />
+                {INSIGHT.title}
+              </p>
+              <p className="hf-insight__body">{INSIGHT.body}</p>
+            </div>
+            <span ref={set("chip")} className="hf-action">
+              Explore this deeper
+              <Icon name="arrowRight" size={12} />
             </span>
-            <p>
-              {NUDGE.split(" ").map((word, i) => (
-                <span key={i} ref={set(`nw${i}`)} className="how-film__word">
-                  {word}{" "}
-                </span>
-              ))}
-            </p>
           </div>
 
-          {/* 6. The closing line. */}
-          <div ref={set("closing")} className="how-film__closing font-display">
+          {/* 5. The conversation (HeroDemoChatPhase). */}
+          <div ref={set("chat")} className="hf-layer hf-chat">
+            <span className="hf-grabber" />
+            <p className="hf-chat__head">
+              <svg viewBox="0 0 256 256" width="20" height="20" aria-hidden>
+                <path
+                  fillRule="evenodd"
+                  clipRule="evenodd"
+                  d={APP_ICON}
+                  fill="currentColor"
+                />
+              </svg>
+              Nutritionist
+            </p>
+            <div className="hf-chat__messages">
+              <div ref={set("q")} className="hf-grow hf-grow--user">
+                <div>
+                  <p className="hf-bubble hf-bubble--user">{CHAT_QUESTION}</p>
+                </div>
+              </div>
+              {CHAT_REPLY.map((text, i) => (
+                <div key={i} ref={set(`a${i}`)} className="hf-grow">
+                  <div>
+                    <p className="hf-bubble">{text}</p>
+                  </div>
+                </div>
+              ))}
+              <span ref={set("dots")} className="hf-dots">
+                <i />
+                <i />
+                <i />
+              </span>
+            </div>
+            <div className="hf-chat__composer">
+              <Composer hint="Ask about your nutrition..." size={36} />
+            </div>
+          </div>
+
+          {/* 6. The closing line, white on the dark. */}
+          <div ref={set("flood")} className="how-film__flood" />
+          <div ref={set("closing")} className="hf-layer hf-closing">
             {CLOSING.map((word, i) => (
-              <span key={word} className="relative inline-block">
-                <span className="how-film__mask">
-                  <span ref={set(`cw${i}`)} className="how-film__closing-word">
+              <span
+                key={word}
+                className={
+                  i === CLOSING.length - 1 ? "relative inline-block" : undefined
+                }
+              >
+                <span className="hf-mask">
+                  <span ref={set(`cw${i}`)} className="hf-closing__word">
                     {word}
                   </span>
                 </span>
                 {i === CLOSING.length - 1 && (
-                  <svg viewBox="0 0 220 18" preserveAspectRatio="none" className="how-film__underline">
+                  <svg
+                    viewBox="0 0 220 18"
+                    preserveAspectRatio="none"
+                    className="hf-underline"
+                    aria-hidden
+                  >
                     <path
-                      ref={set("underline") as (el: SVGPathElement | null) => void}
+                      ref={set("underline")}
                       d="M3 12 C 50 4, 120 3, 217 9"
                       fill="none"
                       stroke="var(--color-accent)"
@@ -377,6 +642,7 @@ export default function HowItWorksFilm({ label }: { label: string }) {
                     />
                   </svg>
                 )}
+                {i < CLOSING.length - 1 && " "}
               </span>
             ))}
           </div>
@@ -385,17 +651,34 @@ export default function HowItWorksFilm({ label }: { label: string }) {
       <button
         type="button"
         className="loop-video__toggle"
-        aria-label={running ? "Pause animation" : "Play animation"}
-        onClick={toggle}
+        aria-label={showsPause ? "Pause animation" : "Play animation"}
+        onClick={() => setUserState(showsPause ? "paused" : "playing")}
       >
-        {running ? (
+        {showsPause ? (
           <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden>
-            <rect x="3" y="2" width="3.5" height="12" rx="1" fill="currentColor" />
-            <rect x="9.5" y="2" width="3.5" height="12" rx="1" fill="currentColor" />
+            <rect
+              x="3"
+              y="2"
+              width="3.5"
+              height="12"
+              rx="1"
+              fill="currentColor"
+            />
+            <rect
+              x="9.5"
+              y="2"
+              width="3.5"
+              height="12"
+              rx="1"
+              fill="currentColor"
+            />
           </svg>
         ) : (
           <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden>
-            <path d="M4 2.6v10.8a1 1 0 0 0 1.5.86l9-5.4a1 1 0 0 0 0-1.72l-9-5.4A1 1 0 0 0 4 2.6Z" fill="currentColor" />
+            <path
+              d="M4 2.6v10.8a1 1 0 0 0 1.5.86l9-5.4a1 1 0 0 0 0-1.72l-9-5.4A1 1 0 0 0 4 2.6Z"
+              fill="currentColor"
+            />
           </svg>
         )}
       </button>
