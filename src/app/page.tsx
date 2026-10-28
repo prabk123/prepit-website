@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import SectionViewTracker from "@/components/analytics/SectionViewTracker";
 import HomeHero from "@/components/home/HomeHero";
+import HowItWorksSection from "@/components/home/HowItWorksSection";
 import KnowsYouSection from "@/components/home/KnowsYouSection";
 import ObjectionsSection from "@/components/home/ObjectionsSection";
 import PlansBand from "@/components/home/PlansBand";
@@ -48,6 +49,7 @@ export default function Home() {
       <SectionViewTracker />
       <MotionLayer />
       <HomeHero />
+      <HowItWorksSection />
       <SpeaksUpBand />
       <KnowsYouSection />
       <SignalsSection />

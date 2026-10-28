@@ -18,9 +18,8 @@ type PricingCardProps = {
 export default function PricingCard({ title, price, priceNote, features, cta, finePrint, className }: PricingCardProps) {
   return (
     <article
-      data-reveal="rise"
       data-spotlight
-      className={`spotlight flex w-full max-w-[520px] flex-col gap-8 rounded-card border border-line border-t-4 border-t-accent bg-surface p-8 text-ink lg:p-12 ${className ?? ""}`}
+      className={`spotlight beam-border flex w-full max-w-[520px] flex-col gap-8 rounded-card border border-line border-t-4 border-t-accent bg-surface p-8 text-ink lg:p-12 ${className ?? ""}`}
     >
       <div className="flex flex-col gap-3">
         <h3 className="font-display text-title">{title}</h3>

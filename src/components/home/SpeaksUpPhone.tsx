@@ -166,6 +166,8 @@ export default function SpeaksUpPhone({
       className="flex w-full min-w-0 flex-col items-center gap-4 lg:gap-6"
       aria-labelledby={captionId}
       data-playing={playing || undefined}
+      // On the homepage the phone swings up into view (src/app/motion.css).
+      data-reveal={autoplay ? "phone" : undefined}
       style={{ "--speaks-up-autoplay": `${AUTOPLAY_MS}ms` } as CSSProperties}
     >
       <div

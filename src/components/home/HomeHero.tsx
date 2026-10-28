@@ -51,27 +51,24 @@ export default function HomeHero() {
             <h1 id="hero-heading" className="hero-words font-display text-hero text-ink text-balance">
               <SplitWords
                 text="The nutritionist that notices."
-                last={(word) => (
-                  <span className="relative inline-block">
-                    {word}
-                    {/* An orange stroke drawn under "notices." once the words are in. */}
-                    <svg
-                      aria-hidden
-                      viewBox="0 0 220 18"
-                      preserveAspectRatio="none"
-                      className="hero-underline absolute -bottom-[0.12em] left-0 h-[0.22em] w-[92%] text-accent"
-                    >
-                      <path
-                        d="M3 12 C 50 4, 120 3, 217 9"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="5"
-                        strokeLinecap="round"
-                        pathLength={1}
-                      />
-                    </svg>
-                  </span>
-                )}
+                lastAfter={
+                  // An orange stroke drawn under "notices." once the words are in.
+                  <svg
+                    aria-hidden
+                    viewBox="0 0 220 18"
+                    preserveAspectRatio="none"
+                    className="hero-underline absolute -bottom-[0.1em] left-0 h-[0.22em] w-[92%] text-accent"
+                  >
+                    <path
+                      d="M3 12 C 50 4, 120 3, 217 9"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="5"
+                      strokeLinecap="round"
+                      pathLength={1}
+                    />
+                  </svg>
+                }
               />
             </h1>
             <p className="hero-rise max-w-[44ch] text-lead text-ink-secondary text-pretty">
@@ -88,7 +85,7 @@ export default function HomeHero() {
           annotations={heroCafe.annotations}
           annotationsFromXl
           fadeEdges
-          className="mt-8 aspect-[4/5] max-h-[720px] w-full lg:mt-0 lg:aspect-[1376/768] lg:max-h-[1040px] lg:min-h-[600px]"
+          className="hero-settle mt-8 aspect-[4/5] max-h-[720px] w-full lg:mt-0 lg:aspect-[1376/768] lg:max-h-[1040px] lg:min-h-[600px]"
         />
       </div>
     </section>

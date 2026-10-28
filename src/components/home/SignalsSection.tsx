@@ -1,13 +1,15 @@
+import type { CSSProperties } from "react";
 import FeatureSplit from "@/components/ui/FeatureSplit";
 import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
 import TextLink from "@/components/ui/TextLink";
 import { lunchRings } from "@/content/lifestyle";
 
-const SIGNAL_DOTS = [
-  { name: "Energy", color: "var(--color-energy)" },
-  { name: "Satiety", color: "var(--color-satiety)" },
-  { name: "Mood", color: "var(--color-mood)" },
+// The scores on the Home screen in the photo beside them (PRE-282).
+const SIGNAL_SCORES = [
+  { name: "Energy", color: "var(--color-energy)", score: 84 },
+  { name: "Satiety", color: "var(--color-satiety)", score: 96 },
+  { name: "Mood", color: "var(--color-mood)", score: 87 },
 ];
 
 /**
@@ -22,7 +24,7 @@ export default function SignalsSection() {
         media={
           // The lunch photo's 4:5 crop around the phone (PRE-282): Home with
           // Energy 84, Satiety 96 and Mood 87 beside the meal behind them.
-          <picture data-reveal="rise">
+          <picture>
             {lunchRings.mobile.avif && (
               <source srcSet={lunchRings.mobile.avif} sizes="(min-width: 1024px) 460px, 100vw" type="image/avif" />
             )}
@@ -47,11 +49,35 @@ export default function SignalsSection() {
           title="Know how your food will make you feel."
           lead="Calories say what you ate. Energy, Satiety and Mood say whether you'll get the 3pm dip, stay full until dinner and feel steady tomorrow."
         />
-        <ul aria-label="The three scores" className="flex flex-wrap gap-x-6 gap-y-2">
-          {SIGNAL_DOTS.map((signal) => (
-            <li key={signal.name} className="flex items-center gap-2 text-small font-medium text-ink">
-              <span aria-hidden className="signal-pulse h-2.5 w-2.5 rounded-full" style={{ background: signal.color }} />
-              {signal.name}
+        {/* Each ring fills to the lunch's score as it comes into view, the
+            number counting up with it (website motion experiment). */}
+        <ul aria-label="The three scores for the lunch in the photo" className="flex flex-wrap gap-x-8 gap-y-4">
+          {SIGNAL_SCORES.map((signal, i) => (
+            <li
+              key={signal.name}
+              className="signal-ring flex items-center gap-3"
+              style={{ "--ring-color": signal.color, "--ring-score": signal.score, "--i": i } as CSSProperties}
+            >
+              <span className="relative grid h-14 w-14 place-items-center">
+                <svg aria-hidden viewBox="0 0 56 56" className="absolute inset-0 -rotate-90">
+                  <circle cx="28" cy="28" r="24" fill="none" stroke="var(--color-line)" strokeWidth="5" />
+                  <circle
+                    className="signal-ring__arc"
+                    cx="28"
+                    cy="28"
+                    r="24"
+                    fill="none"
+                    stroke={signal.color}
+                    strokeWidth="5"
+                    strokeLinecap="round"
+                    pathLength={100}
+                  />
+                </svg>
+                <span data-count={signal.score} className="font-display text-[18px] text-ink tabular-nums">
+                  {signal.score}
+                </span>
+              </span>
+              <span className="text-small font-medium text-ink">{signal.name}</span>
             </li>
           ))}
         </ul>

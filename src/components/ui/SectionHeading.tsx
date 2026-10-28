@@ -46,9 +46,7 @@ export default function SectionHeading({
   const centered = align === "center";
 
   return (
-    // Words blur in when the page's motion layer is on (src/app/motion.css).
     <div
-      data-reveal="words"
       className={`flex flex-col gap-5 ${centered ? "items-center text-center" : ""} ${className ?? ""}`}
     >
       {eyebrow && (
@@ -66,7 +64,7 @@ export default function SectionHeading({
       </Heading>
       {lead && (
         <p
-          className={`reveal-follow text-lead text-ink-secondary ${centered ? "max-w-[36ch]" : "max-w-[40ch]"} text-pretty`}
+          className={`text-lead text-ink-secondary ${centered ? "max-w-[36ch]" : "max-w-[40ch]"} text-pretty`}
         >
           {lead}
         </p>

@@ -1,5 +1,3 @@
-import type { CSSProperties } from "react";
-
 export type Point = {
   title: string;
   detail: string;
@@ -41,13 +39,8 @@ export default function PointList({
   if (layout === "columns") {
     return (
       <ul className={`grid gap-x-10 gap-y-8 ${columnClass[columns]} ${className ?? ""}`}>
-        {points.map((point, i) => (
-          <li
-            key={point.title}
-            data-reveal="rise"
-            style={{ "--i": i } as CSSProperties}
-            className="flex flex-col gap-2 border-t border-line pt-5"
-          >
+        {points.map((point) => (
+          <li key={point.title} className="flex flex-col gap-2 border-t border-line pt-5">
             <p className="flex items-start gap-3">
               <Dot color={point.accent} />
               <span

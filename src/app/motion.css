@@ -1,41 +1,82 @@
 /*
  * Homepage motion experiment, after React Bits (reactbits.dev) and the
- * Prompt Motion gallery: Blur Text on headlines, Animated Content on blocks,
- * Gradient Text on the hero eyebrow, Tilted Card on phones, Spotlight Card on
- * cards, Magnet on the App Store button and a scroll progress line.
+ * Prompt Motion gallery (prompt-motion.com).
  *
- * <MotionLayer> sets html[data-motion="on"] and marks [data-reveal] blocks
- * `data-revealed` as they scroll in. Nothing is hidden unless motion is on, so
- * the page reads the same without JavaScript, under reduced motion and with
- * ?motion=off. The hero plays on load in CSS alone, so it never waits for
- * the script.
+ * The rule: every block below the hero comes in as it scrolls into view, in
+ * reading order. Headlines rise word by word out of a mask line (Prompt
+ * Motion's "text rises from a mask line"); every other block rises 28px and
+ * sharpens from a light blur. Blocks that arrive together follow each other
+ * by --stagger-block. The hero plays the same moves on load, over the photo
+ * settling into place.
+ *
+ * On top of that rule, three set pieces: the speaks-up phone swings up from
+ * the table and its messages fly out of the chat; the Energy, Satiety and
+ * Mood rings fill as their numbers count up; a beam of light runs round the
+ * pricing card. Phones tilt towards the pointer, cards keep a soft light
+ * under it, and the App Store button leans towards it.
+ *
+ * <MotionLayer> sets html[data-motion="on"] and marks blocks `data-revealed`.
+ * Nothing is hidden unless motion is on, so the page reads the same without
+ * JavaScript, under reduced motion and with ?motion=off. The hero plays in
+ * CSS alone, so it never waits for the script.
  */
 
 @theme static {
+  /* A spring-like settle with no visible bounce. */
   --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
-  --duration-reveal: 900ms;
-  /* Gap between words in a headline, and between items in a list. */
-  --stagger-word: 55ms;
-  --stagger-item: 110ms;
+  /* A very small overshoot, for things that land (the phone, the messages). */
+  --ease-land: cubic-bezier(0.34, 1.32, 0.64, 1);
+  --duration-reveal: 1000ms;
+  --stagger-word: 60ms;
+  --stagger-block: 90ms;
+}
+
+@property --beam-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+/* Words sit in a clipping box. The box reaches a little below the baseline,
+   so descenders aren't cut. */
+.split-mask {
+  display: inline-block;
+  overflow: hidden;
+  padding-bottom: 0.14em;
+  margin-bottom: -0.14em;
+  vertical-align: top;
+}
+
+.split-word {
+  display: inline-block;
+}
+
+/* The signal rings rest at their score. */
+.signal-ring__arc {
+  stroke-dasharray: 100;
+  stroke-dashoffset: calc(100 - var(--ring-score, 0));
 }
 
 @media (prefers-reduced-motion: no-preference) {
   /* ---- Hero, on load ---------------------------------------------------- */
   html:not([data-motion="off"]) .hero-words .split-word {
-    display: inline-block;
-    animation: blur-in var(--duration-reveal) var(--ease-out-soft) both;
-    animation-delay: calc(120ms + var(--i, 0) * 70ms);
+    animation: mask-rise 1100ms var(--ease-out-soft) both;
+    animation-delay: calc(150ms + var(--i, 0) * 90ms);
   }
 
   html:not([data-motion="off"]) .hero-underline path {
     stroke-dasharray: 1;
     stroke-dashoffset: 1;
-    animation: draw-line 700ms var(--ease-out-soft) 750ms forwards;
+    animation: draw-line 800ms var(--ease-out-soft) 900ms forwards;
   }
 
   html:not([data-motion="off"]) .hero-rise {
     animation: rise-in var(--duration-reveal) var(--ease-out-soft) both;
-    animation-delay: var(--rise-delay, 450ms);
+    animation-delay: var(--rise-delay, 500ms);
+  }
+
+  html:not([data-motion="off"]) .hero-settle .annotated-photo__layer {
+    animation: photo-settle 1800ms var(--ease-out-soft) both;
   }
 
   html:not([data-motion="off"]) .gradient-drift {
@@ -43,106 +84,89 @@
     animation: gradient-drift 7s ease-in-out infinite alternate;
   }
 
-  /* ---- Scroll reveals --------------------------------------------------- */
+  /* ---- The rule: blocks come in as they scroll in ------------------------ */
   html[data-motion="on"] [data-reveal="words"] .split-word {
-    display: inline-block;
-    transition:
-      opacity 700ms var(--ease-out-soft),
-      filter 700ms var(--ease-out-soft),
-      translate 700ms var(--ease-out-soft);
-    transition-delay: calc(var(--i, 0) * var(--stagger-word));
-  }
-
-  html[data-motion="on"] [data-reveal="words"] .reveal-follow {
-    transition:
-      opacity 800ms var(--ease-out-soft) 250ms,
-      translate 800ms var(--ease-out-soft) 250ms;
+    transition: translate 1000ms var(--ease-out-soft);
+    transition-delay: calc(var(--order, 0) * var(--stagger-block) + var(--i, 0) * var(--stagger-word));
   }
 
   html[data-motion="on"] [data-reveal="words"]:not([data-revealed]) .split-word {
-    opacity: 0;
-    filter: blur(10px);
-    translate: 0 0.35em;
-  }
-
-  html[data-motion="on"] [data-reveal="words"]:not([data-revealed]) .reveal-follow {
-    opacity: 0;
-    translate: 0 16px;
+    translate: 0 110%;
   }
 
   html[data-motion="on"] [data-reveal="rise"] {
     transition:
-      opacity var(--duration-reveal) var(--ease-out-soft),
-      translate var(--duration-reveal) var(--ease-out-soft),
-      scale var(--duration-reveal) var(--ease-out-soft);
-    transition-delay: calc(var(--i, 0) * var(--stagger-item));
+      opacity 900ms var(--ease-out-soft),
+      translate 1000ms var(--ease-out-soft),
+      filter 900ms var(--ease-out-soft);
+    transition-delay: calc(var(--order, 0) * var(--stagger-block));
   }
 
   html[data-motion="on"] [data-reveal="rise"]:not([data-revealed]) {
     opacity: 0;
-    translate: 0 36px;
-    scale: 0.97;
+    translate: 0 28px;
+    filter: blur(6px);
   }
 
-  /* ---- Phones tilt towards the pointer ---------------------------------- */
-  @media (hover: hover) and (pointer: fine) {
-    html[data-motion="on"] .device-frame__shell {
-      transform: perspective(1400px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
-      transition: transform 600ms var(--ease-out-soft);
-    }
-
-    html[data-motion="on"] .magnet {
-      translate: var(--magnet-x, 0) var(--magnet-y, 0);
-      transition:
-        translate 350ms var(--ease-out-soft),
-        opacity 150ms ease;
-    }
+  /* ---- Set piece: the speaks-up phone ------------------------------------ */
+  /* It lies back as if on the table, then swings up to face you; once it
+     lands, the message flies out of the chat, then the reply, then the tag
+     saying why it was sent. */
+  html[data-motion="on"] [data-reveal="phone"] .device-frame {
+    transform-origin: 50% 100%;
+    transition:
+      transform 1400ms var(--ease-land),
+      opacity 700ms var(--ease-out-soft);
   }
 
-  /* ---- Soft light behind phones breathes -------------------------------- */
-  html[data-motion="on"] .glow-warm {
-    animation: glow-breathe 9s ease-in-out infinite alternate;
+  html[data-motion="on"] [data-reveal="phone"]:not([data-revealed]) .device-frame {
+    opacity: 0;
+    transform: perspective(1200px) translateY(80px) rotateX(38deg) scale(0.9);
   }
 
-  /* ---- Signal dots pulse once their section is in ----------------------- */
-  html[data-motion="on"] .signal-pulse {
-    position: relative;
+  html[data-motion="on"] [data-reveal="phone"]:not([data-revealed]) .speaks-up-phone__pop * {
+    opacity: 0 !important;
+    transform: none !important;
   }
 
-  html[data-motion="on"] .signal-pulse::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    background: inherit;
-    animation: dot-pulse 2.4s var(--ease-out-soft) infinite;
+  html[data-motion="on"] [data-reveal="phone"][data-revealed] .speaks-up-phone__cutout {
+    transition:
+      transform 900ms var(--ease-land) var(--pop-delay, 120ms),
+      opacity 300ms ease var(--pop-delay, 120ms);
   }
 
-  html[data-motion="on"] li:nth-child(2) > .signal-pulse::after {
-    animation-delay: 0.8s;
+  html[data-motion="on"] [data-reveal="phone"][data-revealed] .speaks-up-phone__cutout--message {
+    --pop-delay: 900ms;
   }
 
-  html[data-motion="on"] li:nth-child(3) > .signal-pulse::after {
-    animation-delay: 1.6s;
+  html[data-motion="on"] [data-reveal="phone"][data-revealed] .speaks-up-phone__cutout--highlight {
+    --pop-delay: 1250ms;
   }
 
-  /* ---- "It speaks up": messages arrive one after another --------------- */
-  /* Each arrival nudges the phone, the message lifts out, then the reply,
-     then the tag saying why it was sent. */
-  html[data-motion="on"] .speaks-up-phone[data-buzz="a"] .device-frame {
+  html[data-motion="on"] [data-reveal="phone"][data-revealed] .speaks-up-phone__reason {
+    transition: opacity 400ms ease 1500ms;
+  }
+
+  /* Later messages arrive faster: the phone has already landed. */
+  html[data-motion="on"] .speaks-up-phone[data-buzz] .speaks-up-phone__cutout--message {
+    --pop-delay: 200ms;
+  }
+
+  html[data-motion="on"] .speaks-up-phone[data-buzz] .speaks-up-phone__cutout--highlight {
+    --pop-delay: 520ms;
+  }
+
+  html[data-motion="on"] .speaks-up-phone[data-buzz] .speaks-up-phone__reason {
+    transition-delay: 800ms;
+  }
+
+  /* Each new message nudges the phone. */
+  html[data-motion="on"] .speaks-up-phone[data-buzz="a"] .device-frame__shell {
     animation: phone-buzz-a 520ms var(--ease-out-soft);
   }
 
-  html[data-motion="on"] .speaks-up-phone[data-buzz="b"] .device-frame {
+  html[data-motion="on"] .speaks-up-phone[data-buzz="b"] .device-frame__shell {
     animation: phone-buzz-b 520ms var(--ease-out-soft);
-  }
-
-  html[data-motion="on"] .speaks-up-phone__pop[data-active] .speaks-up-phone__cutout--highlight {
-    transition-delay: 520ms;
-  }
-
-  html[data-motion="on"] .speaks-up-phone__pop[data-active] .speaks-up-phone__reason {
-    transition-delay: 820ms;
   }
 
   /* A line filling under the current message's button while it plays. */
@@ -156,7 +180,83 @@
     animation: grow-x var(--speaks-up-autoplay, 5s) linear both;
   }
 
-  /* ---- Scroll progress -------------------------------------------------- */
+  /* ---- Set piece: the signal rings fill --------------------------------- */
+  html[data-motion="on"] .signal-ring__arc {
+    transition: stroke-dashoffset 1400ms var(--ease-out-soft);
+    transition-delay: calc(200ms + var(--i, 0) * 160ms);
+  }
+
+  html[data-motion="on"] [data-reveal]:not([data-revealed]) .signal-ring__arc {
+    stroke-dashoffset: 100;
+  }
+
+  /* ---- Set piece: a beam of light runs round the pricing card ----------- */
+  html[data-motion="on"] .beam-border::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1.5px;
+    pointer-events: none;
+    background: conic-gradient(
+      from var(--beam-angle),
+      transparent 0deg,
+      transparent 300deg,
+      rgb(255 100 79 / 0.9) 340deg,
+      transparent 360deg
+    );
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+    animation: beam-spin 6s linear infinite;
+  }
+
+  /* ---- Pointer ---------------------------------------------------------- */
+  @media (hover: hover) and (pointer: fine) {
+    html[data-motion="on"] .device-frame__shell {
+      transform: perspective(1400px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+      transition: transform 600ms var(--ease-out-soft);
+    }
+
+    html[data-motion="on"] .magnet {
+      translate: var(--magnet-x, 0) var(--magnet-y, 0);
+      transition:
+        translate 350ms var(--ease-out-soft),
+        opacity 150ms ease;
+    }
+
+    html[data-motion="on"] .spotlight {
+      position: relative;
+      isolation: isolate;
+    }
+
+    html[data-motion="on"] .spotlight::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      border-radius: inherit;
+      pointer-events: none;
+      opacity: 0;
+      background: radial-gradient(
+        420px circle at var(--spot-x, 50%) var(--spot-y, 50%),
+        rgb(255 100 79 / 0.1),
+        transparent 65%
+      );
+      transition: opacity 400ms ease;
+    }
+
+    html[data-motion="on"] .spotlight:hover::before {
+      opacity: 1;
+    }
+  }
+
+  /* ---- Ambient ---------------------------------------------------------- */
+  html[data-motion="on"] .glow-warm {
+    animation: glow-breathe 9s ease-in-out infinite alternate;
+  }
+
   @supports (animation-timeline: scroll()) {
     html[data-motion="on"] .scroll-progress {
       display: block;
@@ -166,33 +266,8 @@
   }
 }
 
-/* Spotlight: a soft orange light under the pointer. Only drawn once the
-   pointer has set --spot-x, so touch screens never see it. */
-@media (hover: hover) and (pointer: fine) {
-  html[data-motion="on"] .spotlight {
-    position: relative;
-    isolation: isolate;
-  }
-
-  html[data-motion="on"] .spotlight::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    border-radius: inherit;
-    pointer-events: none;
-    opacity: 0;
-    background: radial-gradient(
-      420px circle at var(--spot-x, 50%) var(--spot-y, 50%),
-      rgb(255 100 79 / 0.1),
-      transparent 65%
-    );
-    transition: opacity 400ms ease;
-  }
-
-  html[data-motion="on"] .spotlight:hover::before {
-    opacity: 1;
-  }
+.beam-border {
+  position: relative;
 }
 
 .scroll-progress {
@@ -206,15 +281,11 @@
   pointer-events: none;
 }
 
-@keyframes blur-in {
+@keyframes mask-rise {
   from {
-    opacity: 0;
-    filter: blur(12px);
-    translate: 0 0.3em;
+    translate: 0 110%;
   }
   to {
-    opacity: 1;
-    filter: blur(0);
     translate: 0 0;
   }
 }
@@ -222,11 +293,24 @@
 @keyframes rise-in {
   from {
     opacity: 0;
-    translate: 0 18px;
+    translate: 0 24px;
+    filter: blur(6px);
   }
   to {
     opacity: 1;
     translate: 0 0;
+    filter: blur(0);
+  }
+}
+
+@keyframes photo-settle {
+  from {
+    scale: 1.08;
+    filter: blur(6px);
+  }
+  to {
+    scale: 1;
+    filter: blur(0);
   }
 }
 
@@ -256,15 +340,9 @@
   }
 }
 
-@keyframes dot-pulse {
-  0% {
-    opacity: 0.6;
-    scale: 1;
-  }
-  70%,
-  100% {
-    opacity: 0;
-    scale: 2.6;
+@keyframes beam-spin {
+  to {
+    --beam-angle: 360deg;
   }
 }
 
@@ -314,4 +392,325 @@
   to {
     scale: 1 1;
   }
+}
+
+/*
+ * <HowItWorksFilm>: an 800 x 800 stage scaled to its box by --film-scale.
+ * Before the script runs (and under reduced motion) it rests on the logged
+ * meal; seek(t) sets every inline style from then on.
+ */
+.how-film {
+  position: relative;
+  width: 100%;
+  max-width: 560px;
+  aspect-ratio: 1;
+  margin-inline: auto;
+  overflow: hidden;
+  border-radius: var(--radius-card);
+  background:
+    radial-gradient(closest-side at 50% 55%, rgb(255 100 79 / 0.07), transparent),
+    var(--color-surface-raised);
+  border: 1px solid var(--color-line);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+}
+
+.how-film__stage {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 800px;
+  height: 800px;
+  transform: scale(var(--film-scale, 0.7));
+  transform-origin: 0 0;
+}
+
+.how-film__camera {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 50%;
+}
+
+.how-film__camera > * {
+  position: absolute;
+}
+
+.how-film__shape {
+  left: 0;
+  top: 0;
+  width: 560px;
+  height: 430px;
+  transform: translate(120px, 215px);
+  border-radius: 36px;
+  background: #fff;
+  box-shadow:
+    0 30px 60px -30px rgb(26 26 46 / 0.35),
+    0 8px 18px -8px rgb(26 26 46 / 0.12);
+}
+
+.how-film__glow {
+  left: 90px;
+  top: 348px;
+  width: 620px;
+  height: 104px;
+  border-radius: 999px;
+  opacity: 0;
+  background: conic-gradient(#809ff9, #d093d9, #f38c61, #f5cc77, #809ff9);
+  filter: blur(22px);
+}
+
+.how-film__flood {
+  inset: 0;
+  background: var(--color-ink);
+  clip-path: circle(0 at 400px 400px);
+}
+
+.how-film__ripple {
+  left: 598px;
+  top: 340px;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  opacity: 0;
+}
+
+.how-film__composer,
+.how-film__sent,
+.how-film__rings,
+.how-film__nudge,
+.how-film__closing {
+  opacity: 0;
+}
+
+.how-film__composer {
+  left: 100px;
+  top: 358px;
+  width: 600px;
+  height: 84px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px 0 34px;
+  font-size: 27px;
+}
+
+.how-film__typed {
+  display: inline-flex;
+  align-items: center;
+}
+
+.how-film__caret {
+  display: inline-block;
+  width: 3px;
+  height: 32px;
+  margin-left: 2px;
+  background: var(--color-accent);
+}
+
+.how-film__send {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.how-film__sent {
+  left: 290px;
+  top: 174px;
+  width: 420px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 23px;
+}
+
+.how-film__meal {
+  left: 120px;
+  top: 215px;
+  width: 560px;
+  height: 430px;
+  padding: 40px 44px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  font-size: 22px;
+}
+
+.how-film__meal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 30px;
+}
+
+.how-film__meal-head .how-film__muted {
+  font-size: 18px;
+}
+
+.how-film__muted {
+  color: var(--color-ink-muted);
+}
+
+.how-film__item {
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--color-line);
+}
+
+.how-film__total {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 22px;
+}
+
+.how-film__total .font-display {
+  font-size: 64px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.how-film__macros {
+  display: grid;
+  gap: 10px;
+  font-size: 19px;
+}
+
+.how-film__macro {
+  display: grid;
+  grid-template-columns: 90px 1fr 50px;
+  align-items: center;
+  gap: 14px;
+  text-align: right;
+}
+
+.how-film__macro .how-film__muted {
+  text-align: left;
+}
+
+.how-film__track {
+  height: 10px;
+  border-radius: 999px;
+  background: var(--color-surface-raised);
+  overflow: hidden;
+}
+
+.how-film__bar {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-accent);
+  transform-origin: 0 50%;
+}
+
+.how-film__rings {
+  left: 100px;
+  top: 310px;
+  width: 600px;
+  height: 220px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  align-items: center;
+  font-size: 21px;
+  font-weight: 500;
+}
+
+.how-film__ring {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.how-film__ring-dial {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 118px;
+  height: 118px;
+  font-size: 38px;
+  font-variant-numeric: tabular-nums;
+}
+
+.how-film__ring-dial svg {
+  position: absolute;
+  inset: 0;
+  rotate: -90deg;
+}
+
+.how-film__nudge {
+  left: 80px;
+  top: 285px;
+  width: 600px;
+  height: 230px;
+  padding: 34px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  font-size: 27px;
+  line-height: 1.35;
+}
+
+.how-film__nudge p {
+  margin: 0;
+}
+
+.how-film__from {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--color-ink-muted);
+}
+
+.how-film__dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  box-shadow: 0 0 0 5px rgb(255 100 79 / 0.18);
+}
+
+.how-film__closing {
+  left: 80px;
+  top: 300px;
+  width: 640px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.28em;
+  font-size: 84px;
+  line-height: 1.05;
+  font-weight: 500;
+  color: #f4f4f5;
+}
+
+.how-film__mask {
+  display: inline-block;
+  overflow: hidden;
+  padding-bottom: 0.14em;
+  margin-bottom: -0.14em;
+}
+
+.how-film__closing-word {
+  display: inline-block;
+}
+
+.how-film__underline {
+  position: absolute;
+  left: 0;
+  bottom: -0.1em;
+  width: 92%;
+  height: 0.22em;
+}
+
+.how-film .loop-video__toggle {
+  right: 14px;
+  bottom: 14px;
 }
