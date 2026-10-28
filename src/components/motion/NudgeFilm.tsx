@@ -29,6 +29,8 @@ type Nudge = {
   height: number;
   /** The lock screen's time, when the backend sends this nudge. */
   time: string;
+  /** Its own day: the nutritionist sends at most one nudge a day. */
+  date: string;
 };
 
 const NUDGES: Nudge[] = [
@@ -40,6 +42,7 @@ const NUDGES: Nudge[] = [
     at: 0,
     height: 106,
     time: "9:40",
+    date: "Thursday 15 October",
   },
   {
     banner: "It's been 8 days since your last weigh-in. Next time you hop on the scales, just send me…",
@@ -49,10 +52,12 @@ const NUDGES: Nudge[] = [
     at: 6.3,
     height: 86,
     time: "12:30",
+    date: "Friday 16 October",
   },
 ];
 const PATTERN_AT = 12.6;
 const PATTERN_TIME = "12:30";
+const PATTERN_DATE = "Saturday 17 October";
 const PATTERN_BANNER =
   "Tuesdays and Wednesdays have run about 520 kcal over your goal in most of the last four weeks…";
 const DAYS = [
@@ -65,7 +70,10 @@ const DAYS = [
   { day: "Sun", kcal: "1,510", diff: "-60" },
 ];
 /** When each notification arrives, and the lock screen's time then. */
-const ARRIVALS = [...NUDGES.map((n) => ({ at: n.at, time: n.time })), { at: PATTERN_AT, time: PATTERN_TIME }];
+const ARRIVALS = [
+  ...NUDGES.map((n) => ({ at: n.at, time: n.time, date: n.date })),
+  { at: PATTERN_AT, time: PATTERN_TIME, date: PATTERN_DATE },
+];
 
 const BUBBLE_TOP = 60;
 /** The notification, on the phone's lock screen. */
@@ -181,10 +189,10 @@ export default function NudgeFilm({ label, className }: { label: string; classNa
     <Film {...film} label={label} className={`nudge-film ${className ?? ""}`}>
       <div ref={set("camera")} className="film__camera" aria-hidden>
         {/* The lock screen each notification arrives on, under the shape. */}
-        {ARRIVALS.map(({ time }, k) => (
+        {ARRIVALS.map(({ time, date }, k) => (
           <span key={k} ref={set(`phone${k}`)} className="nf-c nf-phone">
             <span className="nf-phone__island" />
-            <span className="nf-phone__date">Saturday 17 October</span>
+            <span className="nf-phone__date">{date}</span>
             <span className="nf-phone__time">{time}</span>
           </span>
         ))}

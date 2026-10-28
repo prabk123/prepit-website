@@ -153,9 +153,15 @@ export function useFilm({ loop, rest, name, seek }: { loop: number; rest: number
     seekRef.current(clock.current.t, putRef.current);
     // Plays only while most of it is on screen, and picks up where it
     // stopped when it comes back.
-    const observer = new IntersectionObserver(([entry]) => setInView(entry.intersectionRatio >= 0.6), {
-      threshold: [0, 0.6],
-    });
+    // A film taller than 60% of a short screen counts as in view once it
+    // fills 60% of the screen's height.
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        const screen = entry.rootBounds?.height ?? window.innerHeight;
+        setInView(entry.intersectionRatio >= 0.6 || entry.intersectionRect.height >= 0.6 * screen);
+      },
+      { threshold: [0, 0.2, 0.4, 0.6, 0.8, 1] },
+    );
     observer.observe(box);
     return () => observer.disconnect();
   }, []);
