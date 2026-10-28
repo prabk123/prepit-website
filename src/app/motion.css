@@ -407,39 +407,37 @@
 }
 
 /*
- * <HowItWorksFilm>: the app's real components floating on their own (no
- * phone screen) through a real flow, in app points on a 400 x 400 stage,
- * scaled to its box by --film-scale (set by the component; the container
- * steps below get the first paint close before it runs). Colours, sizes and
- * radii are the app's light theme (PrepItColors.light). With no script it
- * shows the day's Energy, Satiety and Mood.
+ * Homepage films (<HeroFilm>, <KnowsYouFilm>, see filmKit): the app's real
+ * components floating on the page, in app points on a 400 x 400 stage scaled
+ * to its box by --film-scale (set by the script; the container steps below
+ * get the first paint close before it runs). No frame or border: the stage
+ * fades out at its edges so components leave into the page. Colours, sizes
+ * and radii are the app's light theme (PrepItColors.light). A click or tap
+ * pauses; the Play/Pause button shows on keyboard focus and under reduced
+ * motion.
  */
-.how-film {
+.film {
   container-type: inline-size;
   position: relative;
   width: 100%;
   max-width: 560px;
   aspect-ratio: 1;
   margin-inline: auto;
-  overflow: hidden;
-  border-radius: var(--radius-card);
-  background:
-    radial-gradient(closest-side at 50% 50%, rgb(255 100 79 / 0.08), transparent),
-    #f4f4f5;
-  border: 1px solid var(--color-line);
   color: #000;
   font-family: var(--font-body);
   font-size: 14px;
   line-height: 20px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
   --film-scale-css: 1.4;
 }
 
-@container (max-width: 520px) { .how-film__stage { --film-scale-css: 1.25; } }
-@container (max-width: 460px) { .how-film__stage { --film-scale-css: 1.1; } }
-@container (max-width: 400px) { .how-film__stage { --film-scale-css: 0.95; } }
-@container (max-width: 350px) { .how-film__stage { --film-scale-css: 0.82; } }
+@container (max-width: 520px) { .film__stage { --film-scale-css: 1.25; } }
+@container (max-width: 460px) { .film__stage { --film-scale-css: 1.1; } }
+@container (max-width: 400px) { .film__stage { --film-scale-css: 0.95; } }
+@container (max-width: 350px) { .film__stage { --film-scale-css: 0.82; } }
 
-.how-film__stage {
+.film__stage {
   position: absolute;
   left: 0;
   top: 0;
@@ -448,9 +446,17 @@
   overflow: hidden;
   transform: scale(var(--film-scale, var(--film-scale-css, 1.4)));
   transform-origin: 0 0;
+  -webkit-mask-image:
+    linear-gradient(to bottom, transparent, #000 5%, #000 95%, transparent),
+    linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to bottom, transparent, #000 5%, #000 95%, transparent),
+    linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
+  mask-composite: intersect;
 }
 
-.how-film__camera {
+.film__camera {
   position: absolute;
   left: 0;
   top: 0;
@@ -459,24 +465,57 @@
   transform-origin: 0 0;
 }
 
-.how-film p {
+.film p {
   margin: 0;
 }
 
-.how-film b {
+.film b {
   font-weight: 700;
 }
 
-.how-film i {
+.film i {
   font-style: normal;
 }
 
-.how-film small {
+.film small {
   display: block;
   font-size: 12px;
   line-height: 16px;
   font-weight: 500;
   color: #7a7a82;
+}
+
+/* Pause and play: out of sight until it has keyboard focus. */
+.film__toggle {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  color: var(--color-video-toggle-ink);
+  background: var(--color-video-toggle);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  cursor: pointer;
+}
+
+.film__toggle:not(.film__toggle--shown):not(:focus-visible) {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.film__toggle:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* The hero film. With no script it shows the day's Energy, Satiety and Mood. */
+.hero-film {
+  max-width: 600px;
 }
 
 .hf-green {
@@ -488,18 +527,15 @@
 }
 
 /* Each component floats on its own and is hidden until the script runs. */
-.hf-c {
+.hf-c,
+.kf-c {
   position: absolute;
   opacity: 0;
   visibility: hidden;
 }
 
-.hf-lift {
-  box-shadow: 0 14px 40px rgb(26 26 46 / 0.1);
-}
-
 /* The one shape. With no script it is the Energy, Satiety and Mood card. */
-.how-film__shape {
+.hf-shape {
   position: absolute;
   left: 0;
   top: 0;
@@ -513,40 +549,28 @@
 }
 
 /* 1. The check-in */
-.hf-chat-head {
-  left: 127px;
-  top: 8px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-family: var(--font-display);
-  font-size: 17px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.hf-avatar {
-  display: grid;
-  place-items: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: var(--color-ink);
-  color: #fff;
-}
-
 .hf-bubble {
+  position: absolute;
   left: 30px;
-  top: 50px;
   width: 340px;
+  margin: 0;
   padding: 12px 16px;
   background: #fff;
+  border: 1px solid #e9e9ea;
   border-radius: 12px 12px 12px 2px;
   font-size: 14px;
   line-height: 20px;
   color: #1a1a2e;
-  transform-origin: 0 100%;
   box-shadow: 0 14px 40px rgb(26 26 46 / 0.08);
+}
+
+.hf-bubble__mask {
+  display: block;
+  overflow: hidden;
+}
+
+.hf-bubble__text {
+  display: block;
 }
 
 .hf-reply,
@@ -570,7 +594,6 @@
 }
 
 .hf-tap-label {
-  top: 246px;
   color: #fff;
 }
 
@@ -1071,49 +1094,286 @@
   font-weight: 600;
 }
 
-/* 8. The dark and the closing line */
-.how-film__flood {
-  position: absolute;
-  inset: 0;
-  background: var(--color-ink);
-  clip-path: circle(0 at 200px 200px);
-}
 
-.hf-closing {
-  position: absolute;
-  left: 40px;
-  top: 150px;
-  width: 320px;
-  font-family: var(--font-display);
-  font-size: 42px;
-  line-height: 1.12;
-  font-weight: 500;
-  letter-spacing: -0.01em;
-  color: #f4f4f5;
-  visibility: hidden;
-}
-
-.hf-mask {
-  display: inline-block;
-  overflow: hidden;
-  padding-bottom: 0.14em;
-  margin-bottom: -0.14em;
-}
-
-.hf-closing__word {
-  display: inline-block;
-}
-
-.hf-underline {
+/* The consultation and check-in film. */
+.kf-shape {
   position: absolute;
   left: 0;
-  bottom: -0.1em;
-  width: 92%;
-  height: 0.22em;
+  top: 0;
+  width: 364px;
+  height: 376px;
+  transform: translate(18px, 13px);
+  border: 1px solid #e9e9ea;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 14px 40px rgb(26 26 46 / 0.1);
 }
 
-.how-film .loop-video__toggle {
-  top: 14px;
-  right: 14px;
-  bottom: auto;
+.kf-pick-head {
+  left: 34px;
+  top: 26px;
+  width: 332px;
+  display: grid;
+  gap: 2px;
+}
+
+.kf-pick-head b,
+.kf-head {
+  font-family: var(--font-display);
+  font-weight: 600;
+}
+
+.kf-pick-head b {
+  font-size: 20px;
+  line-height: 26px;
+}
+
+.kf-pick-head span,
+.kf-muted {
+  font-size: 12px;
+  line-height: 16px;
+  color: #7a7a82;
+}
+
+.kf-option {
+  left: 34px;
+  width: 332px;
+  height: 76px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 12px;
+  border: 1px solid #e9e9ea;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.kf-option__text {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.kf-option__text b {
+  font-size: 14px;
+  line-height: 18px;
+}
+
+.kf-option__text span {
+  font-size: 12px;
+  line-height: 16px;
+  color: #7a7a82;
+}
+
+.kf-check {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border: 1.5px solid #d3d3d5;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.kf-check svg {
+  scale: 0;
+}
+
+.kf-tag {
+  position: absolute;
+  top: -9px;
+  left: 12px;
+  height: 18px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: #ffe8e4;
+  color: #b24637;
+  font-size: 11px;
+  line-height: 18px;
+  font-weight: 600;
+  scale: 0;
+  transform-origin: 0 50%;
+}
+
+.kf-continue {
+  left: 34px;
+  top: 340px;
+  width: 332px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #a6a6ac;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.kf-date {
+  left: 34px;
+  top: 22px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #7a7a82;
+}
+
+.kf-head {
+  left: 34px;
+  top: 38px;
+  width: 332px;
+  font-size: 24px;
+  line-height: 30px;
+}
+
+.kf-mask {
+  display: block;
+  overflow: hidden;
+}
+
+.kf-head__text {
+  display: block;
+}
+
+.kf-summary {
+  left: 34px;
+  top: 74px;
+  width: 332px;
+  font-size: 13px;
+  line-height: 18px;
+  color: #4d4d59;
+}
+
+.kf-goal,
+.kf-calories {
+  left: 18px;
+  width: 364px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.kf-goal {
+  top: 150px;
+  height: 240px;
+}
+
+.kf-goal__title {
+  font-family: var(--font-display);
+  font-size: 17px;
+  line-height: 22px;
+}
+
+.kf-goal__weights {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 10px 0 6px;
+}
+
+.kf-goal__weights > span {
+  display: grid;
+}
+
+.kf-right {
+  margin-left: auto;
+  text-align: right;
+}
+
+.kf-num {
+  font-family: var(--font-display);
+  font-size: 20px;
+  line-height: 24px;
+  font-weight: 600;
+}
+
+.kf-num i {
+  font-size: 12px;
+  color: #7a7a82;
+}
+
+.kf-row {
+  display: flex;
+  justify-content: space-between;
+  height: 24px;
+  align-items: center;
+  border-top: 1px solid #f0f0f1;
+  font-size: 13px;
+}
+
+.kf-row b {
+  font-weight: 500;
+  color: #4d4d59;
+}
+
+.kf-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  align-self: flex-start;
+  margin-top: 8px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgb(64 227 0 / 0.16);
+  color: #258400;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  scale: 0;
+  transform-origin: 0 50%;
+}
+
+.kf-calories {
+  top: 410px;
+  gap: 2px;
+  background: #fff;
+  border: 1px solid #e9e9ea;
+  border-radius: 16px;
+  box-shadow: 0 14px 40px rgb(26 26 46 / 0.1);
+}
+
+.kf-calories__nums {
+  margin-top: 6px;
+}
+
+.kf-bars {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  height: 100px;
+  margin: 4px 0 10px;
+  padding: 0 6px;
+}
+
+.kf-bars__target {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 86px;
+  border-top: 1.5px dashed #c4c4c8;
+}
+
+.kf-bars__col {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 4px;
+  width: 30px;
+}
+
+.kf-bars__bar {
+  width: 26px;
+  height: 66px;
+  border-radius: 6px 6px 3px 3px;
+  background: linear-gradient(#ff644f, #ffb09f);
+  transform-origin: 50% 100%;
+}
+
+.kf-bars__day {
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 600;
+  color: #7a7a82;
 }

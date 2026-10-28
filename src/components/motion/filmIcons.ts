@@ -1,5 +1,5 @@
 /**
- * Icons for the how-it-works film, as the app draws them: glyphs from the
+ * Icons for the homepage films, as the app draws them: glyphs from the
  * app's icon font (fresca_app assets/fonts/PrepItIcons.ttf) on a 1000 box,
  * plus the two Font Awesome Free icons the app's Add sheet uses (glass of
  * water, pills; Font Awesome Free, CC BY 4.0, fontawesome.com).

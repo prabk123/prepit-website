@@ -1,38 +1,19 @@
-import DeviceFrame from "@/components/device/DeviceFrame";
-import DevicePair from "@/components/device/DevicePair";
+import KnowsYouFilm from "@/components/motion/KnowsYouFilm";
 import FeatureSplit from "@/components/ui/FeatureSplit";
-import Glow from "@/components/ui/Glow";
 import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
-import { appCapture } from "@/lib/captures";
 
 /**
- * Standout 1, second half: how it gets to know you. The consultation's focus
- * picker and a weekly check-in report.
+ * Standout 1, second half: how it gets to know you. A film of the
+ * consultation's focus picker becoming a weekly check-in report, drawn in
+ * code from the app's captures (see KnowsYouFilm).
  */
 export default function KnowsYouSection() {
   return (
     <Section id="consultation" labelledBy="knows-you-heading" analyticsName="knows-you">
       <FeatureSplit
         media={
-          <div className="relative">
-            <Glow />
-            <DevicePair className="[--device-w:260px] sm:[--device-w:300px] lg:[--device-w:clamp(260px,22vw,320px)]">
-              <DeviceFrame
-                capture={appCapture(
-                  "20-focus-picker",
-                  "The consultation's focus picker: front-load protein at breakfast, even out the day, or make snacks work harder",
-                )}
-              />
-              <DeviceFrame
-                className="hidden sm:block"
-                capture={appCapture(
-                  "11-check-in-report",
-                  "A weekly check-in report: your steadiest week yet, with goal pace and calories",
-                )}
-              />
-            </DevicePair>
-          </div>
+          <KnowsYouFilm label="An animation of PrepIt's app screens. The consultation's Pick your focus card: Front-load protein at breakfast is picked as the main focus and Even out the day as the second, then Continue. Then a weekly check-in for 6 to 12 October: Your steadiest week yet. The Lose fat goal shows 79.2 kg against a 75.0 kg goal weight, a pace of 0.4 kg a week against a goal pace of 0.3, On pace. Calories averaged 1,562 over 7 logged days against a 1,570 target." />
         }
       >
         <SectionHeading
