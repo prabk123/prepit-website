@@ -1,4 +1,5 @@
 import DeviceFrame from "@/components/device/DeviceFrame";
+import SplitWords from "@/components/motion/SplitWords";
 import AppStoreCta from "@/components/ui/AppStoreCta";
 import BandPhoto from "@/components/ui/BandPhoto";
 import Glow from "@/components/ui/Glow";
@@ -31,7 +32,7 @@ export default function FinalCta({
       <div className="relative flex flex-col items-center gap-8 text-center">
         <div className="flex flex-col items-center gap-5">
           <h2 id={`${id}-heading`} className="font-display text-chapter text-ink text-balance">
-            Start eating better this week.
+            <SplitWords text="Start eating better this week." />
           </h2>
           <p className="w-fit text-gradient-brand text-lead font-medium">
             Try your nutritionist free for {TRIAL_DAYS} days.

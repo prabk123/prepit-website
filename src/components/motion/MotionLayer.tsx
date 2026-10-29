@@ -1,14 +1,18 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 
 /**
- * The homepage's motion layer (website motion experiment): one small script
+ * The site's motion layer (website motion experiment), on the homepage, the
+ * feature pages, the guides and the research page: one small script
  * that turns on the effects styled in src/app/motion.css, after React Bits
  * and the Prompt Motion gallery.
  *
  * One rule decides what animates: every block of content in a section below
- * the hero comes in as it scrolls into view, in reading order. Headlines rise
+ * the page's opening (the homepage hero, or the heading marked `intro` that
+ * plays the same moves on load) comes in as it scrolls into view, in reading
+ * order, and so does the closing download band. Headlines rise
  * word by word out of a mask line; everything else (paragraphs, list items,
  * links, cards, phones, photos) rises and un-blurs. Blocks that arrive
  * together follow each other a beat apart. Anything already on screen when
@@ -26,11 +30,11 @@ import { useEffect } from "react";
 /** The blocks that come in, smallest first: a block inside another is left to its parent. */
 const BLOCKS = "h2, h3, p, li, figure, picture, article, .device-frame, .device-pair, a, details";
 /** Decorative layers, photos the text sits on, and anything that moves on its own. */
-const SKIP = "[aria-hidden='true'], .annotated-photo, .pointer-events-none, nav, [data-reveal]";
+const SKIP = "[aria-hidden='true'], .annotated-photo, .pointer-events-none, nav, [data-reveal], .hero-words, .hero-rise";
 
 function revealBlocks(): HTMLElement[] {
   const blocks: HTMLElement[] = [];
-  for (const section of document.querySelectorAll<HTMLElement>("#main section:not(#hero)")) {
+  for (const section of document.querySelectorAll<HTMLElement>("#main section:not(#hero), .site-final-cta > section")) {
     const own = Array.from(section.querySelectorAll<HTMLElement>(`${BLOCKS}, [data-reveal]`)).filter(
       (el) => !el.parentElement?.closest(SKIP) && (el.dataset.reveal || !el.matches(SKIP)),
     );
@@ -59,6 +63,9 @@ function countUp(el: HTMLElement) {
 }
 
 export default function MotionLayer() {
+  // A layout keeps this mounted from one page to the next, so each new page
+  // gets its blocks set up again.
+  const pathname = usePathname();
   useEffect(() => {
     const root = document.documentElement;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -163,7 +170,7 @@ export default function MotionLayer() {
       onPointerLeave();
       delete root.dataset.motion;
     };
-  }, []);
+  }, [pathname]);
 
   // The orange line along the top that fills as the page scrolls (CSS only).
   return <div aria-hidden className="scroll-progress" />;

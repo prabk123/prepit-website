@@ -51,12 +51,13 @@ export default async function ContactPage({
           <div className="flex flex-col gap-8">
             <SectionHeading
               as="h1"
+              intro
               id="contact-heading"
               size="section"
               title={copy[kind].title}
               lead={copy[kind].lead}
             />
-            <div className="flex flex-col gap-4 text-body text-ink-secondary">
+            <div className="hero-rise flex flex-col gap-4 text-body text-ink-secondary [--rise-delay:600ms]">
               <p>
                 Prefer email? Write to{" "}
                 <a
@@ -70,7 +71,9 @@ export default async function ContactPage({
               <TextLink href="/#faq">Read the FAQ</TextLink>
             </div>
           </div>
-          <ContactForm kind={kind} />
+          <div className="hero-rise [--rise-delay:300ms]">
+            <ContactForm kind={kind} />
+          </div>
         </div>
       </Section>
     </div>

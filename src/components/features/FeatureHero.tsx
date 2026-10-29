@@ -25,7 +25,7 @@ export default function FeatureHero({ feature, media }: FeatureHeroProps) {
       <FeatureSplit
         emphasis="text"
         media={
-          <div className="relative py-4">
+          <div className="hero-rise relative py-4 [--rise-delay:300ms]">
             <Glow />
             <DeviceFrame
               className="[--device-w:260px] sm:[--device-w:300px] lg:[--device-w:340px]"
@@ -37,12 +37,14 @@ export default function FeatureHero({ feature, media }: FeatureHeroProps) {
       >
         <SectionHeading
           as="h1"
+          intro
           id="feature-heading"
           size="section"
           title={feature.heading}
           lead={feature.lead}
         />
         <AppStoreCta
+          className="hero-rise [--rise-delay:600ms]"
           trackingSource={`feature-${feature.slug}-hero`}
           note={`${TRIAL_DAYS} days free. Cancel anytime.`}
         />
