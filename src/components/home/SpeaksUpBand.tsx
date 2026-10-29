@@ -1,13 +1,14 @@
-import SpeaksUpPhone from "@/components/home/SpeaksUpPhone";
+import NudgeFilm from "@/components/motion/NudgeFilm";
 import PhotoBand from "@/components/ui/PhotoBand";
 import SectionHeading from "@/components/ui/SectionHeading";
 import TextLink from "@/components/ui/TextLink";
-import { nutritionistEvening } from "@/content/lifestyle";
+import PhotoGlance, { GlanceNotification } from "@/components/media/PhotoGlance";
+import { eveningGlance } from "@/content/lifestyle";
 
 /**
  * Standout 1, first half: the nutritionist speaks up on its own. Under the
- * evening photo, one phone shows the messages it sends unasked, each lifted
- * out of the real chat screen, with buttons to switch between them (PRE-294).
+ * evening photo, a film of the messages it sends unasked, drawn in code from
+ * the real chat captures (see NudgeFilm).
  * On desktop the phone is on the left and its titled text on the right, level
  * with the phone's middle, so the page keeps alternating (PRE-306). On
  * phones the title comes first and the photo under it (PRE-319).
@@ -18,13 +19,19 @@ export default function SpeaksUpBand() {
       id="nutritionist"
       labelledBy="speaks-up-heading"
       analyticsName="speaks-up"
-      photo={nutritionistEvening.desktop}
-      phonePhoto={nutritionistEvening.mobile}
+      photo={eveningGlance.desktop}
+      phonePhoto={eveningGlance.mobile}
       // Below 1024 px the title comes before the photo, so this photo doesn't
       // sit straight under the hero's, a similar shot (PRE-319).
       textFirstOnPhones
-      annotations={nutritionistEvening.annotations}
-      textSide={nutritionistEvening.textSide}
+      // The protein check-in lands as she's about to eat dinner, where its
+      // gap is (the showcase account's numbers, as in the hero film).
+      overlay={
+        <PhotoGlance x={62} y={58} phoneX={6} phoneY={62}>
+          <GlanceNotification text="Over the past few weeks protein has been a little low: under your target on 18 of 21 logged days, about 127g a day against 158g. Most of the gap is at dinner…" />
+        </PhotoGlance>
+      }
+      textSide={eveningGlance.textSide}
       mediaSide="start"
       aside={
         <>
@@ -36,7 +43,9 @@ export default function SpeaksUpBand() {
           <TextLink href="/features/ai-nutritionist">More about your nutritionist</TextLink>
         </>
       }
-      media={<SpeaksUpPhone />}
+      media={
+        <NudgeFilm label="An animation of PrepIt's nutritionist messages, each arriving as a notification. I can't see any breakfast log today, let me know if you skipped it: I'll log it now is tapped. It's been 8 days since your last weigh-in: Log my weight is tapped. Then a weekly calorie pattern: Tuesdays and Wednesdays 1,740 kcal, the other days 1,500 to 1,510, protein stays at 158g and the weekly total stays 10,990 kcal. Use this pattern is tapped." />
+      }
     >
       <SectionHeading
         id="speaks-up-heading"

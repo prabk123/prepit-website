@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import SplitWords from "@/components/motion/SplitWords";
 
 type SectionHeadingProps = {
   eyebrow?: string;
@@ -19,6 +20,12 @@ type SectionHeadingProps = {
   as?: "h1" | "h2" | "h3";
   id?: string;
   align?: "start" | "center";
+  /**
+   * The page's opening heading: it plays the homepage hero's moves on load
+   * (src/app/motion.css), the words rising out of their mask line and the
+   * eyebrow and lead rising after them.
+   */
+  intro?: boolean;
   className?: string;
 };
 
@@ -39,6 +46,7 @@ export default function SectionHeading({
   as,
   id,
   align = "start",
+  intro = false,
   className,
 }: SectionHeadingProps) {
   const Heading = as ?? (size === "hero" ? "h1" : "h2");
@@ -49,7 +57,7 @@ export default function SectionHeading({
       className={`flex flex-col gap-5 ${centered ? "items-center text-center" : ""} ${className ?? ""}`}
     >
       {eyebrow && (
-        <p className="text-eyebrow font-medium uppercase">
+        <p className={`text-eyebrow font-medium uppercase ${intro ? "hero-rise [--rise-delay:50ms]" : ""}`}>
           <span className={eyebrowTone === "gradient" ? "text-gradient-brand" : "text-ink-muted"}>
             {eyebrow}
           </span>
@@ -57,13 +65,13 @@ export default function SectionHeading({
       )}
       <Heading
         id={id}
-        className={`font-display ${titleSize[size]} text-ink text-balance`}
+        className={`font-display ${titleSize[size]} text-ink text-balance ${intro ? "hero-words" : ""}`}
       >
-        {title}
+        <SplitWords text={title} />
       </Heading>
       {lead && (
         <p
-          className={`text-lead text-ink-secondary ${centered ? "max-w-[36ch]" : "max-w-[40ch]"} text-pretty`}
+          className={`text-lead text-ink-secondary ${centered ? "max-w-[36ch]" : "max-w-[40ch]"} text-pretty ${intro ? "hero-rise [--rise-delay:450ms]" : ""}`}
         >
           {lead}
         </p>

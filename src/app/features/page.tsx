@@ -41,13 +41,20 @@ export default function FeaturesPage() {
         <div className="flex flex-col gap-8">
           <SectionHeading
             as="h1"
+            intro
             id="features-heading"
             eyebrow="Features"
             title="Everything your nutritionist does."
             lead="It learns how you eat, speaks up when something slips, plans your week and keeps logging quick."
           />
-          <AppStoreCta trackingSource="features-index-hero" note={`${TRIAL_DAYS} days free. Cancel anytime.`} />
-          <TextLink href={RESEARCH_PAGE_HREF}>How your nutritionist decides</TextLink>
+          <AppStoreCta
+            className="hero-rise [--rise-delay:600ms]"
+            trackingSource="features-index-hero"
+            note={`${TRIAL_DAYS} days free. Cancel anytime.`}
+          />
+          <TextLink href={RESEARCH_PAGE_HREF} className="hero-rise [--rise-delay:700ms]">
+            How your nutritionist decides
+          </TextLink>
         </div>
       </Section>
       {FEATURE_SLUGS.map((slug, index) => {

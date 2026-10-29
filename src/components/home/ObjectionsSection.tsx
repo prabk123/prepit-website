@@ -48,7 +48,8 @@ export default function ObjectionsSection() {
             {QUESTIONS.map((item) => (
               <div
                 key={item.question}
-                className="flex w-full flex-col gap-2 rounded-card border border-line bg-surface-raised p-5 lg:rounded-none lg:border-x-0 lg:border-b-0 lg:bg-transparent lg:px-0 lg:py-7"
+                data-spotlight
+                className="spotlight flex w-full flex-col gap-2 rounded-card border border-line bg-surface-raised p-5 lg:rounded-none lg:border-x-0 lg:border-b-0 lg:bg-transparent lg:px-0 lg:py-7"
               >
                 <h3 className="font-display text-card-title text-ink">{item.question}</h3>
                 <p className="max-w-[58ch] text-body text-ink-secondary text-pretty">{item.answer}</p>

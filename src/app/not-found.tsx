@@ -28,13 +28,14 @@ export default function NotFound() {
         <div className="flex flex-col gap-10">
           <SectionHeading
             as="h1"
+            intro
             id="not-found-heading"
             size="section"
             eyebrow="Page not found"
             title="There's nothing on this page."
             lead="The link may be old, or the address may have a typo. These will get you back on track."
           />
-          <nav aria-label="Pages to try" className="flex flex-wrap gap-3">
+          <nav aria-label="Pages to try" className="hero-rise flex flex-wrap gap-3 [--rise-delay:600ms]">
             <Link href="/" className={PILL_CLASS}>
               Go to the homepage
             </Link>
@@ -45,7 +46,7 @@ export default function NotFound() {
               Guides
             </Link>
           </nav>
-          <AppStoreCta trackingSource="not-found" note={TRIAL_NOTE} />
+          <AppStoreCta className="hero-rise [--rise-delay:700ms]" trackingSource="not-found" note={TRIAL_NOTE} />
         </div>
       </Section>
     </div>

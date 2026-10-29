@@ -4,9 +4,11 @@ import HomeHero from "@/components/home/HomeHero";
 import KnowsYouSection from "@/components/home/KnowsYouSection";
 import ObjectionsSection from "@/components/home/ObjectionsSection";
 import PlansBand from "@/components/home/PlansBand";
+import PlanSwapSection from "@/components/home/PlanSwapSection";
 import ResearchSection from "@/components/home/ResearchSection";
 import SignalsSection from "@/components/home/SignalsSection";
 import SpeaksUpBand from "@/components/home/SpeaksUpBand";
+import MotionLayer from "@/components/motion/MotionLayer";
 import FaqSection from "@/components/pricing/FaqSection";
 import PricingSection from "@/components/pricing/PricingSection";
 
@@ -45,12 +47,14 @@ export default function Home() {
   return (
     <div className="bg-page text-ink">
       <SectionViewTracker />
+      <MotionLayer />
       <HomeHero />
       <SpeaksUpBand />
       <KnowsYouSection />
       <SignalsSection />
       <ResearchSection />
       <PlansBand />
+      <PlanSwapSection />
       <ObjectionsSection />
       <PricingSection />
       <FaqSection />

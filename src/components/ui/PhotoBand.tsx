@@ -16,6 +16,8 @@ type PhotoBandProps = {
    */
   textFirstOnPhones?: boolean;
   annotations?: PhotoAnnotation[];
+  /** An app component floating on the photo (see PhotoGlance). */
+  overlay?: ReactNode;
   /**
    * Side the text sits on, clear of the photo's subject. `end` puts it top
    * right, for photos whose subject is on the left and low.
@@ -72,6 +74,7 @@ export default function PhotoBand({
   phonePhoto,
   textFirstOnPhones = false,
   annotations,
+  overlay,
   textSide = "start",
   children,
   media,
@@ -94,6 +97,7 @@ export default function PhotoBand({
         photo={photo}
         phonePhoto={phonePhoto}
         annotations={annotations}
+        overlay={overlay}
         annotationsFromXl={end}
         fadeEdges
         stackOnPhones

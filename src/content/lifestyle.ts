@@ -114,3 +114,31 @@ export const plansKitchen: LifestylePhoto = {
 };
 
 export const lifestylePhotos = { heroCafe, nutritionistEvening, lunchRings, plansKitchen };
+
+/*
+ * Phone-free photos for app components to float on (website motion
+ * experiment, after Whoop's site; generated 28 Oct 2026 with Seedream 5 Pro,
+ * prompts in the PR). Nothing in them is an app screen.
+ */
+
+/** Early evening in a kitchen, a salmon and quinoa bowl on the counter. */
+export const eveningGlance: LifestylePhoto = {
+  ...photo(
+    "evening-glance",
+    "A woman leans on a kitchen counter in the early evening, smiling, beside a bowl of salmon, quinoa and greens.",
+    { position: "70% 40%" },
+  ),
+  textSide: "start",
+  annotations: [],
+};
+
+/** Lunch at a sunny table: chicken, quinoa, roasted peppers and salad. 4:5 only. */
+export const lunchGlance: SectionPhoto = {
+  src: "/lifestyle/lunch-glance-mobile@1x.webp",
+  avif: "/lifestyle/lunch-glance-mobile@1x.avif 640w, /lifestyle/lunch-glance-mobile@2x.avif 920w",
+  webp: "/lifestyle/lunch-glance-mobile@1x.webp 640w, /lifestyle/lunch-glance-mobile@2x.webp 920w",
+  sizes: "100vw",
+  width: 640,
+  height: 800,
+  alt: "A man eats lunch at a sunny kitchen table: sliced chicken, quinoa, roasted peppers and salad.",
+};

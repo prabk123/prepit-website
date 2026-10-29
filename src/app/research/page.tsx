@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import DeviceFrame, { type DeviceCapture } from "@/components/device/DeviceFrame";
+import MotionLayer from "@/components/motion/MotionLayer";
 import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
 import TextLink from "@/components/ui/TextLink";
@@ -71,10 +72,12 @@ function groupByTopic(sources: ResearchSource[]) {
 export default function ResearchPage() {
   return (
     <div className="w-full bg-page pt-16 text-ink lg:pt-[72px]">
+      <MotionLayer />
       <Section labelledBy="research-page-heading">
         <div className="mx-auto flex max-w-[1040px] flex-col gap-stack">
           <SectionHeading
             as="h1"
+            intro
             id="research-page-heading"
             eyebrow="Why you can trust the advice"
             title="How your nutritionist decides what to say."

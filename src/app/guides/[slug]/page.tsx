@@ -119,13 +119,13 @@ export default async function GuidePage({ params }: Props) {
           emphasis="text"
           mediaClassName="max-lg:hidden"
           media={
-            <div className="relative py-4">
+            <div className="hero-rise relative py-4 [--rise-delay:300ms]">
               <Glow />
               <DeviceFrame className="[--device-w:340px]" {...heroMedia} />
             </div>
           }
         >
-          <nav aria-label="Breadcrumb">
+          <nav aria-label="Breadcrumb" className="hero-rise [--rise-delay:0ms]">
             <Link
               href="/guides"
               className="tap-target -my-1 inline-block py-1 text-small font-medium text-ink-muted transition-colors hover:text-ink"
@@ -135,12 +135,13 @@ export default async function GuidePage({ params }: Props) {
           </nav>
           <SectionHeading
             as="h1"
+            intro
             id="guide-heading"
             eyebrow={guideSectionTitle(meta.section)}
             title={meta.title}
             lead={meta.summary}
           />
-          <p className="text-small text-ink-faint">
+          <p className="hero-rise text-small text-ink-faint [--rise-delay:600ms]">
             Updated <time dateTime={meta.updated}>{formatGuideDate(meta.updated)}</time>
           </p>
         </FeatureSplit>

@@ -33,6 +33,8 @@ type AnnotatedPhotoProps = {
    * cropped enough at 1024 px that they would meet the text.
    */
   annotationsFromXl?: boolean;
+  /** An app component floating on the photo (see PhotoGlance). */
+  overlay?: ReactNode;
   /** Fade the photo into the page at its top and bottom edges. */
   fadeEdges?: boolean;
   /**
@@ -85,6 +87,7 @@ export default function AnnotatedPhoto({
   phonePhoto,
   annotations = [],
   annotationsFromXl,
+  overlay,
   fadeEdges,
   stackOnPhones,
   stripLastOnPhones,
@@ -158,6 +161,7 @@ export default function AnnotatedPhoto({
               decoding="async"
             />
           </picture>
+          {overlay}
           {annotations.length > 0 && (
             <ul
               className={`hidden ${annotationsFromXl ? "xl:block" : "lg:block"}`}

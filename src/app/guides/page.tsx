@@ -26,6 +26,7 @@ export default async function GuidesPage() {
       <div className="flex flex-col gap-stack">
         <SectionHeading
           as="h1"
+          intro
           id="guides-heading"
           eyebrow="Guides"
           title="Get more from your nutritionist."
