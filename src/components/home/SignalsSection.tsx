@@ -39,7 +39,7 @@ export default function SignalsSection() {
                 className="block h-auto w-full"
               />
             </picture>
-            <PhotoGlance x={44} y={62}>
+            <PhotoGlance x={34} y={62} phoneX={5} phoneY={64}>
               <GlanceRings rings={SIGNAL_SCORES.map((s) => ({ label: s.name, score: s.score }))} />
             </PhotoGlance>
           </div>

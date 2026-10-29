@@ -7,7 +7,8 @@ import { ICON } from "@/components/ui/LongLogo";
  * One of the app's components floating on a lifestyle photo, beside the
  * person rather than on a phone (website motion experiment, after Whoop's
  * site). It sits at a point on the photo, given in % of the photo, and rises
- * in once the photo is in view. Under reduced motion it is simply there.
+ * in once the photo is in view. Under reduced motion or ?motion=off it is
+ * simply there.
  */
 export default function PhotoGlance({
   x,
@@ -30,7 +31,9 @@ export default function PhotoGlance({
 
   useEffect(() => {
     const el = ref.current;
-    if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const optedOut = new URLSearchParams(window.location.search).get("motion") === "off";
+    if (!el || reduced || optedOut) return;
     el.dataset.glance = "armed";
     const observer = new IntersectionObserver(
       ([entry]) => {
