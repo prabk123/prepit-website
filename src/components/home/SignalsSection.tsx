@@ -3,9 +3,10 @@ import FeatureSplit from "@/components/ui/FeatureSplit";
 import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
 import TextLink from "@/components/ui/TextLink";
-import { lunchRings } from "@/content/lifestyle";
+import PhotoGlance, { GlanceRings } from "@/components/media/PhotoGlance";
+import { lunchGlance } from "@/content/lifestyle";
 
-// The scores on the Home screen in the photo beside them (PRE-282).
+// The showcase account's scores on Home (PRE-282), floating on the lunch photo.
 const SIGNAL_SCORES = [
   { name: "Energy", color: "var(--color-energy)", score: 84 },
   { name: "Satiety", color: "var(--color-satiety)", score: 96 },
@@ -22,25 +23,26 @@ export default function SignalsSection() {
       <FeatureSplit
         reverse
         media={
-          // The lunch photo's 4:5 crop around the phone (PRE-282): Home with
-          // Energy 84, Satiety 96 and Mood 87 beside the meal behind them.
-          <picture>
-            {lunchRings.mobile.avif && (
-              <source srcSet={lunchRings.mobile.avif} sizes="(min-width: 1024px) 460px, 100vw" type="image/avif" />
-            )}
-            {lunchRings.mobile.webp && (
-              <source srcSet={lunchRings.mobile.webp} sizes="(min-width: 1024px) 460px, 100vw" type="image/webp" />
-            )}
-            <img
-              src={lunchRings.mobile.src}
-              alt={lunchRings.desktop.alt ?? ""}
-              width={lunchRings.mobile.width}
-              height={lunchRings.mobile.height}
-              loading="lazy"
-              decoding="async"
-              className="mx-auto h-auto w-full max-w-[460px] rounded-card"
-            />
-          </picture>
+          // Lunch, with the day's Energy, Satiety and Mood floating beside
+          // it, as on Home (the showcase account's 84, 96 and 87).
+          <div className="relative mx-auto w-full max-w-[460px] overflow-hidden rounded-card">
+            <picture>
+              {lunchGlance.avif && <source srcSet={lunchGlance.avif} sizes="(min-width: 1024px) 460px, 100vw" type="image/avif" />}
+              {lunchGlance.webp && <source srcSet={lunchGlance.webp} sizes="(min-width: 1024px) 460px, 100vw" type="image/webp" />}
+              <img
+                src={lunchGlance.src}
+                alt={lunchGlance.alt ?? ""}
+                width={lunchGlance.width}
+                height={lunchGlance.height}
+                loading="lazy"
+                decoding="async"
+                className="block h-auto w-full"
+              />
+            </picture>
+            <PhotoGlance x={44} y={62}>
+              <GlanceRings rings={SIGNAL_SCORES.map((s) => ({ label: s.name, score: s.score }))} />
+            </PhotoGlance>
+          </div>
         }
       >
         <SectionHeading
@@ -51,7 +53,7 @@ export default function SignalsSection() {
         />
         {/* Each ring fills to the lunch's score as it comes into view, the
             number counting up with it (website motion experiment). */}
-        <ul aria-label="The three scores for the lunch in the photo" className="flex flex-wrap gap-x-8 gap-y-4">
+        <ul aria-label="The three scores" className="flex flex-wrap gap-x-8 gap-y-4">
           {SIGNAL_SCORES.map((signal, i) => (
             <li
               key={signal.name}

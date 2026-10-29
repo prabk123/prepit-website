@@ -2,7 +2,8 @@ import NudgeFilm from "@/components/motion/NudgeFilm";
 import PhotoBand from "@/components/ui/PhotoBand";
 import SectionHeading from "@/components/ui/SectionHeading";
 import TextLink from "@/components/ui/TextLink";
-import { nutritionistEvening } from "@/content/lifestyle";
+import PhotoGlance, { GlanceNotification } from "@/components/media/PhotoGlance";
+import { eveningGlance } from "@/content/lifestyle";
 
 /**
  * Standout 1, first half: the nutritionist speaks up on its own. Under the
@@ -18,13 +19,19 @@ export default function SpeaksUpBand() {
       id="nutritionist"
       labelledBy="speaks-up-heading"
       analyticsName="speaks-up"
-      photo={nutritionistEvening.desktop}
-      phonePhoto={nutritionistEvening.mobile}
+      photo={eveningGlance.desktop}
+      phonePhoto={eveningGlance.mobile}
       // Below 1024 px the title comes before the photo, so this photo doesn't
       // sit straight under the hero's, a similar shot (PRE-319).
       textFirstOnPhones
-      annotations={nutritionistEvening.annotations}
-      textSide={nutritionistEvening.textSide}
+      // The protein check-in lands as she's about to eat dinner, where its
+      // gap is (the showcase account's numbers, as in the hero film).
+      overlay={
+        <PhotoGlance x={62} y={58} phoneX={6} phoneY={62}>
+          <GlanceNotification text="Over the past few weeks protein has been a little low: under your target on 18 of 21 logged days, about 127g a day against 158g. Most of the gap is at dinner…" />
+        </PhotoGlance>
+      }
+      textSide={eveningGlance.textSide}
       mediaSide="start"
       aside={
         <>
