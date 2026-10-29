@@ -10,9 +10,10 @@ import { AppMark, Film, Icon, Plus, cameraAt, clamp01, columns, ease, easeIn, mi
  * through the UI with springs) and ultimaxbt-2ddf1e (one continuous take,
  * components flowing in and out, a button growing into the next screen).
  *
- * The app's real components float on the page with no phone around them,
- * and follow a real flow on the showcase account's day (the captures in
- * public/app):
+ * It opens on Home in a phone (step 8), then the app's real components
+ * float on the page with no phone around them and follow a real flow on the
+ * showcase account's day (the captures in public/app), coming back to the
+ * phone at the end of each loop. The timeline below runs from step 1:
  * 1. the nutritionist's protein check-in, and a tap on "Bigger protein at dinner";
  * 2. that black reply shrinks into the + button, which grows into the Add sheet;
  * 3. Describe your meal: "Mediterranean salmon bowl with quinoa" is typed and sent;
@@ -30,9 +31,14 @@ import { AppMark, Film, Icon, Plus, cameraAt, clamp01, columns, ease, easeIn, mi
  * numbers before the salmon bowl are the day's totals minus that meal.
  */
 
-const LOOP = 21.0;
-/** Where the film rests before it plays, and under reduced motion. */
-const REST = 16.0;
+const LOOP = 21.5;
+/**
+ * The film opens on Home in the phone (step 8): its clock starts this far in,
+ * so the loop plays 8, 9, 1 ... 7 and comes back to the phone.
+ */
+const START = 18.3;
+/** The frame shown under reduced motion: Home in the phone, on the film's clock. */
+const REST = 0.4;
 
 const NUDGE =
   "Over the past few weeks protein has been a little low: under your target on 18 of 21 logged days, about 127g a day against 158g. Most of the gap is at dinner, which averages about 39g. Two easy fixes that don't change what you cook: a bigger portion of the protein you already have at dinner, or a pot of Greek yogurt after dinner. Want to try one?";
@@ -88,7 +94,7 @@ const SHAPE: [number, number, number, number, number, number, number][] = [
   [14.0, 200, 330, 330, 96, 16, 1], // ...moved down for Eaten
   [16.35, 200, 200, 360, 170, 24, 1], // Energy, Satiety and Mood
   [17.85, HOME_CARD.x, HOME_CARD.y, HOME_CARD.w, HOME_CARD.h, 14, 1], // ...in its place on Home
-  [20.15, 200, BUBBLE.top + BUBBLE.height / 2, 340, BUBBLE.height, 12, 1], // the check-in again
+  [20.65, 200, BUBBLE.top + BUBBLE.height / 2, 340, BUBBLE.height, 12, 1], // the check-in again
 ];
 const SHAPE_TRACKS = columns(SHAPE, 6);
 
@@ -99,7 +105,7 @@ const CAMERA: [number, number, number, number][] = [
   [7.6, 1.06, 200, 205], // a little closer on the composer, the card still whole
   [9.75, 1, 200, 200],
   [14.0, 1, 200, 196],
-  [20.15, 1.15, 200, 112], // back on the check-in for the next loop
+  [20.65, 1.15, 200, 112], // back on the check-in for the next loop
 ];
 
 function Wheel({ items, list, width }: { items: (string | number)[]; list: (el: HTMLElement | null) => void; width: number }) {
@@ -125,7 +131,7 @@ function seek(t: number, put: (key: string, prop: string, value: string) => void
   const h = Math.max(0, h0);
   const r = Math.max(0, r0);
   // As it becomes the check-in, its corner sharpens like the bubble's.
-  const tail = mix(r, 2, ease((t - 20.15) / 0.5));
+  const tail = mix(r, 2, ease((t - 20.65) / 0.5));
   put("shape", "visibility", t >= 3.85 ? "visible" : "hidden");
   put("shape", "width", `${w.toFixed(1)}px`);
   put("shape", "height", `${h.toFixed(1)}px`);
@@ -239,7 +245,7 @@ function seek(t: number, put: (key: string, prop: string, value: string) => void
 
   // 8. Home, a real capture in a phone, around the card; then it fades and
   //    the card goes on to become the check-in.
-  const phoneIn = clamp01((t - 17.75) / 0.35) * (1 - clamp01((t - 19.7) / 0.35));
+  const phoneIn = clamp01((t - 17.75) / 0.35) * (1 - clamp01((t - 20.2) / 0.35));
   put("phone", "opacity", phoneIn.toFixed(2));
   put("phone", "visibility", phoneIn > 0 ? "visible" : "hidden");
   put("phone", "scale", mix(1.06, 1, spring(t - 17.75, 0.9, 0.9)).toFixed(4));
@@ -250,8 +256,13 @@ function seek(t: number, put: (key: string, prop: string, value: string) => void
   });
 }
 
+/** The film's clock, which starts on the phone, on the timeline above. */
+function seekFromPhone(t: number, put: (key: string, prop: string, value: string) => void) {
+  seek((t + START) % LOOP, put);
+}
+
 export default function HeroFilm({ label, className }: { label: string; className?: string }) {
-  const { set, ...film } = useFilm({ loop: LOOP, rest: REST, name: "hero-film", seek });
+  const { set, ...film } = useFilm({ loop: LOOP, rest: REST, name: "hero-film", seek: seekFromPhone });
 
   return (
     <Film {...film} label={label} className={`hero-film ${className ?? ""}`}>

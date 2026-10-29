@@ -51,12 +51,6 @@
   display: inline-block;
 }
 
-/* The signal rings rest at their score. */
-.signal-ring__arc {
-  stroke-dasharray: 100;
-  stroke-dashoffset: calc(100 - var(--ring-score, 0));
-}
-
 @media (prefers-reduced-motion: no-preference) {
   /* ---- Hero, on load ---------------------------------------------------- */
   html:not([data-motion="off"]) .hero-words .split-word {
@@ -174,16 +168,6 @@
     background: var(--color-accent);
     transform-origin: 0 50%;
     animation: grow-x var(--speaks-up-autoplay, 5s) linear both;
-  }
-
-  /* ---- Set piece: the signal rings fill --------------------------------- */
-  html[data-motion="on"] .signal-ring__arc {
-    transition: stroke-dashoffset 1400ms var(--ease-out-soft);
-    transition-delay: calc(200ms + var(--i, 0) * 160ms);
-  }
-
-  html[data-motion="on"] [data-reveal]:not([data-revealed]) .signal-ring__arc {
-    stroke-dashoffset: 100;
   }
 
   /* ---- Set piece: a beam of light runs round the pricing card ----------- */
