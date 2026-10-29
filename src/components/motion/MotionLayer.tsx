@@ -18,8 +18,8 @@ import { useEffect } from "react";
  * together follow each other a beat apart. Anything already on screen when
  * the page loads is shown as it is, so nothing visible blinks out and back.
  *
- * It also counts `[data-count]` numbers up as they come in, tilts phones
- * towards the pointer, keeps a soft orange light under the pointer on
+ * It also tilts phones towards the pointer, keeps a soft orange light under
+ * the pointer on
  * `[data-spotlight]` cards and leans `[data-magnet]` buttons towards it.
  *
  * It sets `data-motion` on <html>: "on", or "off" under reduced motion or with
@@ -48,20 +48,6 @@ function revealBlocks(): HTMLElement[] {
   return blocks;
 }
 
-function countUp(el: HTMLElement) {
-  const target = Number(el.dataset.count);
-  if (!Number.isFinite(target)) return;
-  const start = performance.now();
-  const duration = 1400;
-  const tick = (now: number) => {
-    const t = Math.min(1, (now - start) / duration);
-    el.textContent = String(Math.round(target * (1 - Math.pow(1 - t, 4))));
-    if (t < 1) requestAnimationFrame(tick);
-  };
-  el.textContent = "0";
-  requestAnimationFrame(tick);
-}
-
 export default function MotionLayer() {
   // A layout keeps this mounted from one page to the next, so each new page
   // gets its blocks set up again.
@@ -87,7 +73,6 @@ export default function MotionLayer() {
     const show = (el: HTMLElement, order: number) => {
       el.style.setProperty("--order", String(order));
       el.dataset.revealed = "";
-      for (const number of el.querySelectorAll<HTMLElement>("[data-count]")) countUp(number);
     };
     const observer = new IntersectionObserver(
       (entries) => {
