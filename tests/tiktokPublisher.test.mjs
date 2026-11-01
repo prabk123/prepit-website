@@ -43,3 +43,12 @@ test("consent line names the Branded Content Policy only for branded content", (
   assert.match(consentText(true), /Branded Content Policy/);
   assert.doesNotMatch(consentText(false), /Branded/);
 });
+
+test("only the allowed TikTok account may use the publisher", async () => {
+  const { allowedCreator } = await import("../src/lib/tiktok/publisher.ts");
+  assert.equal(allowedCreator("tryprepit"), true);
+  assert.equal(allowedCreator("TryPrepIt"), true);
+  assert.equal(allowedCreator("someoneelse"), false);
+  assert.equal(allowedCreator(undefined), false);
+  assert.equal(allowedCreator("b", "@a, b"), true);
+});

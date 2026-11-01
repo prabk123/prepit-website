@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { TIKTOK_API, TOKEN_COOKIE } from "./publisher";
+import { allowedCreator, TIKTOK_API, TOKEN_COOKIE, type CreatorInfo } from "./publisher";
 
 /** The site's own URL for TikTok's redirect, e.g. https://tryprepit.app/api/tiktok/callback. */
 export function redirectUri(origin: string): string {
@@ -25,4 +25,10 @@ export async function tiktokPost<T>(path: string, token: string, body: unknown):
     throw new Error(err?.message || err?.code || `TikTok answered ${res.status}`);
   }
   return json.data as T;
+}
+
+/** The creator's info, or null when the signed-in account isn't on the allow-list. */
+export async function allowedCreatorInfo(token: string): Promise<CreatorInfo | null> {
+  const info = await tiktokPost<CreatorInfo>("/post/publish/creator_info/query/", token, {});
+  return allowedCreator(info.creator_username, process.env.TIKTOK_ALLOWED_USERNAMES || undefined) ? info : null;
 }

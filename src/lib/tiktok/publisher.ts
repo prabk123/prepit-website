@@ -18,8 +18,12 @@ export const STATE_COOKIE = "tt_publisher_state";
 /** Only videos served from this site's reels path may be posted. */
 export const MEDIA_PREFIX = "https://tryprepit.app/media/reels/";
 
-/** The reels ready to post, written by the PrepIt reel pipeline next to the videos. */
-export const QUEUE_PATH = "/media/reels/queue.json";
+/**
+ * The reels ready to post, written by the PrepIt reel pipeline to the Blob store outside
+ * the public /media/reels/ path, so only the signed-in PrepIt account sees the list
+ * (read server-side by /api/tiktok/queue).
+ */
+export const QUEUE_URL = "https://hf1esjmhuinvpakl.public.blob.vercel-storage.com/publisher/queue.json";
 export type QueuedReel = { id: string; title: string; file: string; caption: string };
 
 export const PRIVACY_LABELS: Record<string, string> = {
@@ -40,6 +44,18 @@ export type CreatorInfo = {
   stitch_disabled: boolean;
   max_video_post_duration_sec: number;
 };
+
+/**
+ * Only PrepIt's own TikTok account may use the publisher. TIKTOK_ALLOWED_USERNAMES is a
+ * comma-separated list; it defaults to tryprepit.
+ */
+export function allowedCreator(username: string | undefined, allowList = "tryprepit"): boolean {
+  if (!username) return false;
+  const allowed = allowList.split(",").map((u) => u.trim().replace(/^@/, "").toLowerCase()).filter(Boolean);
+  return allowed.includes(username.toLowerCase());
+}
+
+export const NOT_ALLOWED = "This page only posts to PrepIt's own TikTok account. Sign out and sign in as @tryprepit.";
 
 export type PostRequest = {
   videoUrl: string;

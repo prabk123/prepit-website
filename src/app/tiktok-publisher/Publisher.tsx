@@ -6,7 +6,6 @@ import {
   consentText,
   MEDIA_PREFIX,
   PRIVACY_LABELS,
-  QUEUE_PATH,
   type CreatorInfo,
   type QueuedReel,
 } from "@/lib/tiktok/publisher";
@@ -42,7 +41,7 @@ export default function Publisher() {
         if (j.error) setLoadError(j.error);
       })
       .catch(() => setSignedIn(false));
-    fetch(QUEUE_PATH, { cache: "no-store" })
+    fetch("/api/tiktok/queue", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : []))
       .then((q) => setQueue(Array.isArray(q) ? q : []))
       .catch(() => setQueue([]));
