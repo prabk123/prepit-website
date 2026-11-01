@@ -20,6 +20,10 @@ const nextConfig: NextConfig = {
       // Firebase's sign-in handler on this domain, so Google and Apple show
       // PrepIt's address instead of fresca-dev.firebaseapp.com (PRE-374).
       ...firebaseAuthHandlerRewrites(process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID),
+      // Approved reels for the TikTok publisher (/tiktok-publisher). TikTok's Direct
+      // Post fetches videos only from a verified domain, so they are served from here
+      // out of the reels Blob store.
+      { source: "/media/reels/:path*", destination: "https://hf1esjmhuinvpakl.public.blob.vercel-storage.com/reels/:path*" },
     ];
   },
   images: {
