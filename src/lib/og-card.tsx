@@ -3,6 +3,7 @@ import path from "node:path";
 import { ImageResponse } from "next/og";
 import type { CardThumb } from "@/lib/captures";
 import type { FeatureSlug } from "@/lib/features";
+import { HOME_HEADLINE } from "@/lib/homeMetadata";
 
 export const ogCardSize = { width: 1200, height: 630 };
 
@@ -229,7 +230,7 @@ export async function renderOgCard({
               {summary}
             </span>
           </div>
-          <span style={{ fontSize: 24, fontWeight: 500, color: ogTokens.inkMuted }}>The nutritionist that notices.</span>
+          <span style={{ fontSize: 24, fontWeight: 500, color: ogTokens.inkMuted }}>{HOME_HEADLINE}</span>
         </div>
 
         {phone ? (

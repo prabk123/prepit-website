@@ -3,7 +3,8 @@
 import Link from "next/link";
 import AppStoreButton from "@/components/ui/AppStoreButton";
 import { PILL_BUTTON_CLASS } from "@/components/ui/buttons";
-import { landingBridgeHref, LANDING_FUNNEL_ID } from "@/lib/funnel/landing";
+import { useLandingSurface } from "@/components/landing/LandingSurface";
+import { landingBridgeHref } from "@/lib/funnel/landing";
 import { LANDING_EVENTS, trackLandingEvent } from "@/lib/landingAnalytics";
 import type { WebMarket } from "@/lib/markets";
 
@@ -14,6 +15,7 @@ type LandingCtaProps = {
   /**
    * Where the button sits, for analytics: hero, plans, pricing, closing,
    * sticky. Also set as `data-cta="<placement>_start_trial"` on the button.
+   * On the homepage both get a `home_` prefix (LandingSurface, PRE-444).
    */
   placement: string;
   /** Stretch to the container, as in the price card. */
@@ -39,11 +41,13 @@ function Arrow() {
  * in, choose a plan, pay $0); in a country listed for the App Store it is
  * the App Store button; in a waitlist country it goes to the waitlist.
  */
-export default function LandingCta({ market, placement, fullWidth, small, label, className }: LandingCtaProps) {
+export default function LandingCta({ market, placement: where, fullWidth, small, label, className }: LandingCtaProps) {
+  const surface = useLandingSurface();
+  const placement = `${surface.placementPrefix}${where}`;
   if (market === "app-store") {
     return (
       <div className={className} data-cta={`${placement}_start_trial`}>
-        <AppStoreButton trackingSource={`landing-${placement}`} label={START_LABEL} />
+        <AppStoreButton trackingSource={`${surface.trackingPrefix}-${where}`} label={START_LABEL} />
       </div>
     );
   }
@@ -52,10 +56,10 @@ export default function LandingCta({ market, placement, fullWidth, small, label,
   const width = fullWidth ? "w-full justify-center" : "";
   return (
     <Link
-      href={market === "web" ? landingBridgeHref() : "/waitlist"}
+      href={market === "web" ? landingBridgeHref(surface.funnelId) : "/waitlist"}
       className={`${PILL_BUTTON_CLASS} ${size} ${width} ${className ?? ""}`}
       data-cta={`${placement}_start_trial`}
-      onClick={() => trackLandingEvent(LANDING_EVENTS.ctaClick, market, { placement, funnel_id: LANDING_FUNNEL_ID })}
+      onClick={() => trackLandingEvent(LANDING_EVENTS.ctaClick, market, { placement, funnel_id: surface.funnelId })}
     >
       {market === "web" ? (label ?? START_LABEL) : "Join the waitlist"}
       {!small && <Arrow />}
@@ -69,14 +73,16 @@ export default function LandingCta({ market, placement, fullWidth, small, label,
  * `web_landing_cta_click` with placement `closing_quiz`.
  */
 export function LandingQuizLink({ market }: { market: WebMarket }) {
+  const surface = useLandingSurface();
+  const placement = `${surface.placementPrefix}closing_quiz`;
   return (
     <p className="text-body text-ink-secondary">
       Not sure yet?{" "}
       <Link
         href="/quiz"
-        data-cta="closing_quiz"
+        data-cta={placement}
         className="font-medium text-ink underline underline-offset-4"
-        onClick={() => trackLandingEvent(LANDING_EVENTS.ctaClick, market, { placement: "closing_quiz", funnel_id: LANDING_FUNNEL_ID })}
+        onClick={() => trackLandingEvent(LANDING_EVENTS.ctaClick, market, { placement, funnel_id: surface.funnelId })}
       >
         Take the quiz first
       </Link>

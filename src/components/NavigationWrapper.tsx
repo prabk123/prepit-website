@@ -7,7 +7,7 @@ import AppStoreLink from "@/components/AppStoreLink";
 import LandingHeaderCta from "@/components/landing/LandingHeaderCta";
 import { LANDING_PATH } from "@/lib/funnel/landing";
 import LongLogo from "@/components/ui/LongLogo";
-import { HEADER_SECTION_LINKS, SITE_PAGE_LINKS } from "@/lib/homeSections";
+import { HEADER_PAGE_LINKS, HEADER_SECTION_LINKS } from "@/lib/homeSections";
 
 const linkClass =
   "text-small font-medium text-ink-muted transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus";
@@ -87,7 +87,7 @@ export default function NavigationWrapper() {
           {/* Desktop */}
           <div className="hidden items-center gap-8 lg:flex">
             {!onLanding &&
-              [...HEADER_SECTION_LINKS, ...SITE_PAGE_LINKS].map((link) => (
+              [...HEADER_SECTION_LINKS, ...HEADER_PAGE_LINKS].map((link) => (
                 <Link key={link.href} href={link.href} className={linkClass}>
                   {link.label}
                 </Link>
@@ -149,7 +149,7 @@ export default function NavigationWrapper() {
         className="fixed left-0 right-0 top-16 z-40 border-b border-line bg-surface lg:hidden"
       >
         <div className="flex flex-col gap-1 px-gutter py-4">
-          {[...HEADER_SECTION_LINKS, ...SITE_PAGE_LINKS].map((link) => (
+          {[...HEADER_SECTION_LINKS, ...HEADER_PAGE_LINKS].map((link) => (
             <Link
               key={link.href}
               href={link.href}

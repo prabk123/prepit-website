@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
+import AppStoreLink from "@/components/AppStoreLink";
 import LandingCta from "@/components/landing/LandingCta";
+import type { LandingSurfaceName } from "@/components/landing/LandingSurface";
 import { landingCopy } from "@/components/landing/LandingSections";
 import Reveal from "@/components/landing/v9/Reveal";
 import { V9Photo, V9Screen } from "@/components/landing/v9/V9Photo";
@@ -75,6 +77,14 @@ export function Split({ text, media, reverse, align = "center" }: { text: ReactN
   );
 }
 
+/**
+ * Empty targets at the top of a section, so links to an older page's
+ * anchors (the homepage before v9, PRE-444) still land on the matching part.
+ */
+export function AnchorAliases({ ids }: { ids?: string[] }) {
+  return ids?.map((alias) => <span key={alias} id={alias} aria-hidden className="absolute left-0 top-0" />);
+}
+
 /** One section of the page, with the name it reports to `home_section_viewed`. */
 export function V9Section({
   id,
@@ -82,6 +92,7 @@ export function V9Section({
   labelledBy,
   band,
   className,
+  aliases,
   children,
 }: {
   id: string;
@@ -89,6 +100,8 @@ export function V9Section({
   labelledBy: string;
   band?: boolean;
   className?: string;
+  /** Older anchors that should land here too (see AnchorAliases). */
+  aliases?: string[];
   children: ReactNode;
 }) {
   return (
@@ -98,6 +111,7 @@ export function V9Section({
       data-section-name={name}
       className={`relative w-full overflow-hidden text-ink ${band ? "v9-band" : "bg-page"} ${className ?? ""}`}
     >
+      <AnchorAliases ids={aliases} />
       <div className="mx-auto w-full max-w-content px-gutter py-section">{children}</div>
     </section>
   );
@@ -105,8 +119,16 @@ export function V9Section({
 
 // ---------------------------------------------------------------- 1. hero film
 
-export function V9Hero({ market, prices }: { market: WebMarket; prices: Prices }) {
+/**
+ * On the homepage (`home`, PRE-444) the hero also offers the App Store
+ * straight away, for people who arrive already sold, where the website
+ * sells (elsewhere the main button is already the App Store or the
+ * waitlist); on /try every button goes to the cart. `surface` must match the
+ * page's LandingSurfaceProvider.
+ */
+export function V9Hero({ market, prices, surface = "try" }: { market: WebMarket; prices: Prices; surface?: LandingSurfaceName }) {
   const web = market === "web";
+  const filmId = `${surface}-hero-film`;
   const { reassure } = landingCopy(market, prices);
   return (
     <section
@@ -145,7 +167,7 @@ export function V9Hero({ market, prices }: { market: WebMarket; prices: Prices }
             width={720}
             height={1280}
             label=""
-            analyticsId="try-hero-film"
+            analyticsId={filmId}
           />
         </div>
         <div className="v9-hero-toggle absolute bottom-3 right-3 z-10 min-[900px]:hidden">
@@ -161,7 +183,7 @@ export function V9Hero({ market, prices }: { market: WebMarket; prices: Prices }
             width={1600}
             height={900}
             label=""
-            analyticsId="try-hero-film"
+            analyticsId={filmId}
           />
         </div>
         <div className="v9-hero-toggle absolute bottom-4 right-4 z-10 hidden min-[900px]:block">
@@ -188,6 +210,18 @@ export function V9Hero({ market, prices }: { market: WebMarket; prices: Prices }
             </span>
           </div>
           <LandingCta market={market} placement="hero" className="w-fit max-[599px]:flex max-[599px]:w-full max-[599px]:justify-center" />
+          {surface === "home" && market === "web" && (
+            <p className="text-small text-ink-secondary">
+              Already sure?{" "}
+              <AppStoreLink
+                trackingSource="home-hero-app-store"
+                data-cta="home_hero_app_store"
+                className="font-medium text-ink underline underline-offset-4 hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus"
+              >
+                Download it from the App Store
+              </AppStoreLink>
+            </p>
+          )}
           <p className="text-[13px] leading-snug text-ink-secondary max-[899px]:pr-14">
             {web ? `${WEB_REMINDER_EMAIL_LIVE ? "Reminder email on day 4. " : ""}Cancel before day 8, pay nothing.` : `${reassure.strong} ${reassure.rest}`}
           </p>
@@ -344,14 +378,14 @@ export function SayItSection() {
 
 // ---------------------------------------------------------------- 6. 02 see it
 
-export function SeeItSection() {
+export function SeeItSection({ aliases }: { aliases?: string[] } = {}) {
   const why = [
     { tag: "Energy 84", name: "see-why-energy-oats", w: 740, h: 293, offset: "", alt: "One breakfast's Energy, up 34: Morning protein provides a steady power supply to your day. Enjoy these oats with a side of chia seeds or almonds." },
     { tag: "Satiety 96", name: "see-why-satiety", w: 732, h: 295, offset: "min-[480px]:ml-[14%]", alt: "How it's shaped, Protein: protein grams and protein share of calories are the largest lift to Satiety. 155 g, 42% of kcal from protein, plus 23.6." },
     { tag: "Mood 87", name: "see-why-mood", w: 732, h: 337, offset: "min-[480px]:ml-[4%]", alt: "How it's shaped, Ultra-processed pattern: heavier ultra-processed patterns in yesterday's log lower Mood in line with observational research links. 0% of calories from ultra-processed, plus 22." },
   ];
   return (
-    <V9Section id="see-it" name="see-it" labelledBy="see-heading">
+    <V9Section id="see-it" name="see-it" labelledBy="see-heading" aliases={aliases}>
       <Split
         reverse
         text={
@@ -388,9 +422,9 @@ export function SeeItSection() {
 
 // ---------------------------------------------------------------- 7. 03 it notices
 
-export function ItNoticesSection() {
+export function ItNoticesSection({ aliases }: { aliases?: string[] } = {}) {
   return (
-    <V9Section id="it-notices" name="it-notices" labelledBy="notices-heading" band>
+    <V9Section id="it-notices" name="it-notices" labelledBy="notices-heading" band aliases={aliases}>
       <Split
         text={
           <>
@@ -440,9 +474,9 @@ export function ItNoticesSection() {
 
 // ---------------------------------------------------------------- 8. 04 it plans
 
-export function ItPlansSection({ market }: { market: WebMarket }) {
+export function ItPlansSection({ market, aliases }: { market: WebMarket; aliases?: string[] }) {
   return (
-    <V9Section id="it-plans" name="it-plans" labelledBy="plans-heading">
+    <V9Section id="it-plans" name="it-plans" labelledBy="plans-heading" aliases={aliases}>
       <Split
         reverse
         text={

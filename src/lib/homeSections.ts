@@ -21,3 +21,14 @@ export const SITE_PAGE_LINKS: HomeSectionLink[] = [
   { label: "Guides", href: "/guides" },
   { label: "Contact", href: "/contact" },
 ];
+
+/**
+ * Site pages in the header: the footer's Company pages plus Research, which
+ * the footer lists as "How it decides" (PRE-444: the homepage links to
+ * Features, Guides and Research).
+ */
+export const HEADER_PAGE_LINKS: HomeSectionLink[] = [
+  { label: "Guides", href: "/guides" },
+  { label: "Research", href: "/research" },
+  { label: "Contact", href: "/contact" },
+];

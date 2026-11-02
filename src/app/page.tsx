@@ -1,59 +1,94 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import SectionViewTracker from "@/components/analytics/SectionViewTracker";
-import HomeHero from "@/components/home/HomeHero";
-import KnowsYouSection from "@/components/home/KnowsYouSection";
-import ObjectionsSection from "@/components/home/ObjectionsSection";
-import PlansBand from "@/components/home/PlansBand";
-import ResearchSection from "@/components/home/ResearchSection";
-import SignalsSection from "@/components/home/SignalsSection";
-import SpeaksUpBand from "@/components/home/SpeaksUpBand";
-import FaqSection from "@/components/pricing/FaqSection";
-import PricingSection from "@/components/pricing/PricingSection";
+import { LandingSurfaceProvider } from "@/components/landing/LandingSurface";
+import StickyCta from "@/components/landing/StickyCta";
+import "@/app/v9-cream.css";
+import "@/components/landing/v9/landing-v9.css";
+import { ClosingSection, FaqSection, OfferSection, TrustSection, V9FinePrint } from "@/components/landing/v9/V9LowerSections";
+import {
+  AskNutritionistSection,
+  HoweverYouEatSection,
+  ItNoticesSection,
+  ItPlansSection,
+  SayItSection,
+  SeeItSection,
+  StartMondaySection,
+  V9Hero,
+  WhoItsForSection,
+} from "@/components/landing/v9/V9Sections";
+import { HideSiteFinalCta } from "@/components/pricing/SiteFinalCta";
+import { HOME_DESCRIPTION, HOME_SHARE_DESCRIPTION, HOME_TITLE } from "@/lib/homeMetadata";
+import { COUNTRY_HEADER, webMarketFor } from "@/lib/markets";
+import { PRICES, WEB_PRICES } from "@/lib/pricing";
+import { webBillingSellerFor } from "@/lib/revenuecat/sellers";
 
-const TITLE = "PrepIt | The nutritionist that notices";
-const DESCRIPTION =
-  "Tell PrepIt what you eat. It spots what's behind the 3pm slump and the evening snacking, and tells you the one thing to change first. 7 days free on iPhone.";
-const SHARE_DESCRIPTION =
-  "An AI nutritionist that learns how you eat, speaks up when something slips, and shows how your food will make you feel.";
+const SITE_URL = "https://www.tryprepit.app";
 
-// The preview image is the site default, ./opengraph-image.tsx (PRE-312).
+// Indexed, with the canonical URL. The preview image is the site default,
+// ./opengraph-image.tsx and ./twitter-image.tsx (the v9 hero, PRE-444).
 export const metadata: Metadata = {
-  title: { absolute: TITLE },
-  description: DESCRIPTION,
+  title: { absolute: HOME_TITLE },
+  description: HOME_DESCRIPTION,
   alternates: {
-    canonical: "https://www.tryprepit.app",
+    canonical: SITE_URL,
   },
   openGraph: {
-    title: TITLE,
-    description: SHARE_DESCRIPTION,
-    url: "https://www.tryprepit.app",
+    title: HOME_TITLE,
+    description: HOME_SHARE_DESCRIPTION,
+    url: SITE_URL,
   },
   twitter: {
     card: "summary_large_image",
-    title: TITLE,
-    description: SHARE_DESCRIPTION,
+    title: HOME_TITLE,
+    description: HOME_SHARE_DESCRIPTION,
   },
 };
 
 /**
- * The homepage (PRE-277, the light redesign): the promise, the two standouts
- * (the nutritionist that knows you and speaks up; how your food will make you
- * feel), the research band, your week planned, the questions people ask, then
- * price and FAQ. The closing download band is added by the layout.
+ * The homepage (PRE-444): Landing v9, the same sections as /try (PRE-432,
+ * PRE-433), with what an ad page leaves out. The site header (Features,
+ * Guides, Research and "Get the app"), a direct App Store link in the hero,
+ * and the full site footer instead of the landing's short one (its small
+ * print stays, above the site footer). Buttons report
+ * with a `home_` placement and start in the `home` funnel (LandingSurface).
+ * The old homepage's anchors still land on the matching section: #nutritionist,
+ * #consultation, #signals, #how-it-decides, #plans and #questions (#hero,
+ * #pricing and #faq keep their ids).
+ *
+ * Like /try, the country the proxy passes picks the market and the currency.
  */
-export default function Home() {
+export default async function Home() {
+  const country = (await headers()).get(COUNTRY_HEADER);
+  const market = webMarketFor(country);
+  const prices = market === "web" ? WEB_PRICES[webBillingSellerFor(country)] : PRICES;
+
   return (
-    <div className="bg-page text-ink">
-      <SectionViewTracker />
-      <HomeHero />
-      <SpeaksUpBand />
-      <KnowsYouSection />
-      <SignalsSection />
-      <ResearchSection />
-      <PlansBand />
-      <ObjectionsSection />
-      <PricingSection />
-      <FaqSection />
-    </div>
+    <LandingSurfaceProvider surface="home">
+      <div className="landing-v9 bg-page text-ink">
+        <HideSiteFinalCta />
+        <SectionViewTracker />
+        <V9Hero market={market} prices={prices} surface="home" />
+        <HoweverYouEatSection />
+        <WhoItsForSection />
+        <StartMondaySection />
+        <SayItSection />
+        <SeeItSection aliases={["signals"]} />
+        <ItNoticesSection aliases={["nutritionist"]} />
+        <ItPlansSection market={market} aliases={["plans"]} />
+        <AskNutritionistSection />
+        <TrustSection aliases={["how-it-decides"]} />
+        <OfferSection market={market} prices={prices} aliases={["consultation"]} />
+        <FaqSection market={market} prices={prices} surface="home" aliases={["questions"]} />
+        <ClosingSection market={market} prices={prices} />
+        {/* The landing footer's small print; the site footer below carries the copyright. */}
+        <div className="v9-band w-full border-t border-line">
+          <div className="mx-auto w-full max-w-content px-gutter py-8">
+            <V9FinePrint copyright={false} />
+          </div>
+        </div>
+        <StickyCta market={market} prices={prices} />
+      </div>
+    </LandingSurfaceProvider>
   );
 }

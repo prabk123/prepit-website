@@ -11,10 +11,8 @@ export type FaqItem = {
 };
 
 /**
- * The FAQ sits under the homepage's questions section, so it covers what that
- * section doesn't (price, trial, logging, scores, messages) in the same voice.
- * The visible accordion and the FAQPage structured data both read this list, so
- * they always match.
+ * The pre-v9 homepage FAQ. Its support questions (HOME_SUPPORT_FAQ_IDS) are
+ * still on the homepage, after Landing v9's own questions (PRE-444).
  */
 export const FAQ_ITEMS: FaqItem[] = [
   {
@@ -186,6 +184,21 @@ export const LANDING_APP_STORE_FAQ_ITEMS: FaqItem[] = landingFaq({
 });
 
 /** schema.org FAQPage for the same questions and answers. */
+/**
+ * The support questions from the homepage before Landing v9 (PRE-444) that the
+ * landing's FAQ doesn't cover. The homepage FAQ adds them before its last
+ * question (which phones), so search and the contact page's "Read the FAQ"
+ * still find them. /try leaves them out.
+ */
+export const HOME_SUPPORT_FAQ_IDS = ["different-from-tracker", "logging-accuracy", "messages", "wearable"] as const;
+
+export function homeFaqItems(landingItems: FaqItem[]): FaqItem[] {
+  const support = HOME_SUPPORT_FAQ_IDS.map((id) => FAQ_ITEMS.find((item) => item.id === id)).filter(
+    (item): item is FaqItem => item !== undefined,
+  );
+  return [...landingItems.slice(0, -1), ...support, ...landingItems.slice(-1)];
+}
+
 export function faqPageJsonLd(items: FaqItem[] = FAQ_ITEMS) {
   return {
     "@context": "https://schema.org",

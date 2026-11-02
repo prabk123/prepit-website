@@ -7,7 +7,8 @@ import { Eyebrow, Glass, Head, V9Section } from "@/components/landing/v9/V9Secti
 import FaqAccordion from "@/components/pricing/FaqAccordion";
 import LongLogo from "@/components/ui/LongLogo";
 import { FooterWithdrawalLink } from "@/components/withdrawal/WithdrawalLink";
-import { faqPageJsonLd, LANDING_APP_STORE_FAQ_ITEMS, landingWebFaqItems } from "@/lib/faq";
+import type { LandingSurfaceName } from "@/components/landing/LandingSurface";
+import { faqPageJsonLd, homeFaqItems, LANDING_APP_STORE_FAQ_ITEMS, landingWebFaqItems } from "@/lib/faq";
 import type { WebMarket } from "@/lib/markets";
 import { type Prices, TRIAL_DAYS, WEB_REMINDER_EMAIL_LIVE } from "@/lib/pricing";
 
@@ -69,9 +70,9 @@ const DRAWS_ON: { id: string; name: ReactNode; shapes: string }[] = [
   { id: "health-psychology", name: <i>Health Psychology</i>, shapes: "Coaching" },
 ];
 
-export function TrustSection() {
+export function TrustSection({ aliases }: { aliases?: string[] } = {}) {
   return (
-    <V9Section id="trust" name="trust" labelledBy="trust-heading" band>
+    <V9Section id="trust" name="trust" labelledBy="trust-heading" band aliases={aliases}>
       <div className="grid items-start gap-x-16 gap-y-10 min-[900px]:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
         <div className="min-[900px]:sticky min-[900px]:top-28">
           <Head
@@ -178,7 +179,7 @@ const INCLUDED = [
  * otherwise (PRE-373). The day 4 reminder email is a web promise (PRE-352):
  * App Store trials don't get it, so their timeline leaves it out.
  */
-export function OfferSection({ market, prices }: { market: WebMarket; prices: Prices }) {
+export function OfferSection({ market, prices, aliases }: { market: WebMarket; prices: Prices; aliases?: string[] }) {
   const web = market === "web";
   const timeline: { when: string; title: string; what: string }[] = [
     { when: "Today", title: "Getting to know you", what: `Session 1, about 5 minutes.${web ? ` ${prices.free}.` : ""}` },
@@ -187,7 +188,7 @@ export function OfferSection({ market, prices }: { market: WebMarket; prices: Pr
     { when: "Around day 7", title: "Week-in-review", what: "Session 3, your first check-in." },
   ];
   return (
-    <V9Section id="pricing" name="pricing" labelledBy="price-heading">
+    <V9Section id="pricing" name="pricing" labelledBy="price-heading" aliases={aliases}>
       <div className="grid items-start gap-x-16 gap-y-10 min-[900px]:grid-cols-[minmax(0,6fr)_minmax(0,5fr)]">
         <div className="flex min-w-0 flex-col gap-8">
           <Head
@@ -243,11 +244,27 @@ export function OfferSection({ market, prices }: { market: WebMarket; prices: Pr
 
 // ---------------------------------------------------------------- 12. FAQ
 
-/** Opens are `faq_question_opened` with source `landing-faq`, as before. */
-export function FaqSection({ market, prices }: { market: WebMarket; prices: Prices }) {
-  const items = market === "web" ? landingWebFaqItems(prices) : LANDING_APP_STORE_FAQ_ITEMS;
+/**
+ * Opens are `faq_question_opened` with source `landing-faq` on /try, as
+ * before. The homepage (PRE-444) keeps its own `home-faq` source and adds the
+ * old homepage's support questions (homeFaqItems).
+ */
+export function FaqSection({
+  market,
+  prices,
+  surface = "try",
+  aliases,
+}: {
+  market: WebMarket;
+  prices: Prices;
+  surface?: LandingSurfaceName;
+  aliases?: string[];
+}) {
+  const landingItems = market === "web" ? landingWebFaqItems(prices) : LANDING_APP_STORE_FAQ_ITEMS;
+  const items = surface === "home" ? homeFaqItems(landingItems) : landingItems;
+  const trackingSource = surface === "home" ? "home-faq" : "landing-faq";
   return (
-    <V9Section id="faq" name="faq" labelledBy="faq-heading" className="[&>div]:pt-0">
+    <V9Section id="faq" name="faq" labelledBy="faq-heading" className="[&>div]:pt-0" aliases={aliases}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqPageJsonLd(items)).replace(/</g, "\\u003c") }}
@@ -259,7 +276,7 @@ export function FaqSection({ market, prices }: { market: WebMarket; prices: Pric
             The small print, in big print.
           </h2>
         </div>
-        <FaqAccordion items={items} trackingSource="landing-faq" singleColumn />
+        <FaqAccordion items={items} trackingSource={trackingSource} singleColumn />
       </div>
     </V9Section>
   );
@@ -336,7 +353,7 @@ const footerLinkClass = "flex min-h-11 items-center text-small text-ink-secondar
  */
 export function V9Footer() {
   return (
-    <footer className="v9-band w-full border-t border-line text-ink">
+    <footer data-v9-footer="" className="v9-band w-full border-t border-line text-ink">
       <div className="mx-auto flex w-full max-w-content flex-col gap-6 px-gutter pb-[calc(96px+env(safe-area-inset-bottom,0px))] pt-12 min-[761px]:pb-16">
         <div className="flex flex-wrap items-center justify-between gap-x-8 gap-y-4">
           <Link href="/" className="flex h-11 w-fit items-center" aria-label="PrepIt home">
@@ -351,12 +368,19 @@ export function V9Footer() {
             <FooterWithdrawalLink className={footerLinkClass} />
           </nav>
         </div>
-        <p className="max-w-[60em] text-[13px] leading-normal text-ink-muted">
-          PrepIt is a coach, not a doctor: general nutrition guidance, not medical advice. Scores and costs are estimates. App
-          screens are real, from an example account. Photos are illustrative, and some are AI-generated. iPhone only for now;
-          Android is coming. © {new Date().getFullYear()} PrepIt.
-        </p>
+        <V9FinePrint />
       </div>
     </footer>
+  );
+}
+
+/** The landing's small print, in its footer on /try and above the site footer on the homepage. */
+export function V9FinePrint({ copyright = true }: { copyright?: boolean }) {
+  return (
+    <p className="max-w-[60em] text-[13px] leading-normal text-ink-muted">
+      PrepIt is a coach, not a doctor: general nutrition guidance, not medical advice. Scores and costs are estimates. App
+      screens are real, from an example account. Photos are illustrative, and some are AI-generated. iPhone only for now;
+      Android is coming.{copyright && <> © {new Date().getFullYear()} PrepIt.</>}
+    </p>
   );
 }

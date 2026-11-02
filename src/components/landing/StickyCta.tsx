@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import LandingCta from "@/components/landing/LandingCta";
+import { useLandingSurface } from "@/components/landing/LandingSurface";
 import type { WebMarket } from "@/lib/markets";
 import { type Prices, TRIAL_DAYS } from "@/lib/pricing";
 
@@ -13,11 +14,12 @@ import { type Prices, TRIAL_DAYS } from "@/lib/pricing";
  */
 export default function StickyCta({ market, prices }: { market: WebMarket; prices: Prices }) {
   const [show, setShow] = useState(false);
+  const { placementPrefix } = useLandingSurface();
 
   useEffect(() => {
     const hero = document.getElementById("hero");
     if (!hero || !("IntersectionObserver" in window)) return;
-    const others = [document.querySelector('[data-cta="pricing_start_trial"]'), document.getElementById("start")].filter(
+    const others = [document.querySelector(`[data-cta="${placementPrefix}pricing_start_trial"]`), document.getElementById("start")].filter(
       (el): el is Element => el !== null,
     );
     const visible = new Map<Element, boolean>();
@@ -28,12 +30,13 @@ export default function StickyCta({ market, prices }: { market: WebMarket; price
     observer.observe(hero);
     for (const el of others) observer.observe(el);
     return () => observer.disconnect();
-  }, []);
+  }, [placementPrefix]);
 
   if (market === "waitlist") return null;
   const web = market === "web";
   return (
     <div
+      data-v9-sticky=""
       aria-hidden={!show}
       inert={!show}
       className={`fixed inset-x-0 bottom-0 z-50 flex items-center justify-between gap-3 border-t border-line bg-surface/90 px-4 pb-[calc(10px+env(safe-area-inset-bottom,0px))] pt-2.5 backdrop-blur-md transition-transform duration-300 motion-reduce:transition-none min-[761px]:hidden ${show ? "translate-y-0" : "translate-y-[110%]"}`}
