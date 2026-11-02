@@ -34,6 +34,7 @@ export default function LandingHeaderCta({ className, trackingSource }: { classN
     <Link
       href={market === "web" ? landingBridgeHref() : "/waitlist"}
       className={className}
+      data-cta="header_start_trial"
       onClick={() => trackLandingEvent(LANDING_EVENTS.ctaClick, market, { placement: "header", funnel_id: LANDING_FUNNEL_ID })}
     >
       {market === "web" ? (

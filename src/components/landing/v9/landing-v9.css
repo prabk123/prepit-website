@@ -1,0 +1,157 @@
+/*
+ * Landing v9 on /try (PRE-432): Charlie's cream "gallery wall" ground, the
+ * fork photo's own colour, under the site's own tokens. Scoped to pages that
+ * render <div class="landing-v9">, so the header and footer around it turn
+ * cream too and nothing else on the site changes. The accent stays the app's
+ * calories orange; Clash Display headlines come from the site's tokens.
+ *
+ * Contrast on cream (#efe8e1): ink 13:1, ink-secondary 6.6:1, ink-muted
+ * (#5e5a57) 5.6:1, accent-text (#9a3a2c) 6.0:1.
+ */
+body:has(.landing-v9) {
+  --color-page: #efe8e1;
+  --color-surface: #f8f4f0;
+  --color-surface-raised: #e7dfd7;
+  --color-line: rgb(22 22 29 / 0.1);
+  --color-line-strong: rgb(22 22 29 / 0.2);
+  --color-ink-muted: #5e5a57;
+  --color-ink-faint: #5e5a57;
+  --color-accent-text: #9a3a2c;
+  /* The darker cream behind bands that set themselves apart (the fork photo's ground). */
+  --color-v9-band: #e4dad2;
+  /* Floating app captures: soft, warm shadow. */
+  --shadow-v9-card: 0 24px 48px -26px rgb(40 30 20 / 0.42), 0 4px 14px -6px rgb(40 30 20 / 0.14);
+}
+
+/* /try ends with the landing's own short footer (V9Footer, PRE-433). */
+body:has(.landing-v9) [data-site-footer] {
+  display: none;
+}
+
+@layer components {
+  .v9-band {
+    background: var(--color-v9-band);
+  }
+
+  /* The hero film fills its box; the poster underneath is the still. */
+  .v9-hero-film,
+  .v9-hero-film > video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .v9-hero-film > video {
+    object-fit: cover;
+    object-position: center;
+  }
+
+  /* The film's pause button, drawn outside the film layer (V9Hero). */
+  .v9-hero-toggle .loop-video__toggle--outside {
+    margin: 0;
+  }
+
+  .v9-hero-scrim {
+    background: linear-gradient(0deg, rgb(0 0 0 / 0.74) 0%, rgb(0 0 0 / 0.42) 45%, rgb(0 0 0 / 0) 72%);
+  }
+
+  @media (min-width: 900px) {
+    .v9-hero-scrim {
+      background: linear-gradient(90deg, rgb(0 0 0 / 0.64) 0%, rgb(0 0 0 / 0.32) 42%, rgb(0 0 0 / 0) 80%);
+    }
+  }
+
+  /*
+   * Builds, then holds (Charlie's motion rule): an element below the fold
+   * fades up once as it arrives, and never moves again. <Reveal> only marks
+   * it waiting after hydration, so without JavaScript, or under reduced
+   * motion, everything is simply there.
+   */
+  .v9-reveal {
+    transition:
+      opacity 700ms var(--ease-calm),
+      transform 700ms var(--ease-calm);
+    transition-delay: var(--v9-delay, 0ms);
+  }
+
+  .v9-reveal[data-state="waiting"] {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  /* "Monday." is struck through once the band arrives. */
+  .v9-strike {
+    position: relative;
+    display: inline-block;
+  }
+
+  .v9-strike::after {
+    content: "";
+    position: absolute;
+    left: -2%;
+    right: -2%;
+    top: 54%;
+    height: 0.07em;
+    background: currentColor;
+    transform-origin: left center;
+    transition: transform 650ms var(--ease-calm) 450ms;
+  }
+
+  .v9-reveal[data-state="waiting"] .v9-strike::after {
+    transform: scaleX(0);
+  }
+
+  /* The who-it's-for ticker: one slow, steady line. Under reduced motion it stands still, shown once (WhoItsFor hides the loop copy and the button). */
+  .v9-ticker {
+    display: flex;
+    width: max-content;
+    animation: v9-ticker 60s linear infinite;
+  }
+
+  /* Stopped by its pause button, and while hovered or focused. */
+  .v9-ticker-wrap[data-paused="true"] .v9-ticker,
+  .v9-ticker-wrap:hover .v9-ticker,
+  .v9-ticker-wrap:focus-within .v9-ticker {
+    animation-play-state: paused;
+  }
+
+  @keyframes v9-ticker {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  /* The carousel scrolls without a visible bar; the progress line and buttons below it stand in. */
+  .v9-carousel {
+    scrollbar-width: none;
+  }
+
+  .v9-carousel::-webkit-scrollbar {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .v9-reveal,
+    .v9-strike::after {
+      transition: none;
+    }
+
+    .v9-reveal[data-state="waiting"] {
+      opacity: 1;
+      transform: none;
+    }
+
+    .v9-reveal[data-state="waiting"] .v9-strike::after {
+      transform: none;
+    }
+
+    .v9-ticker {
+      animation: none;
+    }
+
+    .v9-ticker-wrap {
+      overflow-x: auto;
+    }
+  }
+}

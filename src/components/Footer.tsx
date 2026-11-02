@@ -25,7 +25,7 @@ function Column({ title, children }: { title: string; children: React.ReactNode 
  */
 export default function Footer() {
   return (
-    <footer className="w-full border-t border-line bg-page text-ink">
+    <footer data-site-footer="" className="w-full border-t border-line bg-page text-ink">
       <div className="mx-auto flex w-full max-w-content flex-col gap-12 px-gutter py-16">
         <div className="flex flex-col gap-10 lg:flex-row lg:justify-between">
           <div className="flex flex-col gap-4">
