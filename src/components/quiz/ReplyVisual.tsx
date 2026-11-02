@@ -42,7 +42,6 @@ const SIZES: Record<string, [number, number]> = {
   "today-snack": [760, 184],
   "week-rings": [740, 298],
   "week-strip": [724, 156],
-  "weekly-head": [740, 207],
   "weekly-weekend": [740, 706],
   "why-energy-oats": [740, 293],
   "why-mood": [732, 337],

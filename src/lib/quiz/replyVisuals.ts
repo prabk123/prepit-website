@@ -42,7 +42,6 @@ const TODAY_SNACK = "In today's plan: snack at 3:30 pm, apple with peanut butter
 const WEEK_RINGS = "Analysis, last 7 days: Energy 82, Satiety 79, Mood 78.";
 const RINGS = "Today's scores: Energy 84, Satiety 96, Mood 87.";
 const TODAY_ROWS = "Today's plan: snack at 3:30 pm, apple with peanut butter; dinner at 7:00 pm, Korean beef rice bowl, 440 kcal, each with Log it.";
-const WEEKLY = "Weekly pattern: change a day and we spread the difference across the others, so your weekly total stays the same.";
 const WEEKLY_WEEKEND = "Weekly calorie pattern: Saturdays and Sundays 1,740 kcal, 170 more; Monday to Friday about 1,500 kcal, 60 to 70 less.";
 const MSG_DIP = "Nutritionist: Last week it was toast and jam, and that's when the 3pm dip showed up. Keep doing what you're doing!";
 const ROW_OATS = "Breakfast, 7:45 am: protein overnight oats with apple and cinnamon, Energy up 35, Satiety up 8, Mood up 12.";
@@ -196,13 +195,11 @@ export const VISUALS = {
       },
     ],
   },
-  // Weekends: the rule, then a real pattern giving Saturday and Sunday more room (PRE-436, capture E3).
+  // Weekends: a real pattern giving Saturday and Sunday more room (PRE-436, capture E3).
+  // On its own: with the rule card above it, the reply ran under Continue on a phone.
   weekend: {
-    uses: ["weekly", "weekend"],
-    cards: [
-      { img: "weekly-head", alt: WEEKLY, w: 100, wd: 94 },
-      { img: "weekly-weekend", alt: WEEKLY_WEEKEND, w: 88, wd: 80, right: true, ov: -6 },
-    ],
+    uses: ["weekend"],
+    cards: [{ img: "weekly-weekend", alt: WEEKLY_WEEKEND, w: 92, wd: 84, right: true }],
   },
   social: {
     uses: ["social"],
