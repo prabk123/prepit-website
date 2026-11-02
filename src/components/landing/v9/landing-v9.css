@@ -97,7 +97,7 @@ body:has(.landing-v9) {
     transform: scaleX(0);
   }
 
-  /* The who-it's-for ticker: one slow, steady line; it stops on hover and under reduced motion. */
+  /* The who-it's-for ticker: one slow, steady line. Under reduced motion it stands still, shown once (WhoItsFor hides the loop copy and the button). */
   .v9-ticker {
     display: flex;
     width: max-content;
@@ -143,12 +143,6 @@ body:has(.landing-v9) {
 
     .v9-ticker {
       animation: none;
-    }
-
-    /* The second copy only exists to loop the line. */
-    .v9-ticker > [aria-hidden="true"],
-    .v9-ticker-toggle {
-      display: none;
     }
 
     .v9-ticker-wrap {

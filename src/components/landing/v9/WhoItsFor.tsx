@@ -32,7 +32,7 @@ function ArrowIcon({ back }: { back?: boolean }) {
 
 function TickerLine({ hidden }: { hidden?: boolean }) {
   return (
-    <ul aria-hidden={hidden} className="flex shrink-0 items-center">
+    <ul aria-hidden={hidden} className={`flex shrink-0 items-center ${hidden ? "motion-reduce:hidden" : ""}`}>
       {TICKER.map((line) => (
         <li key={line} className="flex items-center whitespace-nowrap font-display text-[clamp(20px,17px+0.8vw,26px)] leading-none text-ink-secondary">
           <span aria-hidden className="mx-6 h-1.5 w-1.5 rounded-full bg-accent" />
@@ -169,7 +169,7 @@ export default function WhoItsFor() {
           aria-label={tickerPaused ? "Play the moving list" : "Pause the moving list"}
           aria-pressed={tickerPaused}
           onClick={() => setTickerPaused((paused) => !paused)}
-          className="v9-ticker-toggle mx-3 grid h-11 w-11 flex-none place-items-center rounded-full border border-line-strong text-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus"
+          className="v9-ticker-toggle mx-3 grid motion-reduce:hidden h-11 w-11 flex-none place-items-center rounded-full border border-line-strong text-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus"
         >
           {tickerPaused ? (
             <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" aria-hidden>
