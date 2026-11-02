@@ -20,6 +20,26 @@
 import type { BridgeSource } from "./params";
 import type { WebSignupAnswer, WebSignupSettings, WebSignupUser } from "./webSignupProfile";
 
+/** The quiz's first sticking point, as the quiz leaves it for the cart. */
+export const STARTING_POINT_IDS = [
+  "dip",
+  "dip_breakfast",
+  "low",
+  "weekend",
+  "evening",
+  "graze",
+  "dinner",
+  "going",
+  "none",
+] as const;
+export type StartingPointId = (typeof STARTING_POINT_IDS)[number];
+
+export function parseStartingPointId(value: unknown): StartingPointId | undefined {
+  return typeof value === "string" && (STARTING_POINT_IDS as readonly string[]).includes(value)
+    ? (value as StartingPointId)
+    : undefined;
+}
+
 /** What the quiz leaves for the bridge. */
 export type BridgeHandoff = {
   funnelId: string;
@@ -33,6 +53,8 @@ export type BridgeHandoff = {
   email?: string;
   /** What the bridge's "your plan" card shows: the quiz's chips and daily targets. */
   planSummary?: { tags?: string[]; calories?: number; proteinGrams?: number };
+  /** The quiz's first sticking point: picks the cart's "For…" and "You said…" lines (PRE-437). */
+  startingPoint?: StartingPointId;
 };
 
 export const BRIDGE_HANDOFF_KEY = "prepit.bridgeHandoff";
@@ -75,6 +97,7 @@ export function parseBridgeHandoff(raw: string | null, now = Date.now()): Bridge
     firstName: text(value.firstName, 100),
     email: text(value.email, 320),
     planSummary: parsePlanSummary(value.planSummary),
+    startingPoint: parseStartingPointId(value.startingPoint),
   };
 }
 

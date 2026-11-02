@@ -1,10 +1,8 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import Checkout from "@/app/checkout/Checkout";
-import EmailInUseNotice from "@/components/account/EmailInUseNotice";
-import SignInButtons from "@/components/account/SignInButtons";
 import { useSaveWebSignup } from "@/components/account/useSaveWebSignup";
 import { useWebSession } from "@/components/account/useWebSession";
 import {
@@ -14,86 +12,34 @@ import {
   BridgeHead,
   BridgeHeader,
   BridgeProgress,
-  ConsultationShots,
-  FreeWeekTimeline,
-  QuizPlanCard,
   SUPPORT_EMAIL,
-  TrialTerms,
 } from "@/components/bridge/BridgeParts";
 import SignedInChip from "@/components/bridge/SignedInChip";
-import FaqAccordion from "@/components/pricing/FaqAccordion";
+import Cart from "./Cart";
 import { PRIMARY_BUTTON_CLASS, TEXT_BUTTON_CLASS } from "@/components/ui/buttons";
 import { openAppUrl } from "@/lib/appStore";
 import { providerOf, signInAuthDomain, signOutOfWebsite } from "@/lib/firebase/auth";
 import { readBridgeHandoff, writeBridgeVisit, type BridgeHandoff } from "@/lib/funnel/bridgeHandoff";
-import { parseBridgeSource, parseFunnelId, type BridgeSource } from "@/lib/funnel/params";
+import type { CartMarket } from "@/lib/funnel/cart";
+import { parseBridgeSource, parseFunnelId } from "@/lib/funnel/params";
 import { parsePlanId } from "@/lib/pricing";
 import { identifyPixelUser, trackSignupRegistration } from "@/lib/metaPixel";
 import { resetWebUser, trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webFunnelAnalytics";
 
-function faqItems(from: BridgeSource) {
-  return [
-    {
-      id: "bridge-when-pay",
-      question: "When do I pay?",
-      answer:
-        "Not today. We email you a reminder on day 4. If you keep PrepIt after your free 7 days, your first payment is on day 8, and it renews until you cancel.",
-    },
-    {
-      id: "bridge-cancel",
-      question: "How do I cancel?",
-      answer: "Online, any time, at tryprepit.app/account. Cancel before day 8 and you pay nothing.",
-    },
-    {
-      id: "bridge-get-app",
-      question: "How do I get PrepIt on my iPhone?",
-      answer: `Next you’ll download PrepIt from the App Store and sign in with the same Apple or Google account. ${
-        from === "quiz" ? "Your plan and free week are already there, so you skip the setup." : "Your free week is already on it."
-      }`,
-    },
-    {
-      id: "bridge-why-apple-google",
-      question: "Why Apple or Google?",
-      answer: `It keeps ${from === "quiz" ? "your plan, your trial" : "your trial"} and the app on one account, with no password to make. With Apple you can keep your email private.`,
-    },
-    {
-      id: "bridge-medical",
-      question: "Is this medical advice?",
-      answer: "No. PrepIt is a coach, not a doctor. For medical conditions, talk to a professional.",
-    },
-  ];
-}
-
-/** The short wait after sign-in while the account and answers are saved. */
-function SavingPlan({ from, provider }: { from: BridgeSource; provider: string | null }) {
-  const steps = ["Account ready", ...(from === "quiz" ? ["Quiz answers saved to your plan"] : []), "Checking your free week"];
-  return (
-    <div role="status" className="flex flex-col items-center gap-4 py-10 text-center">
-      <h1 className="font-display text-title text-ink">{from === "quiz" ? "Saving your plan" : "Checking your account"}</h1>
-      {provider && <p className="text-small text-ink-muted">Signed in with {provider}</p>}
-      <ul className="flex flex-col gap-2 text-left text-small text-ink-secondary">
-        {steps.map((step) => (
-          <li key={step} className="flex items-center gap-2">
-            <span aria-hidden className="h-2 w-2 animate-pulse rounded-full bg-primary motion-reduce:animate-none" />
-            {step}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
 /**
- * The shared bridge (PRE-323), from the bridge design, for the landing page
- * and the quiz: one page whose header follows `from`. Before sign-in it shows
- * the dated free week and the sign-in buttons; the plans and prices are
- * RevenueCat's paywall after sign-in, in the buyer's currency (PRE-375).
- * After sign-in the quiz's answers are saved to the account, then members
+ * The shared bridge (PRE-323) for the landing page and the quiz. Before
+ * sign-in it is the cart (PRE-437, Cart.tsx): the free consultation, both
+ * prices and the sign-in buttons; the plan is picked on RevenueCat's paywall
+ * after sign-in, on this page. While the account and the quiz's answers are
+ * saved, the cart stays up with "Saving your plan…" on its button. Then members
  * get their own page, people who had a trial get "Welcome back", and
  * everyone else goes on to RevenueCat's checkout and then "You're in".
  */
-/** `country` picks the company that sells at checkout (PRE-355). */
-export default function StartBridge({ country }: { country: string | null }) {
+/**
+ * `country` picks the company that sells at checkout (PRE-355); `market` is
+ * the cart's prices and terms for that company, read on the server (PRE-437).
+ */
+export default function StartBridge({ country, market }: { country: string | null; market: CartMarket }) {
   const params = useSearchParams();
   const from = parseBridgeSource(params.get("from"));
   const funnelId = parseFunnelId(params.get("funnel"));
@@ -165,45 +111,24 @@ export default function StartBridge({ country }: { country: string | null }) {
     resetWebUser();
   }
 
-  const name =
-    (session.status === "signedIn" ? session.user.displayName?.trim().split(/\s+/)[0] : undefined) || handoff?.firstName;
   const provider = session.status === "signedIn" ? providerOf(session.user) : null;
-  const providerName = provider === "apple" ? "Apple" : provider === "google" ? "Google" : null;
   const chip =
     session.status === "signedIn" ? (
       <SignedInChip provider={provider} email={session.user.email} onSignOut={() => void signOut()} />
     ) : null;
 
-  const intro =
-    from === "quiz" ? (
-      <>
-        <BridgeHead
-          eyebrow="Your plan is ready"
-          title={name ? `${name}, your free 7 days start today.` : "Your free 7 days start today."}
-          lead="Your 3-session consultation with your AI nutritionist is included. Nothing to pay today."
-        />
-        <QuizPlanCard name={name} summary={handoff?.planSummary} />
-      </>
-    ) : (
-      <BridgeHead
-        eyebrow="Your AI nutritionist"
-        title="Your free 7 days start today."
-        lead="Including a 3-session nutrition consultation with your AI nutritionist. Nothing to pay today."
-      />
-    );
-
   if (session.status === "loading") {
     return (
-      <>
+      <Narrow>
         <BridgeHeader />
         <p className="text-body text-ink-secondary">Loading…</p>
-      </>
+      </Narrow>
     );
   }
 
   if (session.status === "signedOut" && android && !androidContinue) {
     return (
-      <>
+      <Narrow>
         <BridgeHeader />
         <BridgeProgress from={from} current="trial" />
         <BridgeHead
@@ -215,62 +140,31 @@ export default function StartBridge({ country }: { country: string | null }) {
           Have an iPhone too? <u className="font-bold text-ink">Continue on this page</u>
         </button>
         <BridgeFooter />
-      </>
+      </Narrow>
     );
   }
 
   if (session.status === "signedOut" || summary?.emailInUse) {
     return (
-      <>
-        <BridgeHeader>
-          <button
-            type="button"
-            className="text-small text-ink-secondary"
-            onClick={() => document.getElementById("signin")?.scrollIntoView({ block: "start" })}
-          >
-            Already a member? <u className="font-bold text-ink">Sign in</u>
-          </button>
-        </BridgeHeader>
-        <BridgeProgress from={from} current="trial" />
-        {intro}
-        <FreeWeekTimeline today={today} />
-        <section id="signin" aria-labelledby="signin-heading" className="flex scroll-mt-28 flex-col gap-3">
-          <h2 id="signin-heading" className="font-display text-title text-ink">
-            Start my free 7 days
-          </h2>
-          {summary?.emailInUse ? (
-            <EmailInUseNotice
-              existingProvider={summary.emailInUse.existingProvider}
-              purpose={from === "quiz" ? "your plan and trial stay in one place" : "your trial stays in one place"}
-              onSignOut={() => void signOut(true)}
-            />
-          ) : (
-            <>
-              <p className="text-small text-ink-secondary">
-                Choose the account to save {from === "quiz" ? "your plan and trial" : "your free week"} to. You’ll sign
-                in to the PrepIt app with the same one.
-              </p>
-              <SignInButtons context={context} loginHint={handoff?.email} />
-            </>
-          )}
-          <TrialTerms today={today} />
-        </section>
-        <Assurances />
-        <ConsultationShots />
-        <section aria-labelledby="bridge-faq" className="flex flex-col gap-2">
-          <h2 id="bridge-faq" className="font-display text-[21px] leading-tight text-ink">
-            Questions
-          </h2>
-          <FaqAccordion items={faqItems(from)} trackingSource="bridge-faq" defaultOpenId="bridge-get-app" singleColumn />
-        </section>
-        <BridgeFooter />
-      </>
+      <Cart
+        from={from}
+        context={context}
+        handoff={handoff}
+        market={market}
+        today={today}
+        saving={false}
+        emailInUse={
+          summary?.emailInUse
+            ? { existingProvider: summary.emailInUse.existingProvider, onSignOut: () => void signOut(true) }
+            : null
+        }
+      />
     );
   }
 
   if (account?.status === "error") {
     return (
-      <div className="flex flex-col items-center gap-4 py-10 text-center">
+      <div className="mx-auto flex w-full max-w-[560px] flex-col items-center gap-4 py-10 text-center">
         <div className="self-stretch text-left">
           <BridgeHeader />
         </div>
@@ -289,19 +183,15 @@ export default function StartBridge({ country }: { country: string | null }) {
     );
   }
 
+  // Signed in, account and answers still saving: the cart with "Saving your plan…" on its button.
   if (!summary || save.status !== "done") {
-    return (
-      <>
-        <BridgeHeader />
-        <SavingPlan from={from} provider={providerName} />
-      </>
-    );
+    return <Cart from={from} context={context} handoff={handoff} market={market} today={today} saving />;
   }
 
   // Already paying (any store): never a checkout.
   if (summary.isSubscribed) {
     return (
-      <>
+      <Narrow>
         <BridgeHeader />
         <BridgeHead
           eyebrow="Welcome back"
@@ -325,13 +215,13 @@ export default function StartBridge({ country }: { country: string | null }) {
           .
         </p>
         <BridgeFooter />
-      </>
+      </Narrow>
     );
   }
 
   const welcomeBack = summary.hasUsedTrial;
   return (
-    <>
+    <Narrow>
       {/* The paying account, with Sign out, in the header like /checkout (PRE-375). */}
       <BridgeHeader>
         <SignedInChip
@@ -357,6 +247,11 @@ export default function StartBridge({ country }: { country: string | null }) {
       <Checkout country={country} header={false} />
       <Assurances trial={!welcomeBack} />
       <BridgeFooter />
-    </>
+    </Narrow>
   );
+}
+
+/** Every step but the cart keeps the bridge's narrow column. */
+function Narrow({ children }: { children: ReactNode }) {
+  return <div className="mx-auto flex w-full max-w-[560px] flex-col gap-6">{children}</div>;
 }

@@ -44,3 +44,9 @@ export function webBillingKeyFor(
   if (own) return { apiKey: own, seller, fellBack: false };
   return { apiKey: keys.shared?.trim() || null, seller, fellBack: true };
 }
+
+/** The company each seller is, for "Sold by …" lines (PRE-437). */
+export const WEB_BILLING_SELLER_NAMES: Record<WebBillingSeller, string> = {
+  us: "DOCWHIZZ, LLC",
+  uk: "DocWhizz Ltd",
+};

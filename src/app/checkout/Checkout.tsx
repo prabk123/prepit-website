@@ -9,7 +9,7 @@ import SignedInChip from "@/components/bridge/SignedInChip";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { PRIMARY_BUTTON_CLASS } from "@/components/ui/buttons";
 import { providerOf, signOutOfWebsite } from "@/lib/firebase/auth";
-import { parseFunnelId } from "@/lib/funnel/params";
+import { bridgePath, parseFunnelId } from "@/lib/funnel/params";
 import { parsePlanId } from "@/lib/pricing";
 import {
   checkoutValueFor,
@@ -120,10 +120,9 @@ export default function Checkout({ country, header = true }: { country: string |
   // Signed out: sign in first, then come back here with the same plan.
   useEffect(() => {
     if (session.status !== "signedOut") return;
-    const back = `/checkout?${params.toString()}`;
-    const query = new URLSearchParams({ ...(requestedPlan ? { plan: requestedPlan } : {}), funnel: funnelId, next: back });
-    router.replace(`/signin?${query}`);
-  }, [session.status, params, requestedPlan, funnelId, router]);
+    // The cart on /start signs them in and shows this checkout on the same page (PRE-437).
+    router.replace(bridgePath({ from: "landing", plan: requestedPlan, funnel: funnelId }));
+  }, [session.status, requestedPlan, funnelId, router]);
 
   useEffect(() => {
     if (!uid || !summary || !plansKey || keyProblem) return;
@@ -238,7 +237,7 @@ export default function Checkout({ country, header = true }: { country: string |
   useEffect(() => {
     if (plans.status === "already_subscribed") router.replace(welcomePath(false, true));
     if (plans.status === "email_in_use") {
-      router.replace(`/signin?${new URLSearchParams({ ...(requestedPlan ? { plan: requestedPlan } : {}), funnel: funnelId })}`);
+      router.replace(bridgePath({ from: "landing", plan: requestedPlan, funnel: funnelId }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [plans.status]);

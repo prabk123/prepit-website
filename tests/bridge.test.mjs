@@ -29,6 +29,7 @@ test("parseBridgeHandoff keeps known fields and drops stale or broken ones", () 
     firstName: "  Jo ",
     email: "jo@example.com",
     planSummary: { tags: [" Lose fat ", 3, ""], calories: 1610.4, proteinGrams: -5 },
+    startingPoint: "dip_breakfast",
     extra: "ignored",
     savedAt: now - 1000,
   });
@@ -42,7 +43,9 @@ test("parseBridgeHandoff keeps known fields and drops stale or broken ones", () 
     firstName: "Jo",
     email: "jo@example.com",
     planSummary: { tags: ["Lose fat"], calories: 1610, proteinGrams: undefined },
+    startingPoint: "dip_breakfast",
   });
+  assert.equal(parseBridgeHandoff(JSON.stringify({ funnelId: "quiz", startingPoint: "evil", savedAt: now }), now)?.startingPoint, undefined);
   assert.equal(parseBridgeHandoff(JSON.stringify({ funnelId: "quiz", savedAt: now - 31 * 86400000 }), now), null);
   assert.equal(parseBridgeHandoff("{not json", now), null);
   assert.equal(parseBridgeHandoff(JSON.stringify({ savedAt: now }), now), null);

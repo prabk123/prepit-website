@@ -40,21 +40,82 @@ export const SIGN_IN_FAILURE_MESSAGES: Record<SignInFailure, string | null> = {
 };
 
 /**
+ * Starts a Google or Apple sign-in and records it. `cartEvents` also sends the
+ * cart's own `auth_*` events (PRE-437) with `from_sticky`.
+ */
+export function useSignIn({
+  context,
+  onSignedIn,
+  loginHint,
+  cartEvents = false,
+  fromSticky = false,
+}: {
+  context: Record<string, string | null>;
+  onSignedIn?: (provider: SignInProvider) => void;
+  loginHint?: string;
+  cartEvents?: boolean;
+  fromSticky?: boolean;
+}) {
+  const [busy, setBusy] = useState<SignInProvider | null>(null);
+  const [failure, setFailure] = useState<SignInFailure | null>(null);
+
+  async function start(provider: SignInProvider) {
+    setBusy(provider);
+    setFailure(null);
+    trackWebFunnelEvent(WEB_FUNNEL_EVENTS.signInStart, {
+      ...context,
+      signup_method: provider,
+      auth_domain: signInAuthDomain(),
+    });
+    if (cartEvents) trackWebFunnelEvent(WEB_FUNNEL_EVENTS.authStart, { ...context, provider, from_sticky: fromSticky });
+    try {
+      await signInWith(provider, { loginHint });
+      if (cartEvents) trackWebFunnelEvent(WEB_FUNNEL_EVENTS.authSuccess, { ...context, provider, from_sticky: fromSticky });
+      onSignedIn?.(provider);
+    } catch (error) {
+      const code = error instanceof SignInError ? error.code : "unknown";
+      setFailure(code);
+      // A closed popup is its own event, so failure counts stay comparable
+      // with earlier weeks. It is also what a Google error page in the popup
+      // (redirect_uri_mismatch) turns into once the visitor closes it.
+      trackWebFunnelEvent(code === "cancelled" ? WEB_FUNNEL_EVENTS.signInCancelled : WEB_FUNNEL_EVENTS.signInFailed, {
+        ...context,
+        signup_method: provider,
+        ...(code === "cancelled" ? {} : { reason: code }),
+        auth_domain: signInAuthDomain(),
+      });
+      if (cartEvents && code === "cancelled") {
+        trackWebFunnelEvent(WEB_FUNNEL_EVENTS.authCancel, { ...context, provider, from_sticky: fromSticky });
+      }
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  return { busy, failure, start, message: failure ? SIGN_IN_FAILURE_MESSAGES[failure] : null };
+}
+
+/**
  * Sign in with Apple (when it's set up) and Google, the same two ways the app
- * signs people in. `context` is sent with the analytics events.
+ * signs people in. `context` is sent with the analytics events. `savingLabel`
+ * replaces both buttons with one waiting button after sign-in (the cart's
+ * "Saving your plan…", PRE-437).
  */
 export default function SignInButtons({
   context,
   onSignedIn,
   loginHint,
+  cartEvents,
+  savingLabel,
 }: {
   context: Record<string, string | null>;
   onSignedIn?: (provider: SignInProvider) => void;
   /** An email to start Google's account picker on (the quiz's). */
   loginHint?: string;
+  cartEvents?: boolean;
+  savingLabel?: string | null;
 }) {
-  const [busy, setBusy] = useState<SignInProvider | null>(null);
-  const [failure, setFailure] = useState<SignInFailure | null>(null);
+  const { busy, failure, start, message } = useSignIn({ context, onSignedIn, loginHint, cartEvents });
   const [inAppBrowser, setInAppBrowser] = useState(false);
   const [browserUrl, setBrowserUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -69,32 +130,18 @@ export default function SignInButtons({
     return <p className="text-body text-ink-secondary">{SIGN_IN_FAILURE_MESSAGES.unavailable}</p>;
   }
 
-  async function start(provider: SignInProvider) {
-    setBusy(provider);
-    setFailure(null);
-    trackWebFunnelEvent(WEB_FUNNEL_EVENTS.signInStart, {
-      ...context,
-      signup_method: provider,
-      auth_domain: signInAuthDomain(),
-    });
-    try {
-      await signInWith(provider, { loginHint });
-      onSignedIn?.(provider);
-    } catch (error) {
-      const code = error instanceof SignInError ? error.code : "unknown";
-      setFailure(code);
-      // A closed popup is its own event, so failure counts stay comparable
-      // with earlier weeks. It is also what a Google error page in the popup
-      // (redirect_uri_mismatch) turns into once the visitor closes it.
-      trackWebFunnelEvent(code === "cancelled" ? WEB_FUNNEL_EVENTS.signInCancelled : WEB_FUNNEL_EVENTS.signInFailed, {
-        ...context,
-        signup_method: provider,
-        ...(code === "cancelled" ? {} : { reason: code }),
-        auth_domain: signInAuthDomain(),
-      });
-    } finally {
-      setBusy(null);
-    }
+  if (savingLabel) {
+    return (
+      <div className="flex w-full flex-col gap-3">
+        <button type="button" className={PRIMARY_BUTTON_CLASS} disabled aria-busy="true">
+          <span aria-hidden className="h-2 w-2 animate-pulse rounded-full bg-on-primary motion-reduce:animate-none" />
+          {savingLabel}
+        </button>
+        <p role="status" aria-live="polite" className="sr-only">
+          {savingLabel}
+        </p>
+      </div>
+    );
   }
 
   async function copyLink() {
@@ -106,8 +153,6 @@ export default function SignInButtons({
       setCopied(false);
     }
   }
-
-  const message = failure ? SIGN_IN_FAILURE_MESSAGES[failure] : null;
 
   return (
     <div className="flex w-full flex-col gap-3">

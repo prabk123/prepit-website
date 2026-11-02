@@ -66,6 +66,7 @@ import {
   nextScreen,
   type Option,
   planSummary,
+  startingPointId,
   progress,
   QUIZ_FUNNEL_ID,
   QUIZ_FUNNEL_VERSION,
@@ -256,6 +257,7 @@ export default function Quiz({ country, market, prices }: { country: string; mar
       firstName: latest.firstName.trim() || undefined,
       email: latest.email.trim() || undefined,
       planSummary: planSummary(latest, targets),
+      startingPoint: startingPointId(latest),
     });
   };
 
