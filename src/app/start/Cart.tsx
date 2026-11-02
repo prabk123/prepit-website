@@ -13,17 +13,20 @@ import { isAppleSignInEnabled } from "@/lib/firebase/config";
 import { isInAppBrowser } from "@/lib/firebase/auth";
 import type { BridgeHandoff } from "@/lib/funnel/bridgeHandoff";
 import { cartDates, cartTermsParts, cartWho, type CartMarket } from "@/lib/funnel/cart";
+import { isCartEmailPlanEnabled, showCartEmailPlan } from "@/lib/funnel/cartLead";
 import type { BridgeSource } from "@/lib/funnel/params";
 import type { ExistingProvider } from "@/lib/prepitApi";
 import { WEB_REMINDER_EMAIL_LIVE } from "@/lib/pricing";
 import { WEB_BILLING_SELLER_NAMES } from "@/lib/revenuecat/sellers";
 import { trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webFunnelAnalytics";
+import CartEmailPlan from "./CartEmailPlan";
 
 /**
  * The cart (PRE-437): `/start` before sign-in, from Charlie's cart v6.1 (web
  * funnel v9). The order is fixed by the design: the free consultation and
  * $0 today, the plan card, the next step with both prices, sign-in, the four
- * risk reducers and the terms, then trust, three questions and the footer.
+ * risk reducers and the terms, then trust, three questions, "Not ready? Email
+ * me my plan" (quiz only, PRE-439) and the footer.
  * The plan itself is picked on RevenueCat's paywall after sign-in, on this
  * same page (StartBridge renders Checkout), so there's no plan picker here.
  * On a wide screen the order sits in a sticky column on the right; on a phone
@@ -35,6 +38,8 @@ type CartProps = {
   context: Record<string, string | null>;
   handoff: BridgeHandoff | null;
   market: CartMarket;
+  /** The visitor's country from the server's geo header, for "Email me my plan" (PRE-439). */
+  country?: string | null;
   today: Date;
   /** After sign-in, while the account and answers are saved: the button's own "Saving your plan…". */
   saving: boolean;
@@ -358,7 +363,7 @@ function StickyBar({
   );
 }
 
-export default function Cart({ from, context, handoff, market, today, saving, emailInUse }: CartProps) {
+export default function Cart({ from, context, handoff, market, country = null, today, saving, emailInUse }: CartProps) {
   const dates = cartDates(today);
   const zero = market.prices?.free ?? "$0";
   const quiz = from === "quiz";
@@ -389,6 +394,8 @@ export default function Cart({ from, context, handoff, market, today, saving, em
   }, []);
 
   const showSticky = stickyVisible && !saving && !emailInUse;
+  // "Not ready? Email me my plan" (PRE-439): quiz entry, before sign-in, while the plan email can go out.
+  const emailPlan = !saving && !emailInUse && handoff && showCartEmailPlan(from, handoff, isCartEmailPlanEnabled()) ? handoff : null;
   const left = "lg:col-start-1";
 
   return (
@@ -470,6 +477,11 @@ export default function Cart({ from, context, handoff, market, today, saving, em
           </h2>
           <FaqAccordion items={faqItems(from, market, dates)} trackingSource="bridge-faq" singleColumn />
         </section>
+        {emailPlan && (
+          <div className={left}>
+            <CartEmailPlan handoff={emailPlan} country={country} context={context} />
+          </div>
+        )}
         <div className={left}>
           <BridgeFooter soldBy={WEB_BILLING_SELLER_NAMES[market.seller]} />
         </div>
