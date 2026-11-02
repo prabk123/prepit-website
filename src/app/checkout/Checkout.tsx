@@ -554,7 +554,7 @@ export default function Checkout({
       {intro}
       {/* Our line over RevenueCat's own error: the card wasn't added and nothing was charged (PRE-438). */}
       {declined && paying === "idle" && !failure && (
-        <p role="alert" className="rounded-tile border border-energy bg-energy/20 px-4 py-3 text-small text-ink">
+        <p role="alert" className="rounded-icon border border-energy bg-energy/20 px-4 py-3 text-small text-ink">
           {DECLINED_LINE}
         </p>
       )}
@@ -576,7 +576,7 @@ export default function Checkout({
               role="alert"
               className={
                 failure === "declined"
-                  ? "rounded-tile border border-energy bg-energy/20 px-4 py-3 text-small text-ink"
+                  ? "rounded-icon border border-energy bg-energy/20 px-4 py-3 text-small text-ink"
                   : "text-small text-error"
               }
             >

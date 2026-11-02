@@ -21,18 +21,21 @@ export default function AppStoreButton({
   trackingSource,
   label = "Download on the App Store",
   note,
+  fullWidth = false,
 }: {
   /** Sent with the `app_store_click` event, e.g. "home-hero". */
   trackingSource: string;
   label?: string;
   /** Line under the button, e.g. "7 days free" (TRIAL_NOTE). */
   note?: string;
+  /** Fill a narrow card below the desktop breakpoint (the "You're in" steps). */
+  fullWidth?: boolean;
 }) {
   return (
-    <div className="flex flex-col items-start gap-3">
+    <div className={`flex flex-col items-start gap-3 ${fullWidth ? "w-full lg:w-auto" : ""}`}>
       <AppStoreLink
         trackingSource={trackingSource}
-        className={PILL_BUTTON_CLASS}
+        className={`${PILL_BUTTON_CLASS} ${fullWidth ? "w-full justify-center lg:w-auto" : ""}`}
       >
         <AppleLogo />
         {label}

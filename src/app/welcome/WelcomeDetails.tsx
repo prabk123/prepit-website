@@ -14,14 +14,13 @@ const PROVIDER_NAMES = { google: "Google", apple: "Apple" } as const;
 
 function Step({ n, title, children }: { n: number; title: string; children?: ReactNode }) {
   return (
-    <li className="grid grid-cols-[28px_minmax(0,1fr)] gap-3">
+    <li className="grid grid-cols-[28px_minmax(0,1fr)] items-center gap-x-3 gap-y-3">
       <span aria-hidden className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-small font-bold text-on-primary">
         {n}
       </span>
-      <div className="flex min-w-0 flex-col gap-2">
-        <b className="text-body font-bold text-ink">{title}</b>
-        {children}
-      </div>
+      <b className="text-body font-bold text-ink">{title}</b>
+      {/* Under the number on phones, so the App Store button has the card's full width. */}
+      {children && <div className="col-span-2 flex min-w-0 flex-col gap-3 sm:col-span-1 sm:col-start-2">{children}</div>}
     </li>
   );
 }
@@ -103,10 +102,10 @@ export default function WelcomeDetails({ download }: { download: ReactNode }) {
             {APP_LINK_EMAIL_LIVE && <EmailLinkButton email={account?.email ?? null} provider={provider} />}
           </Step>
           <Step n={2} title="Open it and tap Sign in">
-            <span className="w-fit rounded-tile bg-surface-raised px-3 py-2 text-small text-ink-secondary">
+            <span className="w-fit rounded-icon bg-surface-raised px-4 py-2.5 text-small text-ink-secondary">
               Already have an account? <b className="font-bold text-ink underline">Sign in</b>
             </span>
-            <p className="rounded-tile border border-energy bg-energy/20 px-3 py-2 text-small text-ink-secondary">
+            <p className="rounded-icon border border-energy bg-energy/20 px-4 py-2.5 text-small text-ink-secondary">
               Not Get Started. Get Started begins a new plan from scratch.
             </p>
           </Step>
