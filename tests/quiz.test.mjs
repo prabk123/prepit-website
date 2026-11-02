@@ -44,7 +44,7 @@ import {
   weightKg,
   weightText,
 } from "../src/lib/quiz/quiz.ts";
-import { pickVisuals, VISUALS, visualFinePrint } from "../src/lib/quiz/replyVisuals.ts";
+import { drawnVisual, pickVisuals, VISUALS, visualCaptures, visualFinePrint } from "../src/lib/quiz/replyVisuals.ts";
 
 const TODAY = new Date(2026, 9, 21);
 
@@ -232,25 +232,34 @@ test("across every route, a reply never repeats an earlier reply's capture, and 
           const picked = Object.values(visualsFor(answers({ goal, blockers: [blocker], dayPatterns, history })));
           const route = `${goal} / ${blocker} / ${dayPatterns} / ${history}`;
           assert.equal(picked.length, 5, route);
-          // Real captures: compositions that share a capture only appear when the reply had no other option.
+          // No image shows twice on a path: declared captures and drawn images both count.
+          const seen = new Set();
+          for (const p of picked)
+            for (const capture of visualCaptures(drawnVisual(p))) {
+              assert.ok(!seen.has(capture), `${route}: ${capture} repeats`);
+              seen.add(capture);
+            }
+          // (visualCaptures lists each capture once per visual, so a repeat here is across replies.)
           const stills = picked.filter((p) => VISUALS[p.key].still && !p.bare).length;
           assert.ok(stills <= 2, route);
           routes += 1;
         }
   assert.equal(routes, 7 * 8 * 5 * 4);
-  // A worked route: Improve energy, then Tired, then a dip. The tired reply's second option avoids the energy ring's oats.
+  // A worked route: Improve energy, then Tired, then a dip. The goal reply already drew the oats breakfast, so the dip shows the 3pm snack.
   assert.deepEqual(
     visualsFor(answers({ goal: "Improve energy", blockers: ["I feel tired"], dayPatterns: ["dip"], history: "Never" })),
     {
       "echo-goal": { key: "energy", bare: false },
       "echo-blocker": { key: "dipmsg", bare: false },
-      "echo-signals": { key: "dip", bare: false },
+      "echo-signals": { key: "dip2", bare: false },
       demo: { key: "typed", bare: false },
       "echo-plans": { key: "plan", bare: false },
     },
   );
   // The low-energy reply skips the check-in a Maintain path already showed.
   assert.equal(visualsFor(answers({ goal: "Maintain", dayPatterns: ["low"] }))["echo-signals"].key, "low2");
+  // Steady days on Maintain skip the rings (shown) and the oats (the typed demo draws them next).
+  assert.equal(visualsFor(answers({ goal: "Maintain", dayPatterns: ["none"] }))["echo-signals"].key, "steady4");
 });
 
 test("the fine print under each reply carries only the qualifiers its visual needs", () => {

@@ -38,6 +38,8 @@ export type Visual = {
 
 const ENERGY_OATS = "One breakfast's Energy, up 34: Morning protein provides a steady power supply to your day. Enjoy these oats with a side of chia seeds or almonds.";
 const CHECKIN = "Weekly check-in: Your steadiest week yet. Protein at lunch and fibre-rich breakfasts kept your Energy and Satiety in the green almost every day.";
+const TODAY_SNACK = "In today's plan: snack at 3:30 pm, apple with peanut butter, 200 kcal, with Log it.";
+const WEEK_RINGS = "Analysis, last 7 days: Energy 82, Satiety 79, Mood 78.";
 const RINGS = "Today's scores: Energy 84, Satiety 96, Mood 87.";
 const TODAY_ROWS = "Today's plan: snack at 3:30 pm, apple with peanut butter; dinner at 7:00 pm, Korean beef rice bowl, 440 kcal, each with Log it.";
 const WEEKLY = "Weekly pattern: change a day and we spread the difference across the others, so your weekly total stays the same.";
@@ -244,7 +246,7 @@ export const VISUALS = {
     uses: ["snacks"],
     cards: [
       { img: "msg-snacks", alt: "Nutritionist: We'll factor in those snacks to help keep things balanced.", w: 86, wd: 78, right: true },
-      { img: "today-snack", alt: "In today's plan: snack at 3:30 pm, apple with peanut butter, 200 kcal, with Log it.", w: 94, wd: 86, ov: 10 },
+      { img: "today-snack", alt: TODAY_SNACK, w: 94, wd: 86, ov: 10 },
     ],
   },
   hunger: {
@@ -275,6 +277,20 @@ export const VISUALS = {
     still: { img: "still-desk-3pm", position: "50% 30%" },
     cards: [{ img: "why-energy-oats", alt: ENERGY_OATS, w: 94, wd: 86, right: true, ov: -96, ovd: -170, tag: "One breakfast" }],
   },
+  // The same desk still with the 3:30 pm snack, for paths whose goal reply already showed the oats breakfast.
+  dip2: {
+    uses: ["dip", "snacks"],
+    scores: true,
+    still: { img: "still-desk-3pm", position: "50% 30%" },
+    cards: [{ img: "today-snack", alt: TODAY_SNACK, w: 94, wd: 86, right: true, ov: -96, ovd: -170, tag: "Today's plan" }],
+  },
+  // And with the last 7 days, when the snack showed too.
+  dip3: {
+    uses: ["dip", "week-rings"],
+    scores: true,
+    still: { img: "still-desk-3pm", position: "50% 30%" },
+    cards: [{ img: "week-rings", alt: WEEK_RINGS, w: 94, wd: 86, right: true, ov: -96, ovd: -170, tag: "Last 7 days" }],
+  },
   low: {
     uses: ["checkin", "ring-energy"],
     scores: true,
@@ -283,7 +299,7 @@ export const VISUALS = {
   low2: {
     uses: ["week-rings"],
     scores: true,
-    cards: [{ img: "week-rings", alt: "Analysis, last 7 days: Energy 82, Satiety 79, Mood 78.", w: 100, wd: 94, tag: "Last 7 days" }],
+    cards: [{ img: "week-rings", alt: WEEK_RINGS, w: 100, wd: 94, tag: "Last 7 days" }],
   },
   hungry: {
     uses: ["row-wrap", "row-yogurt"],
@@ -328,6 +344,15 @@ export const VISUALS = {
     scores: true,
     cards: [
       { img: "rings", alt: RINGS, w: 100, wd: 92 },
+      { img: "row-salmon", alt: ROW_SALMON, w: 88, wd: 80, right: true, ov: 10 },
+    ],
+  },
+  // Two meals and no breakfast oats, for paths whose goal reply showed today's rings (the typed demo draws the oats next).
+  steady4: {
+    uses: ["row-salmon", "row-yogurt"],
+    scores: true,
+    cards: [
+      { img: "row-yogurt", alt: ROW_YOGURT, w: 88, wd: 80 },
       { img: "row-salmon", alt: ROW_SALMON, w: 88, wd: 80, right: true, ov: 10 },
     ],
   },
@@ -401,6 +426,11 @@ export type VisualReply = (typeof VISUAL_REPLIES)[number];
 
 const MAX_STILLS = 2;
 
+/** What a visual shows: its declared captures plus every image it draws, so a token can't drift from the image. */
+export function visualCaptures(visual: Visual): string[] {
+  return [...new Set([...visual.uses, ...visual.cards.map((card) => card.img), ...(visual.still ? [visual.still.img] : [])])];
+}
+
 /**
  * Each reply's visual: the first option that shares no capture with an
  * earlier reply's, else its first option. A pick with a still after two
@@ -413,11 +443,11 @@ export function pickVisuals(options: Record<VisualReply, VisualKey[]>): Partial<
   for (const reply of VISUAL_REPLIES) {
     const keys = options[reply];
     if (!keys.length) continue;
-    const key = keys.find((k) => !VISUALS[k].uses.some((u) => used.has(u))) ?? keys[0];
+    const key = keys.find((k) => !visualCaptures(VISUALS[k]).some((u) => used.has(u))) ?? keys[0];
     const visual: Visual = VISUALS[key];
     const bare = Boolean(visual.still) && stills >= MAX_STILLS;
     picked[reply] = { key, bare };
-    visual.uses.forEach((u) => used.add(u));
+    visualCaptures(visual).forEach((u) => used.add(u));
     if (visual.still && !bare) stills += 1;
   }
   return picked;

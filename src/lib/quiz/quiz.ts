@@ -674,7 +674,7 @@ const SCORES_REPLIES: Record<DayPattern, Reply> = {
     eyebrow: "You said · Energy dips mid-afternoon",
     headline: "Let's see what's behind your afternoon dip.",
     say: "Your Energy score updates as you log, so you can see what lunch does to your afternoon. No wearable, no guesswork.",
-    visuals: ["dip"],
+    visuals: ["dip", "dip2", "dip3"],
   },
   low: {
     eyebrow: "You said · Energy is low most days",
@@ -699,7 +699,7 @@ const SCORES_REPLIES: Record<DayPattern, Reply> = {
     eyebrow: "You said · Steady all day",
     headline: "Steady already. Let's keep it that way.",
     say: "Your scores show which meals keep you there, so you know exactly what's working.",
-    visuals: ["steady", "steady2", "steady3"],
+    visuals: ["steady2", "steady4", "steady", "steady3"],
   },
 };
 
