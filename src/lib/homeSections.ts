@@ -1,5 +1,3 @@
-import { RESEARCH_PAGE_HREF } from "@/lib/research";
-
 export type HomeSectionLink = {
   label: string;
   href: string;
@@ -30,7 +28,7 @@ export const SITE_PAGE_LINKS: HomeSectionLink[] = [
  * Features, Guides and Research).
  */
 export const HEADER_PAGE_LINKS: HomeSectionLink[] = [
-  SITE_PAGE_LINKS[0],
-  { label: "Research", href: RESEARCH_PAGE_HREF },
-  ...SITE_PAGE_LINKS.slice(1),
+  { label: "Guides", href: "/guides" },
+  { label: "Research", href: "/research" },
+  { label: "Contact", href: "/contact" },
 ];

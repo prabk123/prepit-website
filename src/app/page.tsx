@@ -79,7 +79,7 @@ export default async function Home() {
         <AskNutritionistSection />
         <TrustSection aliases={["how-it-decides"]} />
         <OfferSection market={market} prices={prices} aliases={["consultation"]} />
-        <FaqSection market={market} prices={prices} trackingSource="home-faq" aliases={["questions"]} />
+        <FaqSection market={market} prices={prices} surface="home" aliases={["questions"]} />
         <ClosingSection market={market} prices={prices} />
         {/* The landing footer's small print; the site footer below carries the copyright. */}
         <div className="v9-band w-full border-t border-line">

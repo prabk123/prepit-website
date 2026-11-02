@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import AppStoreLink from "@/components/AppStoreLink";
 import LandingCta from "@/components/landing/LandingCta";
+import type { LandingSurfaceName } from "@/components/landing/LandingSurface";
 import { landingCopy } from "@/components/landing/LandingSections";
 import Reveal from "@/components/landing/v9/Reveal";
 import { V9Photo, V9Screen } from "@/components/landing/v9/V9Photo";
@@ -120,10 +121,12 @@ export function V9Section({
 
 /**
  * On the homepage (`home`, PRE-444) the hero also offers the App Store
- * straight away, for people who arrive already sold; on /try every button
- * goes to the cart.
+ * straight away, for people who arrive already sold, where the website
+ * sells (elsewhere the main button is already the App Store or the
+ * waitlist); on /try every button goes to the cart. `surface` must match the
+ * page's LandingSurfaceProvider.
  */
-export function V9Hero({ market, prices, surface = "try" }: { market: WebMarket; prices: Prices; surface?: "try" | "home" }) {
+export function V9Hero({ market, prices, surface = "try" }: { market: WebMarket; prices: Prices; surface?: LandingSurfaceName }) {
   const web = market === "web";
   const filmId = `${surface}-hero-film`;
   const { reassure } = landingCopy(market, prices);
@@ -207,7 +210,7 @@ export function V9Hero({ market, prices, surface = "try" }: { market: WebMarket;
             </span>
           </div>
           <LandingCta market={market} placement="hero" className="w-fit max-[599px]:flex max-[599px]:w-full max-[599px]:justify-center" />
-          {surface === "home" && market !== "app-store" && (
+          {surface === "home" && market === "web" && (
             <p className="text-small text-ink-secondary">
               Already sure?{" "}
               <AppStoreLink

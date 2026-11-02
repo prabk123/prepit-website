@@ -7,7 +7,8 @@ import { Eyebrow, Glass, Head, V9Section } from "@/components/landing/v9/V9Secti
 import FaqAccordion from "@/components/pricing/FaqAccordion";
 import LongLogo from "@/components/ui/LongLogo";
 import { FooterWithdrawalLink } from "@/components/withdrawal/WithdrawalLink";
-import { faqPageJsonLd, LANDING_APP_STORE_FAQ_ITEMS, landingWebFaqItems } from "@/lib/faq";
+import type { LandingSurfaceName } from "@/components/landing/LandingSurface";
+import { faqPageJsonLd, homeFaqItems, LANDING_APP_STORE_FAQ_ITEMS, landingWebFaqItems } from "@/lib/faq";
 import type { WebMarket } from "@/lib/markets";
 import { type Prices, TRIAL_DAYS, WEB_REMINDER_EMAIL_LIVE } from "@/lib/pricing";
 
@@ -245,20 +246,23 @@ export function OfferSection({ market, prices, aliases }: { market: WebMarket; p
 
 /**
  * Opens are `faq_question_opened` with source `landing-faq` on /try, as
- * before, and the homepage's own `home-faq` there (PRE-444).
+ * before. The homepage (PRE-444) keeps its own `home-faq` source and adds the
+ * old homepage's support questions (homeFaqItems).
  */
 export function FaqSection({
   market,
   prices,
-  trackingSource = "landing-faq",
+  surface = "try",
   aliases,
 }: {
   market: WebMarket;
   prices: Prices;
-  trackingSource?: string;
+  surface?: LandingSurfaceName;
   aliases?: string[];
 }) {
-  const items = market === "web" ? landingWebFaqItems(prices) : LANDING_APP_STORE_FAQ_ITEMS;
+  const landingItems = market === "web" ? landingWebFaqItems(prices) : LANDING_APP_STORE_FAQ_ITEMS;
+  const items = surface === "home" ? homeFaqItems(landingItems) : landingItems;
+  const trackingSource = surface === "home" ? "home-faq" : "landing-faq";
   return (
     <V9Section id="faq" name="faq" labelledBy="faq-heading" className="[&>div]:pt-0" aliases={aliases}>
       <script
