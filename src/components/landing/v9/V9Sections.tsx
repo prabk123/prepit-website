@@ -18,7 +18,7 @@ import { type Prices, TRIAL_DAYS } from "@/lib/pricing";
 // ---------------------------------------------------------------- pieces
 
 /** A small uppercase label with an orange dot: plain, or as a black pill over media. */
-function DotTag({ children, pill }: { children: ReactNode; pill?: boolean }) {
+export function DotTag({ children, pill }: { children: ReactNode; pill?: boolean }) {
   return (
     <span
       className={`inline-flex w-fit items-center gap-1.5 text-[11px] font-bold uppercase leading-none tracking-[0.1em] ${
@@ -31,7 +31,7 @@ function DotTag({ children, pill }: { children: ReactNode; pill?: boolean }) {
   );
 }
 
-function Chip({ children }: { children: ReactNode }) {
+export function Chip({ children }: { children: ReactNode }) {
   return (
     <span className="inline-flex items-center rounded-full border border-line bg-surface/70 px-3 py-1.5 text-[13px] font-medium leading-tight text-ink">
       {children}
@@ -40,7 +40,7 @@ function Chip({ children }: { children: ReactNode }) {
 }
 
 /** A real app capture floating on the page, as the app's own card. */
-function Glass({ children, className }: { children: ReactNode; className?: string }) {
+export function Glass({ children, className }: { children: ReactNode; className?: string }) {
   return (
     <div className={`overflow-hidden rounded-[18px] bg-white p-1 shadow-[var(--shadow-v9-card)] ring-1 ring-black/5 ${className ?? ""}`}>
       <div className="overflow-hidden rounded-[14px]">{children}</div>
@@ -48,12 +48,12 @@ function Glass({ children, className }: { children: ReactNode; className?: strin
   );
 }
 
-function Eyebrow({ children }: { children: ReactNode }) {
+export function Eyebrow({ children }: { children: ReactNode }) {
   return <p className="text-[12px] font-bold uppercase leading-none tracking-[0.12em] text-ink-muted">{children}</p>;
 }
 
 /** Label, headline and the one supporting line of a section. */
-function Head({ id, label, title, lead, center }: { id: string; label: string; title: ReactNode; lead: ReactNode; center?: boolean }) {
+export function Head({ id, label, title, lead, center }: { id: string; label: string; title: ReactNode; lead: ReactNode; center?: boolean }) {
   return (
     <div className={`flex flex-col gap-4 ${center ? "items-center text-center" : ""}`}>
       <Eyebrow>{label}</Eyebrow>
@@ -66,7 +66,7 @@ function Head({ id, label, title, lead, center }: { id: string; label: string; t
 }
 
 /** Text beside media from 900 px, text first below. `reverse` puts the media on the left. */
-function Split({ text, media, reverse, align = "center" }: { text: ReactNode; media: ReactNode; reverse?: boolean; align?: "center" | "end" }) {
+export function Split({ text, media, reverse, align = "center" }: { text: ReactNode; media: ReactNode; reverse?: boolean; align?: "center" | "end" }) {
   return (
     <div className={`grid gap-x-16 gap-y-10 min-[900px]:grid-cols-2 ${align === "end" ? "min-[900px]:items-end" : "items-center"}`}>
       <div className={`flex min-w-0 flex-col gap-6 ${reverse ? "min-[900px]:order-2" : ""}`}>{text}</div>
@@ -76,7 +76,7 @@ function Split({ text, media, reverse, align = "center" }: { text: ReactNode; me
 }
 
 /** One section of the page, with the name it reports to `home_section_viewed`. */
-function V9Section({
+export function V9Section({
   id,
   name,
   labelledBy,

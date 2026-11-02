@@ -23,6 +23,11 @@ body:has(.landing-v9) {
   --shadow-v9-card: 0 24px 48px -26px rgb(40 30 20 / 0.42), 0 4px 14px -6px rgb(40 30 20 / 0.14);
 }
 
+/* /try ends with the landing's own short footer (V9Footer, PRE-433). */
+body:has(.landing-v9) [data-site-footer] {
+  display: none;
+}
+
 /* Dark bands inside the page keep their dark values. */
 body:has(.landing-v9) .theme-dark {
   --color-page: #18181b;
