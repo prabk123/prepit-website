@@ -152,10 +152,16 @@ export function readWebSessionId(): string | undefined {
 /**
  * What the bridge knew when it showed checkout, for the "You're in" page
  * after it: which page they came from and whether they got the free week.
- * Session storage, so it ends with the tab. Checkout (RevenueCat) owns the
- * redirect, so this can't travel in the URL.
+ * Once a purchase went through, checkout adds `purchase`: the plan bought
+ * (null when the package wasn't one of ours), the company that billed it and
+ * when, for the recap (PRE-438). Session storage, so it ends with the tab.
+ * Checkout (RevenueCat) owns the redirect, so this can't travel in the URL.
  */
-export type BridgeVisit = { from: BridgeSource; trial: boolean };
+export type BridgeVisit = {
+  from: BridgeSource;
+  trial: boolean;
+  purchase?: { plan: "annual" | "monthly" | null; seller: "us" | "uk"; startedAt: string };
+};
 
 const BRIDGE_VISIT_KEY = "prepit.bridgeVisit";
 
@@ -167,13 +173,23 @@ export function writeBridgeVisit(visit: BridgeVisit): void {
   }
 }
 
+function parsePurchase(value: unknown): BridgeVisit["purchase"] | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  const { plan, seller, startedAt } = value as Record<string, unknown>;
+  if (plan !== "annual" && plan !== "monthly" && plan !== null) return undefined;
+  if (seller !== "us" && seller !== "uk") return undefined;
+  if (typeof startedAt !== "string" || Number.isNaN(Date.parse(startedAt))) return undefined;
+  return { plan, seller, startedAt };
+}
+
 /** Parses a stored visit. Exported for tests. */
 export function parseBridgeVisit(raw: string | null): BridgeVisit | null {
   if (!raw) return null;
   try {
     const value = JSON.parse(raw) as Record<string, unknown>;
     if ((value.from !== "landing" && value.from !== "quiz") || typeof value.trial !== "boolean") return null;
-    return { from: value.from, trial: value.trial };
+    const purchase = parsePurchase(value.purchase);
+    return purchase ? { from: value.from, trial: value.trial, purchase } : { from: value.from, trial: value.trial };
   } catch {
     return null;
   }

@@ -13,9 +13,19 @@ import { WEB_REMINDER_EMAIL_LIVE } from "@/lib/pricing";
 export const SUPPORT_EMAIL = "support@tryprepit.app";
 
 /** Progress: quiz visitors already have their plan, landing visitors start at the free trial. */
-export function BridgeProgress({ from, current }: { from: BridgeSource; current: "trial" | "app" }) {
-  const labels = from === "quiz" ? ["Plan ready", "Free trial", "Get the app"] : ["Free trial", "Get the app"];
-  const active = labels.indexOf(current === "trial" ? "Free trial" : "Get the app");
+export function BridgeProgress({
+  from,
+  current,
+  trial = true,
+}: {
+  from: BridgeSource;
+  current: "trial" | "app";
+  /** False for an account that has had its free week: the middle step is "Your plan", with no trial words (PRE-438). */
+  trial?: boolean;
+}) {
+  const middle = trial ? "Free trial" : "Your plan";
+  const labels = from === "quiz" ? ["Plan ready", middle, "Get the app"] : [middle, "Get the app"];
+  const active = labels.indexOf(current === "trial" ? middle : "Get the app");
   return (
     <ol
       aria-label="Progress"
