@@ -20,6 +20,8 @@ type LandingCtaProps = {
   fullWidth?: boolean;
   /** The compact size, for the phone's sticky bar. */
   small?: boolean;
+  /** A shorter label where the website sells, as on the phone's sticky bar ("Start free"). */
+  label?: string;
   className?: string;
 };
 
@@ -37,7 +39,7 @@ function Arrow() {
  * in, choose a plan, pay $0); in a country listed for the App Store it is
  * the App Store button; in a waitlist country it goes to the waitlist.
  */
-export default function LandingCta({ market, placement, fullWidth, small, className }: LandingCtaProps) {
+export default function LandingCta({ market, placement, fullWidth, small, label, className }: LandingCtaProps) {
   if (market === "app-store") {
     return (
       <div className={className} data-cta={`${placement}_start_trial`}>
@@ -55,8 +57,29 @@ export default function LandingCta({ market, placement, fullWidth, small, classN
       data-cta={`${placement}_start_trial`}
       onClick={() => trackLandingEvent(LANDING_EVENTS.ctaClick, market, { placement, funnel_id: LANDING_FUNNEL_ID })}
     >
-      {market === "web" ? START_LABEL : "Join the waitlist"}
+      {market === "web" ? (label ?? START_LABEL) : "Join the waitlist"}
       {!small && <Arrow />}
     </Link>
+  );
+}
+
+/**
+ * "Not sure yet? Take the quiz first." under the closing button: the later
+ * test arm (Charlie's decision D4), off at launch. Clicks report as
+ * `web_landing_cta_click` with placement `closing_quiz`.
+ */
+export function LandingQuizLink({ market }: { market: WebMarket }) {
+  return (
+    <p className="text-body text-ink-secondary">
+      Not sure yet?{" "}
+      <Link
+        href="/quiz"
+        data-cta="closing_quiz"
+        className="font-medium text-ink underline underline-offset-4"
+        onClick={() => trackLandingEvent(LANDING_EVENTS.ctaClick, market, { placement: "closing_quiz", funnel_id: LANDING_FUNNEL_ID })}
+      >
+        Take the quiz first
+      </Link>
+    </p>
   );
 }

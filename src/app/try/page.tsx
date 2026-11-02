@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import SectionViewTracker from "@/components/analytics/SectionViewTracker";
-import LandingFaq from "@/components/landing/LandingFaq";
-import { ClosingSection, OfferSection, TrustSection } from "@/components/landing/LandingSections";
 import LandingViewTracker from "@/components/landing/LandingViewTracker";
 import StickyCta from "@/components/landing/StickyCta";
 import "@/components/landing/v9/landing-v9.css";
+import { ClosingSection, FaqSection, OfferSection, TrustSection, V9Footer } from "@/components/landing/v9/V9LowerSections";
 import {
   AskNutritionistSection,
   HoweverYouEatSection,
@@ -36,9 +35,9 @@ export const metadata: Metadata = {
 };
 
 /**
- * The direct-sale landing page (PRE-302): Landing v9 from the hero film to
- * Ask Nutritionist (PRE-432), then the earlier trust, offer, FAQ and closing
- * sections until part 2 (PRE-433) replaces them. No quiz.
+ * The direct-sale landing page (PRE-302): Landing v9, from the hero film to
+ * Ask Nutritionist (PRE-432), then why you can trust it, the offer, the FAQ,
+ * the close and the landing's own footer (PRE-433). No quiz link yet.
  * Visitors start their free week on the website (sign in, pay $0, then
  * download the app). That is every country for now; a country listed in
  * lib/markets.ts goes to the App Store or the waitlist instead (PRE-331).
@@ -64,14 +63,11 @@ export default async function LandingPage() {
       <ItNoticesSection />
       <ItPlansSection market={market} />
       <AskNutritionistSection />
-      <TrustSection market={market} />
+      <TrustSection />
       <OfferSection market={market} prices={prices} />
-      <LandingFaq market={market} prices={prices} />
+      <FaqSection market={market} prices={prices} />
       <ClosingSection market={market} prices={prices} />
-      {/* The handoff footer's media note, until PRE-433 rebuilds the footer. */}
-      <p className="mx-auto w-full max-w-content px-gutter pb-2 pt-8 text-[13px] leading-snug text-ink-muted">
-        App screens are real, from an example account. Photos are illustrative, and some are AI-generated.
-      </p>
+      <V9Footer />
       <StickyCta market={market} prices={prices} />
     </div>
   );

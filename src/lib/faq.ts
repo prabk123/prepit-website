@@ -78,91 +78,112 @@ export const FAQ_ITEMS: FaqItem[] = [
   },
 ];
 
-const LANDING_SHARED_FAQ: FaqItem[] = [
-  {
-    id: "landing-consultation",
-    question: "What happens in the nutrition consultation?",
-    answer:
-      "Three short chat sessions with your AI nutritionist in your first week: getting to know you, what it noticed in your first few days of meals, and a review of the week. Session 3 is your first weekly check-in.",
-  },
-  {
-    id: "landing-meal-plan",
-    question: "Can I get a meal plan in the free week?",
-    answer:
-      "Yes. Ask your nutritionist any time after Session 1, and Session 2 offers to plan your week. Plans cover up to 7 days, for one person, with one grocery list.",
-  },
-  {
-    id: "landing-real-nutritionist",
-    question: "Is PrepIt a real nutritionist?",
-    answer:
-      "PrepIt's nutritionist is AI, and never claims to be human. Its advice comes from your meals, your goals and nutrition science, and you confirm every suggested change.",
-  },
-  {
-    id: "landing-energy-satiety-mood",
-    question: "What are Energy, Satiety and Mood?",
-    answer:
-      "Three scores from 0 to 100 that show how your meals line up with steadier energy, fullness and mood, each with the reason behind it. They're estimates to guide your next meal, not a medical measurement.",
-  },
-];
-
-function landingMedicalFaq(professional: string): FaqItem {
-  return {
-    id: "landing-medical",
-    question: "Can PrepIt help with a medical condition?",
-    answer: `PrepIt gives nutrition guidance, not medical advice. Medical questions get pointed to a qualified professional, such as ${professional}, a pharmacist or a registered dietitian.`,
-  };
+/**
+ * The Landing v9 FAQ (PRE-433): Charlie's nine questions from the handoff,
+ * in his order. Ids of questions kept from the earlier landing FAQ stay the
+ * same, so `faq_question_opened` reads across both versions.
+ */
+function landingFaq({
+  trial,
+  cancel,
+  professional,
+  phones,
+}: {
+  trial: FaqItem;
+  cancel: FaqItem;
+  professional: string;
+  phones: FaqItem;
+}): FaqItem[] {
+  return [
+    trial,
+    cancel,
+    {
+      id: "landing-real-nutritionist",
+      question: "Is PrepIt a real nutritionist?",
+      answer:
+        "An AI nutritionist, and it always says so. Its advice comes from your meals, your goals and nutrition research. You confirm every change it suggests.",
+    },
+    {
+      id: "landing-sell-data",
+      question: "Do you sell my data?",
+      answer: "No. We don't sell your data, and we don't share your food, health or body data with advertisers.",
+      link: { href: "/privacy-policy", label: "Privacy policy" },
+    },
+    {
+      id: "landing-consultation",
+      question: "What happens in the consultation?",
+      answer: "3 short chat sessions in your first week: Getting to know you, What I've noticed so far, and Week-in-review.",
+    },
+    {
+      id: "landing-meal-plan",
+      question: "Can I get a meal plan in the free week?",
+      answer:
+        "Yes. Ask any time after Session 1, and Session 2 offers to plan your week. Up to 7 days, for 1 person, with 1 grocery list.",
+    },
+    {
+      id: "landing-energy-satiety-mood",
+      question: "What are Energy, Satiety and Mood?",
+      answer:
+        "3 scores from 0 to 100 showing how your meals line up with steadier energy, fullness and mood, each with the reason. Estimates, not a medical measurement.",
+    },
+    {
+      id: "landing-medical",
+      question: "Can PrepIt help with a medical condition?",
+      answer: `PrepIt gives nutrition guidance, not medical advice. Medical questions go to ${professional}, a pharmacist or a registered dietitian.`,
+    },
+    phones,
+  ];
 }
 
 /**
  * The landing page FAQ where visitors start on the website (PRE-302).
  * A web subscription is managed and cancelled on the website, not in the app
  * or the App Store (PRE-304), so the cancel answer says so. The prices are
- * in the currency checkout charges this visitor (PRE-373).
+ * in the currency checkout charges this visitor (PRE-373), yearly total first
+ * (PRE-357).
  */
-export const landingWebFaqItems = (prices: Prices): FaqItem[] => [
-  {
-    id: "landing-web-trial",
-    question: "How does the free trial work?",
-    answer: `You get ${TRIAL_DAYS} days with everything included, starting with your nutrition consultation. You pay ${prices.free} today, and we email you a reminder on day 4. If you keep PrepIt, your plan starts on day 8: ${prices.annual} a year (that works out at ${prices.annualPerMonth} a month) or ${prices.monthly} a month. Cancel before day 8 and you pay nothing.`,
-  },
-  {
-    id: "landing-web-cancel",
-    question: "How do I cancel?",
-    answer:
-      "Cancel any time before day 8 and you won't be charged. If you started on this website, go to tryprepit.app/account and sign in with the same Google or Apple account, then cancel there. It isn't managed in the app or in your iPhone's settings. If you started in the App Store, go to Settings on your iPhone, then your name, then Subscriptions, at least 24 hours before the trial ends.",
-    link: { href: "/account", label: "Manage your subscription" },
-  },
-  ...LANDING_SHARED_FAQ,
-  landingMedicalFaq("your doctor"),
-  {
-    id: "landing-web-devices",
-    question: "Which devices does PrepIt work on?",
-    answer:
-      "iPhone, from the App Store. After you sign up here, you download PrepIt and sign in with the same account. Android isn't available yet. We never sell your personal or health data.",
-  },
-];
+export const landingWebFaqItems = (prices: Prices): FaqItem[] =>
+  landingFaq({
+    trial: {
+      id: "landing-web-trial",
+      question: "How does the free trial work?",
+      answer: `${TRIAL_DAYS} days, everything included. ${prices.free} today, and a reminder email on day 4. Keep PrepIt and you pay from day 8: ${prices.annual} a year (${prices.annualPerMonth} a month) or ${prices.monthly} a month. Cancel before day 8 and you pay nothing.`,
+    },
+    cancel: {
+      id: "landing-web-cancel",
+      question: "How do I cancel?",
+      answer:
+        "Any time before day 8, from your account at tryprepit.app/account, and you pay nothing. Started in the App Store? Cancel in your iPhone's Settings.",
+      link: { href: "/account", label: "Manage your subscription" },
+    },
+    professional: "your doctor",
+    phones: {
+      id: "landing-web-devices",
+      question: "Which phones does it work on?",
+      answer: "iPhone, from the App Store. Start here, then download PrepIt and sign in with the same account. Android isn't available yet.",
+    },
+  });
 
 /** The same questions for visitors who start in the App Store (PRE-331). */
-export const LANDING_APP_STORE_FAQ_ITEMS: FaqItem[] = [
-  {
+export const LANDING_APP_STORE_FAQ_ITEMS: FaqItem[] = landingFaq({
+  trial: {
     id: "landing-app-store-trial",
     question: "How does the free trial work?",
-    answer: `You get ${TRIAL_DAYS} days with everything included, starting with your nutrition consultation. If you keep PrepIt, your plan starts when the free days end: ${PRICES.annual} a year or ${PRICES.monthly} a month in US dollars; the App Store shows the price for your country.`,
+    answer: `${TRIAL_DAYS} days, everything included. Keep PrepIt and you pay when the free days end: ${PRICES.annual} a year (${PRICES.annualPerMonth} a month) or ${PRICES.monthly} a month in US dollars; the App Store shows the price for your country. Cancel at least 24 hours before the trial ends and you pay nothing.`,
   },
-  {
+  cancel: {
     id: "landing-app-store-cancel",
     question: "How do I cancel?",
     answer:
       "Go to Settings on your iPhone, then your name, then Subscriptions, at least 24 hours before the trial ends, and you won't be charged.",
   },
-  ...LANDING_SHARED_FAQ,
-  landingMedicalFaq("your GP"),
-  {
+  professional: "your GP",
+  phones: {
     id: "landing-app-store-devices",
-    question: "Which devices does PrepIt work on?",
-    answer: "iPhone, from the App Store. Android isn't available yet. We never sell your personal or health data.",
+    question: "Which phones does it work on?",
+    answer: "iPhone, from the App Store. Android isn't available yet.",
   },
-];
+});
 
 /** schema.org FAQPage for the same questions and answers. */
 export function faqPageJsonLd(items: FaqItem[] = FAQ_ITEMS) {
