@@ -1,17 +1,23 @@
 "use client";
 
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState } from "react";
+import PlanCard, { type PlanCardPart } from "@/components/bridge/PlanCard";
 import { Question, QUIZ_BUTTON_CLASS, QUIZ_GHOST_BUTTON_CLASS } from "@/components/quiz/parts";
+import type { BridgeHandoff } from "@/lib/funnel/bridgeHandoff";
 import { LOADER_QUESTIONS, LOADER_STEPS } from "@/lib/quiz/quiz";
 
 const STEP_MS = 110;
-const RING = 2 * Math.PI * 52;
+/** The parts pull apart for about half a second once every line has ticked… */
+const SPREAD_MS = 500;
+/** …then the card holds before the cart opens with the same card on top. */
+const HOLD_MS = 700;
 
-function subscribe(onChange: () => void) {
-  const query = window.matchMedia("(prefers-reduced-motion: reduce)");
-  query.addEventListener("change", onChange);
-  return () => query.removeEventListener("change", onChange);
-}
+/**
+ * What each line adds to the card as it ticks: the still, the targets, the
+ * "For…" and "You said…" lines (after both questions, which can change them),
+ * then the three sessions.
+ */
+const PARTS_BY_STEP: PlanCardPart[][] = [[], ["targets"], ["line", "said"], ["sessions"]];
 
 const TICK = (
   <svg width="12" height="12" viewBox="0 0 16 16" aria-hidden>
@@ -20,32 +26,37 @@ const TICK = (
 );
 
 /**
- * "Building your plan": about 12 seconds of a filling ring and a ticking
- * checklist, paused twice by a yes or no question whose answers name the
- * plan page's starting point. Under reduced motion only the checklist ticks.
+ * "Building your plan" (PRE-446): about 12 seconds of a filling line and a
+ * ticking checklist, paused twice by a yes or no question. As each line ticks
+ * it builds the cart's plan card (PlanCard), the parts spread for a moment,
+ * then the card holds and the quiz hands off to the cart. Under reduced
+ * motion nothing moves; the checklist still ticks and the parts still appear.
  */
 export default function LoaderScreen({
+  card,
   onAnswer,
   onDone,
 }: {
+  /** The quiz's first sticking point and targets so far, as the cart will read them. */
+  card: Pick<BridgeHandoff, "startingPoint" | "planSummary">;
   onAnswer: (key: "skipsBreakfast" | "eveningSnacks", value: "Yes" | "No") => void;
   onDone: () => void;
 }) {
-  const reduced = useSyncExternalStore(
-    subscribe,
-    () => window.matchMedia("(prefers-reduced-motion: reduce)").matches,
-    () => false,
-  );
   const [percent, setPercent] = useState(0);
   const [asking, setAsking] = useState<(typeof LOADER_QUESTIONS)[number] | null>(null);
+  const [phase, setPhase] = useState<"building" | "spread" | "held">("building");
   const asked = useRef(new Set<number>());
   const done = useRef(false);
   const sheetButton = useRef<HTMLButtonElement>(null);
   const onDoneRef = useRef(onDone);
+  const endTimers = useRef<number[]>([]);
 
   useEffect(() => {
     onDoneRef.current = onDone;
   }, [onDone]);
+
+  // Back during the last beat must not hand off from another screen.
+  useEffect(() => () => endTimers.current.forEach((timer) => window.clearTimeout(timer)), []);
 
   useEffect(() => {
     if (asking) return;
@@ -64,7 +75,13 @@ export default function LoaderScreen({
     }
     if (percent >= 100 && !done.current) {
       done.current = true;
-      window.setTimeout(() => onDoneRef.current(), 500);
+      setPhase("spread");
+      endTimers.current.push(
+        window.setTimeout(() => {
+          setPhase("held");
+          endTimers.current.push(window.setTimeout(() => onDoneRef.current(), HOLD_MS));
+        }, SPREAD_MS),
+      );
     }
   }, [percent]);
 
@@ -78,49 +95,40 @@ export default function LoaderScreen({
     setAsking(null);
   };
 
+  const ticked = LOADER_STEPS.map((_, index) => percent >= (index + 1) * 25);
+  const parts = new Set(PARTS_BY_STEP.flatMap((step, index) => (ticked[index] ? step : [])));
+
   return (
     <>
-      <div className="text-center">
+      <div className="flex flex-col gap-3.5">
         <Question>Building your plan</Question>
-      </div>
-      {!reduced && (
-        <svg className="mx-auto mt-1.5 block size-[120px]" viewBox="0 0 120 120" aria-hidden>
-          <circle cx="60" cy="60" r="52" fill="none" stroke="var(--color-line)" strokeWidth="10" />
-          <circle
-            cx="60"
-            cy="60"
-            r="52"
-            fill="none"
-            stroke="var(--color-primary)"
-            strokeWidth="10"
-            strokeLinecap="round"
-            strokeDasharray={RING}
-            strokeDashoffset={RING * (1 - percent / 100)}
-            transform="rotate(-90 60 60)"
-          />
-        </svg>
-      )}
-      <p className="text-center font-display text-[44px] font-medium tabular-nums" aria-hidden>
-        {percent}%
-      </p>
-      <ul className="m-0 flex list-none flex-col gap-2.5 p-0" aria-live="polite">
-        {LOADER_STEPS.map((step, index) => {
-          const ticked = percent >= (index + 1) * 25;
-          return (
-            <li key={step} className={`flex items-center gap-2.5 text-[15px] ${ticked ? "text-ink" : "text-ink-faint"}`}>
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3" aria-hidden>
+          <i className="block h-[3px] overflow-hidden rounded-full bg-line">
+            <b className="block h-full bg-primary" style={{ width: `${percent}%` }} />
+          </i>
+          <span className="min-w-[3ch] text-right font-display text-[15px] font-medium tabular-nums">{percent}%</span>
+        </div>
+        <ul className="m-0 flex list-none flex-col gap-2.5 p-0" aria-live="polite">
+          {LOADER_STEPS.map((step, index) => (
+            <li key={step} className={`flex items-center gap-2.5 text-[15px] ${ticked[index] ? "text-ink" : "text-ink-faint"}`}>
               <span
                 className={`grid size-5 flex-none place-items-center rounded-full border-[1.5px] ${
-                  ticked ? "border-primary bg-primary text-on-primary" : "border-line-strong text-transparent"
+                  ticked[index] ? "border-primary bg-primary text-on-primary" : "border-line-strong text-transparent"
                 }`}
               >
                 {TICK}
               </span>
               {step}
-              {ticked && <span className="sr-only">, done</span>}
+              {ticked[index] && <span className="sr-only">, done</span>}
             </li>
-          );
-        })}
-      </ul>
+          ))}
+        </ul>
+      </div>
+      {ticked[0] && (
+        <div className="plan-part-in">
+          <PlanCard from="quiz" handoff={card} parts={parts} spread={phase === "spread"} animate />
+        </div>
+      )}
       {asking && (
         <div className="fixed inset-0 z-30 flex items-end justify-center bg-overlay">
           <div

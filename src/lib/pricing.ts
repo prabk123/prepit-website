@@ -11,7 +11,7 @@ export const TRIAL_DAYS = 7;
 /**
  * Web trials get a reminder email on day 4 (PRE-326/352; proof in PRE-434).
  * Every page that promises it reads this: the cart and the signed-in bridge
- * (/start), the /try landing, its FAQ, the quiz and the plan page. Set to
+ * (/start), the /try landing, its FAQ, the quiz and the emailed plan page. Set to
  * false to drop every reminder line at once if that email stops going out.
  */
 export const WEB_REMINDER_EMAIL_LIVE = true;

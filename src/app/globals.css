@@ -670,3 +670,17 @@ body {
   font-family: var(--font-dm-sans), Arial, Helvetica, sans-serif;
 }
 
+
+/* The quiz's loader builds the cart's plan card part by part (PRE-446):
+   each part rises 16px into place, then the card holds. */
+@keyframes plan-part-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .plan-part-in {
+    animation: plan-part-in 420ms var(--ease-calm) both;
+  }
+}

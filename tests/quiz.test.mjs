@@ -27,7 +27,6 @@ import {
   planSummary,
   PLANS_REPLY,
   progress,
-  resultHeadline,
   resultTags,
   savedDiet,
   SAFETY_EATING_DISORDER,
@@ -78,14 +77,10 @@ function walk(a, from = "goal") {
   return path;
 }
 
-/** The v9.2 quiz screens: everything up to and including the loader (the email gate, name and plan page are PRE-446's). */
-function quizScreens(path) {
-  return path.slice(0, path.indexOf("loader") + 1);
-}
-
 test("v9.2: 19 screens to the loader for Lose fat and Build muscle, 18 for the other goals", () => {
   const lose = walk(answers());
-  assert.deepEqual(quizScreens(lose), [
+  // PRE-446: no email gate, name or plan page; the loader hands off to the cart.
+  assert.deepEqual(lose, [
     "goal",
     "echo-goal",
     "blockers",
@@ -106,15 +101,16 @@ test("v9.2: 19 screens to the loader for Lose fat and Build muscle, 18 for the o
     "echo-plans",
     "loader",
   ]);
-  assert.equal(quizScreens(walk(answers({ goal: "Build muscle" }))).length, 19);
+  assert.equal((walk(answers({ goal: "Build muscle" }))).length, 19);
   for (const goal of ["Improve energy", "Stay fuller", "Eat healthier", "Fuel training", "Maintain"]) {
-    assert.equal(quizScreens(walk(answers({ goal }))).length, 18, goal);
+    assert.equal((walk(answers({ goal }))).length, 18, goal);
   }
   assert.ok(!lose.includes("stop-age") && !lose.includes("stop-ed"));
   // Never with pregnancy.
   assert.ok(!walk(answers({ safety: [SAFETY_PREGNANT] })).includes("goalweight"));
   // Cut in v9.2.
   for (const cut of ["energy", "hunger", "mood", "dob", "hw", "mealhelp", "style"]) assert.ok(!SCREENS.some((s) => s.id === cut), cut);
+  assert.equal(SCREENS.filter((s) => !s.branch).length, 19);
 });
 
 test("under 18 and an eating disorder go to their stop screens, which end the quiz", () => {
@@ -334,9 +330,7 @@ test("the plans reply says what plans leave out", () => {
   );
 });
 
-test("the plan page's headline, tags and dates", () => {
-  assert.equal(resultHeadline(answers({ firstName: " Sam " })), "Sam, your fat-loss plan is ready");
-  assert.equal(resultHeadline(answers()), "Your fat-loss plan is ready");
+test("the plan card's tags and dates", () => {
   assert.deepEqual(resultTags(answers({ diet: "vegan", intolerances: ["Egg"], rules: ["Pork"] })), [
     "Lose fat",
     "Keeping track",
@@ -357,7 +351,7 @@ test("progress fills section by section", () => {
   assert.equal(bars[2], 0);
   // "Your day" is the second section in v9.2.
   assert.ok(progress("history", answers())[1] > 0);
-  assert.deepEqual(progress("result", answers()).slice(0, 3), [1, 1, 1]);
+  assert.deepEqual(progress("loader", answers()).slice(0, 3), [1, 1, 1]);
 });
 
 test("targets request: backend values, and no deficit when pregnant", () => {
@@ -393,7 +387,6 @@ test("the saved profile passes the backend's own cleaning untouched", () => {
     dayPatterns: ["dip", "mood"],
     history: "I started, then stopped",
     skipsBreakfast: "No",
-    firstName: "Sam",
   });
   const profile = buildQuizProfile(a, { calories: 1500, protein: 120, carbs: 140, fats: 50, resolvedGoalSpeed: 0.5 });
   assert.deepEqual(profile.settings, {
@@ -409,7 +402,8 @@ test("the saved profile passes the backend's own cleaning untouched", () => {
   });
   const body = buildWebSignupBody({ funnelId: "quiz", ...profile });
   assert.deepEqual(body.settings, profile.settings);
-  assert.deepEqual(body.user, { firstName: "Sam", dob: "1991-05-14", gender: "female", height: 168, weight: 79.8 });
+  // No name from the quiz any more (PRE-446): it comes from the Apple or Google sign-in.
+  assert.deepEqual(body.user, { dob: "1991-05-14", gender: "female", height: 168, weight: 79.8 });
   assert.deepEqual(
     body.answers.map((answer) => answer.questionId),
     ["day_patterns", "afternoon_energy", "hunger_between_meals", "food_and_mood", "tracking_history", "safety", "skips_breakfast"],

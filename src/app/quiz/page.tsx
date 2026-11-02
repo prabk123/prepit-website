@@ -19,10 +19,11 @@ export const metadata: Metadata = {
 /**
  * The web quiz (PRE-322): an app-like page of its own, without the site's
  * header and footer. The country comes from Vercel's geo header, for the
- * email gate's lead (PRE-327); the quiz is US-first, so it defaults to US.
- * The market (from the proxy, which honours the preview `?country=` pin)
- * picks where "Start my free 7 days" goes, as on the landing page (PRE-331),
- * and the currency of the prices, as checkout does (PRE-373).
+ * units and helplines (PRE-441); it defaults to US. The market (from the
+ * proxy, which honours the preview
+ * `?country=` pin) picks where the quiz hands off once its loader ends: the
+ * cart where the website sells (PRE-446), as on the landing page (PRE-331).
+ * The currency is checkout's (PRE-373), for the completion event.
  */
 export default async function QuizPage() {
   const requestHeaders = await headers();

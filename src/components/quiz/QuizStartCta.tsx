@@ -9,7 +9,8 @@ import type { WebMarket } from "@/lib/markets";
 import { QUIZ_FUNNEL_ID } from "@/lib/quiz/quiz";
 
 /**
- * "Start my free 7 days" at the end of the quiz and on the plan email's page.
+ * "Start my free 7 days" on the plan email's page (/my-plan). The quiz itself
+ * hands off on its own once its loader ends (PRE-446).
  * Like the landing page's button (LandingCta), it follows the visitor's
  * market (PRE-331): the bridge (/start) where the website sells (every
  * country for now), the App Store or the waitlist for a country listed in
