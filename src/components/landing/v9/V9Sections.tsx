@@ -4,7 +4,7 @@ import { landingCopy } from "@/components/landing/LandingSections";
 import Reveal from "@/components/landing/v9/Reveal";
 import { V9Photo, V9Screen } from "@/components/landing/v9/V9Photo";
 import WhoItsFor from "@/components/landing/v9/WhoItsFor";
-import LoopVideo from "@/components/media/LoopVideo";
+import LoopVideo, { LoopVideoToggle, LoopVideoToggleScope } from "@/components/media/LoopVideo";
 import type { WebMarket } from "@/lib/markets";
 import { type Prices, TRIAL_DAYS } from "@/lib/pricing";
 
@@ -130,31 +130,44 @@ export function V9Hero({ market, prices }: { market: WebMarket; prices: Prices }
           className="absolute inset-0 -z-20 h-full w-full object-cover"
         />
       </picture>
-      {/* One film per shape; the hidden one never loads (LoopVideo plays and loads only on screen). */}
-      <div className="absolute inset-0 -z-10 min-[900px]:hidden">
-        <LoopVideo
-          className="v9-hero-film"
-          mp4="/landing/v9/hero-film-portrait.mp4"
-          poster="/landing/v9/hero-poster-portrait-720.webp"
-          width={720}
-          height={1280}
-          label=""
-          analyticsId="try-hero-film"
-          priority
-        />
-      </div>
-      <div className="absolute inset-0 -z-10 hidden min-[900px]:block">
-        <LoopVideo
-          className="v9-hero-film"
-          mp4="/landing/v9/hero-film-wide.mp4"
-          poster="/landing/v9/hero-poster-wide-1600.webp"
-          width={1600}
-          height={900}
-          label=""
-          analyticsId="try-hero-film"
-          priority
-        />
-      </div>
+      {/*
+        One film per shape. The hidden one never loads: LoopVideo fetches its
+        poster and plays only once it is on screen, and its poster is the same
+        file the still above already loaded. Each film's pause button is drawn
+        above the copy (LoopVideoToggleScope), so it can always be tapped.
+      */}
+      <LoopVideoToggleScope>
+        <div className="absolute inset-0 -z-10 min-[900px]:hidden">
+          <LoopVideo
+            className="v9-hero-film"
+            mp4="/landing/v9/hero-film-portrait.mp4"
+            poster="/landing/v9/hero-poster-portrait-720.avif"
+            width={720}
+            height={1280}
+            label=""
+            analyticsId="try-hero-film"
+          />
+        </div>
+        <div className="v9-hero-toggle absolute bottom-3 right-3 z-10 min-[900px]:hidden">
+          <LoopVideoToggle />
+        </div>
+      </LoopVideoToggleScope>
+      <LoopVideoToggleScope>
+        <div className="absolute inset-0 -z-10 hidden min-[900px]:block">
+          <LoopVideo
+            className="v9-hero-film"
+            mp4="/landing/v9/hero-film-wide.mp4"
+            poster="/landing/v9/hero-poster-wide-1600.avif"
+            width={1600}
+            height={900}
+            label=""
+            analyticsId="try-hero-film"
+          />
+        </div>
+        <div className="v9-hero-toggle absolute bottom-4 right-4 z-10 hidden min-[900px]:block">
+          <LoopVideoToggle />
+        </div>
+      </LoopVideoToggleScope>
       <div aria-hidden className="v9-hero-scrim pointer-events-none absolute inset-0 -z-10" />
 
       <div className="relative mx-auto w-full max-w-content px-gutter pb-[calc(28px+env(safe-area-inset-bottom,0px))] pt-24 min-[900px]:py-20">
@@ -174,7 +187,7 @@ export function V9Hero({ market, prices }: { market: WebMarket; prices: Prices }
               iPhone
             </span>
           </div>
-          <LandingCta market={market} placement="hero" className="w-fit max-[599px]:w-full max-[599px]:justify-center" />
+          <LandingCta market={market} placement="hero" className="w-fit max-[599px]:flex max-[599px]:w-full max-[599px]:justify-center" />
           <p className="text-[13px] leading-snug text-ink-secondary max-[899px]:pr-14">
             {web ? "Reminder email on day 4. Cancel before day 8, pay nothing." : `${reassure.strong} ${reassure.rest}`}
           </p>
@@ -488,7 +501,7 @@ function YouSaid({ children }: { children: ReactNode }) {
 
 function NutritionistSaid({ children }: { children: ReactNode }) {
   return (
-    <div className="flex max-w-[34rem] flex-col gap-2 self-end max-[899px]:ml-7 min-[900px]:w-1/2 min-[900px]:self-auto min-[900px]:ml-[50%]">
+    <div className="ml-auto flex w-[88%] max-w-[34rem] flex-col gap-2 min-[900px]:w-1/2">
       <p className="text-[12px] font-bold uppercase tracking-[0.1em]">
         <span className="text-gradient-brand">Your nutritionist</span>
       </p>
