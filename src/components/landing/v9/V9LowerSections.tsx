@@ -292,12 +292,13 @@ export function ClosingSection({ market, prices, showQuizLink = false }: { marke
             <p className="text-[11px] font-bold uppercase leading-none tracking-[0.1em] text-ink-secondary">Session 1 · Getting to know you</p>
             <p className="text-body text-ink-secondary">A short chat about your routine and goals.</p>
             <p className="font-display text-[clamp(40px,34px+1.2vw,48px)] font-medium leading-none text-ink">Ready?</p>
-            <p className="flex flex-wrap gap-2" aria-label="Your first replies to choose from: Let's do it, or What happens in a consultation?">
-              <span aria-hidden className="inline-flex items-center gap-2 rounded-full border border-ink px-3.5 py-2 text-small font-medium leading-none text-ink">
+            <p className="sr-only">Your first replies to choose from: Let&apos;s do it, or What happens in a consultation?</p>
+            <p aria-hidden className="flex flex-wrap gap-2">
+              <span className="inline-flex items-center gap-2 rounded-full border border-ink px-3.5 py-2 text-small font-medium leading-none text-ink">
                 <span className="h-1.5 w-1.5 rounded-full bg-ink" />
                 Let&apos;s do it
               </span>
-              <span aria-hidden className="inline-flex items-center rounded-full border border-line-strong px-3.5 py-2 text-small font-medium leading-none text-ink">
+              <span className="inline-flex items-center rounded-full border border-line-strong px-3.5 py-2 text-small font-medium leading-none text-ink">
                 What happens in a consultation?
               </span>
             </p>
@@ -321,6 +322,7 @@ const FOOTER_LINKS = [
   { href: "/privacy-policy", label: "Privacy" },
   { href: "/terms-and-conditions", label: "Terms" },
   { href: "/subscription-policy", label: "Subscription terms" },
+  { href: "/cookie-policy", label: "Cookies" },
   { href: "/guides", label: "Help" },
   { href: "/contact", label: "Contact" },
 ];
