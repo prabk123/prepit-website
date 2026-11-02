@@ -615,7 +615,7 @@ const BLOCKER_REPLIES: Record<string, Omit<Reply, "eyebrow"> & { short: string }
     short: "Weekends",
     headline: "Weekends aren't a willpower problem. They're a planning problem.",
     say: "I can give weekends more room and take a little from weekdays, keeping your weekly total the same. Or we plan the weekend's meals together. Your call.",
-    visuals: ["weekly", "weekly2"],
+    visuals: ["weekend"],
   },
   "I eat out or socialise a lot": {
     short: "Eating out",

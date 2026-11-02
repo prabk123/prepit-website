@@ -43,7 +43,8 @@ import {
   weightKg,
   weightText,
 } from "../src/lib/quiz/quiz.ts";
-import { drawnVisual, pickVisuals, VISUALS, visualCaptures, visualFinePrint } from "../src/lib/quiz/replyVisuals.ts";
+import { cardImageFor, CURRENCY_CARDS, drawnVisual, pickVisuals, VISUALS, visualCaptures, visualFinePrint } from "../src/lib/quiz/replyVisuals.ts";
+import { existsSync } from "node:fs";
 
 const TODAY = new Date(2026, 9, 21);
 
@@ -501,4 +502,20 @@ test("analytics URLs never keep a sign-in code on any page", () => {
   assert.equal(withoutUrlSecrets("/p?mode=signIn&oobCode=abc&apiKey=k"), "/p?mode=signIn");
   assert.equal(withoutUrlSecrets("Plan your week"), "Plan your week");
   assert.equal(withoutUrlSecrets("/my-plan"), "/my-plan");
+});
+
+test("the plan cost card shows dollars to visitors who pay in dollars, and pounds to everyone else (PRE-436)", () => {
+  const plan = (currency) => drawnVisual({ key: "plan", bare: false }, currency).cards.map((card) => card.img);
+  assert.ok(plan("USD").includes("plan-cost-usd"));
+  assert.ok(!plan("USD").includes("plan-cost"));
+  assert.ok(plan("GBP").includes("plan-cost"));
+  assert.ok(plan(undefined).includes("plan-cost"));
+  assert.equal(cardImageFor("week-strip", "USD"), "week-strip");
+  // A bare pick still swaps the currency and drops only the first card's overlap.
+  const bare = drawnVisual({ key: "plan2", bare: true }, "USD");
+  assert.equal(bare.cards[0].ov, 0);
+  assert.ok(bare.cards.some((card) => card.img === "plan-cost-usd"));
+  for (const variants of Object.values(CURRENCY_CARDS)) {
+    for (const img of Object.values(variants)) assert.ok(existsSync(`public/quiz/v9/${img}.webp`), img);
+  }
 });

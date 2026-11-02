@@ -500,7 +500,7 @@ export default function Quiz({ country, market, prices }: { country: string; mar
         </div>
         {picked && (
           <div className="min-w-0 min-[900px]:sticky min-[900px]:top-28 min-[900px]:self-start">
-            <ReplyVisual picked={picked} />
+            <ReplyVisual picked={picked} currency={prices.currency} />
           </div>
         )}
       </>

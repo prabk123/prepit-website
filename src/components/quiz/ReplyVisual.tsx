@@ -25,6 +25,7 @@ const SIZES: Record<string, [number, number]> = {
   "msg-social": [658, 545],
   "msg-swap": [652, 312],
   "plan-cost": [732, 220],
+  "plan-cost-usd": [732, 228],
   "plan-head": [396, 124],
   "ring-energy": [412, 400],
   "ring-mood": [412, 400],
@@ -42,6 +43,7 @@ const SIZES: Record<string, [number, number]> = {
   "week-rings": [740, 298],
   "week-strip": [724, 156],
   "weekly-head": [740, 207],
+  "weekly-weekend": [740, 706],
   "why-energy-oats": [740, 293],
   "why-mood": [732, 337],
   "why-satiety-lunch": [748, 338],
@@ -54,10 +56,11 @@ type Vars = CSSProperties & Record<`--${string}`, string | number>;
 /**
  * A reply's visual (PRE-441): the cards build one by one when the screen
  * arrives, then hold. Nothing re-runs while the screen stays open, and under
- * reduced motion the final frame shows at once (quiz-v9.css).
+ * reduced motion the final frame shows at once (quiz-v9.css). Cost cards
+ * show the visitor's checkout currency (PRE-436).
  */
-export default function ReplyVisual({ picked }: { picked: PickedVisual }) {
-  const visual = drawnVisual(picked);
+export default function ReplyVisual({ picked, currency }: { picked: PickedVisual; currency?: string }) {
+  const visual = drawnVisual(picked, currency);
   let index = 0;
   return (
     <div className="quiz-visual" data-visual={picked.key}>
