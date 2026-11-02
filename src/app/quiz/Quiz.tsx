@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import DeviceFrame from "@/components/device/DeviceFrame";
 import {
@@ -26,14 +27,14 @@ import {
   UnitField,
 } from "@/components/quiz/parts";
 import LongLogo from "@/components/ui/LongLogo";
-import QuizStartCta from "@/components/quiz/QuizStartCta";
 import { appVideo } from "@/lib/captures";
-import { readAttribution } from "@/lib/funnel/attributionStore";
 import { writeBridgeHandoff } from "@/lib/funnel/bridgeHandoff";
+import { bridgePath } from "@/lib/funnel/params";
+import { APP_STORE_URL } from "@/lib/appStore";
 import type { WebMarket } from "@/lib/markets";
-import { type Prices, WEB_REMINDER_EMAIL_LIVE } from "@/lib/pricing";
-import { trackQuizLead } from "@/lib/metaPixel";
-import { fetchTargets, LeadApiError, saveLead } from "@/lib/quiz/leadApi";
+import type { Prices } from "@/lib/pricing";
+import { trackAppStoreClick, trackQuizLead } from "@/lib/metaPixel";
+import { fetchTargets } from "@/lib/quiz/leadApi";
 import {
   ACTIVITY_OPTIONS,
   ageFrom,
@@ -58,7 +59,6 @@ import {
   HUNGER_OPTIONS,
   isStopScreen,
   leaveOutLine,
-  MARKETING_CONSENT_TEXT,
   MEAL_HELP_OPTIONS,
   mediaPlan,
   MONTHS,
@@ -85,15 +85,17 @@ import {
   weightKg,
   weightText,
 } from "@/lib/quiz/quiz";
-import { getWebSessionId } from "@/lib/quiz/webSession";
 import { trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webFunnelAnalytics";
 import LoaderScreen from "./LoaderScreen";
-import ResultScreen from "./ResultScreen";
 
 /** Kept for this tab only, so a refresh or a Back from the bridge keeps the answers. */
 const STORAGE_KEY = "prepit.quiz.v3";
 
 type Saved = { answers: QuizAnswers; screen: ScreenId; history: ScreenId[] };
+
+/** Screens a tab saved before PRE-446 took the email gate, name and plan page out. */
+const LEGACY_END_SCREENS: ReadonlySet<string> = new Set(["email", "name", "result"]);
+type LegacyAnswers = { email?: string; firstName?: string; marketingConsent?: boolean };
 
 function readSaved(): Saved | null {
   try {
@@ -103,8 +105,16 @@ function readSaved(): Saved | null {
     if (!parsed.answers || !parsed.screen || !Array.isArray(parsed.history)) return null;
     // Never come back to a stop screen or the loader halfway.
     if (isStopScreen(parsed.screen)) return null;
-    const screen = parsed.screen === "loader" ? "week" : parsed.screen;
-    return { answers: { ...emptyAnswers(), ...parsed.answers }, screen, history: parsed.history.filter((id) => id !== "loader") };
+    // The loader (a Back from the cart) and the screens that came after it
+    // before PRE-446 (email, name and the plan page) land on the last question,
+    // one tap from "Build my plan". The old gate's email and name are dropped.
+    const ended = (id: string) => id === "loader" || LEGACY_END_SCREENS.has(id);
+    const screen = ended(parsed.screen) ? "week" : parsed.screen;
+    const answers: Partial<QuizAnswers> & LegacyAnswers = { ...parsed.answers };
+    delete answers.email;
+    delete answers.firstName;
+    delete answers.marketingConsent;
+    return { answers: { ...emptyAnswers(), ...answers }, screen, history: parsed.history.filter((id) => !ended(id)) };
   } catch {
     return null;
   }
@@ -119,6 +129,23 @@ function writeSaved(saved: Saved | null) {
   }
 }
 
+/** Set once the quiz has counted a completion in this tab (quiz_completed and Meta's Lead). */
+const COMPLETED_KEY = "prepit.quiz.completed";
+
+/** True the first time in this tab; with storage blocked, every time (Meta counts a repeat at worst). */
+function firstCompletionInTab(): boolean {
+  try {
+    if (window.sessionStorage.getItem(COMPLETED_KEY)) return false;
+    window.sessionStorage.setItem(COMPLETED_KEY, "1");
+  } catch {
+    // No storage: count it.
+  }
+  return true;
+}
+
+/** How long the hand-off waits for targets still loading when the loader ends. */
+const TARGETS_GRACE_MS = 4000;
+
 const BACK_ICON = (
   <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden>
     <path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -126,19 +153,22 @@ const BACK_ICON = (
 );
 
 /**
- * The web quiz (PRE-322) with its stop screens (PRE-329) and email gate
- * (PRE-327): one screen at a time, then the plan page, which hands the
- * answers to the bridge (/start, PRE-323) in this browser's storage.
+ * The web quiz (PRE-322) with its stop screens (PRE-329): one screen at a
+ * time, then the loader, which builds the cart's plan card and hands the
+ * answers to the cart (/start?from=quiz, PRE-446) in this browser's storage.
+ * The cart saves them to the account at sign-in, before payment.
  */
-export default function Quiz({ country, market, prices }: { country: string; market: WebMarket; prices: Prices }) {
+export default function Quiz({ market, prices }: { market: WebMarket; prices: Prices }) {
+  const router = useRouter();
   const [answers, setAnswers] = useState<QuizAnswers>(emptyAnswers);
   const [screen, setScreen] = useState<ScreenId>("goal");
   const [history, setHistory] = useState<ScreenId[]>([]);
   const [restored, setRestored] = useState(false);
   // Targets for the answers they were fetched for, so a change after Back fetches again.
   const [fetched, setFetched] = useState<{ key: string; targets: Targets | null } | null>(null);
-  const [emailState, setEmailState] = useState<"idle" | "saving" | "invalid">("idle");
-  const leadSaved = useRef(false);
+  // The loader has finished; the hand-off waits (briefly) for the targets.
+  const [loaderDone, setLoaderDone] = useState(false);
+  const handedOff = useRef(false);
   const advanceTimer = useRef<number | null>(null);
   const firstScreen = useRef(true);
 
@@ -183,6 +213,7 @@ export default function Quiz({ country, market, prices }: { country: string; mar
 
   const goTo = (id: ScreenId | null) => {
     if (!id || id === screen) return;
+    setLoaderDone(false);
     setHistory((h) => [...h, screen]);
     setScreen(id);
   };
@@ -191,6 +222,7 @@ export default function Quiz({ country, market, prices }: { country: string; mar
 
   const back = () => {
     if (advanceTimer.current) window.clearTimeout(advanceTimer.current);
+    setLoaderDone(false);
     // Back never replays the loader's 12 seconds and questions.
     let index = history.length - 1;
     while (index > 0 && history[index] === "loader") index -= 1;
@@ -203,7 +235,6 @@ export default function Quiz({ country, market, prices }: { country: string; mar
     setAnswers(emptyAnswers());
     setHistory([]);
     setFetched(null);
-    leadSaved.current = false;
     setScreen("goal");
   };
 
@@ -227,12 +258,12 @@ export default function Quiz({ country, market, prices }: { country: string; mar
     update({ [key]: values });
   };
 
-  // The targets are fetched from the loader on (again after a reload or a
-  // Back from the bridge); the plan page waits for them. undefined = loading.
+  // The targets are fetched from the loader on; the hand-off waits for
+  // them. undefined = loading.
   const request = targetsRequest(answers);
   const requestKey = request ? JSON.stringify(request) : "";
   const targets: Targets | null | undefined = !request ? null : fetched?.key === requestKey ? fetched.targets : undefined;
-  const needsTargets = screen === "loader" || screen === "email" || screen === "name" || screen === "result";
+  const needsTargets = screen === "loader";
   useEffect(() => {
     if (!needsTargets || !requestKey || fetched?.key === requestKey) return;
     let cancelled = false;
@@ -244,92 +275,61 @@ export default function Quiz({ country, market, prices }: { country: string; mar
     };
   }, [needsTargets, requestKey, fetched]);
 
-  /**
-   * Leaves the answers for the bridge in this browser. Written from the email
-   * gate on, so "Start my free 7 days" on the plan email's page (same
-   * browser) still carries them.
-   */
-  const writeHandoff = (latest: QuizAnswers) => {
-    writeBridgeHandoff({
-      funnelId: QUIZ_FUNNEL_ID,
-      funnelVersion: QUIZ_FUNNEL_VERSION,
-      ...buildQuizProfile(latest, targets),
-      firstName: latest.firstName.trim() || undefined,
-      email: latest.email.trim() || undefined,
-      planSummary: planSummary(latest, targets),
-      startingPoint: startingPointId(latest),
-    });
-  };
-
-  const leadInput = (latest: QuizAnswers, webSessionId: string) => ({
-    webSessionId,
-    email: latest.email.trim(),
-    marketingConsent: latest.marketingConsent,
-    consentText: MARKETING_CONSENT_TEXT,
-    country,
+  /** What the cart reads: the answers for the account, the first sticking point and the targets. */
+  const handoff = (latest: QuizAnswers) => ({
     funnelId: QUIZ_FUNNEL_ID,
     funnelVersion: QUIZ_FUNNEL_VERSION,
     ...buildQuizProfile(latest, targets),
-    attribution: readAttribution(),
+    planSummary: planSummary(latest, targets),
+    startingPoint: startingPointId(latest),
   });
 
-  const submitEmail = async () => {
-    if (emailState === "saving") return;
-    setEmailState("saving");
-    const webSessionId = getWebSessionId();
-    let saved = false;
-    let errorStatus: number | undefined;
-    if (webSessionId) {
-      try {
-        await saveLead(leadInput(answers, webSessionId));
-        saved = true;
-      } catch (error) {
-        errorStatus = error instanceof LeadApiError ? error.status : 0;
-        // Only a refused address is theirs to fix; the gate has no skip.
-        if (error instanceof LeadApiError && error.status === 400 && /email/i.test(error.details ?? "")) {
-          setEmailState("invalid");
-          return;
-        }
-        // Down, rate-limited or another field refused: the plan still shows, and the bridge saves the answers.
-      }
+  /**
+   * The end of the quiz (PRE-446): leave the answers for the cart, count the
+   * completion, then go to the cart with the card the loader built on top.
+   * Targets still loading after the loader get a few more seconds, then the
+   * cart goes without them (the app sets them with the visitor).
+   */
+  const handOff = useCallback(() => {
+    if (handedOff.current) return;
+    handedOff.current = true;
+    writeBridgeHandoff(handoff(answers));
+    // Once per tab: a Back from the cart remounts the quiz, and running the
+    // loader again isn't a second completion or a second lead.
+    if (firstCompletionInTab()) {
+      trackWebFunnelEvent(WEB_FUNNEL_EVENTS.quizCompleted, {
+        funnel_id: QUIZ_FUNNEL_ID,
+        funnel_version: QUIZ_FUNNEL_VERSION,
+        market,
+        targets_available: Boolean(targets),
+        price_currency: prices.currency,
+      });
+      // Meta's empty Lead, where the email gate used to send it (the gate had no skip).
+      trackQuizLead();
     }
-    leadSaved.current = saved;
-    writeHandoff(answers);
-    trackWebFunnelEvent(WEB_FUNNEL_EVENTS.quizLeadSaved, {
-      funnel_id: QUIZ_FUNNEL_ID,
-      saved,
-      marketing_consent: answers.marketingConsent,
-      ...(errorStatus !== undefined ? { error_status: errorStatus } : {}),
-    });
-    if (saved) trackQuizLead();
-    setEmailState("idle");
-    next();
-  };
-
-  const submitName = (skip: boolean) => {
-    const latest = skip ? { ...answers, firstName: "" } : answers;
-    if (skip) setAnswers(latest);
-    // The plan email greets them by name: update the lead (same session id).
-    const webSessionId = getWebSessionId();
-    if (leadSaved.current && webSessionId && latest.firstName.trim()) {
-      saveLead(leadInput(latest, webSessionId)).catch(() => undefined);
+    if (market === "app-store") {
+      trackAppStoreClick("quiz-loader");
+      // Give the pixel's requests a moment before the page goes.
+      window.setTimeout(() => window.location.assign(APP_STORE_URL), 300);
+    } else {
+      router.push(market === "waitlist" ? "/waitlist" : bridgePath({ from: "quiz", funnel: QUIZ_FUNNEL_ID }));
     }
-    writeHandoff(latest);
-    next(latest);
-  };
+    // handoff reads the latest answers and targets.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [answers, targets, market, prices.currency, router]);
 
-  const startTrial = () => {
-    writeHandoff(answers);
-    trackWebFunnelEvent(WEB_FUNNEL_EVENTS.quizStartTrial, {
-      funnel_id: QUIZ_FUNNEL_ID,
-      market,
-      targets_available: Boolean(targets),
-      price_currency: prices.currency,
-    });
-  };
+  useEffect(() => {
+    if (!loaderDone || screen !== "loader") return;
+    if (targets !== undefined) {
+      handOff();
+      return;
+    }
+    const timer = window.setTimeout(handOff, TARGETS_GRACE_MS);
+    return () => window.clearTimeout(timer);
+  }, [loaderDone, screen, targets, handOff]);
 
   const ok = canContinue(screen, answers);
-  const showProgress = screen !== "result" && !isStopScreen(screen);
+  const showProgress = !isStopScreen(screen);
   const bars = progress(screen, answers);
   const section = sectionOf(screen);
 
@@ -872,122 +872,10 @@ export default function Quiz({ country, market, prices }: { country: string; mar
     case "loader":
       body = (
         <LoaderScreen
+          card={{ startingPoint: startingPointId(answers), planSummary: planSummary(answers, targets) }}
           onAnswer={(key, value) => update({ [key]: value })}
-          onDone={() => next()}
+          onDone={() => setLoaderDone(true)}
         />
-      );
-      break;
-
-    case "email":
-      body = (
-        <>
-          <Eyebrow>Your plan is ready</Eyebrow>
-          <Question>Where should we save your plan?</Question>
-          <Sub>We&apos;ll save your answers to your account, so the app can skip its setup, and email you a copy of your plan.</Sub>
-          <form
-            id="email-form"
-            noValidate
-            onSubmit={(event) => {
-              event.preventDefault();
-              if (ok) void submitEmail();
-            }}
-            className="flex flex-col gap-4"
-          >
-            <div>
-              <FieldLabel htmlFor="email">Email</FieldLabel>
-              <input
-                id="email"
-                type="email"
-                inputMode="email"
-                autoComplete="email"
-                placeholder="you@example.com"
-                className={INPUT_CLASS}
-                value={answers.email}
-                aria-invalid={emailState === "invalid"}
-                aria-describedby={emailState === "invalid" ? "email-error" : undefined}
-                onChange={(event) => {
-                  update({ email: event.target.value });
-                  if (emailState === "invalid") setEmailState("idle");
-                }}
-              />
-              {emailState === "invalid" && (
-                <p id="email-error" role="alert" className="mt-1.5 text-small text-error">
-                  Check your email address and try again.
-                </p>
-              )}
-            </div>
-            <label className="flex items-start gap-2.5 text-small text-ink-secondary">
-              <input
-                type="checkbox"
-                className="mt-px size-5 flex-none accent-primary"
-                checked={answers.marketingConsent}
-                onChange={(event) => update({ marketingConsent: event.target.checked })}
-              />
-              {MARKETING_CONSENT_TEXT}
-            </label>
-          </form>
-          <p className="text-[12.5px] leading-[1.45] text-ink-muted">
-            We never sell your data. See our{" "}
-            <Link className="text-ink-secondary underline" href="/privacy-policy">
-              Privacy Policy
-            </Link>
-            .
-          </p>
-        </>
-      );
-      footer = (
-        <button type="submit" form="email-form" className={QUIZ_BUTTON_CLASS} disabled={!ok || emailState === "saving"}>
-          {emailState === "saving" ? "Saving…" : "Save my plan"}
-        </button>
-      );
-      break;
-
-    case "name":
-      body = (
-        <>
-          <Question>What should your nutritionist call you?</Question>
-          <form
-            id="name-form"
-            onSubmit={(event) => {
-              event.preventDefault();
-              submitName(false);
-            }}
-          >
-            <FieldLabel htmlFor="first-name">First name</FieldLabel>
-            <input
-              id="first-name"
-              autoComplete="given-name"
-              maxLength={100}
-              className={INPUT_CLASS}
-              value={answers.firstName}
-              onChange={(event) => update({ firstName: event.target.value })}
-            />
-          </form>
-        </>
-      );
-      footer = (
-        <>
-          <button type="submit" form="name-form" className={QUIZ_BUTTON_CLASS}>
-            Show my plan
-          </button>
-          <p className="mt-2.5 text-center">
-            <button type="button" className="text-small text-ink-secondary underline underline-offset-4" onClick={() => submitName(true)}>
-              Skip
-            </button>
-          </p>
-        </>
-      );
-      break;
-
-    case "result":
-      body = <ResultScreen answers={answers} targets={targets} prices={prices} />;
-      footer = (
-        <>
-          <QuizStartCta market={market} className={QUIZ_BUTTON_CLASS} trackingSource="quiz-result" onStart={startTrial} />
-          {market === "web" && (
-            <p className="mt-1.5 text-center text-[12.5px] text-ink-muted">{prices.free} today.{WEB_REMINDER_EMAIL_LIVE ? " Reminder email on day 4." : ""} Cancel any time.</p>
-          )}
-        </>
       );
       break;
   }

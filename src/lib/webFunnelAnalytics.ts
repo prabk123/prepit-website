@@ -76,10 +76,13 @@ export const WEB_FUNNEL_EVENTS = {
   emailLinkRequested: "email_link_requested",
   /** A quiz screen was shown (`step_id`, `step_index`). Never an answer: both stop screens (under 18, eating disorder) are `stop` with a null `step_index`. */
   quizStepView: "web_quiz_step_view",
-  /** The email gate saved its lead (`marketing_consent`, `saved`: false when the request failed). */
-  quizLeadSaved: "web_quiz_lead_saved",
-  /** "Start my free 7 days" on the quiz's plan page, on to the bridge. */
-  quizStartTrial: "web_quiz_start_trial",
+  /**
+   * The quiz's loader finished and the quiz handed off to the cart (PRE-446): `funnel_version`, `market`,
+   * `targets_available`, `price_currency`. Never an answer. The cart's `cart_view` follows with `entry: quiz`.
+   * Before PRE-446 the quiz went on to an email gate (`web_quiz_lead_saved`) and a plan page
+   * (`web_quiz_start_trial`); neither fires any more.
+   */
+  quizCompleted: "quiz_completed",
   /** The plan page an email links to (`found`). */
   leadPlanView: "web_lead_plan_view",
   /** The email preferences page (`action`: unsubscribe or delete). */

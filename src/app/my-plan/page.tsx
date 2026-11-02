@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   itunes: null,
 };
 
-/** The page the email gate's "copy of your plan" email links to (PRE-327). */
+/** The page the "copy of your plan" email links to (the cart's "Email me my plan", PRE-439; the old quiz email gate, PRE-327). */
 export default async function MyPlanPage() {
   const country = (await headers()).get(COUNTRY_HEADER);
   const market = webMarketFor(country);

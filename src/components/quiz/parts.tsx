@@ -282,7 +282,7 @@ export function ReplyMedia({ media }: { media: MediaKey }) {
   );
 }
 
-/** A cut-out screen with a caption, for the plan page's swipe strip and the plans reply. */
+/** A cut-out screen with a caption, for the plans reply. */
 export function Shot({
   src,
   alt,

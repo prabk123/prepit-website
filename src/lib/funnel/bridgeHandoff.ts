@@ -49,9 +49,9 @@ export type BridgeHandoff = {
   answers?: WebSignupAnswer[];
   user?: WebSignupUser;
   settings?: WebSignupSettings;
-  /** The name the quiz asked for; used only when the sign-in has none (Apple often sends none). */
+  /** The name the quiz asked for before PRE-446 (old handoffs only); used only when the sign-in has none. */
   firstName?: string;
-  /** The email gate's address; a hint for Google's account picker, never sent to the backend from here. */
+  /** The old email gate's address (handoffs from before PRE-446); a hint for Google's account picker, never sent to the backend from here. */
   email?: string;
   /** What the bridge's "your plan" card shows: the quiz's chips and daily targets. */
   planSummary?: { tags?: string[]; calories?: number; proteinGrams?: number };
