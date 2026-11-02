@@ -8,6 +8,7 @@
  * (PRE-323). Only the email gate sends them earlier, to `POST /web-leads`.
  */
 import type { WebSignupAnswer, WebSignupSettings, WebSignupUser } from "../funnel/webSignupProfile";
+import type { StartingPointId } from "../funnel/bridgeHandoff";
 
 export const QUIZ_FUNNEL_ID = "quiz";
 /** Sent with every save, so answers can be told apart when the questions change. */
@@ -831,6 +832,24 @@ export function startingPoint(a: QuizAnswers): StartingPoint {
     why: "You didn't flag a sticking point, which is a good start.",
     line: "Your first few days of meals will show what's already working.",
   };
+}
+
+/**
+ * The same first sticking point as `startingPoint`, as the id the cart reads
+ * (PRE-437: its "For…" and "You said…" lines). Keep the two in step.
+ */
+export function startingPointId(a: QuizAnswers): StartingPointId {
+  const b = a.blockers;
+  if (a.energy === "I dip mid-afternoon") return a.skipsBreakfast === "Yes" ? "dip_breakfast" : "dip";
+  if (a.energy === "Low most days") return "low";
+  if (b.includes("I feel tired")) return "tired";
+  if (b.includes("Weekends derail me") || b.includes("I eat out or socialise a lot")) return "weekend";
+  if (a.eveningSnacks === "Yes") return "evening";
+  if (b.includes("I get hungry") || a.hunger === "Most days" || a.hunger === "I graze all day") return "graze";
+  if (b.includes("I crave snacks")) return "cravings";
+  if (b.includes("I don't know what to eat")) return "dinner";
+  if (b.includes("Logging takes too long") || b.includes("I lose motivation")) return "going";
+  return "none";
 }
 
 /** Protein leads the targets for muscle and training goals. */

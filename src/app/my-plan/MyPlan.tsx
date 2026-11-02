@@ -7,7 +7,7 @@ import { Card, CardTitle, Eyebrow, TargetTiles } from "@/components/quiz/parts";
 import { useEmailToken } from "@/components/quiz/useEmailToken";
 import { PRIMARY_BUTTON_CLASS, TEXT_BUTTON_CLASS } from "@/components/ui/buttons";
 import type { WebMarket } from "@/lib/markets";
-import type { Prices } from "@/lib/pricing";
+import { type Prices, WEB_REMINDER_EMAIL_LIVE } from "@/lib/pricing";
 import { fetchLeadPlan, LeadApiError, type LeadPlan } from "@/lib/quiz/leadApi";
 import { dietLabelFor, goalLabelFor, QUIZ_FUNNEL_ID, savedPlanHeadline, weightText } from "@/lib/quiz/quiz";
 import { trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webFunnelAnalytics";
@@ -118,7 +118,7 @@ export default function MyPlan({ market, prices }: { market: WebMarket; prices: 
         <Card>
           <CardTitle>Your first 7 days are free</CardTitle>
           <p className="text-[15px] text-ink-secondary">
-            Full access and your first session today, a reminder email on day 4, and your plan starts on day 8 if you keep it: {prices.annual} a
+            Full access and your first session today,{WEB_REMINDER_EMAIL_LIVE ? " a reminder email on day 4," : ""} and your plan starts on day 8 if you keep it: {prices.annual} a
             year or {prices.monthly} a month. Cancel before then and you pay nothing.
           </p>
         </Card>

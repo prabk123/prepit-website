@@ -12,6 +12,17 @@ import { withPostHog } from "@/lib/posthogClient";
  */
 export const WEB_FUNNEL_EVENTS = {
   bridgeView: "web_bridge_view",
+  /**
+   * The cart, `/start` before sign-in (PRE-437): `entry` (landing or quiz), `market` (the billing seller, us or uk),
+   * `has_quiz_answers`, `in_app_browser`. Named as the web funnel v9 plan names it, for its dashboard (PRE-443).
+   */
+  cartView: "cart_view",
+  /** A sign-in button on the cart was pressed (`provider`, `from_sticky`). `web_signin_start` still fires too. */
+  authStart: "auth_start",
+  /** The Google or Apple popup came back signed in (`provider`, `from_sticky`), before the account is read. */
+  authSuccess: "auth_success",
+  /** The popup was closed before signing in (`provider`, `from_sticky`). `web_signin_cancelled` still fires too. */
+  authCancel: "auth_cancel",
   /** Google or Apple sign-in started (`signup_method`, `auth_domain`: `prepit` when sign-in runs through tryprepit.app, `firebase` through firebaseapp.com, PRE-374). */
   signInStart: "web_signin_start",
   /** Signed in (`has_account`, `is_subscribed`…, and `auth_domain` as on `web_signin_start`). */

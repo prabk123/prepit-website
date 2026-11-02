@@ -9,7 +9,7 @@ import LongLogo from "@/components/ui/LongLogo";
 import { FooterWithdrawalLink } from "@/components/withdrawal/WithdrawalLink";
 import { faqPageJsonLd, LANDING_APP_STORE_FAQ_ITEMS, landingWebFaqItems } from "@/lib/faq";
 import type { WebMarket } from "@/lib/markets";
-import { type Prices, TRIAL_DAYS } from "@/lib/pricing";
+import { type Prices, TRIAL_DAYS, WEB_REMINDER_EMAIL_LIVE } from "@/lib/pricing";
 
 /**
  * Landing v9 on /try, part 2 (PRE-433): why you can trust it, the offer, the
@@ -183,7 +183,7 @@ export function OfferSection({ market, prices }: { market: WebMarket; prices: Pr
   const timeline: { when: string; title: string; what: string }[] = [
     { when: "Today", title: "Getting to know you", what: `Session 1, about 5 minutes.${web ? ` ${prices.free}.` : ""}` },
     { when: "After 3 days", title: "What I've noticed so far", what: "1 focus, 2 swaps. Plan my week." },
-    ...(web ? [{ when: "Day 4", title: "Reminder email", what: "4 days before any charge." }] : []),
+    ...(web && WEB_REMINDER_EMAIL_LIVE ? [{ when: "Day 4", title: "Reminder email", what: "4 days before any charge." }] : []),
     { when: "Around day 7", title: "Week-in-review", what: "Session 3, your first check-in." },
   ];
   return (
@@ -309,7 +309,7 @@ export function ClosingSection({ market, prices, showQuizLink = false }: { marke
         {showQuizLink && <LandingQuizLink market={market} />}
         <p className="max-w-[40em] text-[13px] leading-normal text-ink-muted">
           {thenPrices(prices)}
-          {web ? " Reminder email on day 4." : " The App Store shows the price for your country."} Prices in {prices.currencyName}.
+          {web ? (WEB_REMINDER_EMAIL_LIVE ? " Reminder email on day 4." : "") : " The App Store shows the price for your country."} Prices in {prices.currencyName}.
         </p>
       </div>
     </V9Section>

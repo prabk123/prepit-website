@@ -1,4 +1,4 @@
-import { DEFAULT_FUNNEL_ID } from "./params";
+import { bridgePath, DEFAULT_FUNNEL_ID } from "./params";
 
 /** The direct-sale landing page (PRE-302). */
 export const LANDING_PATH = "/try";
@@ -8,11 +8,9 @@ export const LANDING_FUNNEL_ID = DEFAULT_FUNNEL_ID;
 
 /**
  * Where "Start my free 7 days" goes where the website sells (every country
- * for now): the shared bridge (sign in, choose a plan, pay). The design has no plan picker on this page, so no
- * plan is passed. Until the PRE-323 bridge at /start is merged this is the
- * sign-in bridge, which continues to /checkout; then it becomes
- * `/start?from=landing&funnel=direct-sale`.
+ * for now): the cart on `/start` (PRE-437), which signs people in and then
+ * shows RevenueCat's paywall. No plan is passed: it's picked on the paywall.
  */
 export function landingBridgeHref(): string {
-  return `/signin?${new URLSearchParams({ funnel: LANDING_FUNNEL_ID })}`;
+  return bridgePath({ from: "landing", funnel: LANDING_FUNNEL_ID });
 }

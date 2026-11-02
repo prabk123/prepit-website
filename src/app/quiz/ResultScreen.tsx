@@ -1,5 +1,5 @@
 import { Caption, Card, CardTitle, ESTIMATES, Eyebrow, MiniPhone, Question, REAL_SCREENS, Shot, TargetTiles, Timeline } from "@/components/quiz/parts";
-import type { Prices } from "@/lib/pricing";
+import { type Prices, WEB_REMINDER_EMAIL_LIVE } from "@/lib/pricing";
 import { proteinFirst, type QuizAnswers, resultHeadline, resultTags, startingPoint, type Targets, trialDay } from "@/lib/quiz/quiz";
 
 const STRIP = [
@@ -113,7 +113,9 @@ export default function ResultScreen({
             items={[
               { when: "Today", what: "Full access and your first session", how: `Getting to know you, about 5 minutes. You pay ${prices.free}.`, state: "now" },
               { when: "After about 3 days", what: "What I've noticed so far", how: "Your patterns, and one focus to work on." },
-              { when: `Day 4, ${trialDay(4)}`, what: "Reminder email", how: "We email you a reminder, 4 days before any charge." },
+              ...(WEB_REMINDER_EMAIL_LIVE
+                ? [{ when: `Day 4, ${trialDay(4)}`, what: "Reminder email", how: "We email you a reminder, 4 days before any charge." }]
+                : []),
               { when: `Around day 7, ${trialDay(7)}`, what: "Week-in-review", how: "Your first weekly check-in." },
               { when: `Day 8, ${trialDay(8)}`, what: "Your plan starts, if you keep it", how: "Cancel before then and you pay nothing.", state: "pay" },
             ]}
@@ -165,7 +167,7 @@ export default function ResultScreen({
           },
           {
             q: "What happens on day 8?",
-            a: `If you keep PrepIt, your plan starts: ${prices.annual} for the year (that works out at ${prices.annualPerMonth} a month), or ${prices.monthly} a month if you pick monthly. We email you a reminder on day 4, and you can cancel any time before day 8 and pay nothing.`,
+            a: `If you keep PrepIt, your plan starts: ${prices.annual} for the year (that works out at ${prices.annualPerMonth} a month), or ${prices.monthly} a month if you pick monthly. ${WEB_REMINDER_EMAIL_LIVE ? "We email you a reminder on day 4, and you" : "You"} can cancel any time before day 8 and pay nothing.`,
           },
           {
             q: "Is the nutritionist a person?",
