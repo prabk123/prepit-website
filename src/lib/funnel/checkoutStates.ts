@@ -216,8 +216,9 @@ export function welcomeRecap({
 
 /**
  * "Email me the link" on the desktop "You're in" page sends
- * `email_link_requested`, and a PostHog workflow emails the App Store link to
- * the person. Off until that workflow is live, so the button never promises
- * an email nobody sends (PRE-438).
+ * `email_link_requested`, and the PostHog workflow "Web: Email me the app
+ * link (PRE-438)" emails the /open link to the person. Turn this off again if
+ * that workflow is ever paused, so the button never promises an email nobody
+ * sends.
  */
-export const APP_LINK_EMAIL_LIVE = false;
+export const APP_LINK_EMAIL_LIVE = true;
