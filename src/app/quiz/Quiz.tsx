@@ -129,6 +129,20 @@ function writeSaved(saved: Saved | null) {
   }
 }
 
+/** Set once the quiz has counted a completion in this tab (quiz_completed and Meta's Lead). */
+const COMPLETED_KEY = "prepit.quiz.completed";
+
+/** True the first time in this tab; with storage blocked, every time (Meta counts a repeat at worst). */
+function firstCompletionInTab(): boolean {
+  try {
+    if (window.sessionStorage.getItem(COMPLETED_KEY)) return false;
+    window.sessionStorage.setItem(COMPLETED_KEY, "1");
+  } catch {
+    // No storage: count it.
+  }
+  return true;
+}
+
 /** How long the hand-off waits for targets still loading when the loader ends. */
 const TARGETS_GRACE_MS = 4000;
 
@@ -280,18 +294,23 @@ export default function Quiz({ market, prices }: { market: WebMarket; prices: Pr
     if (handedOff.current) return;
     handedOff.current = true;
     writeBridgeHandoff(handoff(answers));
-    trackWebFunnelEvent(WEB_FUNNEL_EVENTS.quizCompleted, {
-      funnel_id: QUIZ_FUNNEL_ID,
-      funnel_version: QUIZ_FUNNEL_VERSION,
-      market,
-      targets_available: Boolean(targets),
-      price_currency: prices.currency,
-    });
-    // Meta's empty Lead, where the email gate used to send it (the gate had no skip).
-    trackQuizLead();
+    // Once per tab: a Back from the cart remounts the quiz, and running the
+    // loader again isn't a second completion or a second lead.
+    if (firstCompletionInTab()) {
+      trackWebFunnelEvent(WEB_FUNNEL_EVENTS.quizCompleted, {
+        funnel_id: QUIZ_FUNNEL_ID,
+        funnel_version: QUIZ_FUNNEL_VERSION,
+        market,
+        targets_available: Boolean(targets),
+        price_currency: prices.currency,
+      });
+      // Meta's empty Lead, where the email gate used to send it (the gate had no skip).
+      trackQuizLead();
+    }
     if (market === "app-store") {
       trackAppStoreClick("quiz-loader");
-      window.location.assign(APP_STORE_URL);
+      // Give the pixel's requests a moment before the page goes.
+      window.setTimeout(() => window.location.assign(APP_STORE_URL), 300);
     } else {
       router.push(market === "waitlist" ? "/waitlist" : bridgePath({ from: "quiz", funnel: QUIZ_FUNNEL_ID }));
     }

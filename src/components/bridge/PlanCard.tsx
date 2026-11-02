@@ -47,7 +47,9 @@ export default function PlanCard({
   const arrive = animate ? "plan-part-in" : "";
   return (
     <section
-      aria-labelledby="cart-plan"
+      // The heading arrives with the sessions part; until then the card names itself.
+      aria-labelledby={parts.has("sessions") ? "cart-plan" : undefined}
+      aria-label={parts.has("sessions") ? undefined : "Your plan"}
       className={`overflow-hidden rounded-tile border border-line bg-surface transition-shadow duration-500 ${spread ? "shadow-[0_18px_40px_-18px_rgb(26_26_46/0.35)]" : ""}`}
     >
       <div className="relative h-[150px] bg-[#eadccf] lg:h-[240px]">
