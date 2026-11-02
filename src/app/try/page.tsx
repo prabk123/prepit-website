@@ -2,28 +2,28 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import SectionViewTracker from "@/components/analytics/SectionViewTracker";
 import LandingFaq from "@/components/landing/LandingFaq";
-import {
-  ClosingSection,
-  FreeWeekSection,
-  JustAskSection,
-  LandingHero,
-  LoggingSection,
-  OfferSection,
-  PlansSection,
-  SignalsSection,
-  TrustSection,
-  WeKnowSection,
-  WhyItWorksSection,
-} from "@/components/landing/LandingSections";
+import { ClosingSection, OfferSection, TrustSection } from "@/components/landing/LandingSections";
 import LandingViewTracker from "@/components/landing/LandingViewTracker";
 import StickyCta from "@/components/landing/StickyCta";
+import "@/components/landing/v9/landing-v9.css";
+import {
+  AskNutritionistSection,
+  HoweverYouEatSection,
+  ItNoticesSection,
+  ItPlansSection,
+  SayItSection,
+  SeeItSection,
+  StartMondaySection,
+  V9Hero,
+  WhoItsForSection,
+} from "@/components/landing/v9/V9Sections";
 import { HideSiteFinalCta } from "@/components/pricing/SiteFinalCta";
 import { COUNTRY_HEADER, webMarketFor } from "@/lib/markets";
 import { PRICES, TRIAL_DAYS, WEB_PRICES } from "@/lib/pricing";
 import { webBillingSellerFor } from "@/lib/revenuecat/sellers";
 
-const TITLE = "PrepIt | Eat healthier, one change at a time";
-const DESCRIPTION = `Tell your AI nutritionist what you eat. It finds the one thing to change first and plans your week. ${TRIAL_DAYS} days free, with a nutrition consultation.`;
+const TITLE = "PrepIt | The nutritionist for everyone";
+const DESCRIPTION = `Your AI nutritionist learns your meals, spots the pattern and plans your week. ${TRIAL_DAYS} days free, with a nutrition consultation.`;
 
 // An ad landing page: kept out of search, so it doesn't compete with the homepage.
 export const metadata: Metadata = {
@@ -36,7 +36,9 @@ export const metadata: Metadata = {
 };
 
 /**
- * The direct-sale landing page (PRE-302), to the landing design: no quiz.
+ * The direct-sale landing page (PRE-302): Landing v9 from the hero film to
+ * Ask Nutritionist (PRE-432), then the earlier trust, offer, FAQ and closing
+ * sections until part 2 (PRE-433) replaces them. No quiz.
  * Visitors start their free week on the website (sign in, pay $0, then
  * download the app). That is every country for now; a country listed in
  * lib/markets.ts goes to the App Store or the waitlist instead (PRE-331).
@@ -49,19 +51,20 @@ export default async function LandingPage() {
   const prices = market === "web" ? WEB_PRICES[webBillingSellerFor(country)] : PRICES;
 
   return (
-    <div className="bg-page text-ink">
+    <div className="landing-v9 bg-page text-ink">
       <HideSiteFinalCta />
       <SectionViewTracker />
       <LandingViewTracker market={market} priceCurrency={prices.currency} />
-      <LandingHero market={market} prices={prices} />
-      <FreeWeekSection market={market} />
-      <WhyItWorksSection />
-      <SignalsSection />
-      <PlansSection market={market} />
-      <LoggingSection />
-      <JustAskSection />
+      <V9Hero market={market} prices={prices} />
+      <HoweverYouEatSection />
+      <WhoItsForSection />
+      <StartMondaySection />
+      <SayItSection />
+      <SeeItSection />
+      <ItNoticesSection />
+      <ItPlansSection market={market} />
+      <AskNutritionistSection />
       <TrustSection market={market} />
-      <WeKnowSection market={market} prices={prices} />
       <OfferSection market={market} prices={prices} />
       <LandingFaq market={market} prices={prices} />
       <ClosingSection market={market} prices={prices} />
