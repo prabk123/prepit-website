@@ -6,6 +6,7 @@ import { COUNTRY_HEADER, webMarketFor } from "@/lib/markets";
 import { WEB_PRICES } from "@/lib/pricing";
 import { webBillingSellerFor } from "@/lib/revenuecat/sellers";
 import Quiz from "./Quiz";
+import "../v9-cream.css";
 import "./quiz-v9.css";
 
 export const metadata: Metadata = {

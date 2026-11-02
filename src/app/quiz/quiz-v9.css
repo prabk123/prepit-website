@@ -1,23 +1,10 @@
 /*
- * Quiz v9.2 (PRE-441): the quiz sits on Landing v9's cream "gallery wall"
- * ground, with the same token values as landing-v9.css (scoped to pages that
- * render <div class="quiz-v9">), so nothing else on the site changes. The
- * accent stays the app's calories orange; there's no lime (the site's tokens
- * have none).
- *
- * Contrast on cream (#efe8e1): ink 13:1, ink-secondary 6.6:1, ink-muted
- * (#5e5a57) 5.6:1, accent-text (#9a3a2c) 6.0:1.
+ * Quiz v9.2 (PRE-441): motion and reply visuals. The cream tokens come from
+ * src/app/v9-cream.css, shared with Landing v9; the page keeps an explicit
+ * cream background.
  */
 body:has(.quiz-v9) {
-  --color-page: #efe8e1;
-  --color-surface: #f8f4f0;
-  --color-surface-raised: #e7dfd7;
-  --color-line: rgb(22 22 29 / 0.1);
-  --color-line-strong: rgb(22 22 29 / 0.2);
-  --color-ink-muted: #5e5a57;
-  --color-ink-faint: #5e5a57;
-  --color-accent-text: #9a3a2c;
-  background: #efe8e1;
+  background: var(--color-page);
 }
 
 @layer components {
@@ -108,8 +95,8 @@ body:has(.quiz-v9) {
     aspect-ratio: 16 / 7;
     overflow: hidden;
     border-radius: 22px;
-    background: #e4dad2;
-    box-shadow: var(--shadow-v9-card, 0 24px 48px -26px rgb(40 30 20 / 0.42), 0 4px 14px -6px rgb(40 30 20 / 0.14));
+    background: var(--color-v9-band);
+    box-shadow: var(--shadow-v9-card);
   }
 
   .quiz-visual__still img {

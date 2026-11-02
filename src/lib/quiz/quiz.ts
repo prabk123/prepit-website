@@ -644,11 +644,11 @@ const BLOCKER_REPLIES: Record<string, Omit<Reply, "eyebrow"> & { short: string }
 };
 
 /** The reply to the first sticking point tapped; null only if none was picked. */
-export function blockerReply(a: QuizAnswers): Reply | null {
+export function blockerReply(a: QuizAnswers): Reply {
   const first = a.blockers.find((b) => BLOCKER_REPLIES[b]);
-  if (!first) return null;
-  const { short, ...reply } = BLOCKER_REPLIES[first];
-  return { eyebrow: `Your sticking point · ${short}`, ...reply };
+  // Continue needs a pick, so the fallback (the first option's reply, with no answer to mirror) is never shown.
+  const { short, ...reply } = BLOCKER_REPLIES[first ?? BLOCKER_OPTIONS[0].value];
+  return { eyebrow: first ? `Your sticking point · ${short}` : "Your sticking point", ...reply };
 }
 
 /** The "Your day" pick the scores reply leads with. */

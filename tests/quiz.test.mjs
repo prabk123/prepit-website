@@ -198,7 +198,7 @@ test("a loss goal can't go below the healthy range for their height", () => {
 function visualsFor(a) {
   return pickVisuals({
     "echo-goal": goalReply(a).visuals,
-    "echo-blocker": blockerReply(a)?.visuals ?? [],
+    "echo-blocker": blockerReply(a).visuals,
     "echo-signals": scoresReply(a).visuals,
     demo: demoReply(a).visuals,
     "echo-plans": PLANS_REPLY.visuals,
@@ -274,7 +274,7 @@ test("each reply mirrors the answer it follows", () => {
   // The sticking-point reply follows the first one tapped, not a fixed order.
   assert.equal(blockerReply(answers({ blockers: ["I crave snacks", "Logging takes too long"] })).eyebrow, "Your sticking point · Cravings");
   assert.equal(blockerReply(answers({ blockers: ["Logging takes too long", "I crave snacks"] })).eyebrow, "Your sticking point · Food diary");
-  assert.equal(blockerReply(answers({ blockers: [] })), null);
+  assert.equal(blockerReply(answers({ blockers: [] })).eyebrow, "Your sticking point");
   assert.equal(scoresReply(answers({ dayPatterns: ["mood", "dip"] })).headline, "Let's see what's behind your afternoon dip.");
   assert.equal(scoresReply(answers({ dayPatterns: ["none"] })).headline, "Steady already. Let's keep it that way.");
   assert.ok(scoresReply(answers({ dayPatterns: ["mood"] })).source.startsWith("White, Horwath and Conner 2013"));

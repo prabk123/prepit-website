@@ -106,19 +106,6 @@ export function Chip({ selected, onClick, children }: { selected: boolean; onCli
   );
 }
 
-/** The nutritionist's reply to an answer: a card with the accent dot. Announced when it changes. */
-export function ReplyCard({ children }: { children: ReactNode }) {
-  return (
-    <div
-      role="status"
-      className="flex gap-2.5 rounded-button border border-line bg-surface px-3.5 py-3 text-[15px] leading-[1.45] text-ink"
-    >
-      <span aria-hidden className="mt-[7px] size-2 flex-none rounded-full bg-accent shadow-[0_0_0_4px_rgb(255_100_79/0.18)]" />
-      <div className="min-w-0">{children}</div>
-    </div>
-  );
-}
-
 /** A plain eyebrow that mirrors the answer, e.g. "You said · Lose fat". */
 export function Said({ children }: { children: ReactNode }) {
   return <p className="-mb-2 text-[12px] font-bold uppercase leading-[1.2] tracking-[0.12em] text-ink-muted">{children}</p>;
@@ -152,7 +139,7 @@ export function Note({ say, source }: { say: string; source?: string }) {
 /** A short line from the nutritionist inside a question screen (metabolism, Mostly sitting, safety, goal weight). */
 export function InlineReply({ children, ai = true }: { children: ReactNode; ai?: boolean }) {
   return (
-    <div role="status" className="quiz-fade flex flex-col gap-1 rounded-[14px] border border-line bg-surface px-3.5 py-3">
+    <div className="quiz-fade flex flex-col gap-1 rounded-[14px] border border-line bg-surface px-3.5 py-3">
       {ai && <AiLabel />}
       <p className="text-[14px] leading-[1.45] text-ink">{children}</p>
     </div>

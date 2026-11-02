@@ -98,6 +98,65 @@ const ADVANCE_MS = 250;
 
 type Saved = { answers: QuizAnswers; screen: ScreenId; history: ScreenId[] };
 
+const HELP_LINK = "font-semibold text-ink underline";
+
+function Tel({ number, children }: { number: string; children: ReactNode }) {
+  return (
+    <a className={HELP_LINK} href={`tel:${number}`}>
+      {children}
+    </a>
+  );
+}
+
+function Site({ href, children }: { href: string; children: ReactNode }) {
+  return (
+    <a className={HELP_LINK} href={href} target="_blank" rel="noopener noreferrer">
+      {children}
+    </a>
+  );
+}
+
+/**
+ * Where to get help, by the visitor's country (PRE-441). Numbers checked on
+ * 2 November 2026 against Beat, Bodywhys, Samaritans and ANAD. Countries we
+ * don't list get a doctor, the local emergency number and Find A Helpline.
+ */
+function EatingDisorderHelp({ country }: { country: string }) {
+  const p = "text-[15px] text-ink-secondary";
+  if (country === "GB")
+    return (
+      <p className={p}>
+        Your GP or a specialist service is a good next step. Beat runs a free eating disorder helpline: England{" "}
+        <Tel number="08088010677">0808 801 0677</Tel>, Scotland <Tel number="08088010432">0808 801 0432</Tel>, Wales{" "}
+        <Tel number="08088010433">0808 801 0433</Tel>, Northern Ireland <Tel number="08088010434">0808 801 0434</Tel>, with webchat at{" "}
+        <Site href="https://www.beateatingdisorders.org.uk">beateatingdisorders.org.uk</Site>. If you need to talk now, Samaritans are free on{" "}
+        <Tel number="116123">116 123</Tel>, day or night. In an emergency, call 999.
+      </p>
+    );
+  if (country === "IE")
+    return (
+      <p className={p}>
+        Your GP or a specialist service is a good next step. Bodywhys runs a national eating disorder helpline on{" "}
+        <Tel number="+35312107906">01 210 7906</Tel> and support at <Site href="https://www.bodywhys.ie">bodywhys.ie</Site>. If you need to talk
+        now, Samaritans are free on <Tel number="116123">116 123</Tel>, day or night. In an emergency, call 112 or 999.
+      </p>
+    );
+  if (country === "US" || country === "PR")
+    return (
+      <p className={p}>
+        Your doctor or a specialist service is a good next step. ANAD runs a free eating disorder helpline on{" "}
+        <Tel number="+18883757767">888-375-7767</Tel> and support groups at <Site href="https://anad.org">anad.org</Site>. If you&apos;re in
+        crisis, call or text 988.
+      </p>
+    );
+  return (
+    <p className={p}>
+      Your doctor or a specialist eating disorder service is a good next step. To find a free helpline where you live, visit{" "}
+      <Site href="https://findahelpline.com">findahelpline.com</Site>. In an emergency, call your local emergency number.
+    </p>
+  );
+}
+
 /** Screens a tab saved before PRE-446 took the email gate, name and plan page out. */
 const LEGACY_END_SCREENS: ReadonlySet<string> = new Set(["email", "name", "result"]);
 type LegacyAnswers = { email?: string; firstName?: string; marketingConsent?: boolean };
@@ -455,7 +514,12 @@ export default function Quiz({ country, market, prices }: { country: string; mar
   };
 
   /** The nutritionist's line inside a question screen; the empty wrapper keeps the line from replaying the screen's entrance. */
-  const inline = (line: string, ai = true) => <div className="empty:hidden">{line && <InlineReply ai={ai}>{line}</InlineReply>}</div>;
+  // One live region that stays mounted, so a line is announced when it appears or changes, and not on every keystroke.
+  const inline = (line: string, ai = true) => (
+    <div role="status" className="empty:hidden">
+      {line && <InlineReply ai={ai}>{line}</InlineReply>}
+    </div>
+  );
 
   switch (screen) {
     case "goal":
@@ -499,12 +563,7 @@ export default function Quiz({ country, market, prices }: { country: string; mar
       break;
 
     case "echo-blocker":
-      if (blocker) reply("echo-blocker", blocker);
-      else {
-        // Not reachable (Continue needs a pick); kept so the screen is never blank.
-        body = <Question>No sticking point picked.</Question>;
-        footer = continueButton();
-      }
+      reply("echo-blocker", blocker);
       break;
 
     case "day":
@@ -668,27 +727,7 @@ export default function Quiz({ country, market, prices }: { country: string; mar
           <Question>Thanks for telling us.</Question>
           <Sub>PrepIt sets food targets, and that isn&apos;t the right kind of help while you&apos;re dealing with an eating disorder.</Sub>
           <Card>
-            {country === "GB" ? (
-              <p className="text-[15px] text-ink-secondary">
-                Your doctor or a specialist service is a good next step. In the UK, Beat runs a free helpline and webchat at{" "}
-                <a className="font-semibold text-ink underline" href="https://www.beateatingdisorders.org.uk" target="_blank" rel="noopener noreferrer">
-                  beateatingdisorders.org.uk
-                </a>
-                .
-              </p>
-            ) : (
-              <p className="text-[15px] text-ink-secondary">
-                Your doctor or a specialist service is a good next step. In the US, ANAD runs a free eating disorder helpline on{" "}
-                <a className="font-semibold text-ink underline" href="tel:+18883757767">
-                  888-375-7767
-                </a>{" "}
-                and support groups at{" "}
-                <a className="font-semibold text-ink underline" href="https://anad.org" target="_blank" rel="noopener noreferrer">
-                  anad.org
-                </a>
-                . If you&apos;re in crisis, call or text 988.
-              </p>
-            )}
+            <EatingDisorderHelp country={country} />
           </Card>
         </>
       );
@@ -889,8 +928,7 @@ export default function Quiz({ country, market, prices }: { country: string; mar
   }
 
   // Screen widths: one column (wider on desktop), or text beside the visual on a wide screen.
-  const width =
-    layout === "split" ? "max-w-[520px] min-[900px]:max-w-[1180px]" : layout === "hero" ? "max-w-[520px] min-[900px]:max-w-[1180px]" : "max-w-[520px] min-[900px]:max-w-[620px]";
+  const width = layout === "solo" ? "max-w-[520px] min-[900px]:max-w-[620px]" : "max-w-[520px] min-[900px]:max-w-[1180px]";
   const bodyLayout =
     layout === "split"
       ? "flex flex-col gap-[18px] min-[900px]:grid min-[900px]:grid-cols-[minmax(0,520px)_minmax(0,1fr)] min-[900px]:items-start min-[900px]:gap-x-[72px]"
@@ -903,7 +941,7 @@ export default function Quiz({ country, market, prices }: { country: string; mar
     <div className="quiz-v9 ph-no-capture relative flex min-h-dvh w-full flex-col overflow-x-clip bg-page text-ink">
       {layout === "hero" && (
         <div aria-hidden className="quiz-side-still pointer-events-none absolute top-0 left-[46%] right-0 hidden h-full max-h-[820px] min-[900px]:block">
-          <Image src="/quiz/v9/side-fork.webp" alt="" fill priority sizes="54vw" className="object-cover object-[50%_45%]" />
+          <Image src="/quiz/v9/side-fork.webp" alt="" fill sizes="54vw" className="object-cover object-[50%_45%]" />
         </div>
       )}
       <header className="sticky top-0 z-10 bg-page px-5 pb-2.5 pt-[18px] min-[900px]:px-12">
