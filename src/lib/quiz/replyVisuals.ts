@@ -1,3 +1,4 @@
+import type { Prices } from "@/lib/pricing";
 /**
  * The quiz's reply visuals (PRE-441, v9.2): real app cut-outs on frosted
  * glass, built card by card, with an object still as an accent on a few.
@@ -48,7 +49,8 @@ const ROW_OATS = "Breakfast, 7:45 am: protein overnight oats with apple and cinn
 const ROW_SALMON = "Dinner, 6:45 pm: Mediterranean salmon bowl with quinoa, Energy up 15, Satiety up 9, Mood up 19.";
 const ROW_YOGURT = "Snack, 3:45 pm: Greek yogurt with raspberries, 168 kcal, Satiety up 9.";
 const PLAN_HEAD = "A planned week: 17 Oct to 23 Oct, 21 meals.";
-const PLAN_COST = "Estimated cost at typical supermarket prices, per week and per meal.";
+const PLAN_COST = "Estimated cost at typical supermarket prices: £48 to £66 for the week, £2.29 to £3.14 a meal.";
+const PLAN_COST_USD = "Estimated cost at typical supermarket prices: $63 to $87 for the week, $3.00 to $4.14 a meal.";
 const GROCERY = "Grocery list, 30 ingredients.";
 const RING = (score: string, value: number): VisualCard => ({
   img: `ring-${score.toLowerCase()}`,
@@ -464,16 +466,18 @@ export function visualFinePrint(picked: PickedVisual | undefined): string {
 
 /**
  * Cut-outs captured once per checkout currency (PRE-436): the plan cost card
- * shows dollars to visitors who pay in dollars. The pound capture is the
- * default, and every other cut-out is the same for everyone.
+ * shows dollars to visitors who pay in dollars, with its own alt text. The
+ * pound capture is the default, and every other cut-out is the same for
+ * everyone. A new image here also needs its size in ReplyVisual's SIZES.
  */
-export const CURRENCY_CARDS: Record<string, Partial<Record<string, string>>> = {
-  "plan-cost": { USD: "plan-cost-usd" },
+export const CURRENCY_CARDS: Record<string, Partial<Record<Prices["currency"], { img: string; alt: string }>>> = {
+  "plan-cost": { USD: { img: "plan-cost-usd", alt: PLAN_COST_USD } },
 };
 
-/** The cut-out to draw for a visitor paying in [currency]. */
-export function cardImageFor(img: string, currency: string | undefined): string {
-  return (currency && CURRENCY_CARDS[img]?.[currency]) || img;
+/** The card to draw for a visitor paying in [currency]. */
+export function cardForCurrency(card: VisualCard, currency: string | undefined): VisualCard {
+  const variant = currency ? CURRENCY_CARDS[card.img]?.[currency as Prices["currency"]] : undefined;
+  return variant ? { ...card, ...variant } : card;
 }
 
 /**
@@ -483,8 +487,7 @@ export function cardImageFor(img: string, currency: string | undefined): string 
 export function drawnVisual(picked: PickedVisual, currency?: string): Visual {
   const visual: Visual = VISUALS[picked.key];
   const cards = visual.cards.map((card, i) => {
-    const img = cardImageFor(card.img, currency);
-    const drawn = img === card.img ? card : { ...card, img };
+    const drawn = cardForCurrency(card, currency);
     return picked.bare && i === 0 ? { ...drawn, ov: 0, ovd: 0 } : drawn;
   });
   return picked.bare ? { ...visual, still: undefined, cards } : { ...visual, cards };

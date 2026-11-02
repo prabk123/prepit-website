@@ -43,8 +43,8 @@ import {
   weightKg,
   weightText,
 } from "../src/lib/quiz/quiz.ts";
-import { cardImageFor, CURRENCY_CARDS, drawnVisual, pickVisuals, VISUALS, visualCaptures, visualFinePrint } from "../src/lib/quiz/replyVisuals.ts";
-import { existsSync } from "node:fs";
+import { cardForCurrency, CURRENCY_CARDS, drawnVisual, pickVisuals, VISUALS, visualCaptures, visualFinePrint } from "../src/lib/quiz/replyVisuals.ts";
+import { existsSync, readFileSync } from "node:fs";
 
 const TODAY = new Date(2026, 9, 21);
 
@@ -235,6 +235,13 @@ test("across every route, a reply never repeats an earlier reply's capture, and 
             for (const capture of visualCaptures(drawnVisual(p))) {
               assert.ok(!seen.has(capture), `${route}: ${capture} repeats`);
               seen.add(capture);
+            }
+          // The dollar cards drawn for US visitors don't repeat either.
+          const seenUsd = new Set();
+          for (const p of picked)
+            for (const capture of visualCaptures(drawnVisual(p, "USD"))) {
+              assert.ok(!seenUsd.has(capture), `${route} (USD): ${capture} repeats`);
+              seenUsd.add(capture);
             }
           // (visualCaptures lists each capture once per visual, so a repeat here is across replies.)
           const stills = picked.filter((p) => VISUALS[p.key].still && !p.bare).length;
@@ -510,12 +517,22 @@ test("the plan cost card shows dollars to visitors who pay in dollars, and pound
   assert.ok(!plan("USD").includes("plan-cost"));
   assert.ok(plan("GBP").includes("plan-cost"));
   assert.ok(plan(undefined).includes("plan-cost"));
-  assert.equal(cardImageFor("week-strip", "USD"), "week-strip");
+  const strip = VISUALS.plan.cards.find((card) => card.img === "week-strip");
+  assert.equal(cardForCurrency(strip, "USD"), strip);
+  // The dollar card says its own amounts to screen readers; the pound card says its own.
+  const cost = (currency) => drawnVisual({ key: "plan", bare: false }, currency).cards.find((card) => card.img.startsWith("plan-cost"));
+  assert.match(cost("USD").alt, /\$63 to \$87/);
+  assert.match(cost("GBP").alt, /£48 to £66/);
   // A bare pick still swaps the currency and drops only the first card's overlap.
   const bare = drawnVisual({ key: "plan2", bare: true }, "USD");
   assert.equal(bare.cards[0].ov, 0);
   assert.ok(bare.cards.some((card) => card.img === "plan-cost-usd"));
+  // Every currency image ships, and has its size in ReplyVisual so it holds its space while loading.
+  const component = readFileSync(new URL("../src/components/quiz/ReplyVisual.tsx", import.meta.url), "utf8");
   for (const variants of Object.values(CURRENCY_CARDS)) {
-    for (const img of Object.values(variants)) assert.ok(existsSync(`public/quiz/v9/${img}.webp`), img);
+    for (const { img } of Object.values(variants)) {
+      assert.ok(existsSync(new URL(`../public/quiz/v9/${img}.webp`, import.meta.url)), img);
+      assert.ok(component.includes(`"${img}": [`), `${img} has no size in SIZES`);
+    }
   }
 });
