@@ -1,6 +1,7 @@
 /**
- * The web quiz (PRE-322, PRE-329, PRE-327): its screens, answers, copy and
- * the rules that pick between them, from the v3 quiz design. Kept free of
+ * The web quiz (PRE-322, PRE-329, PRE-327; v9.2 screens and replies,
+ * PRE-441): its screens, answers, copy and the rules that pick between them,
+ * from Charlie's quiz v9.2 board. Kept free of
  * React and browser APIs (and of runtime imports) so it can be tested on its
  * own; the screens themselves are src/app/quiz.
  *
@@ -9,10 +10,11 @@
  */
 import type { WebSignupAnswer, WebSignupSettings, WebSignupUser } from "../funnel/webSignupProfile";
 import type { StartingPointId } from "../funnel/bridgeHandoff";
+import type { VisualKey } from "./replyVisuals";
 
 export const QUIZ_FUNNEL_ID = "quiz";
 /** Sent with every save, so answers can be told apart when the questions change. */
-export const QUIZ_FUNNEL_VERSION = "quiz-v3";
+export const QUIZ_FUNNEL_VERSION = "quiz-v4";
 
 /**
  * Flexitarian, Halal and Kosher need backend values and plan rules (PRE-328)
@@ -24,23 +26,20 @@ export const EXTRA_FOOD_RULES_ENABLED = false;
 
 // ---------------------------------------------------------------- screens
 
-export const SECTIONS = ["Goals", "About you", "Your day", "Your plan"] as const;
+export const SECTIONS = ["Goals", "Your day", "About you", "Your plan"] as const;
 
 export type ScreenId =
   | "goal"
   | "echo-goal"
   | "blockers"
   | "echo-blocker"
-  | "energy"
-  | "hunger"
-  | "mood"
+  | "day"
   | "echo-signals"
   | "history"
   | "demo"
   | "gender"
-  | "dob"
+  | "numbers"
   | "stop-age"
-  | "hw"
   | "safety"
   | "stop-ed"
   | "goalweight"
@@ -48,10 +47,8 @@ export type ScreenId =
   | "exercise"
   | "diet"
   | "intol"
-  | "mealhelp"
-  | "echo-plans"
-  | "style"
   | "week"
+  | "echo-plans"
   | "loader"
   | "email"
   | "name"
@@ -59,33 +56,32 @@ export type ScreenId =
 
 type Screen = { id: ScreenId; section: number; branch?: boolean };
 
-/** In order. Branch screens are only reached from the screen before them. */
+/**
+ * In order, from the v9.2 card list: 19 screens to the loader on the Lose fat
+ * and Build muscle paths, 18 on the others (no goal weight). Branch screens
+ * are only reached from the screen before them.
+ */
 export const SCREENS: readonly Screen[] = [
   { id: "goal", section: 0 },
   { id: "echo-goal", section: 0 },
   { id: "blockers", section: 0 },
   { id: "echo-blocker", section: 0 },
-  { id: "energy", section: 0 },
-  { id: "hunger", section: 0 },
-  { id: "mood", section: 0 },
-  { id: "echo-signals", section: 0 },
+  { id: "day", section: 1 },
+  { id: "echo-signals", section: 1 },
   { id: "history", section: 1 },
   { id: "demo", section: 1 },
-  { id: "gender", section: 1 },
-  { id: "dob", section: 1 },
-  { id: "stop-age", section: 1, branch: true },
-  { id: "hw", section: 1 },
-  { id: "safety", section: 1 },
-  { id: "stop-ed", section: 1, branch: true },
-  { id: "goalweight", section: 1 },
+  { id: "gender", section: 2 },
+  { id: "numbers", section: 2 },
+  { id: "stop-age", section: 2, branch: true },
+  { id: "safety", section: 2 },
+  { id: "stop-ed", section: 2, branch: true },
+  { id: "goalweight", section: 2 },
   { id: "activity", section: 2 },
   { id: "exercise", section: 2 },
   { id: "diet", section: 2 },
   { id: "intol", section: 2 },
-  { id: "mealhelp", section: 2 },
-  { id: "echo-plans", section: 2 },
-  { id: "style", section: 2 },
   { id: "week", section: 3 },
+  { id: "echo-plans", section: 3 },
   { id: "loader", section: 3 },
   { id: "email", section: 3 },
   { id: "name", section: 3 },
@@ -106,20 +102,26 @@ export function isStopScreen(id: ScreenId): boolean {
 
 // ---------------------------------------------------------------- answers
 
+/** Weight units: pounds, kilograms, or stones and pounds. */
 export type Unit = "imperial" | "metric" | "stones";
+export type HeightUnit = "ft" | "cm";
+
+/** "Your day" picks (v9.2), as the backend stores them (`day_patterns`, PRE-435). */
+export type DayPattern = "dip" | "low" | "hungry" | "mood" | "none";
 
 export type QuizAnswers = {
   goal?: string;
+  /** In the order tapped: the first one picks the sticking-point reply. */
   blockers: string[];
-  energy?: string;
-  hunger?: string;
-  mood?: string;
+  dayPatterns: DayPattern[];
   history?: string;
   gender?: string;
   dobDay: string;
   /** "01" to "12", or "" before one is picked. */
   dobMonth: string;
   dobYear: string;
+  heightUnit: HeightUnit;
+  /** The weight unit; goal weight uses it too. */
   unit: Unit;
   heightCm: string;
   weightKg: string;
@@ -129,8 +131,10 @@ export type QuizAnswers = {
   stones: string;
   stonePounds: string;
   safety: string[];
-  /** As typed, in the visitor's units (pounds for feet and stones). */
+  /** As typed, in the visitor's units (stones only, with goalStonePounds, for stones). */
   goalWeightText: string;
+  /** The pounds part of a goal weight in stones. */
+  goalStonePounds?: string;
   /** Always kilograms, from goalWeightText. */
   goalWeightKg?: number;
   activity?: string;
@@ -138,8 +142,8 @@ export type QuizAnswers = {
   diet?: string;
   intolerances: string[];
   rules: string[];
-  mealHelp?: string;
-  style?: string;
+  /** "None of these" on allergies and food rules, so Continue means an answer. */
+  noFoodRules: boolean;
   /** The loader's two questions. */
   skipsBreakfast?: "Yes" | "No";
   eveningSnacks?: "Yes" | "No";
@@ -148,14 +152,32 @@ export type QuizAnswers = {
   firstName: string;
 };
 
-/** US first (PRE-322): feet and pounds, month before day. */
-export function emptyAnswers(): QuizAnswers {
+/**
+ * Units by country (v9.2), with a switch on the card: feet and pounds in the
+ * US, Liberia and Myanmar, feet and stones in the UK and Ireland, centimetres
+ * and kilograms everywhere else. Everything is sent in cm and kg.
+ */
+export function unitsFor(country: string | null | undefined): { heightUnit: HeightUnit; unit: Unit } {
+  const code = (country ?? "US").toUpperCase();
+  if (["US", "LR", "MM", "PR"].includes(code)) return { heightUnit: "ft", unit: "imperial" };
+  if (code === "GB" || code === "IE") return { heightUnit: "ft", unit: "stones" };
+  return { heightUnit: "cm", unit: "metric" };
+}
+
+/** Month before day only where dates are written that way (the US). */
+export function monthFirst(country: string | null | undefined): boolean {
+  return ["US", "PR"].includes((country ?? "US").toUpperCase());
+}
+
+/** Body numbers start empty (never pre-filled); only the units follow the country. US first (PRE-322). */
+export function emptyAnswers(country: string | null = "US"): QuizAnswers {
   return {
     blockers: [],
+    dayPatterns: [],
     dobDay: "",
     dobMonth: "",
     dobYear: "",
-    unit: "imperial",
+    ...unitsFor(country),
     heightCm: "",
     weightKg: "",
     feet: "",
@@ -167,6 +189,7 @@ export function emptyAnswers(): QuizAnswers {
     goalWeightText: "",
     intolerances: [],
     rules: [],
+    noFoodRules: false,
     email: "",
     marketingConsent: false,
     firstName: "",
@@ -208,26 +231,29 @@ export const BLOCKER_OPTIONS: Option[] = [
   { value: "I crave snacks", tag: "Crave snacks" },
 ];
 
-export const ENERGY_OPTIONS: Option[] = [
-  { value: "Steady all day" },
-  { value: "I dip mid-afternoon" },
-  { value: "Up and down" },
-  { value: "Low most days" },
+/** "Your day": energy, hunger and mood as one pick-any list (v9.2). */
+export const DAY_OPTIONS: Option[] = [
+  { value: "dip", label: "My energy dips mid-afternoon" },
+  { value: "low", label: "My energy is low most days" },
+  { value: "hungry", label: "I'm hungry between meals" },
+  { value: "mood", label: "Food changes how I feel" },
+  { value: "none", label: "None of these. My days feel steady.", exclusive: true },
 ];
 
-export const HUNGER_OPTIONS: Option[] = [
-  { value: "Rarely" },
-  { value: "Sometimes" },
-  { value: "Most days" },
-  { value: "I graze all day" },
-];
-
-export const MOOD_OPTIONS: Option[] = [
-  { value: "Not really" },
-  { value: "Sometimes, after big meals" },
-  { value: "Yes, often" },
-  { value: "I'd like to find out" },
-];
+/**
+ * The older energy, hunger and mood answers a "Your day" pick stands for, as
+ * the backend writes them (PRE-435 `legacyDayAnswers`). The starting point
+ * reads these, and the save sends them too for any reader of the old ids.
+ */
+export function dayAnswers(a: Pick<QuizAnswers, "dayPatterns">): { energy: string; hunger: string; mood: string } | null {
+  const d = a.dayPatterns;
+  if (!d.length) return null;
+  return {
+    energy: d.includes("dip") ? "I dip mid-afternoon" : d.includes("low") ? "Low most days" : "Steady all day",
+    hunger: d.includes("hungry") ? "Most days" : "Rarely",
+    mood: d.includes("mood") ? "Yes, often" : "Not really",
+  };
+}
 
 export const HISTORY_OPTIONS: Option[] = [
   { value: "Yes, with an app" },
@@ -237,8 +263,8 @@ export const HISTORY_OPTIONS: Option[] = [
 ];
 
 export const GENDER_OPTIONS: Option[] = [
-  { value: "male", label: "Male" },
   { value: "female", label: "Female" },
+  { value: "male", label: "Male" },
   { value: "non-binary", label: "Non-binary" },
   { value: "rather not say", label: "Rather not say" },
 ];
@@ -354,18 +380,6 @@ export function savedDiet(a: QuizAnswers): { diet?: string; intolerances: string
   return { diet, intolerances };
 }
 
-export const MEAL_HELP_OPTIONS: Option[] = [
-  { value: "Planning the week and the shop" },
-  { value: "Ideas when I'm stuck" },
-  { value: "Eating out and takeaways" },
-  { value: "Better versions of what I already eat" },
-];
-
-export const STYLE_OPTIONS: Option[] = [
-  { value: "Short nudges", detail: "Tell me the one thing to do" },
-  { value: "The detail and the why", detail: "Show me what's behind it" },
-];
-
 export const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 export const LOADER_STEPS = [
@@ -414,7 +428,7 @@ export function dobIso(a: QuizAnswers): string | undefined {
 }
 
 export function heightCm(a: QuizAnswers): number | null {
-  const value = a.unit === "metric" ? num(a.heightCm) : (num(a.feet) * 12 + (num(a.inches) || 0)) * 2.54;
+  const value = a.heightUnit === "cm" ? num(a.heightCm) : (num(a.feet) * 12 + (num(a.inches) || 0)) * 2.54;
   return Number.isFinite(value) && value >= 50 && value <= 272 ? Math.round(value) : null;
 }
 
@@ -443,6 +457,16 @@ export function toKg(text: string, unit: Unit): number | undefined {
   return unit === "metric" ? value : Math.round(value * LB_TO_KG * 10) / 10;
 }
 
+/** A goal weight as typed, in kilograms. Stones take a stones box and a pounds box. */
+export function goalKg(text: string, unit: Unit, stonePounds = ""): number | undefined {
+  if (unit !== "stones") return toKg(text, unit);
+  const stones = num(text);
+  if (!Number.isFinite(stones)) return undefined;
+  const pounds = stonePounds.trim() === "" ? 0 : num(stonePounds);
+  if (!Number.isFinite(pounds)) return undefined;
+  return toKg(String(stones * 14 + pounds), "imperial");
+}
+
 /** BMI 18.5 to 24.9 for their height, in kilograms. */
 export function healthyRange(cm: number): [number, number] {
   const m = cm / 100;
@@ -464,7 +488,7 @@ export function isVisible(id: ScreenId, a: QuizAnswers): boolean {
 
 /** The screen after `id`, or null at the end (or on a stop screen). */
 export function nextScreen(id: ScreenId, a: QuizAnswers, today = new Date()): ScreenId | null {
-  if (id === "dob") {
+  if (id === "numbers") {
     const age = ageFrom(a, today);
     if (age !== null && age < 18) return "stop-age";
   }
@@ -501,18 +525,20 @@ export function canContinue(id: ScreenId, a: QuizAnswers, today = new Date()): b
   switch (id) {
     case "blockers":
       return a.blockers.length > 0;
+    case "day":
+      return a.dayPatterns.length > 0;
     case "safety":
       return a.safety.length > 0;
-    case "dob": {
+    case "numbers": {
       const age = ageFrom(a, today);
-      return age !== null && age < 110;
+      return age !== null && age < 110 && heightCm(a) !== null && weightKg(a) !== null;
     }
-    case "hw":
-      return heightCm(a) !== null && weightKg(a) !== null;
     case "goalweight":
       return a.goalWeightKg !== undefined && a.goalWeightKg >= 20 && a.goalWeightKg <= 400 && goalWeightProblem(a) === null;
     case "diet":
       return Boolean(a.diet);
+    case "intol":
+      return a.noFoodRules || a.intolerances.length > 0 || a.rules.length > 0;
     case "email":
       return isEmail(a.email);
     default:
@@ -526,147 +552,210 @@ export function isEmail(value: string): boolean {
 
 // ---------------------------------------------------------------- copy
 
-export type MediaKey = "protein" | "chart" | "planHead" | "swap" | "signals" | "satiety" | "rings" | "weekly" | "voice" | "home";
+/**
+ * A reply screen (v9.2): the eyebrow that mirrors the answer, the headline,
+ * the nutritionist's own line (first person, under the AI label), an optional
+ * study behind "Source", and the visual options in order of preference
+ * (replyVisuals.ts picks one that repeats no earlier capture).
+ */
+export type Reply = { eyebrow: string; headline: string; say: string; source?: string; visuals: VisualKey[] };
 
-export type Reply = { headline: string; body: string; media: MediaKey[] };
-
-const GOAL_REPLIES: Record<string, Reply> = {
+const GOAL_REPLIES: Record<string, Omit<Reply, "eyebrow">> = {
   "Lose fat": {
-    headline: "You don't need another number. You need to know what to change.",
-    body: "PrepIt is an AI nutritionist. Your nutritionist reads what you eat, spots the patterns, then tells you the one thing to change first.",
-    media: ["protein", "chart"],
+    headline: "Lose fat in a way you can keep up.",
+    say: "You might want a few swaps to meals you love, or the whole week planned. I can do either, around your targets, and nothing changes until you say so.",
+    visuals: ["swap"],
   },
   "Build muscle": {
-    headline: "Hit your protein without living on shakes.",
-    body: "Your nutritionist reads your week and shows where the protein is missing, meal by meal.",
-    media: ["chart", "protein"],
-  },
-  "Eat healthier": {
-    headline: "Not sure what to eat? Your nutritionist plans the week. You just confirm it.",
-    body: "Meals that fit your targets, your diet and how you actually eat.",
-    media: ["planHead", "swap"],
+    headline: "I'll handle the food side of building muscle.",
+    say: "I set protein and calorie targets for building muscle, then show how close each day gets. If you're short, I'll suggest food you'd actually eat to get there.",
+    visuals: ["chart"],
   },
   "Improve energy": {
-    headline: "Find out what's behind the 3pm slump.",
-    body: "PrepIt gives every day an Energy score from what you ate, and shows which meals moved it.",
-    media: ["signals", "rings"],
+    headline: "Steadier energy starts with seeing what each meal does.",
+    say: "Every meal you log shows how it moved your Energy, and why. Within a few days you'll see which meals keep you going, and I'll help you build on them.",
+    visuals: ["energy"],
   },
   "Stay fuller": {
-    headline: "Feel full and steady, not hungry and snappy.",
-    body: "PrepIt gives every day a Satiety score, so you can see which meals keep you going.",
-    media: ["satiety", "signals"],
+    headline: "Find the meals that actually keep you full.",
+    say: "Every meal gets a Satiety score, so you can see which ones carry you to the next. Then I'll help you eat more of the meals that last.",
+    visuals: ["satiety"],
+  },
+  "Eat healthier": {
+    headline: "Eating healthier, without the guesswork.",
+    say: "Ask me anything about food and I'll answer from your own meals and targets. A few small upgrades or a whole new week: we go at your pace.",
+    visuals: ["ask"],
   },
   "Fuel training": {
-    headline: "Eat for the session, not just the scale.",
-    body: "Connect Apple Health and your nutritionist sees your workouts next to your meals, and tells you what to change.",
-    media: ["rings", "signals"],
+    headline: "Fuel that matches how hard you train.",
+    say: "Your targets will match how often you train. Then I'll show how your protein and carbs stack up each day, so you train fuelled and recover well.",
+    visuals: ["macros"],
   },
   Maintain: {
-    headline: "Keep what's working. Notice what isn't.",
-    body: "Energy, Satiety and Mood scores every day, and a check-in every week.",
-    media: ["weekly", "rings"],
+    headline: "Hold your weight and keep feeling your best.",
+    say: "I keep your targets at maintenance and show what each meal does for your Energy, Satiety and Mood. Each weekly check-in helps you catch any drift early.",
+    visuals: ["checkin"],
   },
 };
 
 export function goalReply(a: QuizAnswers): Reply {
-  return GOAL_REPLIES[a.goal ?? ""] ?? GOAL_REPLIES.Maintain;
+  const goal = GOAL_REPLIES[a.goal ?? ""] ? (a.goal as string) : "Maintain";
+  return { eyebrow: `You said · ${goal}`, ...GOAL_REPLIES[goal] };
 }
 
-/** The first match wins, in this order. */
-const BLOCKER_REPLIES: { when: (b: string[]) => boolean; reply: Reply }[] = [
-  {
-    when: (b) => b.includes("Logging takes too long"),
-    reply: {
-      headline: "Type it, say it or snap your plate.",
-      body: "Type “two eggs and buttered toast”, send a voice note or take a photo. It's on your day straight away, and you can change anything after.",
-      media: ["voice"],
-    },
+/** By the sticking point tapped first (v9.2; the live quiz used a fixed order). */
+const BLOCKER_REPLIES: Record<string, Omit<Reply, "eyebrow"> & { short: string }> = {
+  "Logging takes too long": {
+    short: "Food diary",
+    headline: "Log a meal as fast as a text.",
+    say: "Type it, say it or snap it. No searching, no weighing. I work out the numbers, and you can change anything after.",
+    visuals: ["logchat"],
   },
-  {
-    when: (b) => b.includes("I don't know what to eat"),
-    reply: {
-      headline: "Your nutritionist plans the week. You just confirm.",
-      body: "Meals that fit your targets and your diet, with the grocery list attached.",
-      media: ["planHead", "swap"],
-    },
+  "I don't know what to eat": {
+    short: "What to eat",
+    headline: "What to eat, answered before you're hungry.",
+    say: "Ask me for an idea any time and I'll answer from your targets and tastes. Or let me plan your week, so tonight's dinner is already decided.",
+    visuals: ["today", "today2"],
   },
-  {
-    when: (b) => b.includes("I lose motivation"),
-    reply: {
-      headline: "One thing to work on. Not ten.",
-      body: "After about 3 days of meals, your nutritionist shows you the patterns and you pick one focus together. Every week, a check-in suggests the next one.",
-      media: ["protein", "weekly"],
-    },
+  "I lose motivation": {
+    short: "Motivation",
+    headline: "Motivation comes and goes. A clear next step stays.",
+    say: "I don't need you perfect. Log what you can, and each week we pick one thing to focus on, so you always know what's next.",
+    visuals: ["focus"],
   },
-  {
-    when: (b) => b.includes("Weekends derail me") || b.includes("I eat out or socialise a lot"),
-    reply: {
-      headline: "Weekends aren't a willpower problem. They're a planning problem.",
-      body: "Give busier days more room and keep the week on track. Your nutritionist suggests the pattern; you confirm it.",
-      media: ["weekly", "planHead"],
-    },
+  "Weekends derail me": {
+    short: "Weekends",
+    headline: "Weekends aren't a willpower problem. They're a planning problem.",
+    say: "I can give weekends more room and take a little from weekdays, keeping your weekly total the same. Or we plan the weekend's meals together. Your call.",
+    visuals: ["weekly", "weekly2"],
   },
-  {
-    when: (b) => b.includes("I crave snacks") || b.includes("I get hungry"),
-    reply: {
-      headline: "See which meals actually keep you full.",
-      body: "Every meal you describe moves your Satiety score, so the snacks you reach for start to make sense.",
-      media: ["satiety", "signals"],
-    },
+  "I eat out or socialise a lot": {
+    short: "Eating out",
+    headline: "Eating out doesn't have to undo your week.",
+    say: "Describe a restaurant meal in a sentence and I'll work it out. If some days always run bigger, I can give them more room and keep your weekly total.",
+    visuals: ["social"],
   },
-  {
-    when: () => true,
-    reply: {
-      headline: "See what your meals do to your energy.",
-      body: "Every meal you describe moves your Energy score. Your nutritionist tells you which ones help.",
-      media: ["signals", "rings"],
-    },
+  "I feel tired": {
+    short: "Tired",
+    headline: "Let's find the meals that give you energy back.",
+    say: "Tell me when tiredness hits and I'll look at what you ate before it. Your Energy score shows which meals lift you.",
+    visuals: ["dipmsg", "dipmsg2"],
   },
-];
+  "I crave snacks": {
+    short: "Cravings",
+    headline: "Cravings make more sense once you see the pattern.",
+    say: "Snacks aren't banned here. Log them like any meal and I'll look at what comes before a craving, so you're not fighting it on willpower alone.",
+    visuals: ["snacks"],
+  },
+  "I get hungry": {
+    short: "Hunger",
+    headline: "Getting hungry is a signal, not a failing.",
+    say: "I look at what you ate before the hunger hit, then suggest swaps or meals that hold you longer. Your Satiety score shows what's working.",
+    visuals: ["hunger"],
+  },
+};
 
-export function blockerReply(a: QuizAnswers): Reply {
-  return BLOCKER_REPLIES.find((entry) => entry.when(a.blockers))!.reply;
+/** The reply to the first sticking point tapped; null only if none was picked. */
+export function blockerReply(a: QuizAnswers): Reply | null {
+  const first = a.blockers.find((b) => BLOCKER_REPLIES[b]);
+  if (!first) return null;
+  const { short, ...reply } = BLOCKER_REPLIES[first];
+  return { eyebrow: `Your sticking point · ${short}`, ...reply };
 }
 
-/** One app screen per reply page, never the same one twice. */
-export function mediaPlan(a: QuizAnswers): { goal: MediaKey; blocker: MediaKey; signals: MediaKey; plans: MediaKey } {
-  const used = new Set<MediaKey>();
-  const pick = (keys: MediaKey[]) => {
-    const key = keys.find((k) => !used.has(k)) ?? keys[0];
-    used.add(key);
-    return key;
-  };
-  return {
-    goal: pick(goalReply(a).media),
-    blocker: pick(blockerReply(a).media),
-    signals: pick(["rings", "home"]),
-    plans: pick(["planHead", "swap"]),
-  };
+/** The "Your day" pick the scores reply leads with. */
+export function dayKind(a: Pick<QuizAnswers, "dayPatterns">): DayPattern {
+  for (const kind of ["dip", "low", "hungry", "mood"] as const) if (a.dayPatterns.includes(kind)) return kind;
+  return "none";
 }
 
-export function signalsLine(a: QuizAnswers): string {
-  if (a.energy === "I dip mid-afternoon" || a.energy === "Low most days" || a.energy === "Up and down") {
-    const said =
-      a.energy === "Up and down" ? "goes up and down" : a.energy === "Low most days" ? "is low most days" : "dips mid-afternoon";
-    return `You said your energy ${said}. Energy is the one to watch first.`;
-  }
-  if (a.hunger === "Most days" || a.hunger === "I graze all day") {
-    return "You said you're often hungry between meals. Satiety is the one to watch first.";
-  }
-  return "Your scores show what's already working, so you keep it.";
+const SCORES_REPLIES: Record<DayPattern, Reply> = {
+  dip: {
+    eyebrow: "You said · Energy dips mid-afternoon",
+    headline: "Let's see what's behind your afternoon dip.",
+    say: "Your Energy score updates as you log, so you can see what lunch does to your afternoon. No wearable, no guesswork.",
+    visuals: ["dip"],
+  },
+  low: {
+    eyebrow: "You said · Energy is low most days",
+    headline: "Energy is your score to watch.",
+    say: "Every meal shows how it moved your Energy. Over a week you'll see which days you had more of it, and what you ate on them.",
+    visuals: ["low", "low2"],
+  },
+  hungry: {
+    eyebrow: "You said · Hungry between meals",
+    headline: "Satiety is your score to watch.",
+    say: "Snacks count like meals here. Each one shows how it moved your Satiety, so you can see what carries you to the next meal.",
+    visuals: ["hungry", "hungry2"],
+  },
+  mood: {
+    eyebrow: "You said · Food changes how you feel",
+    headline: "Mood starts with yesterday's food.",
+    say: "Your Mood score is worked out from yesterday's log, so you can connect what you eat with how you feel the next day.",
+    source: "White, Horwath and Conner 2013, Br J Health Psychol. 281 young adults over 21 days: more fruit and veg went with a better mood the next day.",
+    visuals: ["mood"],
+  },
+  none: {
+    eyebrow: "You said · Steady all day",
+    headline: "Steady already. Let's keep it that way.",
+    say: "Your scores show which meals keep you there, so you know exactly what's working.",
+    visuals: ["steady", "steady2", "steady3"],
+  },
+};
+
+export function scoresReply(a: QuizAnswers): Reply {
+  return SCORES_REPLIES[dayKind(a)];
 }
 
-export function demoCopy(a: QuizAnswers): { headline: string; body: string } {
-  const quit = a.history === "I started, then stopped" || a.history === "Yes, with an app";
-  const body = "Describe a meal the way you'd text a friend. Your nutritionist researches it and it lands on your day in seconds.";
-  return quit
-    ? { headline: "Tracking always starts well. Then it gets annoying.", body: `So PrepIt works differently. ${body}` }
-    : { headline: "Here's all it takes.", body };
+const DEMO_REPLIES: Record<string, Omit<Reply, "eyebrow">> = {
+  "Yes, with an app": {
+    headline: "No food database. Just tell me what you ate.",
+    say: "Describe a meal like a text. I research it, and it's on your day in seconds. Change anything after.",
+    visuals: ["typed"],
+  },
+  "Yes, notes or photos": {
+    headline: "Keep the photo. Skip the maths.",
+    say: "Snap the plate or say it in a sentence. I work out the numbers, and you can change anything after.",
+    visuals: ["photo"],
+  },
+  "I started, then stopped": {
+    headline: "Log often. Not for long.",
+    say: "In one study, the people who did best logged often and quickly. Here a meal is one sentence, typed or said, and you can fix anything after.",
+    source: "Harvey et al. 2019, Obesity. 142 adults over 24 weeks: those who did best logged more often, and spent less time doing it.",
+    visuals: ["typed"],
+  },
+  Never: {
+    headline: "Here's all it takes.",
+    say: "Describe a meal the way you'd text a friend. I work out the rest in seconds.",
+    visuals: ["typed"],
+  },
+};
+
+/** The demo, by tracking history; the eyebrow always shows their real answer. */
+export function demoReply(a: QuizAnswers): Reply {
+  const history = DEMO_REPLIES[a.history ?? ""] ? (a.history as string) : "Never";
+  return { eyebrow: `You said · ${history}`, ...DEMO_REPLIES[history] };
 }
+
+export const PLANS_REPLY: Reply = {
+  eyebrow: "Meal plans",
+  headline: "After a few days, I can plan your week.",
+  say: "By then I've seen how you really eat, so the plan fits. You get a day-by-day draft, a grocery list and a cost estimate. Want one sooner? Just ask.",
+  visuals: ["plan", "plan2"],
+};
+
+/** The metabolism line on "Your numbers", for ages 20 to 59 only. */
+export function numbersReply(a: QuizAnswers, today = new Date()): string {
+  const age = ageFrom(a, today);
+  if (age === null || age < 20 || age > 59) return "";
+  return `Good news: metabolism holds steady from 20 to 60, once body size is counted. I'll set your targets for age ${age}.`;
+}
+
+export const SITTING_REPLY = "That's most office days. I set your targets from the day you really have, not an ideal one.";
 
 export function safetyReply(a: QuizAnswers): string {
   if (a.safety.includes(SAFETY_PREGNANT)) {
-    return "Your plan won't set a weight-loss target. For anything specific to pregnancy, your nutritionist will point you to your doctor or midwife.";
+    return "Your plan won't set a weight-loss target. For anything specific to pregnancy, I'll point you to your doctor or midwife.";
   }
   if (a.safety.includes(SAFETY_CONDITION)) {
     return "PrepIt is a coach, not a doctor. Check any big change with your doctor or specialist first.";
@@ -674,12 +763,12 @@ export function safetyReply(a: QuizAnswers): string {
   return "";
 }
 
-/** Why the goal weight can't be used yet, or null. */
+/** Why the goal weight can't be used yet, or null. Neither weight goal goes below the healthy range. */
 export function goalWeightProblem(a: QuizAnswers): string | null {
   const cm = heightCm(a);
   if (a.goalWeightKg === undefined || cm === null || a.goalWeightKg < 20) return null;
   const [low] = healthyRange(cm);
-  if (a.goal === "Lose fat" && a.goalWeightKg < low) {
+  if (WEIGHT_GOALS.includes(a.goal ?? "") && a.goalWeightKg < low) {
     return `That's below the healthy range for your height. Your goal needs to be ${weightText(low, a.unit)} or more.`;
   }
   return null;
@@ -691,7 +780,7 @@ export function goalWeightReply(a: QuizAnswers): string {
   const problem = goalWeightProblem(a);
   if (problem) return problem;
   const [low, high] = healthyRange(cm);
-  return `A healthy weight range for your height is ${weightText(low, a.unit)} to ${weightText(high, a.unit)}.`;
+  return `A healthy range for your height is ${weightText(low, a.unit)} to ${weightText(high, a.unit)}. I won't set a goal below it.`;
 }
 
 function joinList(items: string[]): string {
@@ -776,15 +865,16 @@ export type StartingPoint = { name: string; why: string; line: string };
 
 export function startingPoint(a: QuizAnswers): StartingPoint {
   const b = a.blockers;
-  if (a.energy === "I dip mid-afternoon" || a.energy === "Low most days" || b.includes("I feel tired")) {
+  const { energy: dayEnergy, hunger } = dayAnswers(a) ?? {};
+  if (dayEnergy === "I dip mid-afternoon" || dayEnergy === "Low most days" || b.includes("I feel tired")) {
     const energy =
-      a.energy === "I dip mid-afternoon"
+      dayEnergy === "I dip mid-afternoon"
         ? "your energy dips in the afternoon"
-        : a.energy === "Low most days"
+        : dayEnergy === "Low most days"
           ? "your energy is low most days"
           : "tiredness gets in the way";
     return {
-      name: a.energy === "I dip mid-afternoon" ? "The afternoon dip" : "The energy gap",
+      name: dayEnergy === "I dip mid-afternoon" ? "The afternoon dip" : "The energy gap",
       why: `You said ${energy}${a.skipsBreakfast === "Yes" ? " and you often skip breakfast" : ""}.`,
       line: "Your Energy score looks at breakfast, morning protein and how sugary your carbs are, so the food side of it shows up.",
     };
@@ -800,13 +890,12 @@ export function startingPoint(a: QuizAnswers): StartingPoint {
     a.eveningSnacks === "Yes" ||
     b.includes("I crave snacks") ||
     b.includes("I get hungry") ||
-    a.hunger === "Most days" ||
-    a.hunger === "I graze all day"
+    hunger === "Most days"
   ) {
     const said: string[] = [];
     if (a.eveningSnacks === "Yes") said.push("evenings are when you snack most");
     if (b.includes("I crave snacks")) said.push("snack cravings get in the way");
-    if (b.includes("I get hungry") || a.hunger === "Most days" || a.hunger === "I graze all day") said.push("hunger shows up between meals");
+    if (b.includes("I get hungry") || hunger === "Most days") said.push("hunger shows up between meals");
     return {
       name: a.eveningSnacks === "Yes" ? "The evening graze" : "The between-meal graze",
       why: `You said ${joinList(said.slice(0, 2))}.`,
@@ -840,12 +929,13 @@ export function startingPoint(a: QuizAnswers): StartingPoint {
  */
 export function startingPointId(a: QuizAnswers): StartingPointId {
   const b = a.blockers;
-  if (a.energy === "I dip mid-afternoon") return a.skipsBreakfast === "Yes" ? "dip_breakfast" : "dip";
-  if (a.energy === "Low most days") return "low";
+  const { energy, hunger } = dayAnswers(a) ?? {};
+  if (energy === "I dip mid-afternoon") return a.skipsBreakfast === "Yes" ? "dip_breakfast" : "dip";
+  if (energy === "Low most days") return "low";
   if (b.includes("I feel tired")) return "tired";
   if (b.includes("Weekends derail me") || b.includes("I eat out or socialise a lot")) return "weekend";
   if (a.eveningSnacks === "Yes") return "evening";
-  if (b.includes("I get hungry") || a.hunger === "Most days" || a.hunger === "I graze all day") return "graze";
+  if (b.includes("I get hungry") || hunger === "Most days") return "graze";
   if (b.includes("I crave snacks")) return "cravings";
   if (b.includes("I don't know what to eat")) return "dinner";
   if (b.includes("Logging takes too long") || b.includes("I lose motivation")) return "going";
@@ -925,17 +1015,18 @@ export function parseTargets(body: unknown): Targets | null {
 
 /** Quiz questions with no account field go in `answers`, as the app's nutritionist reads them. */
 const ANSWER_QUESTIONS: { id: string; text: string; read: (a: QuizAnswers) => WebSignupAnswer["answer"] | undefined }[] = [
-  { id: "afternoon_energy", text: "How's your energy most afternoons?", read: (a) => a.energy },
-  { id: "hunger_between_meals", text: "How often are you hungry between meals?", read: (a) => a.hunger },
-  { id: "food_and_mood", text: "Do you notice food changing how you feel?", read: (a) => a.mood },
+  // v9.2 "Your day" (PRE-435 stores it and writes the three older answers from it).
+  { id: "day_patterns", text: "Which of these sound like your day?", read: (a) => (a.dayPatterns.length ? a.dayPatterns : undefined) },
+  // Also sent, so a backend from before PRE-435 still gets them; PRE-435 rewrites them from day_patterns.
+  { id: "afternoon_energy", text: "How's your energy most afternoons?", read: (a) => dayAnswers(a)?.energy },
+  { id: "hunger_between_meals", text: "How often are you hungry between meals?", read: (a) => dayAnswers(a)?.hunger },
+  { id: "food_and_mood", text: "Do you notice food changing how you feel?", read: (a) => dayAnswers(a)?.mood },
   { id: "tracking_history", text: "Have you tried keeping track of what you eat before?", read: (a) => a.history },
   {
     id: "safety",
     text: "Does any of this apply to you right now?",
     read: (a) => (a.safety.length ? a.safety : undefined),
   },
-  { id: "meal_help", text: "Where would help with meals make the biggest difference?", read: (a) => a.mealHelp },
-  { id: "advice_style", text: "How do you like advice?", read: (a) => a.style },
   { id: "skips_breakfast", text: "Do you often skip breakfast?", read: (a) => a.skipsBreakfast },
   { id: "evening_snacks", text: "Are evenings when you snack most?", read: (a) => a.eveningSnacks },
 ];
@@ -967,7 +1058,7 @@ export function buildQuizProfile(
     exerciseFrequency: a.exercise,
     ...savedDiet(a),
     mainBlocker: a.blockers.length ? a.blockers : undefined,
-    // The app has no stones; it shows pounds for them.
+    // From the weight unit. The app has no stones; it shows pounds for them.
     unit: a.unit === "metric" ? "metric" : "imperial",
   };
   return { answers, user, settings };

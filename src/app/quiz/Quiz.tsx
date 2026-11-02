@@ -3,31 +3,29 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
-import DeviceFrame from "@/components/device/DeviceFrame";
 import {
-  Caption,
+  AiLabel,
   Card,
   Chip,
   Eyebrow,
   FieldLabel,
+  FinePrint,
+  InlineReply,
   INPUT_CLASS,
-  MEDIA,
+  Note,
   OptionButton,
   Options,
   QUIZ_BUTTON_CLASS,
   QUIZ_GHOST_BUTTON_CLASS,
   Question,
-  REAL_SCREENS,
-  ReplyCard,
-  ReplyMedia,
-  Shot,
+  Said,
   Sub,
   Timeline,
   UnitField,
 } from "@/components/quiz/parts";
+import ReplyVisual from "@/components/quiz/ReplyVisual";
 import LongLogo from "@/components/ui/LongLogo";
 import QuizStartCta from "@/components/quiz/QuizStartCta";
-import { appVideo } from "@/lib/captures";
 import { readAttribution } from "@/lib/funnel/attributionStore";
 import { writeBridgeHandoff } from "@/lib/funnel/bridgeHandoff";
 import type { WebMarket } from "@/lib/markets";
@@ -36,17 +34,17 @@ import { trackQuizLead } from "@/lib/metaPixel";
 import { fetchTargets, LeadApiError, saveLead } from "@/lib/quiz/leadApi";
 import {
   ACTIVITY_OPTIONS,
-  ageFrom,
   ALLERGENS,
   analyticsStepId,
   BLOCKER_OPTIONS,
   blockerReply,
   buildQuizProfile,
   canContinue,
-  demoCopy,
+  DAY_OPTIONS,
+
+  demoReply,
   dietOptions,
   emptyAnswers,
-  ENERGY_OPTIONS,
   EXERCISE_OPTIONS,
   foodRules,
   GENDER_OPTIONS,
@@ -55,47 +53,55 @@ import {
   goalWeightReply,
   heightCm,
   HISTORY_OPTIONS,
-  HUNGER_OPTIONS,
   isStopScreen,
   leaveOutLine,
   MARKETING_CONSENT_TEXT,
-  MEAL_HELP_OPTIONS,
-  mediaPlan,
   MONTHS,
-  MOOD_OPTIONS,
+  monthFirst,
   nextScreen,
+  numbersReply,
   type Option,
   planSummary,
+  PLANS_REPLY,
   startingPointId,
   progress,
   QUIZ_FUNNEL_ID,
   QUIZ_FUNNEL_VERSION,
   type QuizAnswers,
+  type Reply,
   SAFETY_OPTIONS,
   safetyReply,
+  scoresReply,
   type ScreenId,
   SECTIONS,
   sectionOf,
-  signalsLine,
-  STYLE_OPTIONS,
+  SITTING_REPLY,
   type Targets,
   targetsRequest,
-  toKg,
   trialDay,
+  goalKg,
   weightKg,
   weightText,
 } from "@/lib/quiz/quiz";
+import { pickVisuals, type VisualReply, visualFinePrint } from "@/lib/quiz/replyVisuals";
 import { getWebSessionId } from "@/lib/quiz/webSession";
 import { trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webFunnelAnalytics";
 import LoaderScreen from "./LoaderScreen";
 import ResultScreen from "./ResultScreen";
 
-/** Kept for this tab only, so a refresh or a Back from the bridge keeps the answers. */
-const STORAGE_KEY = "prepit.quiz.v3";
+/**
+ * Kept for this tab only, so a refresh or a Back from the bridge keeps the
+ * answers. v4 since the v9.2 screens (PRE-441): a v3 session's answers don't
+ * fit the new screens, so it starts again.
+ */
+const STORAGE_KEY = "prepit.quiz.v4";
+
+/** Single answers confirm, then move on after about this long (v9.2). */
+const ADVANCE_MS = 250;
 
 type Saved = { answers: QuizAnswers; screen: ScreenId; history: ScreenId[] };
 
-function readSaved(): Saved | null {
+function readSaved(country: string): Saved | null {
   try {
     const raw = window.sessionStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
@@ -103,8 +109,8 @@ function readSaved(): Saved | null {
     if (!parsed.answers || !parsed.screen || !Array.isArray(parsed.history)) return null;
     // Never come back to a stop screen or the loader halfway.
     if (isStopScreen(parsed.screen)) return null;
-    const screen = parsed.screen === "loader" ? "week" : parsed.screen;
-    return { answers: { ...emptyAnswers(), ...parsed.answers }, screen, history: parsed.history.filter((id) => id !== "loader") };
+    const screen = parsed.screen === "loader" ? "echo-plans" : parsed.screen;
+    return { answers: { ...emptyAnswers(country), ...parsed.answers }, screen, history: parsed.history.filter((id) => id !== "loader") };
   } catch {
     return null;
   }
@@ -125,13 +131,38 @@ const BACK_ICON = (
   </svg>
 );
 
+/** A segmented unit switch, e.g. ft, in | cm. */
+function UnitSwitch<T extends string>({ label, value, options, onChange }: { label: string; value: T; options: [T, string][]; onChange: (value: T) => void }) {
+  return (
+    <div role="group" aria-label={label} className="inline-flex rounded-control bg-surface-raised p-[3px]">
+      {options.map(([option, text]) => (
+        <button
+          key={option}
+          type="button"
+          aria-pressed={value === option}
+          onClick={() => onChange(option)}
+          className={`rounded-control px-3 py-[7px] text-[13px] font-medium focus-visible:outline-2 focus-visible:outline-focus ${
+            value === option ? "bg-surface text-ink shadow-[0_1px_3px_rgb(0_0_0/0.12)]" : "text-ink-secondary"
+          }`}
+        >
+          {text}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/** Where each screen sits: one column, text beside a visual on a wide screen, or the goal screen's hero. */
+type Layout = "solo" | "split" | "hero";
+
 /**
- * The web quiz (PRE-322) with its stop screens (PRE-329) and email gate
- * (PRE-327): one screen at a time, then the plan page, which hands the
- * answers to the bridge (/start, PRE-323) in this browser's storage.
+ * The web quiz (PRE-322; v9.2 screens and replies, PRE-441) with its stop
+ * screens (PRE-329) and email gate (PRE-327): one screen at a time, then the
+ * plan page, which hands the answers to the bridge (/start, PRE-323) in this
+ * browser's storage.
  */
 export default function Quiz({ country, market, prices }: { country: string; market: WebMarket; prices: Prices }) {
-  const [answers, setAnswers] = useState<QuizAnswers>(emptyAnswers);
+  const [answers, setAnswers] = useState<QuizAnswers>(() => emptyAnswers(country));
   const [screen, setScreen] = useState<ScreenId>("goal");
   const [history, setHistory] = useState<ScreenId[]>([]);
   const [restored, setRestored] = useState(false);
@@ -143,14 +174,14 @@ export default function Quiz({ country, market, prices }: { country: string; mar
   const firstScreen = useRef(true);
 
   useEffect(() => {
-    const saved = readSaved();
+    const saved = readSaved(country);
     if (saved) {
       setAnswers(saved.answers);
       setScreen(saved.screen);
       setHistory(saved.history);
     }
     setRestored(true);
-  }, []);
+  }, [country]);
 
   useEffect(() => {
     if (restored) writeSaved({ answers, screen, history });
@@ -162,9 +193,11 @@ export default function Quiz({ country, market, prices }: { country: string; mar
     if (!restored) return;
     trackWebFunnelEvent(WEB_FUNNEL_EVENTS.quizStepView, {
       funnel_id: QUIZ_FUNNEL_ID,
+      funnel_version: QUIZ_FUNNEL_VERSION,
       step_id: analyticsStepId(screen),
       step_index: isStopScreen(screen) ? null : history.length,
     });
+    if (isStopScreen(screen)) trackWebFunnelEvent(WEB_FUNNEL_EVENTS.quizEnded, { funnel_id: QUIZ_FUNNEL_ID, funnel_version: QUIZ_FUNNEL_VERSION });
     if (firstScreen.current) {
       firstScreen.current = false;
       return;
@@ -200,31 +233,32 @@ export default function Quiz({ country, market, prices }: { country: string; mar
   };
 
   const restart = () => {
-    setAnswers(emptyAnswers());
+    setAnswers(emptyAnswers(country));
     setHistory([]);
     setFetched(null);
     leadSaved.current = false;
     setScreen("goal");
   };
 
-  /** A single choice: mark it, then move on, as the app does. */
-  const choose = (key: keyof QuizAnswers, value: string) => {
+  /** A single choice: mark it, then move on, as the app does. `hold` keeps the screen open (Mostly sitting's line). */
+  const choose = (key: keyof QuizAnswers, value: string, hold = false) => {
     const latest = { ...answers, [key]: value } as QuizAnswers;
     setAnswers(latest);
     if (advanceTimer.current) window.clearTimeout(advanceTimer.current);
-    advanceTimer.current = window.setTimeout(() => next(latest), 180);
+    if (!hold) advanceTimer.current = window.setTimeout(() => next(latest), ADVANCE_MS);
   };
 
-  const toggle = (key: "blockers" | "safety", option: Option, options: Option[]) => {
-    const current = answers[key];
+  const toggle = <K extends "blockers" | "safety" | "dayPatterns">(key: K, option: Option, options: Option[]) => {
+    const current = answers[key] as string[];
     let values: string[];
     if (option.exclusive) values = current.includes(option.value) ? [] : [option.value];
     else {
       const exclusive = options.filter((o) => o.exclusive).map((o) => o.value);
       const kept = current.filter((v) => !exclusive.includes(v));
+      // Kept in tap order: the first sticking point tapped picks the reply.
       values = kept.includes(option.value) ? kept.filter((v) => v !== option.value) : [...kept, option.value];
     }
-    update({ [key]: values });
+    update({ [key]: values } as Partial<QuizAnswers>);
   };
 
   // The targets are fetched from the loader on (again after a reload or a
@@ -243,7 +277,6 @@ export default function Quiz({ country, market, prices }: { country: string; mar
       cancelled = true;
     };
   }, [needsTargets, requestKey, fetched]);
-
   /**
    * Leaves the answers for the bridge in this browser. Written from the email
    * gate on, so "Start my free 7 days" on the plan email's page (same
@@ -335,6 +368,7 @@ export default function Quiz({ country, market, prices }: { country: string; mar
 
   let body: ReactNode = null;
   let footer: ReactNode = null;
+  let layout = "solo" as Layout;
   const continueButton = (label = "Continue", onClick: () => void = () => next(), enabled = ok) => (
     <button type="button" className={QUIZ_BUTTON_CLASS} disabled={!enabled} onClick={onClick}>
       {label}
@@ -360,27 +394,88 @@ export default function Quiz({ country, market, prices }: { country: string; mar
     );
   };
 
-  const plan = mediaPlan(answers);
+  const multi = (key: "blockers" | "safety" | "dayPatterns", question: string, options: Option[], sub: string, after?: ReactNode) => {
+    const picked = answers[key] as string[];
+    body = (
+      <>
+        <Question>{question}</Question>
+        <Sub>{sub}</Sub>
+        <Options label={question}>
+          {options.map((option) => (
+            <OptionButton
+              key={option.value}
+              option={option}
+              multi
+              selected={picked.includes(option.value)}
+              onClick={() => toggle(key, option, options)}
+            />
+          ))}
+        </Options>
+        {after}
+      </>
+    );
+    footer = continueButton();
+  };
+
+  // Each reply's visual, never repeating an earlier reply's capture.
+  const blocker = blockerReply(answers);
+  const visuals = pickVisuals({
+    "echo-goal": goalReply(answers).visuals,
+    "echo-blocker": blocker?.visuals ?? [],
+    "echo-signals": scoresReply(answers).visuals,
+    demo: demoReply(answers).visuals,
+    "echo-plans": PLANS_REPLY.visuals,
+  });
+
+  /** A reply: what they said, the headline, the nutritionist's note and the visual, with the fine print under Continue. */
+  const reply = (id: VisualReply, r: Reply, extra?: ReactNode, label = "Continue") => {
+    const picked = visuals[id];
+    layout = "split";
+    body = (
+      <>
+        <div className="flex min-w-0 flex-col gap-[18px]">
+          <Said>{r.eyebrow}</Said>
+          <Question>{r.headline}</Question>
+          <Note say={r.say} source={r.source} />
+          {extra}
+        </div>
+        {picked && (
+          <div className="min-w-0 min-[900px]:sticky min-[900px]:top-28 min-[900px]:self-start">
+            <ReplyVisual picked={picked} />
+          </div>
+        )}
+      </>
+    );
+    footer = (
+      <>
+        {continueButton(label)}
+        <FinePrint>{visualFinePrint(picked)}</FinePrint>
+      </>
+    );
+  };
+
+  /** The nutritionist's line inside a question screen; the empty wrapper keeps the line from replaying the screen's entrance. */
+  const inline = (line: string, ai = true) => <div className="empty:hidden">{line && <InlineReply ai={ai}>{line}</InlineReply>}</div>;
 
   switch (screen) {
     case "goal":
-      single("goal", "What do you want help with first?", GOAL_OPTIONS, "Answer a few quick questions and see what your first week with your AI nutritionist would focus on.");
+      single("goal", "What do you want help with first?", GOAL_OPTIONS, "A few quick questions, then your daily targets and where your nutritionist would start.");
+      layout = "hero";
       body = (
         <>
-          <div className="-mb-1 aspect-[7/2] overflow-hidden rounded-[20px]">
+          <div className="quiz-band relative -mx-5 -mt-2 h-[168px] overflow-hidden min-[900px]:hidden">
             <Image
-              src="/quiz/welcome-bowl.webp"
-              alt="A bowl of Greek yogurt with berries, granola and pistachios"
-              width={800}
-              height={800}
-              sizes="(min-width: 520px) 480px, 100vw"
+              src="/quiz/v9/band-fork.webp"
+              alt="A row of everyday forks and spoons from different lives, on cream"
+              fill
               priority
-              className="size-full object-cover object-[50%_46%]"
+              sizes="100vw"
+              className="object-cover object-[50%_38%]"
             />
           </div>
-          <Eyebrow>Your AI nutritionist</Eyebrow>
+          <AiLabel />
           {body}
-          <p className="text-[12.5px] leading-[1.45] text-ink-muted">
+          <p className="text-[13px] leading-[1.45] text-ink-muted">
             By continuing you agree to our{" "}
             <Link className="text-ink-secondary underline" href="/terms-and-conditions">
               Terms
@@ -389,166 +484,158 @@ export default function Quiz({ country, market, prices }: { country: string; mar
             <Link className="text-ink-secondary underline" href="/privacy-policy">
               Privacy Policy
             </Link>
-            . We never sell your data. Photos are illustrative.
+            . We never sell your data. Photo is illustrative.
           </p>
         </>
       );
       break;
 
-    case "echo-goal": {
-      const reply = goalReply(answers);
-      body = (
-        <>
-          <Eyebrow>Your AI nutritionist</Eyebrow>
-          <Question>{reply.headline}</Question>
-          <Sub>{reply.body}</Sub>
-          <ReplyMedia media={plan.goal} />
-        </>
-      );
-      footer = continueButton();
+    case "echo-goal":
+      reply("echo-goal", goalReply(answers));
       break;
-    }
 
     case "blockers":
-      body = (
-        <>
-          <Question>What usually gets in the way?</Question>
-          <Sub>Pick all that apply.</Sub>
-          <Options label="What usually gets in the way?">
-            {BLOCKER_OPTIONS.map((option) => (
-              <OptionButton
-                key={option.value}
-                option={option}
-                multi
-                selected={answers.blockers.includes(option.value)}
-                onClick={() => toggle("blockers", option, BLOCKER_OPTIONS)}
-              />
-            ))}
-          </Options>
-        </>
-      );
-      footer = continueButton();
+      multi("blockers", "What usually gets in the way?", BLOCKER_OPTIONS, "Pick any.");
       break;
 
-    case "echo-blocker": {
-      const reply = blockerReply(answers);
-      body = (
-        <>
-          <Question>{reply.headline}</Question>
-          <Sub>{reply.body}</Sub>
-          <ReplyMedia media={plan.blocker} />
-        </>
-      );
-      footer = continueButton();
+    case "echo-blocker":
+      if (blocker) reply("echo-blocker", blocker);
+      else {
+        // Not reachable (Continue needs a pick); kept so the screen is never blank.
+        body = <Question>No sticking point picked.</Question>;
+        footer = continueButton();
+      }
       break;
-    }
 
-    case "energy":
-      single("energy", "How's your energy most afternoons?", ENERGY_OPTIONS);
-      break;
-    case "hunger":
-      single("hunger", "How often are you hungry between meals?", HUNGER_OPTIONS);
-      break;
-    case "mood":
-      single("mood", "Do you notice food changing how you feel?", MOOD_OPTIONS);
+    case "day":
+      multi("dayPatterns", "Which of these sound like your day?", DAY_OPTIONS, "Pick any.");
       break;
 
     case "echo-signals":
-      body = (
-        <>
-          <Eyebrow>Your daily scores</Eyebrow>
-          <Question>Three scores, every day: Energy, Satiety and Mood.</Question>
-          <Sub>Each runs from 0 to 100 and moves with what you eat. No wearable needed.</Sub>
-          <ReplyCard>
-            <p>{signalsLine(answers)}</p>
-          </ReplyCard>
-          <ReplyMedia media={plan.signals} />
-        </>
-      );
-      footer = continueButton();
+      reply("echo-signals", scoresReply(answers));
       break;
 
     case "history":
       single("history", "Have you tried keeping track of what you eat before?", HISTORY_OPTIONS);
       break;
 
-    case "demo": {
-      const copy = demoCopy(answers);
-      body = (
-        <>
-          <Question>{copy.headline}</Question>
-          <Sub>{copy.body}</Sub>
-          <div className="flex flex-col items-center gap-2">
-            <DeviceFrame width={260} video={appVideo("03-log-typed", "Recording of typing lunch into PrepIt")} />
-            <Caption>Real recording: typing lunch into PrepIt</Caption>
-          </div>
-        </>
-      );
-      footer = continueButton();
+    case "demo":
+      reply("demo", demoReply(answers));
       break;
-    }
 
     case "gender":
       single("gender", "Your gender", GENDER_OPTIONS, "This helps set your daily targets.");
       break;
 
-    case "dob": {
-      const age = ageFrom(answers);
+    case "numbers": {
+      const dayField = (
+        <input
+          key="day"
+          id="dob-day"
+          className={INPUT_CLASS}
+          inputMode="numeric"
+          autoComplete="bday-day"
+          aria-label="Day"
+          maxLength={2}
+          placeholder="Day"
+          value={answers.dobDay}
+          onChange={(event) => update({ dobDay: event.target.value.replace(/\D/g, "") })}
+        />
+      );
+      const monthField = (
+        <select
+          key="month"
+          id="dob-month"
+          aria-label="Month"
+          className={`${INPUT_CLASS} px-2.5`}
+          value={answers.dobMonth}
+          onChange={(event) => update({ dobMonth: event.target.value })}
+        >
+          <option value="" disabled>
+            Month
+          </option>
+          {MONTHS.map((month, index) => (
+            <option key={month} value={String(index + 1).padStart(2, "0")}>
+              {month}
+            </option>
+          ))}
+        </select>
+      );
+      const yearField = (
+        <input
+          key="year"
+          id="dob-year"
+          className={INPUT_CLASS}
+          inputMode="numeric"
+          autoComplete="bday-year"
+          aria-label="Year"
+          maxLength={4}
+          placeholder="Year"
+          value={answers.dobYear}
+          onChange={(event) => update({ dobYear: event.target.value.replace(/\D/g, "") })}
+        />
+      );
+      const usDates = monthFirst(country);
       body = (
         <>
-          <Question>When were you born?</Question>
+          <Question>Your date of birth, height and weight</Question>
           <Sub>Used for your daily targets.</Sub>
-          <div className="flex gap-2">
-            <div className="min-w-0 flex-[1.3]">
-              <FieldLabel htmlFor="dob-month">Month</FieldLabel>
-              <select
-                id="dob-month"
-                className={`${INPUT_CLASS} px-2.5`}
-                value={answers.dobMonth}
-                onChange={(event) => update({ dobMonth: event.target.value })}
-              >
-                <option value="" disabled>
-                  Month
-                </option>
-                {MONTHS.map((month, index) => (
-                  <option key={month} value={String(index + 1).padStart(2, "0")}>
-                    {month}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="min-w-0 flex-1">
-              <FieldLabel htmlFor="dob-day">Day</FieldLabel>
-              <input
-                id="dob-day"
-                className={INPUT_CLASS}
-                inputMode="numeric"
-                autoComplete="bday-day"
-                maxLength={2}
-                placeholder="DD"
-                value={answers.dobDay}
-                onChange={(event) => update({ dobDay: event.target.value.replace(/\D/g, "") })}
-              />
-            </div>
-            <div className="min-w-0 flex-[1.4]">
-              <FieldLabel htmlFor="dob-year">Year</FieldLabel>
-              <input
-                id="dob-year"
-                className={INPUT_CLASS}
-                inputMode="numeric"
-                autoComplete="bday-year"
-                maxLength={4}
-                placeholder="YYYY"
-                value={answers.dobYear}
-                onChange={(event) => update({ dobYear: event.target.value.replace(/\D/g, "") })}
-              />
+          <div role="group" aria-labelledby="dob-label">
+            <p id="dob-label" className="mb-1.5 text-[13px] text-ink-muted">
+              Date of birth
+            </p>
+            <div className={`grid gap-2 ${usDates ? "grid-cols-[1.3fr_0.8fr_1fr]" : "grid-cols-[0.8fr_1.3fr_1fr]"}`}>
+              {usDates ? [monthField, dayField, yearField] : [dayField, monthField, yearField]}
             </div>
           </div>
-          {age !== null && age >= 18 && age < 110 && (
-            <ReplyCard>
-              <p>Thanks. Targets for age {age} coming up.</p>
-            </ReplyCard>
-          )}
+          {inline(numbersReply(answers))}
+          <div>
+            <div className="mb-1.5 flex items-center justify-between gap-2">
+              <span className="text-[13px] text-ink-muted">Height</span>
+              <UnitSwitch
+                label="Height unit"
+                value={answers.heightUnit}
+                options={[
+                  ["ft", "ft, in"],
+                  ["cm", "cm"],
+                ]}
+                onChange={(heightUnit) => update({ heightUnit })}
+              />
+            </div>
+            {answers.heightUnit === "cm" ? (
+              <UnitField id="height-cm" label="Height in centimetres" unit="cm" value={answers.heightCm} onChange={(value) => update({ heightCm: value })} />
+            ) : (
+              <div className="flex gap-2">
+                <UnitField id="feet" label="Feet" unit="ft" value={answers.feet} onChange={(feet) => update({ feet })} />
+                <UnitField id="inches" label="Inches" unit="in" value={answers.inches} onChange={(inches) => update({ inches })} />
+              </div>
+            )}
+          </div>
+          <div>
+            <div className="mb-1.5 flex items-center justify-between gap-2">
+              <span className="text-[13px] text-ink-muted">Weight</span>
+              <UnitSwitch
+                label="Weight unit"
+                value={answers.unit}
+                options={[
+                  ["imperial", "lb"],
+                  ["stones", "st, lb"],
+                  ["metric", "kg"],
+                ]}
+                onChange={(unit) => update({ unit, goalWeightText: "", goalStonePounds: "", goalWeightKg: undefined })}
+              />
+            </div>
+            {answers.unit === "metric" ? (
+              <UnitField id="weight-kg" label="Weight in kilograms" unit="kg" decimal value={answers.weightKg} onChange={(value) => update({ weightKg: value })} />
+            ) : answers.unit === "stones" ? (
+              <div className="flex gap-2">
+                <UnitField id="stones" label="Stones" unit="st" value={answers.stones} onChange={(stones) => update({ stones })} />
+                <UnitField id="stone-pounds" label="Pounds" unit="lb" value={answers.stonePounds} onChange={(stonePounds) => update({ stonePounds })} />
+              </div>
+            ) : (
+              <UnitField id="pounds" label="Weight in pounds" unit="lb" decimal value={answers.pounds} onChange={(pounds) => update({ pounds })} />
+            )}
+          </div>
         </>
       );
       footer = continueButton();
@@ -571,101 +658,9 @@ export default function Quiz({ country, market, prices }: { country: string; mar
       );
       break;
 
-    case "hw": {
-      const unitButton = (unit: QuizAnswers["unit"], label: string) => (
-        <button
-          type="button"
-          aria-pressed={answers.unit === unit}
-          onClick={() => update({ unit, goalWeightText: "", goalWeightKg: undefined })}
-          className={`rounded-control px-3.5 py-[7px] text-small font-medium focus-visible:outline-2 focus-visible:outline-focus ${
-            answers.unit === unit ? "bg-surface text-ink shadow-[0_1px_3px_rgb(0_0_0/0.12)]" : "text-ink-secondary"
-          }`}
-        >
-          {label}
-        </button>
-      );
-      const feetAndInches = (
-        <div>
-          <FieldLabel>Height</FieldLabel>
-          <div className="flex gap-2">
-            <UnitField id="feet" label="Feet" unit="ft" value={answers.feet} onChange={(feet) => update({ feet })} />
-            <UnitField id="inches" label="Inches" unit="in" value={answers.inches} onChange={(inches) => update({ inches })} />
-          </div>
-        </div>
-      );
-      body = (
-        <>
-          <Question>Your height and weight</Question>
-          <Sub>Used for your daily targets. Only you and your nutritionist see these.</Sub>
-          <div role="group" aria-label="Units" className="inline-flex self-start rounded-control bg-[#e9e9ea] p-[3px]">
-            {unitButton("imperial", "ft, lb")}
-            {unitButton("metric", "cm, kg")}
-            {unitButton("stones", "ft, st")}
-          </div>
-          {answers.unit === "metric" ? (
-            <>
-              <div>
-                <FieldLabel htmlFor="height-cm">Height</FieldLabel>
-                <UnitField id="height-cm" label="Height in centimetres" unit="cm" value={answers.heightCm} onChange={(heightCm) => update({ heightCm })} />
-              </div>
-              <div>
-                <FieldLabel htmlFor="weight-kg">Weight</FieldLabel>
-                <UnitField id="weight-kg" label="Weight in kilograms" unit="kg" decimal value={answers.weightKg} onChange={(weightKg) => update({ weightKg })} />
-              </div>
-            </>
-          ) : answers.unit === "stones" ? (
-            <>
-              {feetAndInches}
-              <div>
-                <FieldLabel>Weight</FieldLabel>
-                <div className="flex gap-2">
-                  <UnitField id="stones" label="Stones" unit="st" value={answers.stones} onChange={(stones) => update({ stones })} />
-                  <UnitField id="stone-pounds" label="Pounds" unit="lb" value={answers.stonePounds} onChange={(stonePounds) => update({ stonePounds })} />
-                </div>
-              </div>
-            </>
-          ) : (
-            <>
-              {feetAndInches}
-              <div>
-                <FieldLabel htmlFor="pounds">Weight</FieldLabel>
-                <UnitField id="pounds" label="Weight in pounds" unit="lb" decimal value={answers.pounds} onChange={(pounds) => update({ pounds })} />
-              </div>
-            </>
-          )}
-        </>
-      );
-      footer = continueButton();
+    case "safety":
+      multi("safety", "Does any of this apply to you right now?", SAFETY_OPTIONS, "So your plan is safe for you.", inline(safetyReply(answers)));
       break;
-    }
-
-    case "safety": {
-      const reply = safetyReply(answers);
-      body = (
-        <>
-          <Question>Does any of this apply to you right now?</Question>
-          <Sub>So your plan is safe for you.</Sub>
-          <Options label="Does any of this apply to you right now?">
-            {SAFETY_OPTIONS.map((option) => (
-              <OptionButton
-                key={option.value}
-                option={option}
-                multi
-                selected={answers.safety.includes(option.value)}
-                onClick={() => toggle("safety", option, SAFETY_OPTIONS)}
-              />
-            ))}
-          </Options>
-          {reply && (
-            <ReplyCard>
-              <p>{reply}</p>
-            </ReplyCard>
-          )}
-        </>
-      );
-      footer = continueButton();
-      break;
-    }
 
     case "stop-ed":
       body = (
@@ -673,17 +668,27 @@ export default function Quiz({ country, market, prices }: { country: string; mar
           <Question>Thanks for telling us.</Question>
           <Sub>PrepIt sets food targets, and that isn&apos;t the right kind of help while you&apos;re dealing with an eating disorder.</Sub>
           <Card>
-            <p className="text-[15px] text-ink-secondary">
-              Your doctor or a specialist service is a good next step. In the US, ANAD runs a free eating disorder helpline on{" "}
-              <a className="font-semibold text-ink underline" href="tel:+18883757767">
-                888-375-7767
-              </a>{" "}
-              and support groups at{" "}
-              <a className="font-semibold text-ink underline" href="https://anad.org" target="_blank" rel="noopener noreferrer">
-                anad.org
-              </a>
-              . If you&apos;re in crisis, call or text 988.
-            </p>
+            {country === "GB" ? (
+              <p className="text-[15px] text-ink-secondary">
+                Your doctor or a specialist service is a good next step. In the UK, Beat runs a free helpline and webchat at{" "}
+                <a className="font-semibold text-ink underline" href="https://www.beateatingdisorders.org.uk" target="_blank" rel="noopener noreferrer">
+                  beateatingdisorders.org.uk
+                </a>
+                .
+              </p>
+            ) : (
+              <p className="text-[15px] text-ink-secondary">
+                Your doctor or a specialist service is a good next step. In the US, ANAD runs a free eating disorder helpline on{" "}
+                <a className="font-semibold text-ink underline" href="tel:+18883757767">
+                  888-375-7767
+                </a>{" "}
+                and support groups at{" "}
+                <a className="font-semibold text-ink underline" href="https://anad.org" target="_blank" rel="noopener noreferrer">
+                  anad.org
+                </a>
+                . If you&apos;re in crisis, call or text 988.
+              </p>
+            )}
           </Card>
         </>
       );
@@ -703,20 +708,39 @@ export default function Quiz({ country, market, prices }: { country: string; mar
           {current !== null && <Sub>Now: {weightText(current, answers.unit)}</Sub>}
           <div>
             <FieldLabel htmlFor="goal-weight">Goal weight</FieldLabel>
-            <UnitField
-              id="goal-weight"
-              label={`Goal weight in ${isLb ? "pounds" : "kilograms"}`}
-              unit={isLb ? "lb" : "kg"}
-              decimal
-              value={answers.goalWeightText}
-              onChange={(value) => update({ goalWeightText: value, goalWeightKg: toKg(value, answers.unit) })}
-            />
+            {answers.unit === "stones" ? (
+              <div className="grid grid-cols-2 gap-2.5">
+                <UnitField
+                  id="goal-weight"
+                  label="Goal weight, stones"
+                  unit="st"
+                  value={answers.goalWeightText}
+                  onChange={(value) =>
+                    update({ goalWeightText: value, goalWeightKg: goalKg(value, "stones", answers.goalStonePounds) })
+                  }
+                />
+                <UnitField
+                  id="goal-stone-pounds"
+                  label="Goal weight, pounds"
+                  unit="lb"
+                  value={answers.goalStonePounds ?? ""}
+                  onChange={(value) =>
+                    update({ goalStonePounds: value, goalWeightKg: goalKg(answers.goalWeightText, "stones", value) })
+                  }
+                />
+              </div>
+            ) : (
+              <UnitField
+                id="goal-weight"
+                label={`Goal weight in ${isLb ? "pounds" : "kilograms"}`}
+                unit={isLb ? "lb" : "kg"}
+                decimal
+                value={answers.goalWeightText}
+                onChange={(value) => update({ goalWeightText: value, goalWeightKg: goalKg(value, answers.unit) })}
+              />
+            )}
           </div>
-          {heightCm(answers) !== null && (
-            <ReplyCard>
-              <p>{goalWeightReply(answers)}</p>
-            </ReplyCard>
-          )}
+          {heightCm(answers) !== null && inline(goalWeightReply(answers))}
         </>
       );
       footer = continueButton();
@@ -724,58 +748,62 @@ export default function Quiz({ country, market, prices }: { country: string; mar
     }
 
     case "activity":
-      single("activity", "How active is your typical day?", ACTIVITY_OPTIONS, "Your job and everyday movement, not exercise.");
+      body = (
+        <>
+          <Question>How active is your typical day?</Question>
+          <Sub>Your job and everyday movement, not exercise.</Sub>
+          <Options label="How active is your typical day?">
+            {ACTIVITY_OPTIONS.map((option) => (
+              <OptionButton
+                key={option.value}
+                option={option}
+                selected={answers.activity === option.value}
+                // Mostly sitting waits for Continue, so its line can be read.
+                onClick={() => choose("activity", option.value, option.value === "mostly_sitting")}
+              />
+            ))}
+          </Options>
+          {inline(answers.activity === "mostly_sitting" ? SITTING_REPLY : "")}
+        </>
+      );
+      if (answers.activity === "mostly_sitting") footer = continueButton();
       break;
+
     case "exercise":
       single("exercise", "How often do you exercise?", EXERCISE_OPTIONS, "Gym sessions, runs, classes.");
       break;
 
     case "diet":
+      single("diet", "Which of these fits how you eat?", dietOptions(), "Plans leave out what you don't eat.");
       body = (
         <>
-          <Question>Which of these fits how you eat?</Question>
-          <Sub>Plans leave out what you don&apos;t eat.</Sub>
-          <Options label="Which of these fits how you eat?">
-            {dietOptions().map((option) => (
-              <OptionButton key={option.value} option={option} selected={answers.diet === option.value} onClick={() => update({ diet: option.value })} />
-            ))}
-          </Options>
-          <details className="group rounded-button border border-line bg-surface px-3.5 py-0.5">
-            <summary className="flex cursor-pointer list-none justify-between gap-3 py-[11px] text-[14.5px] font-semibold text-ink [&::-webkit-details-marker]:hidden">
-              Where are high protein, low carb and keto?
-              <span aria-hidden className="font-medium text-ink-muted group-open:hidden">+</span>
-              <span aria-hidden className="hidden font-medium text-ink-muted group-open:inline">−</span>
+          {body}
+          <details className="group border-t border-line pt-3 text-small text-ink-secondary">
+            <summary className="flex cursor-pointer list-none gap-1 font-medium text-ink [&::-webkit-details-marker]:hidden">
+              High protein, low carb or keto?
+              <span aria-hidden className="text-ink-muted group-open:hidden">+</span>
+              <span aria-hidden className="hidden text-ink-muted group-open:inline">−</span>
             </summary>
-            <div className="flex flex-col gap-2 pb-3 text-small text-ink-secondary">
-              <p>
-                They&apos;re goals, not rules about which foods you eat. Everyone gets a protein target from their weight and goal, and you can ask
-                for higher-protein meals in any plan.
-              </p>
-              <p>PrepIt doesn&apos;t set low-carb or keto targets yet, so every plan includes some carbs.</p>
-            </div>
+            <p className="mt-2 leading-[1.5]">
+              They&apos;re goals, not rules about which foods you eat. Everyone gets a protein target from their weight and goal, and you can change your
+              targets any time.
+            </p>
           </details>
         </>
       );
-      footer = continueButton();
       break;
 
     case "intol": {
-      const none = !answers.intolerances.length && !answers.rules.length;
       const flip = (key: "intolerances" | "rules", value: string) => {
         const list = answers[key];
-        update({ [key]: list.includes(value) ? list.filter((v) => v !== value) : [...list, value] });
+        update({ [key]: list.includes(value) ? list.filter((v) => v !== value) : [...list, value], noFoodRules: false });
       };
       body = (
         <>
           <Question>Any allergies, intolerances or food rules?</Question>
-          <Sub>Select all that apply.</Sub>
-          <div className="self-start">
-            <Chip selected={none} onClick={() => update({ intolerances: [], rules: [] })}>
-              None of these
-            </Chip>
-          </div>
-          <div role="group" aria-labelledby="allergies-label" className="flex flex-col gap-1.5">
-            <p id="allergies-label" className="text-[13px] text-ink-muted">
+          <Sub>Pick any.</Sub>
+          <div role="group" aria-labelledby="allergies-label" className="flex flex-col gap-2">
+            <p id="allergies-label" className="text-[12px] font-bold uppercase tracking-[0.1em] text-ink-muted">
               Allergies and intolerances
             </p>
             <div className="flex flex-wrap gap-2">
@@ -786,8 +814,8 @@ export default function Quiz({ country, market, prices }: { country: string; mar
               ))}
             </div>
           </div>
-          <div role="group" aria-labelledby="rules-label" className="flex flex-col gap-1.5">
-            <p id="rules-label" className="text-[13px] text-ink-muted">
+          <div role="group" aria-labelledby="rules-label" className="flex flex-col gap-2">
+            <p id="rules-label" className="text-[12px] font-bold uppercase tracking-[0.1em] text-ink-muted">
               Religious or personal rules
             </p>
             <div className="flex flex-wrap gap-2">
@@ -798,52 +826,26 @@ export default function Quiz({ country, market, prices }: { country: string; mar
               ))}
             </div>
           </div>
-        </>
-      );
-      footer = continueButton();
-      break;
-    }
-
-    case "mealhelp":
-      single("mealHelp", "Where would help with meals make the biggest difference?", MEAL_HELP_OPTIONS);
-      break;
-
-    case "echo-plans": {
-      const leaveOut = leaveOutLine(answers);
-      const first = MEDIA[plan.plans];
-      body = (
-        <>
-          <Question>Your nutritionist plans your week. You just confirm.</Question>
-          <Sub>A chat about your week, a day-by-day draft, then the grocery list with a cost estimate.</Sub>
-          {leaveOut && (
-            <ReplyCard>
-              <p>{leaveOut}</p>
-            </ReplyCard>
-          )}
-          <div className="grid grid-cols-2 items-start gap-2">
-            <Shot src={first.src} alt={first.alt} width={first.width} height={first.height} />
-            <Shot src="/quiz/grocery.webp" alt="The grocery list, by aisle" width={640} height={544} />
+          <div className="self-start">
+            <Chip
+              selected={answers.noFoodRules}
+              onClick={() => update(answers.noFoodRules ? { noFoodRules: false } : { intolerances: [], rules: [], noFoodRules: true })}
+            >
+              None of these
+            </Chip>
           </div>
-          <Caption className="-mt-2">
-            {plan.plans === "planHead" ? "Your week planned, and the grocery list by aisle." : "A meal changed by asking, and the grocery list by aisle."}{" "}
-            {REAL_SCREENS}
-          </Caption>
         </>
       );
       footer = continueButton();
       break;
     }
-
-    case "style":
-      single("style", "How do you like advice?", STYLE_OPTIONS);
-      break;
 
     case "week":
       body = (
         <>
-          <Eyebrow>Your nutrition consultation</Eyebrow>
+          <AiLabel>Your nutrition consultation</AiLabel>
           <Question>Your first 7 days</Question>
-          <Sub>Three short sessions with your AI nutritionist, and your week planned whenever you want it.</Sub>
+          <Sub>Three short sessions with your AI nutritionist, starting today.</Sub>
           <Timeline
             items={[
               {
@@ -866,8 +868,14 @@ export default function Quiz({ country, market, prices }: { country: string; mar
           />
         </>
       );
-      footer = continueButton("Build my plan");
+      footer = continueButton();
       break;
+
+    case "echo-plans": {
+      const leaveOut = leaveOutLine(answers);
+      reply("echo-plans", PLANS_REPLY, leaveOut ? <InlineReply ai={false}>{leaveOut}</InlineReply> : undefined, "Build my starting plan");
+      break;
+    }
 
     case "loader":
       body = (
@@ -992,48 +1000,78 @@ export default function Quiz({ country, market, prices }: { country: string; mar
       break;
   }
 
+  // Screen widths: one column (wider on desktop), or text beside the visual on a wide screen.
+  const width =
+    layout === "split" ? "max-w-[520px] min-[900px]:max-w-[1180px]" : layout === "hero" ? "max-w-[520px] min-[900px]:max-w-[1180px]" : "max-w-[520px] min-[900px]:max-w-[620px]";
+  const bodyLayout =
+    layout === "split"
+      ? "flex flex-col gap-[18px] min-[900px]:grid min-[900px]:grid-cols-[minmax(0,520px)_minmax(0,1fr)] min-[900px]:items-start min-[900px]:gap-x-[72px]"
+      : layout === "hero"
+        ? "flex flex-col gap-[18px] min-[900px]:py-6 min-[900px]:*:max-w-[520px]"
+        : "flex flex-col gap-[18px]";
+
   return (
     // ph-no-capture: no autocapture or replay of the answers (health, diet, safety).
-    <div className="ph-no-capture mx-auto flex min-h-dvh w-full max-w-[520px] flex-col bg-page text-ink">
-      <header className="sticky top-0 z-10 bg-page px-5 pb-2.5 pt-[18px]">
-        <div className="flex min-h-8 items-center gap-3">
-          <button
-            type="button"
-            aria-label="Back"
-            onClick={back}
-            disabled={!history.length}
-            className="-ml-1.5 grid size-11 place-items-center rounded-full text-ink focus-visible:outline-2 focus-visible:outline-focus disabled:invisible"
-          >
-            {BACK_ICON}
-          </button>
-          <Link href="/" aria-label="PrepIt home" className="text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus">
-            <LongLogo className="h-[22px] w-auto" />
-          </Link>
+    <div className="quiz-v9 ph-no-capture relative flex min-h-dvh w-full flex-col overflow-x-clip bg-page text-ink">
+      {layout === "hero" && (
+        <div aria-hidden className="quiz-side-still pointer-events-none absolute top-0 left-[46%] right-0 hidden h-full max-h-[820px] min-[900px]:block">
+          <Image src="/quiz/v9/side-fork.webp" alt="" fill priority sizes="54vw" className="object-cover object-[50%_45%]" />
         </div>
-        {showProgress && (
-          <div className="mt-2.5 flex gap-1.5" aria-label={`${SECTIONS[section]}, section ${section + 1} of ${SECTIONS.length}`} role="img">
-            {SECTIONS.map((name, index) => (
-              <div key={name} className="min-w-0 flex-1" aria-hidden>
-                <span
-                  className={`mb-[5px] block truncate text-[11px] uppercase tracking-[0.06em] ${index === section ? "text-ink" : "text-ink-faint"}`}
-                >
-                  {name}
-                </span>
-                <b className="block h-1 overflow-hidden rounded bg-line">
-                  <i
-                    className="block h-full bg-primary transition-[width] duration-300 motion-reduce:transition-none"
-                    style={{ width: `${Math.round(bars[index] * 100)}%` }}
-                  />
-                </b>
-              </div>
-            ))}
+      )}
+      <header className="sticky top-0 z-10 bg-page px-5 pb-2.5 pt-[18px] min-[900px]:px-12">
+        <div className="mx-auto flex w-full max-w-[520px] flex-col gap-2.5 min-[900px]:max-w-[1180px] min-[900px]:flex-row min-[900px]:items-center min-[900px]:gap-8">
+          <div className="flex min-h-8 items-center gap-3 min-[900px]:w-[200px] min-[900px]:flex-none">
+            <button
+              type="button"
+              aria-label="Back"
+              onClick={back}
+              disabled={!history.length}
+              className="-ml-1.5 grid size-11 place-items-center rounded-full text-ink focus-visible:outline-2 focus-visible:outline-focus disabled:invisible"
+            >
+              {BACK_ICON}
+            </button>
+            <Link href="/" aria-label="PrepIt home" className="text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus">
+              <LongLogo className="h-[22px] w-auto" />
+            </Link>
+          </div>
+          {showProgress && (
+            <div
+              className="flex gap-1.5 min-[900px]:mx-auto min-[900px]:max-w-[640px] min-[900px]:flex-1"
+              aria-label={`${SECTIONS[section]}, section ${section + 1} of ${SECTIONS.length}`}
+              role="img"
+            >
+              {SECTIONS.map((name, index) => (
+                <div key={name} className="min-w-0 flex-1" aria-hidden>
+                  <span
+                    className={`mb-[6px] block truncate text-[10px] font-bold uppercase tracking-[0.1em] ${index === section ? "text-ink" : "text-ink-muted"}`}
+                  >
+                    {name}
+                  </span>
+                  <b className="block h-[3px] overflow-hidden rounded bg-surface-raised">
+                    <i
+                      className="block h-full bg-primary transition-[width] duration-500 motion-reduce:transition-none"
+                      style={{ width: `${Math.round(bars[index] * 100)}%` }}
+                    />
+                  </b>
+                </div>
+              ))}
+            </div>
+          )}
+          <span aria-hidden className="hidden min-[900px]:block min-[900px]:w-[200px] min-[900px]:flex-none" />
+        </div>
+      </header>
+      <div className="relative flex-1 px-5 pb-5 pt-2 min-[900px]:px-12 min-[900px]:pt-10">
+        {restored && (
+          <div key={screen} className={`quiz-in mx-auto w-full ${width} ${bodyLayout}`}>
+            {body}
           </div>
         )}
-      </header>
-      <div className="flex flex-1 flex-col gap-[18px] px-5 pb-5 pt-2">{restored ? body : null}</div>
+      </div>
       {restored && footer && (
-        <div className="sticky bottom-0 z-10 bg-gradient-to-b from-page/0 to-page to-30% px-5 pb-[calc(18px+env(safe-area-inset-bottom,0px))] pt-3.5">
-          {footer}
+        <div className="sticky bottom-0 z-10 bg-gradient-to-b from-page/0 to-page to-30% px-5 pb-[calc(18px+env(safe-area-inset-bottom,0px))] pt-3.5 min-[900px]:px-12 min-[900px]:pb-9">
+          <div className={`mx-auto w-full ${width}`}>
+            <div className={layout === "split" ? "min-[900px]:max-w-[520px]" : ""}>{footer}</div>
+          </div>
         </div>
       )}
     </div>

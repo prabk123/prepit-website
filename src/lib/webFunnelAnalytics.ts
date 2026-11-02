@@ -74,8 +74,13 @@ export const WEB_FUNNEL_EVENTS = {
   handoffOpenApp: "web_handoff_open_app",
   /** "Email me the link" on the desktop "You're in" page (`provider`). A PostHog workflow sends the App Store link to the person's email (PRE-438). */
   emailLinkRequested: "email_link_requested",
-  /** A quiz screen was shown (`step_id`, `step_index`). Never an answer: both stop screens (under 18, eating disorder) are `stop` with a null `step_index`. */
+  /**
+   * A quiz screen was shown (`step_id`, `step_index`, `funnel_version`: quiz-v4 from the v9.2 screens, PRE-441).
+   * Never an answer: both stop screens (under 18, eating disorder) are `stop` with a null `step_index`.
+   */
   quizStepView: "web_quiz_step_view",
+  /** The quiz stopped on a stop screen (PRE-441). Neutral on purpose: it never says which one, or why. No Meta event. */
+  quizEnded: "web_quiz_ended",
   /** The email gate saved its lead (`marketing_consent`, `saved`: false when the request failed). */
   quizLeadSaved: "web_quiz_lead_saved",
   /** "Start my free 7 days" on the quiz's plan page, on to the bridge. */
