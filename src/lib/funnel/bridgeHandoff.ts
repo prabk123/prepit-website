@@ -153,14 +153,14 @@ export function readWebSessionId(): string | undefined {
  * What the bridge knew when it showed checkout, for the "You're in" page
  * after it: which page they came from and whether they got the free week.
  * Once a purchase went through, checkout adds `purchase`: the plan bought
- * (null when the package wasn't one of ours), the company that billed it and
- * when, for the recap (PRE-438). Session storage, so it ends with the tab.
+ * (null when the package wasn't one of ours), its price and zero in its
+ * currency as RevenueCat formats them, and when, for the recap (PRE-438). Session storage, so it ends with the tab.
  * Checkout (RevenueCat) owns the redirect, so this can't travel in the URL.
  */
 export type BridgeVisit = {
   from: BridgeSource;
   trial: boolean;
-  purchase?: { plan: "annual" | "monthly" | null; seller: "us" | "uk"; startedAt: string };
+  purchase?: { plan: "annual" | "monthly" | null; amount: string | null; free: string; startedAt: string };
 };
 
 const BRIDGE_VISIT_KEY = "prepit.bridgeVisit";
@@ -175,11 +175,12 @@ export function writeBridgeVisit(visit: BridgeVisit): void {
 
 function parsePurchase(value: unknown): BridgeVisit["purchase"] | undefined {
   if (!value || typeof value !== "object") return undefined;
-  const { plan, seller, startedAt } = value as Record<string, unknown>;
+  const { plan, amount, free, startedAt } = value as Record<string, unknown>;
   if (plan !== "annual" && plan !== "monthly" && plan !== null) return undefined;
-  if (seller !== "us" && seller !== "uk") return undefined;
+  if (amount !== null && (typeof amount !== "string" || amount.length > 32)) return undefined;
+  if (typeof free !== "string" || free.length > 16) return undefined;
   if (typeof startedAt !== "string" || Number.isNaN(Date.parse(startedAt))) return undefined;
-  return { plan, seller, startedAt };
+  return { plan, amount, free, startedAt };
 }
 
 /** Parses a stored visit. Exported for tests. */

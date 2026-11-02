@@ -4,7 +4,7 @@
  * declined card, and the "You're in" recap. Kept free of React and of the
  * RevenueCat SDK so the node tests can run it on its own.
  */
-import type { PlanId, Prices } from "@/lib/pricing";
+import type { PlanId } from "@/lib/pricing";
 
 /**
  * Day `day` of the free week (day 1 is the start), as `trialDay` in cart.ts
@@ -110,10 +110,59 @@ export function couldNotStart(trial: boolean, planSaved: boolean): { title: stri
 }
 
 /**
+ * The prices RevenueCat will charge this visitor, from the offering's own
+ * packages (so the currency, tax and any price change always match the
+ * payment form), formatted as RevenueCat formats them.
+ */
+export type CheckoutPrices = { annual: string; annualPerMonth: string | null; monthly: string; free: string };
+
+/** A RevenueCat price as purchases-js gives it (`Price`), without loading the SDK. */
+export type RcPrice = { amountMicros: number; currency: string; formattedPrice: string };
+
+/** "$0" or "£0" in the package's currency, for "Due today". */
+export function zeroIn(currency: string): string {
+  try {
+    return new Intl.NumberFormat("en-US", { style: "currency", currency, maximumFractionDigits: 0 }).format(0);
+  } catch {
+    return "0";
+  }
+}
+
+/** The annual price over 12 months, rounded down like the cart's "$8.33 a month". */
+function perMonth(annual: RcPrice): string | null {
+  try {
+    const cents = Math.floor(annual.amountMicros / 12 / 10_000);
+    return new Intl.NumberFormat("en-US", { style: "currency", currency: annual.currency }).format(cents / 100);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Both plans' prices from the offering, or null when either is missing, so
+ * the page falls back to "You'll see the price on the next step".
+ */
+export function offeringPrices({
+  annual,
+  monthly,
+}: {
+  annual: RcPrice | null | undefined;
+  monthly: RcPrice | null | undefined;
+}): CheckoutPrices | null {
+  if (!annual || !monthly || annual.currency !== monthly.currency) return null;
+  return {
+    annual: annual.formattedPrice,
+    annualPerMonth: perMonth(annual),
+    monthly: monthly.formattedPrice,
+    free: zeroIn(annual.currency),
+  };
+}
+
+/**
  * The Welcome back step's price line: today's price, with no "free" or
  * "trial" words, because the cart said $0 and this account has had its week.
  */
-export function welcomeBackTerms(prices: Prices | null): string {
+export function welcomeBackTerms(prices: CheckoutPrices | null): string {
   return prices
     ? `You pay today for the plan you pick next: ${prices.annual} a year or ${prices.monthly} a month, renewing until you cancel. Cancel online any time.`
     : "You pay today for the plan you pick next, renewing until you cancel. You’ll see the price on the next step. Cancel online any time.";
@@ -133,28 +182,28 @@ function addPeriod(from: Date, plan: PlanId): Date {
 /**
  * The recap on "You're in": what was due today, the reminder email and the
  * first payment for a free week; today's price and the renewal otherwise.
- * `plan` is null when RevenueCat's package wasn't one of ours, so both prices
- * show. Null when there are no prices to show.
+ * `amount` is the bought package's price as RevenueCat formatted it and
+ * `free` zero in its currency; null when checkout couldn't record them.
  */
 export function welcomeRecap({
   trial,
   plan,
-  prices,
+  amount,
+  free,
   startedAt,
   reminder,
 }: {
   trial: boolean;
   plan: PlanId | null;
-  prices: Prices | null;
+  amount: string | null;
+  free: string;
   startedAt: Date;
   reminder: boolean;
 }): RecapRow[] | null {
-  if (!prices) return null;
-  const amount =
-    plan === "annual" ? prices.annual : plan === "monthly" ? prices.monthly : `${prices.annual} a year or ${prices.monthly} a month`;
+  if (!amount) return null;
   if (trial) {
     return [
-      { label: "Due today", value: prices.free },
+      { label: "Due today", value: free },
       ...(reminder ? [{ label: "Reminder email", value: shortDate(trialDay(4, startedAt)) }] : []),
       { label: "First payment, only if you keep PrepIt", value: `${amount} on ${shortDate(trialDay(8, startedAt))}` },
     ];

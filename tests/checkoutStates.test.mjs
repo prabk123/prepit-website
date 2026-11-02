@@ -7,12 +7,18 @@ import {
   classifyPurchasesError,
   couldNotStart,
   DECLINED_LINE,
+  offeringPrices,
   RC_ERROR,
   startingLine,
   welcomeBackTerms,
   welcomeRecap,
+  zeroIn,
 } from "../src/lib/funnel/checkoutStates.ts";
-import { WEB_PRICES } from "../src/lib/pricing.ts";
+
+const usd = (amount, formattedPrice) => ({ amountMicros: amount * 1e6, currency: "USD", formattedPrice });
+const gbp = (amount, formattedPrice) => ({ amountMicros: amount * 1e6, currency: "GBP", formattedPrice });
+const US = offeringPrices({ annual: usd(99.99, "$99.99"), monthly: usd(14.99, "$14.99") });
+const UK = offeringPrices({ annual: gbp(99.99, "£99.99"), monthly: gbp(14.99, "£14.99") });
 
 const TODAY = new Date(2026, 9, 26, 9, 30); // Mon 26 Oct 2026, local time
 
@@ -56,23 +62,32 @@ test("couldn't start: not charged, plan saved only from the quiz", () => {
   assert.doesNotMatch(couldNotStart(false, false).title, /free/);
 });
 
+test("prices come from RevenueCat's packages, in their currency", () => {
+  assert.deepEqual(US, { annual: "$99.99", annualPerMonth: "$8.33", monthly: "$14.99", free: "$0" });
+  assert.deepEqual(UK, { annual: "£99.99", annualPerMonth: "£8.33", monthly: "£14.99", free: "£0" });
+  // One plan missing, or two currencies: no prices, so the page says you'll see them next.
+  assert.equal(offeringPrices({ annual: usd(99.99, "$99.99"), monthly: undefined }), null);
+  assert.equal(offeringPrices({ annual: usd(99.99, "$99.99"), monthly: gbp(14.99, "£14.99") }), null);
+  assert.equal(zeroIn("EUR"), "€0");
+});
+
 test("welcome back has today's prices and no free or trial words", () => {
-  for (const prices of [WEB_PRICES.us, WEB_PRICES.uk, null]) {
+  for (const prices of [US, UK, null]) {
     const line = welcomeBackTerms(prices);
     assert.doesNotMatch(line, /free|trial/i);
     assert.match(line, /today/);
   }
-  assert.match(welcomeBackTerms(WEB_PRICES.uk), /£99\.99 a year or £14\.99 a month/);
+  assert.match(welcomeBackTerms(UK), /£99\.99 a year or £14\.99 a month/);
 });
 
 test("recap for a free week: due today, reminder on day 4, first payment on day 8", () => {
-  const rows = welcomeRecap({ trial: true, plan: "annual", prices: WEB_PRICES.us, startedAt: TODAY, reminder: true });
+  const rows = welcomeRecap({ trial: true, plan: "annual", amount: "$99.99", free: "$0", startedAt: TODAY, reminder: true });
   assert.deepEqual(rows, [
     { label: "Due today", value: "$0" },
     { label: "Reminder email", value: "Thu, Oct 29" },
     { label: "First payment, only if you keep PrepIt", value: "$99.99 on Mon, Nov 2" },
   ]);
-  const noReminder = welcomeRecap({ trial: true, plan: "monthly", prices: WEB_PRICES.uk, startedAt: TODAY, reminder: false });
+  const noReminder = welcomeRecap({ trial: true, plan: "monthly", amount: "£14.99", free: "£0", startedAt: TODAY, reminder: false });
   assert.deepEqual(noReminder, [
     { label: "Due today", value: "£0" },
     { label: "First payment, only if you keep PrepIt", value: "£14.99 on Mon, Nov 2" },
@@ -80,26 +95,27 @@ test("recap for a free week: due today, reminder on day 4, first payment on day 
 });
 
 test("recap without a free week: paid today and the renewal", () => {
-  assert.deepEqual(welcomeRecap({ trial: false, plan: "monthly", prices: WEB_PRICES.us, startedAt: TODAY, reminder: true }), [
+  assert.deepEqual(welcomeRecap({ trial: false, plan: "monthly", amount: "$14.99", free: "$0", startedAt: TODAY, reminder: true }), [
     { label: "Paid today", value: "$14.99" },
     { label: "Renews", value: "$14.99 on Thu, Nov 26" },
   ]);
-  assert.deepEqual(welcomeRecap({ trial: false, plan: "annual", prices: WEB_PRICES.us, startedAt: TODAY, reminder: true })[1], {
-    label: "Renews",
-    value: "$99.99 on Tue, Oct 26",
-  });
+  assert.deepEqual(
+    welcomeRecap({ trial: false, plan: "annual", amount: "$99.99", free: "$0", startedAt: TODAY, reminder: true })[1],
+    { label: "Renews", value: "$99.99 on Tue, Oct 26" },
+  );
+  assert.deepEqual(welcomeRecap({ trial: false, plan: null, amount: "$99.99", free: "$0", startedAt: TODAY, reminder: true }), [
+    { label: "Paid today", value: "$99.99" },
+  ]);
 });
 
-test("recap with an unknown package shows both prices, and none without prices", () => {
-  const rows = welcomeRecap({ trial: true, plan: null, prices: WEB_PRICES.us, startedAt: TODAY, reminder: false });
-  assert.equal(rows[1].value, "$99.99 a year or $14.99 a month on Mon, Nov 2");
-  assert.equal(welcomeRecap({ trial: true, plan: "annual", prices: null, startedAt: TODAY, reminder: true }), null);
+test("no recap without the amount", () => {
+  assert.equal(welcomeRecap({ trial: true, plan: "annual", amount: null, free: "$0", startedAt: TODAY, reminder: true }), null);
 });
 
 test("a stored visit keeps a valid purchase only", () => {
-  const purchase = { plan: "annual", seller: "uk", startedAt: "2026-10-26T09:30:00.000Z" };
+  const purchase = { plan: "annual", amount: "£99.99", free: "£0", startedAt: "2026-10-26T09:30:00.000Z" };
   assert.deepEqual(parseBridgeVisit(JSON.stringify({ from: "quiz", trial: true, purchase })), { from: "quiz", trial: true, purchase });
-  assert.deepEqual(parseBridgeVisit(JSON.stringify({ from: "quiz", trial: true, purchase: { ...purchase, seller: "eu" } })), {
+  assert.deepEqual(parseBridgeVisit(JSON.stringify({ from: "quiz", trial: true, purchase: { ...purchase, amount: 5 } })), {
     from: "quiz",
     trial: true,
   });

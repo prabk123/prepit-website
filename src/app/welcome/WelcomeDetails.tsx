@@ -6,7 +6,7 @@ import { BridgeHead, BridgeHeader, BridgeProgress } from "@/components/bridge/Br
 import { watchUser } from "@/lib/firebase/auth";
 import { readBridgeVisit } from "@/lib/funnel/bridgeHandoff";
 import { APP_LINK_EMAIL_LIVE, welcomeRecap } from "@/lib/funnel/checkoutStates";
-import { WEB_PRICES, WEB_REMINDER_EMAIL_LIVE } from "@/lib/pricing";
+import { WEB_REMINDER_EMAIL_LIVE } from "@/lib/pricing";
 import EmailLinkButton from "./EmailLinkButton";
 import { trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webFunnelAnalytics";
 
@@ -52,7 +52,8 @@ export default function WelcomeDetails({ download }: { download: ReactNode }) {
       ? welcomeRecap({
           trial,
           plan: visit.purchase.plan,
-          prices: WEB_PRICES[visit.purchase.seller],
+          amount: visit.purchase.amount,
+          free: visit.purchase.free,
           startedAt: new Date(visit.purchase.startedAt),
           reminder: WEB_REMINDER_EMAIL_LIVE,
         })

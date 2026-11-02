@@ -15,12 +15,14 @@ import {
   classifyPurchasesError,
   couldNotStart,
   DECLINED_LINE,
+  offeringPrices,
   startingLine,
+  zeroIn,
   welcomeBackTerms,
   type CheckoutFailure,
 } from "@/lib/funnel/checkoutStates";
 import { bridgePath, parseFunnelId, type BridgeSource } from "@/lib/funnel/params";
-import { parsePlanId, WEB_PRICES, type PlanId } from "@/lib/pricing";
+import { parsePlanId, type PlanId } from "@/lib/pricing";
 import {
   checkoutValueFor,
   ensurePrivateCheckoutRoot,
@@ -186,10 +188,17 @@ export default function Checkout({
   const trialExpected = plans.status === "ready" ? plans.trialExpected : false;
   // RevenueCat offers this account no free week, so they'd pay today: the cart
   // said $0, so Welcome back comes first, with today's price (PRE-438).
-  const offersTrial = offering ? offeringOffersTrial(offering) : true;
+  // Before the offering loads, PrepIt's own record is the best guess (for the progress bar).
+  const offersTrial = offering ? offeringOffersTrial(offering) : !summary?.hasUsedTrial;
   const welcomeBack = offering !== null && !offersTrial;
   const showPaywall = offering !== null && (!welcomeBack || continued);
-  const prices = WEB_PRICES[seller];
+  // RevenueCat's own prices for this visitor, so Welcome back always matches the payment form.
+  const prices = useMemo(() => {
+    if (!offering) return null;
+    const priceOf = (plan: PlanId) =>
+      offering.availablePackages.find((candidate) => planIdOf(candidate) === plan)?.webBillingProduct.price;
+    return offeringPrices({ annual: priceOf("annual"), monthly: priceOf("monthly") });
+  }, [offering]);
 
   // `billing_seller`: whose Web Billing app this checkout sells on;
   // `billing_seller_fallback`: that seller's own key isn't set, so this is on the shared pre-PRE-355 key.
@@ -201,8 +210,12 @@ export default function Checkout({
   useEffect(() => {
     if (!welcomeBack || continued || welcomeBackTracked.current) return;
     welcomeBackTracked.current = true;
-    trackWebFunnelEvent(WEB_FUNNEL_EVENTS.welcomeBackView, { ...context, trial_expected: trialExpected, has_prices: true });
-  }, [welcomeBack, continued, context, trialExpected]);
+    trackWebFunnelEvent(WEB_FUNNEL_EVENTS.welcomeBackView, {
+      ...context,
+      trial_expected: trialExpected,
+      has_prices: prices !== null,
+    });
+  }, [welcomeBack, continued, context, trialExpected, prices]);
 
   useEffect(() => {
     if (paywallTracked.current) return;
@@ -340,10 +353,16 @@ export default function Checkout({
         setDeclined(false);
         setPaying("confirming");
         // What "You're in" recaps: the plan, the company that billed it, and from when (PRE-438).
+        const bought = result.selectedPackage.webBillingProduct.price;
         writeBridgeVisit({
           from: readBridgeVisit()?.from ?? bridge?.from ?? "landing",
           trial: trial.has_trial,
-          purchase: { plan, seller, startedAt: new Date().toISOString() },
+          purchase: {
+            plan,
+            amount: bought?.formattedPrice ?? null,
+            free: zeroIn(bought?.currency ?? "USD"),
+            startedAt: new Date().toISOString(),
+          },
         });
         const unlocked = await waitForPremium(uid, seller, result.customerInfo);
         if (!active) return;
@@ -429,7 +448,7 @@ export default function Checkout({
 
   if (account?.status === "error" || plans.status === "error" || paywallFailed) {
     // Couldn't start (PRE-438): nothing was charged, the plan is saved, Try again.
-    const failed = couldNotStart(!summary?.hasUsedTrial, bridge?.from === "quiz");
+    const failed = couldNotStart(offersTrial, bridge?.from === "quiz");
     return (
       <>
         {top}
@@ -475,22 +494,28 @@ export default function Checkout({
           <h2 id="welcome-back-plan" className="text-eyebrow font-bold uppercase tracking-[0.12em] text-ink-muted">
             Your plan
           </h2>
-          <ul aria-label="Today’s prices" className="flex flex-col border-t border-line">
-            <li className="flex items-baseline justify-between gap-3 border-b border-line py-2.5 text-[15px] text-ink-secondary">
-              <b className="font-bold text-ink">Annual</b>
-              <span className="text-right tabular-nums">
-                <b className="font-semibold text-ink">{prices.annual} a year</b>
-                <small className="block text-[13px] text-ink-muted">{prices.annualPerMonth} a month</small>
-              </span>
-            </li>
-            <li className="flex items-baseline justify-between gap-3 border-b border-line py-2.5 text-[15px] text-ink-secondary">
-              <b className="font-bold text-ink">Monthly</b>
-              <span className="text-right tabular-nums">
-                <b className="font-semibold text-ink">{prices.monthly} a month</b>
-                <small className="block text-[13px] text-ink-muted">billed monthly</small>
-              </span>
-            </li>
-          </ul>
+          {prices ? (
+            <ul aria-label="Today’s prices" className="flex flex-col border-t border-line">
+              <li className="flex items-baseline justify-between gap-3 border-b border-line py-2.5 text-[15px] text-ink-secondary">
+                <b className="font-bold text-ink">Annual</b>
+                <span className="text-right tabular-nums">
+                  <b className="font-semibold text-ink">{prices.annual} a year</b>
+                  {prices.annualPerMonth && (
+                    <small className="block text-[13px] text-ink-muted">{prices.annualPerMonth} a month</small>
+                  )}
+                </span>
+              </li>
+              <li className="flex items-baseline justify-between gap-3 border-b border-line py-2.5 text-[15px] text-ink-secondary">
+                <b className="font-bold text-ink">Monthly</b>
+                <span className="text-right tabular-nums">
+                  <b className="font-semibold text-ink">{prices.monthly} a month</b>
+                  <small className="block text-[13px] text-ink-muted">billed monthly</small>
+                </span>
+              </li>
+            </ul>
+          ) : (
+            <p className="text-small text-ink-secondary">Annual or monthly. You’ll see the price on the next step.</p>
+          )}
         </section>
         <button
           type="button"
