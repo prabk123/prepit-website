@@ -12,6 +12,8 @@ type AppStoreCtaProps = {
   /** What the QR code opens; the App Store listing unless set. */
   qrUrl?: string;
   className?: string;
+  /** Fill a narrow card below the desktop breakpoint. */
+  fullWidth?: boolean;
 };
 
 /**
@@ -26,11 +28,12 @@ export default function AppStoreCta({
   qrCaption,
   qrUrl,
   className,
+  fullWidth,
 }: AppStoreCtaProps) {
 
   return (
     <div className={`flex flex-wrap items-center gap-x-10 gap-y-6 ${className ?? ""}`}>
-      <AppStoreButton trackingSource={trackingSource} label={label} note={note} />
+      <AppStoreButton trackingSource={trackingSource} label={label} note={note} fullWidth={fullWidth} />
       {qrCaption && (
         <AppStoreQr caption={qrCaption} url={qrUrl} trackingSource={`${trackingSource}-qr`} className="hidden lg:flex" />
       )}

@@ -5,6 +5,7 @@ import { readCookie } from "@/lib/cookies";
 import { COUNTRY_COOKIE } from "@/lib/markets";
 import { isProductionDeploy } from "@/lib/firebase/config";
 import { mayKeepAttribution, readAttribution } from "@/lib/funnel/attributionStore";
+import { classifyPurchasesError, type CheckoutFailure } from "@/lib/funnel/checkoutStates";
 import { metaMatchingAttributes } from "@/lib/metaMatching";
 import type { PlanId } from "@/lib/pricing";
 import { webBillingKeyFor, webBillingSellerFor, type WebBillingSeller } from "@/lib/revenuecat/sellers";
@@ -236,36 +237,16 @@ export async function loadCheckoutOffering(uid: string, seller: WebBillingSeller
   return { status: "ready", offering };
 }
 
-/** Why a purchase didn't go through, as a fixed code for analytics and the message. */
-export type CheckoutFailure =
-  | "cancelled"
-  | "already_purchased"
-  | "payment_pending"
-  | "network"
-  | "not_allowed"
-  | "unknown";
+export type { CheckoutFailure } from "@/lib/funnel/checkoutStates";
 
-/** The failure code, plus RevenueCat's numeric error code when there is one (for analytics). */
+/**
+ * The failure code (classifyPurchasesError, lib/funnel/checkoutStates.ts),
+ * plus RevenueCat's numeric error code when there is one (for analytics).
+ */
 export async function toCheckoutFailure(error: unknown): Promise<{ code: CheckoutFailure; rcErrorCode: number | null }> {
-  const { ErrorCode, PurchasesError } = await import("@revenuecat/purchases-js");
+  const { PurchasesError } = await import("@revenuecat/purchases-js");
   if (!(error instanceof PurchasesError)) return { code: "unknown", rcErrorCode: null };
-  const rcErrorCode = error.errorCode;
-  switch (error.errorCode) {
-    case ErrorCode.UserCancelledError:
-      return { code: "cancelled", rcErrorCode };
-    case ErrorCode.ProductAlreadyPurchasedError:
-      return { code: "already_purchased", rcErrorCode };
-    case ErrorCode.PaymentPendingError:
-      return { code: "payment_pending", rcErrorCode };
-    case ErrorCode.NetworkError:
-      return { code: "network", rcErrorCode };
-    case ErrorCode.PurchaseNotAllowedError:
-    case ErrorCode.IneligibleError:
-    case ErrorCode.PurchaseInvalidError:
-      return { code: "not_allowed", rcErrorCode };
-    default:
-      return { code: "unknown", rcErrorCode };
-  }
+  return { code: classifyPurchasesError(error.errorCode, error.message), rcErrorCode: error.errorCode };
 }
 
 const ENTITLEMENT_WAIT_MS = 20_000;

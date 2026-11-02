@@ -29,6 +29,7 @@ export default async function WelcomePage({ searchParams }: { searchParams: Prom
     <div className="flex flex-col gap-3">
       <AppStoreCta
         trackingSource="web-handoff"
+        fullWidth
         qrCaption="Point your iPhone camera at the code"
         qrUrl={openAppUrl(provider)}
       />

@@ -46,11 +46,25 @@ export const WEB_FUNNEL_EVENTS = {
   signInCancelled: "web_signin_cancelled",
   /** The sign-in bridge asked RevenueCat about someone PrepIt's record doesn't show as subscribed (`result`: found, none, error, timeout or no_key; `has_account`). `found` shows "You already have PrepIt" instead of the plans. */
   bridgePremiumCheck: "web_bridge_premium_check",
+  /**
+   * RevenueCat's paywall was shown after sign-in (`plan`, `has_trial`, `trial_expected`…). The web funnel v9 plan
+   * calls this `checkout_view`; the ticket kept the existing name (PRE-438). Likewise `purchase_success` is
+   * `web_checkout_success`, `purchase_fail` is `web_checkout_failed`, `success_view` is `web_handoff_view` and
+   * `app_store_click` is the App Store button's own event.
+   */
   paywallView: "web_paywall_view",
+  /**
+   * The Welcome back step before the paywall (PRE-438): RevenueCat offers no free trial on this account, so they pay
+   * today (`trial_expected`: whether PrepIt's record thought they'd get one, `has_prices`).
+   */
+  welcomeBackView: "welcome_back_view",
+  /** "Continue to payment" on the Welcome back step. */
+  welcomeBackContinue: "welcome_back_continue",
   checkoutStart: "web_checkout_start",
   /** Meta matching details given to RevenueCat on checkout, and again on purchase start if `_fbp` was missing (`trigger`, `has_fbp`, `has_fbc`, `has_email`, `identity_saved`, `ids_saved`, `browser_saved`). Never the values. */
   metaMatchingSent: "web_meta_matching_sent",
   checkoutSuccess: "web_checkout_success",
+  /** `reason`: cancelled, already_purchased, declined (the bank refused the card, PRE-438), network, not_allowed, unknown, or paywall_load_failed. */
   checkoutFailed: "web_checkout_failed",
   /** Checkout couldn't be offered (`reason`: already_subscribed, no_paywall, not_configured…). */
   checkoutUnavailable: "web_checkout_unavailable",
@@ -58,6 +72,8 @@ export const WEB_FUNNEL_EVENTS = {
   handoffView: "web_handoff_view",
   /** "Open PrepIt" on the success page, for people who already have the app. */
   handoffOpenApp: "web_handoff_open_app",
+  /** "Email me the link" on the desktop "You're in" page (`provider`). A PostHog workflow sends the App Store link to the person's email (PRE-438). */
+  emailLinkRequested: "email_link_requested",
   /** A quiz screen was shown (`step_id`, `step_index`). Never an answer: both stop screens (under 18, eating disorder) are `stop` with a null `step_index`. */
   quizStepView: "web_quiz_step_view",
   /** The email gate saved its lead (`marketing_consent`, `saved`: false when the request failed). */

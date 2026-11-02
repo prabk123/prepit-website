@@ -2,15 +2,27 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useWebSession } from "@/components/account/useWebSession";
-import { BridgeHeader } from "@/components/bridge/BridgeParts";
+import { Assurances, BridgeAlert, BridgeHead, BridgeHeader, BridgeProgress, SUPPORT_EMAIL } from "@/components/bridge/BridgeParts";
 import SignedInChip from "@/components/bridge/SignedInChip";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { PRIMARY_BUTTON_CLASS } from "@/components/ui/buttons";
 import { providerOf, signOutOfWebsite } from "@/lib/firebase/auth";
-import { bridgePath, parseFunnelId } from "@/lib/funnel/params";
-import { parsePlanId } from "@/lib/pricing";
+import { readBridgeVisit, writeBridgeVisit } from "@/lib/funnel/bridgeHandoff";
+import {
+  CHECKOUT_FAILURE_MESSAGES,
+  classifyPurchasesError,
+  couldNotStart,
+  DECLINED_LINE,
+  offeringPrices,
+  startingLine,
+  zeroIn,
+  welcomeBackTerms,
+  type CheckoutFailure,
+} from "@/lib/funnel/checkoutStates";
+import { bridgePath, parseFunnelId, type BridgeSource } from "@/lib/funnel/params";
+import { parsePlanId, type PlanId } from "@/lib/pricing";
 import {
   checkoutValueFor,
   ensurePrivateCheckoutRoot,
@@ -26,7 +38,6 @@ import {
   waitForPremium,
   webBillingKey,
   webBillingKeyProblem,
-  type CheckoutFailure,
 } from "@/lib/revenuecat/webBilling";
 import { forceLightPaywall, systemPrefersDark } from "@/lib/revenuecat/lightPaywall";
 import { webBillingSellerFor } from "@/lib/revenuecat/sellers";
@@ -43,16 +54,6 @@ import { resetWebUser, trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webF
 function trialProperties(hasTrial: boolean, trialExpected: boolean) {
   return { has_trial: hasTrial, trial_expected: trialExpected, trial_mismatch: hasTrial && !trialExpected };
 }
-
-const FAILURE_MESSAGES: Record<CheckoutFailure, string | null> = {
-  cancelled: null,
-  already_purchased: "You already have this subscription.",
-  payment_pending: "Your payment is still being confirmed. We'll unlock PrepIt as soon as it goes through.",
-  network: "We couldn't reach the payment service. Check your connection and try again.",
-  not_allowed: "This payment couldn't go through. Please try a different card or try again.",
-  unknown:
-    "Something went wrong with the payment. If you were charged, your subscription will show up shortly. Otherwise, please try again.",
-};
 
 type Plans =
   | { status: "loading" }
@@ -87,7 +88,24 @@ type Plans =
  * which draws its own header with the account. The paywall always shows its
  * light colours, like the rest of the site (lightPaywall.ts).
  */
-export default function Checkout({ country, header = true }: { country: string | null; header?: boolean }) {
+/**
+ * What /start knows that /checkout doesn't (PRE-438): where they came from
+ * (a quiz plan is saved to the account) and the line over the paywall for a free
+ * week ("Your plan is saved." or "You're signed in."). With it, Checkout also
+ * draws the assurances under the paywall, for the free week or not as
+ * RevenueCat offers it.
+ */
+export type CheckoutBridge = { from: BridgeSource; signedInTitle: string };
+
+export default function Checkout({
+  country,
+  header = true,
+  bridge = null,
+}: {
+  country: string | null;
+  header?: boolean;
+  bridge?: CheckoutBridge | null;
+}) {
   const params = useSearchParams();
   const router = useRouter();
   const funnelId = parseFunnelId(params.get("funnel"));
@@ -99,6 +117,13 @@ export default function Checkout({ country, header = true }: { country: string |
 
   const [plansState, setPlans] = useState<{ key: string; plans: Plans } | null>(null);
   const [paying, setPaying] = useState<"idle" | "confirming">("idle");
+  // Whether the purchase being confirmed started a free week, for "Starting your free week."
+  const [confirmingTrial, setConfirmingTrial] = useState(true);
+  // RevenueCat reported a declined card (PRE-438): our line over its error, until the next try starts.
+  const [declined, setDeclined] = useState(false);
+  // Welcome back (no free week on this account): "Continue to payment" was pressed.
+  const [continued, setContinued] = useState(false);
+  const welcomeBackTracked = useRef(false);
   const [failure, setFailure] = useState<CheckoutFailure | null>(null);
   // The paywall itself couldn't be shown (nothing was bought).
   const [paywallFailed, setPaywallFailed] = useState(false);
@@ -159,12 +184,38 @@ export default function Checkout({ country, header = true }: { country: string |
     };
   }, [uid, summary, plansKey, keyProblem, seller]);
 
+  const offering = plans.status === "ready" ? plans.offering : null;
+  const trialExpected = plans.status === "ready" ? plans.trialExpected : false;
+  // RevenueCat offers this account no free week, so they'd pay today: the cart
+  // said $0, so Welcome back comes first, with today's price (PRE-438).
+  // Before the offering loads, PrepIt's own record is the best guess (for the progress bar).
+  const offersTrial = offering ? offeringOffersTrial(offering) : !summary?.hasUsedTrial;
+  const welcomeBack = offering !== null && !offersTrial;
+  const showPaywall = offering !== null && (!welcomeBack || continued);
+  // RevenueCat's own prices for this visitor, so Welcome back always matches the payment form.
+  const prices = useMemo(() => {
+    if (!offering) return null;
+    const priceOf = (plan: PlanId) =>
+      offering.availablePackages.find((candidate) => planIdOf(candidate) === plan)?.webBillingProduct.price;
+    return offeringPrices({ annual: priceOf("annual"), monthly: priceOf("monthly") });
+  }, [offering]);
+
   // `billing_seller`: whose Web Billing app this checkout sells on;
   // `billing_seller_fallback`: that seller's own key isn't set, so this is on the shared pre-PRE-355 key.
   const context = useMemo(
     () => ({ funnel_id: funnelId, billing_seller: seller, billing_seller_fallback: billing.fellBack }),
     [funnelId, seller, billing.fellBack],
   );
+
+  useEffect(() => {
+    if (!welcomeBack || continued || welcomeBackTracked.current) return;
+    welcomeBackTracked.current = true;
+    trackWebFunnelEvent(WEB_FUNNEL_EVENTS.welcomeBackView, {
+      ...context,
+      trial_expected: trialExpected,
+      has_prices: prices !== null,
+    });
+  }, [welcomeBack, continued, context, trialExpected, prices]);
 
   useEffect(() => {
     if (paywallTracked.current) return;
@@ -178,7 +229,7 @@ export default function Checkout({ country, header = true }: { country: string |
     if (unavailable) {
       paywallTracked.current = true;
       trackWebFunnelEvent(WEB_FUNNEL_EVENTS.checkoutUnavailable, { ...context, reason: unavailable });
-    } else if (plans.status === "ready") {
+    } else if (plans.status === "ready" && showPaywall) {
       paywallTracked.current = true;
       trackWebFunnelEvent(WEB_FUNNEL_EVENTS.paywallView, {
         ...context,
@@ -190,7 +241,7 @@ export default function Checkout({ country, header = true }: { country: string |
       if (session.status === "signedIn") identifyPixelUser(session.user.uid, session.user.email);
       trackCheckoutInitiated(checkoutValueFor(plans.offering, requestedPlan));
     }
-  }, [plans, keyProblem, context, requestedPlan, session]);
+  }, [plans, keyProblem, context, requestedPlan, session, showPaywall]);
 
   const provider = session.status === "signedIn" ? providerOf(session.user) : null;
   const email = session.status === "signedIn" ? session.user.email : null;
@@ -244,16 +295,15 @@ export default function Checkout({ country, header = true }: { country: string |
 
   // Shows RevenueCat's paywall in the page. It runs the purchase itself (with
   // 3-D Secure and its own retryable errors); this waits for the result.
-  const offering = plans.status === "ready" ? plans.offering : null;
-  const trialExpected = plans.status === "ready" ? plans.trialExpected : false;
+
   useEffect(() => {
     const host = paywallHost.current;
-    if (!uid || !offering || !host || paying !== "idle") return;
+    if (!uid || !offering || !showPaywall || !host || paying !== "idle") return;
     let active = true;
     // A fresh element per showing, so a second showing never stacks on the first.
     const target = document.createElement("div");
     host.replaceChildren(target);
-    let plan: string | null = null;
+    let plan: PlanId | null = null;
     let trial: ReturnType<typeof trialProperties> | null = null;
     let purchaseStarted = false;
     const releaseLight = forceLightPaywall();
@@ -277,9 +327,13 @@ export default function Checkout({ country, header = true }: { country: string |
               plan = planIdOf(rcPackage);
               trial = trialProperties(packageOffersTrial(rcPackage), trialExpected);
               setFailure(null);
+              setDeclined(false);
               trackWebFunnelEvent(WEB_FUNNEL_EVENTS.checkoutStart, { ...context, plan, ...trial });
             },
             onPurchaseError: (error) => {
+              // RevenueCat keeps its sheet open with its own error; ours is there when it closes.
+              const { errorCode, message } = error as { errorCode?: unknown; message?: string };
+              if (typeof errorCode === "number" && classifyPurchasesError(errorCode, message) === "declined") setDeclined(true);
               void toCheckoutFailure(error).then(({ code, rcErrorCode }) =>
                 trackWebFunnelEvent(WEB_FUNNEL_EVENTS.checkoutFailed, {
                   ...context,
@@ -295,7 +349,21 @@ export default function Checkout({ country, header = true }: { country: string |
         if (!active) return;
         plan = planIdOf(result.selectedPackage) ?? plan;
         trial = trialProperties(packageOffersTrial(result.selectedPackage), trialExpected);
+        setConfirmingTrial(trial.has_trial);
+        setDeclined(false);
         setPaying("confirming");
+        // What "You're in" recaps: the plan, the company that billed it, and from when (PRE-438).
+        const bought = result.selectedPackage.webBillingProduct.price;
+        writeBridgeVisit({
+          from: readBridgeVisit()?.from ?? bridge?.from ?? "landing",
+          trial: trial.has_trial,
+          purchase: {
+            plan,
+            amount: bought?.formattedPrice ?? null,
+            free: zeroIn(bought?.currency ?? "USD"),
+            startedAt: new Date().toISOString(),
+          },
+        });
         const unlocked = await waitForPremium(uid, seller, result.customerInfo);
         if (!active) return;
         trackWebFunnelEvent(WEB_FUNNEL_EVENTS.checkoutSuccess, {
@@ -326,6 +394,7 @@ export default function Checkout({ country, header = true }: { country: string |
           router.push(welcomePath(false));
           return;
         }
+        if (code === "declined") setDeclined(true);
         setFailure(code);
       }
     })();
@@ -336,17 +405,22 @@ export default function Checkout({ country, header = true }: { country: string |
     };
     // welcomePath and context only change with the session and URL already in the deps.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [uid, offering, presentKey]);
+  }, [uid, offering, presentKey, showPaywall]);
 
   const signOut = () => {
     void signOutOfWebsite().then(resetWebUser);
   };
   // Which account is paying, so an old session on the wrong account is visible.
-  const top = header ? (
-    <BridgeHeader>
-      {session.status === "signedIn" && <SignedInChip provider={provider} email={email} onSignOut={signOut} compact />}
-    </BridgeHeader>
-  ) : null;
+  const top = (
+    <>
+      {header && (
+        <BridgeHeader>
+          {session.status === "signedIn" && <SignedInChip provider={provider} email={email} onSignOut={signOut} compact />}
+        </BridgeHeader>
+      )}
+      {bridge && <BridgeProgress from={bridge.from} current="trial" trial={offersTrial} />}
+    </>
+  );
 
   if (keyProblem || plans.status === "no_paywall") {
     return (
@@ -373,11 +447,14 @@ export default function Checkout({ country, header = true }: { country: string |
   }
 
   if (account?.status === "error" || plans.status === "error" || paywallFailed) {
+    // Couldn't start (PRE-438): nothing was charged, the plan is saved, Try again.
+    const failed = couldNotStart(offersTrial, bridge?.from === "quiz");
     return (
       <>
         {top}
-        <div className="flex flex-col items-center gap-6 text-center">
-          <SectionHeading as="h1" size="title" align="center" title="We couldn't load the plans" lead="Please try again in a moment." />
+        <div className="flex flex-col items-center gap-4 text-center">
+          <h1 className="font-display text-title text-ink">{failed.title}</h1>
+          <p className="text-small text-ink-secondary">{failed.body}</p>
           <button
             type="button"
             className={PRIMARY_BUTTON_CLASS}
@@ -393,19 +470,97 @@ export default function Checkout({ country, header = true }: { country: string |
           >
             Try again
           </button>
+          <p className="text-small text-ink-muted">
+            Still stuck? Email <span className="select-all font-bold text-ink">{SUPPORT_EMAIL}</span>.
+          </p>
         </div>
       </>
     );
   }
 
-  const message = failure ? FAILURE_MESSAGES[failure] : null;
+  // Welcome back (PRE-438): this account has had its free week, so before
+  // RevenueCat's paywall, today's price and "Continue to payment", with no
+  // "free" or "trial" words.
+  if (welcomeBack && !continued) {
+    return (
+      <>
+        {top}
+        <BridgeHead
+          eyebrow="Welcome back"
+          title="Pick up where you left off."
+          lead="This account has had its free week, so your plan starts today. Your logs and notes are still there."
+        />
+        <section aria-labelledby="welcome-back-plan" className="flex flex-col gap-2.5">
+          <h2 id="welcome-back-plan" className="text-eyebrow font-bold uppercase tracking-[0.12em] text-ink-muted">
+            Your plan
+          </h2>
+          {prices ? (
+            <ul aria-label="Today’s prices" className="flex flex-col border-t border-line">
+              <li className="flex items-baseline justify-between gap-3 border-b border-line py-2.5 text-[15px] text-ink-secondary">
+                <b className="font-bold text-ink">Annual</b>
+                <span className="text-right tabular-nums">
+                  <b className="font-semibold text-ink">{prices.annual} a year</b>
+                  {prices.annualPerMonth && (
+                    <small className="block text-[13px] text-ink-muted">{prices.annualPerMonth} a month</small>
+                  )}
+                </span>
+              </li>
+              <li className="flex items-baseline justify-between gap-3 border-b border-line py-2.5 text-[15px] text-ink-secondary">
+                <b className="font-bold text-ink">Monthly</b>
+                <span className="text-right tabular-nums">
+                  <b className="font-semibold text-ink">{prices.monthly} a month</b>
+                  <small className="block text-[13px] text-ink-muted">billed monthly</small>
+                </span>
+              </li>
+            </ul>
+          ) : (
+            <p className="text-small text-ink-secondary">Annual or monthly. You’ll see the price on the next step.</p>
+          )}
+        </section>
+        <button
+          type="button"
+          className={PRIMARY_BUTTON_CLASS}
+          onClick={() => {
+            trackWebFunnelEvent(WEB_FUNNEL_EVENTS.welcomeBackContinue, context);
+            setContinued(true);
+          }}
+        >
+          Continue to payment
+        </button>
+        <p className="text-small text-ink-muted">{welcomeBackTerms(prices)}</p>
+        {bridge && <Assurances trial={false} />}
+      </>
+    );
+  }
+
+  const message = failure ? CHECKOUT_FAILURE_MESSAGES[failure] : null;
+  const starting = startingLine(confirmingTrial);
+  let intro: ReactNode = null;
+  if (bridge && paying === "idle") {
+    intro = welcomeBack ? (
+      <p className="text-small text-ink-secondary">
+        <b className="font-bold text-ink">Your plan starts today.</b> Pick annual or monthly below.
+      </p>
+    ) : (
+      <BridgeAlert tone="success" title={bridge.signedInTitle}>
+        Your free 7 days are one step away. Nothing was charged.
+      </BridgeAlert>
+    );
+  }
 
   return (
     <>
       {top}
+      {intro}
+      {/* Our line over RevenueCat's own error: the card wasn't added and nothing was charged (PRE-438). */}
+      {declined && paying === "idle" && !failure && (
+        <p role="alert" className="rounded-icon border border-energy bg-energy/20 px-4 py-3 text-small text-ink">
+          {DECLINED_LINE}
+        </p>
+      )}
       {paying === "confirming" ? (
         <p role="status" className="text-center text-body text-ink-secondary">
-          Confirming your subscription…
+          <b className="font-bold text-ink">{starting.title}</b> {starting.body}
         </p>
       ) : (
         <>
@@ -417,22 +572,28 @@ export default function Checkout({ country, header = true }: { country: string |
       {failure && paying === "idle" && (
         <div className="flex w-full flex-col items-center gap-3 text-center">
           {message && (
-            <p role="alert" className="text-small text-error">
+            <p
+              role="alert"
+              className={
+                failure === "declined"
+                  ? "rounded-icon border border-energy bg-energy/20 px-4 py-3 text-small text-ink"
+                  : "text-small text-error"
+              }
+            >
               {message}
             </p>
           )}
-          {failure !== "payment_pending" && (
-            <button
-              type="button"
-              className={PRIMARY_BUTTON_CLASS}
-              onClick={() => {
-                setFailure(null);
-                setPresentKey((key) => key + 1);
-              }}
-            >
-              Show the plans again
-            </button>
-          )}
+          <button
+            type="button"
+            className={PRIMARY_BUTTON_CLASS}
+            onClick={() => {
+              setFailure(null);
+              setDeclined(false);
+              setPresentKey((key) => key + 1);
+            }}
+          >
+            Show the plans again
+          </button>
         </div>
       )}
       <p className="text-center text-small text-ink-muted">
@@ -450,6 +611,7 @@ export default function Checkout({ country, header = true }: { country: string |
         </Link>
         .
       </p>
+      {bridge && paying === "idle" && <Assurances trial={offersTrial} />}
     </>
   );
 }

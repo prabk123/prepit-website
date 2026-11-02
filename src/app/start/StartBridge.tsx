@@ -6,8 +6,6 @@ import Checkout from "@/app/checkout/Checkout";
 import { useSaveWebSignup } from "@/components/account/useSaveWebSignup";
 import { useWebSession } from "@/components/account/useWebSession";
 import {
-  Assurances,
-  BridgeAlert,
   BridgeFooter,
   BridgeHead,
   BridgeHeader,
@@ -20,6 +18,7 @@ import { PRIMARY_BUTTON_CLASS, TEXT_BUTTON_CLASS } from "@/components/ui/buttons
 import { openAppUrl } from "@/lib/appStore";
 import { providerOf, signInAuthDomain, signOutOfWebsite } from "@/lib/firebase/auth";
 import { readBridgeHandoff, writeBridgeVisit, type BridgeHandoff } from "@/lib/funnel/bridgeHandoff";
+import { couldNotStart } from "@/lib/funnel/checkoutStates";
 import type { CartMarket } from "@/lib/funnel/cart";
 import { parseBridgeSource, parseFunnelId } from "@/lib/funnel/params";
 import { parsePlanId } from "@/lib/pricing";
@@ -169,10 +168,8 @@ export default function StartBridge({ country, market }: { country: string | nul
         <div className="self-stretch text-left">
           <BridgeHeader />
         </div>
-        <h1 className="font-display text-title text-ink">We couldn’t start your free week</h1>
-        <p className="text-small text-ink-secondary">
-          Something went wrong on our side. You have not been charged{from === "quiz" ? ", and your plan is saved" : ""}.
-        </p>
+        <h1 className="font-display text-title text-ink">{couldNotStart(true, from === "quiz").title}</h1>
+        <p className="text-small text-ink-secondary">{couldNotStart(true, from === "quiz").body}</p>
         <button type="button" className={PRIMARY_BUTTON_CLASS} onClick={reloadAccount}>
           Try again
         </button>
@@ -197,7 +194,7 @@ export default function StartBridge({ country, market }: { country: string | nul
         <BridgeHead
           eyebrow="Welcome back"
           title="You’re already a member."
-          lead="Your PrepIt membership is active on this account. There’s nothing new to pay."
+          lead="PrepIt is active on this account, so there’s nothing new to pay."
         >
           {chip}
         </BridgeHead>
@@ -220,7 +217,6 @@ export default function StartBridge({ country, market }: { country: string | nul
     );
   }
 
-  const welcomeBack = summary.hasUsedTrial;
   return (
     <Narrow>
       {/* The paying account, with Sign out, in the header like /checkout (PRE-375). */}
@@ -232,21 +228,20 @@ export default function StartBridge({ country, market }: { country: string | nul
           compact
         />
       </BridgeHeader>
-      <BridgeProgress from={from} current="trial" />
-      {welcomeBack ? (
-        <BridgeHead
-          eyebrow="Welcome back"
-          title="Pick up where you left off."
-          lead="You’ve had a free week before, so this time your plan starts today. Your account and past logs are still here."
-        />
-      ) : (
-        <BridgeAlert tone="success" title={save.accountCreated ? "Your plan is saved." : "You’re signed in."}>
-          Your free 7 days are one step away. Nothing was charged.
-        </BridgeAlert>
-      )}
-      {/* RevenueCat's paywall, straight on the page with no card around it (PRE-375). */}
-      <Checkout country={country} header={false} />
-      <Assurances trial={!welcomeBack} />
+      {/*
+        RevenueCat's paywall, straight on the page with no card around it (PRE-375).
+        Checkout draws the progress and the line above it and the assurances under
+        it, and Welcome back before it when RevenueCat offers this account no free
+        week (PRE-438).
+      */}
+      <Checkout
+        country={country}
+        header={false}
+        bridge={{
+          from,
+          signedInTitle: save.accountCreated ? "Your plan is saved." : "You’re signed in.",
+        }}
+      />
       <BridgeFooter />
     </Narrow>
   );

@@ -5,20 +5,22 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { BridgeHead, BridgeHeader, BridgeProgress } from "@/components/bridge/BridgeParts";
 import { watchUser } from "@/lib/firebase/auth";
 import { readBridgeVisit } from "@/lib/funnel/bridgeHandoff";
+import { APP_LINK_EMAIL_LIVE, welcomeRecap } from "@/lib/funnel/checkoutStates";
+import { WEB_REMINDER_EMAIL_LIVE } from "@/lib/pricing";
+import EmailLinkButton from "./EmailLinkButton";
 import { trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webFunnelAnalytics";
 
 const PROVIDER_NAMES = { google: "Google", apple: "Apple" } as const;
 
 function Step({ n, title, children }: { n: number; title: string; children?: ReactNode }) {
   return (
-    <li className="grid grid-cols-[28px_minmax(0,1fr)] gap-3">
+    <li className="grid grid-cols-[28px_minmax(0,1fr)] items-center gap-x-3 gap-y-3">
       <span aria-hidden className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-small font-bold text-on-primary">
         {n}
       </span>
-      <div className="flex min-w-0 flex-col gap-2">
-        <b className="text-body font-bold text-ink">{title}</b>
-        {children}
-      </div>
+      <b className="text-body font-bold text-ink">{title}</b>
+      {/* Under the number on phones, so the App Store button has the card's full width. */}
+      {children && <div className="col-span-2 flex min-w-0 flex-col gap-3 sm:col-span-1 sm:col-start-2">{children}</div>}
     </li>
   );
 }
@@ -27,6 +29,8 @@ function Step({ n, title, children }: { n: number; title: string; children?: Rea
  * "You're in" (PRE-325), from the bridge design: three numbered steps, the
  * exact button to tap in the app (Sign in, not Get Started), and the account
  * to use. `download` is the App Store button and, on desktop, the QR code.
+ * Under the steps, the recap of what they bought (PRE-438): due today, the
+ * reminder email and the first payment, from what checkout left in this tab.
  */
 export default function WelcomeDetails({ download }: { download: ReactNode }) {
   const params = useSearchParams();
@@ -42,12 +46,23 @@ export default function WelcomeDetails({ download }: { download: ReactNode }) {
   const [visit] = useState(() => readBridgeVisit());
   const from = visit?.from ?? "landing";
   const trial = visit?.trial ?? true;
+  const recap =
+    !member && visit?.purchase
+      ? welcomeRecap({
+          trial,
+          plan: visit.purchase.plan,
+          amount: visit.purchase.amount,
+          free: visit.purchase.free,
+          startedAt: new Date(visit.purchase.startedAt),
+          reminder: WEB_REMINDER_EMAIL_LIVE,
+        })
+      : null;
 
   useEffect(() => {
     if (tracked.current) return;
     tracked.current = true;
-    trackWebFunnelEvent(WEB_FUNNEL_EVENTS.handoffView, { provider, pending, from, trial, member });
-  }, [provider, pending, from, trial, member]);
+    trackWebFunnelEvent(WEB_FUNNEL_EVENTS.handoffView, { provider, pending, from, trial, member, has_recap: recap !== null });
+  }, [provider, pending, from, trial, member, recap]);
 
   // The address they signed in with, so they pick the same account in the app.
   useEffect(
@@ -63,7 +78,7 @@ export default function WelcomeDetails({ download }: { download: ReactNode }) {
   return (
     <>
       <BridgeHeader />
-      <BridgeProgress from={from} current="app" />
+      <BridgeProgress from={from} current="app" trial={trial} />
       <BridgeHead
         eyebrow={member ? "Already a member" : trial ? "Free week started" : "Membership started"}
         title={account?.name ? `You’re in, ${account.name}.` : "You’re in."}
@@ -84,12 +99,13 @@ export default function WelcomeDetails({ download }: { download: ReactNode }) {
         <ol className="flex flex-col gap-5">
           <Step n={1} title="Get PrepIt on your iPhone">
             {download}
+            {APP_LINK_EMAIL_LIVE && <EmailLinkButton email={account?.email ?? null} provider={provider} />}
           </Step>
           <Step n={2} title="Open it and tap Sign in">
-            <span className="w-fit rounded-tile bg-surface-raised px-3 py-2 text-small text-ink-secondary">
+            <span className="w-fit rounded-icon bg-surface-raised px-4 py-2.5 text-small text-ink-secondary">
               Already have an account? <b className="font-bold text-ink underline">Sign in</b>
             </span>
-            <p className="rounded-tile border border-energy bg-energy/20 px-3 py-2 text-small text-ink-secondary">
+            <p className="rounded-icon border border-energy bg-energy/20 px-4 py-2.5 text-small text-ink-secondary">
               Not Get Started. Get Started begins a new plan from scratch.
             </p>
           </Step>
@@ -105,6 +121,16 @@ export default function WelcomeDetails({ download }: { download: ReactNode }) {
         </ol>
       </section>
       <section aria-label="Your subscription" className="flex flex-col gap-2 rounded-tile border border-line bg-surface p-5 text-small text-ink-secondary">
+        {recap && (
+          <dl className="flex flex-col border-b border-line pb-3">
+            {recap.map((row) => (
+              <div key={row.label} className="flex items-baseline justify-between gap-3 py-1.5">
+                <dt>{row.label}</dt>
+                <dd className="text-right font-bold text-ink tabular-nums">{row.value}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
         <p>
           To cancel, go to <a href="/account" className="font-bold text-ink underline underline-offset-4">tryprepit.app/account</a>{" "}
           and sign in the same way.

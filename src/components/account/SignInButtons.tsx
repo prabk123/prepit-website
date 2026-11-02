@@ -40,6 +40,14 @@ export const SIGN_IN_FAILURE_MESSAGES: Record<SignInFailure, string | null> = {
 };
 
 /**
+ * The cart's calm line when the Google or Apple window was closed (PRE-438):
+ * they stay on the cart, nothing changed.
+ */
+export function cartSignInCancelledMessage(provider: SignInProvider): string {
+  return `${provider === "apple" ? "Apple" : "Google"} sign-in didn’t finish, so nothing changed. Try again when you’re ready.`;
+}
+
+/**
  * Starts a Google or Apple sign-in and records it. `cartEvents` also sends the
  * cart's own `auth_*` events (PRE-437) with `from_sticky`.
  */
@@ -58,6 +66,7 @@ export function useSignIn({
 }) {
   const [busy, setBusy] = useState<SignInProvider | null>(null);
   const [failure, setFailure] = useState<SignInFailure | null>(null);
+  const [failedProvider, setFailedProvider] = useState<SignInProvider | null>(null);
 
   async function start(provider: SignInProvider) {
     setBusy(provider);
@@ -75,6 +84,7 @@ export function useSignIn({
     } catch (error) {
       const code = error instanceof SignInError ? error.code : "unknown";
       setFailure(code);
+      setFailedProvider(provider);
       // A closed popup is its own event, so failure counts stay comparable
       // with earlier weeks. It is also what a Google error page in the popup
       // (redirect_uri_mismatch) turns into once the visitor closes it.
@@ -92,7 +102,13 @@ export function useSignIn({
     }
   }
 
-  return { busy, failure, start, message: failure ? SIGN_IN_FAILURE_MESSAGES[failure] : null };
+  const message =
+    failure === "cancelled" && cartEvents && failedProvider
+      ? cartSignInCancelledMessage(failedProvider)
+      : failure
+        ? SIGN_IN_FAILURE_MESSAGES[failure]
+        : null;
+  return { busy, failure, start, message };
 }
 
 /**
