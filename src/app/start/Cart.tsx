@@ -1,18 +1,18 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import EmailInUseNotice from "@/components/account/EmailInUseNotice";
 import SignInButtons, { useSignIn } from "@/components/account/SignInButtons";
 import { BridgeFooter, BridgeHeader, BridgeProgress } from "@/components/bridge/BridgeParts";
+import PlanCard from "@/components/bridge/PlanCard";
 import FaqAccordion from "@/components/pricing/FaqAccordion";
 import { AppleLogo } from "@/components/ui/AppStoreButton";
 import { PRIMARY_BUTTON_CLASS } from "@/components/ui/buttons";
 import { isAppleSignInEnabled } from "@/lib/firebase/config";
 import { isInAppBrowser } from "@/lib/firebase/auth";
 import type { BridgeHandoff } from "@/lib/funnel/bridgeHandoff";
-import { cartDates, cartTermsParts, cartWho, type CartMarket } from "@/lib/funnel/cart";
+import { cartDates, cartTermsParts, type CartMarket } from "@/lib/funnel/cart";
 import { isCartEmailPlanEnabled, showCartEmailPlan } from "@/lib/funnel/cartLead";
 import type { BridgeSource } from "@/lib/funnel/params";
 import type { ExistingProvider } from "@/lib/prepitApi";
@@ -107,76 +107,6 @@ function ZeroToday({ zero, dates }: { zero: string; dates: ReturnType<typeof car
         </span>
       </div>
     </div>
-  );
-}
-
-const SESSIONS = [
-  { title: "Getting to know you", when: "Today · about 5 minutes", body: "Your routine, your goal and what a normal day looks like." },
-  { title: "What I’ve noticed so far", when: "After 3 days of meals", body: "The patterns in your meals, and one focus you pick together." },
-  { title: "Week-in-review", when: "Around day 7", body: "A review of your week, and a custom meal plan for the next one." },
-];
-
-/** The one-bite still with the visitor's "For…" line, what they said, the three sessions and (quiz) their targets. */
-function PlanCard({ from, handoff }: { from: BridgeSource; handoff: BridgeHandoff | null }) {
-  const who = cartWho(from, handoff?.startingPoint);
-  const summary = from === "quiz" ? handoff?.planSummary : undefined;
-  const targets = [
-    summary?.calories ? `${summary.calories.toLocaleString("en-US")} kcal` : null,
-    summary?.proteinGrams ? `${summary.proteinGrams} g protein` : null,
-  ].filter(Boolean);
-  return (
-    <section aria-labelledby="cart-plan" className="overflow-hidden rounded-tile border border-line bg-surface">
-      <div className="relative h-[150px] bg-[#eadccf] lg:h-[240px]">
-        <Image
-          src="/cart/one-bite-1080.webp"
-          alt="Seven spoons, each holding one bite of a different everyday food, on cream"
-          fill
-          priority
-          sizes="(min-width: 1024px) 600px, 100vw"
-          className="object-cover object-[50%_20%] dark:brightness-[0.8] dark:saturate-[0.92]"
-        />
-        <p className="absolute bottom-3 left-3 max-w-[calc(100%-24px)] whitespace-nowrap rounded-[12px] border border-white/60 bg-surface/80 px-3 py-2 font-display text-[16px] font-medium leading-tight text-ink backdrop-blur-md">
-          {who.line}
-        </p>
-      </div>
-      <div className="flex flex-col gap-3 px-[18px] pb-[18px] pt-4">
-        {who.said && <p className="text-[15px] italic leading-relaxed text-ink-secondary">{who.said}</p>}
-        <p className="text-eyebrow font-bold uppercase tracking-[0.12em]">
-          <span className="text-gradient-brand">Your free consultation</span>
-        </p>
-        <h2 id="cart-plan" className="font-display text-[19px] font-medium leading-tight text-ink text-balance">
-          3 short chats with your nutritionist.
-        </h2>
-        <ol aria-label="Your three consultation sessions" className="flex flex-col">
-          {SESSIONS.map((session, index) => (
-            <li key={session.title} className="relative grid grid-cols-[28px_minmax(0,1fr)] gap-3 pb-3.5 last:pb-0">
-              {index < SESSIONS.length - 1 && <span aria-hidden className="absolute bottom-0 left-[13.5px] top-7 w-px bg-line-strong" />}
-              <span
-                aria-hidden
-                className={`grid h-7 w-7 place-items-center rounded-full font-display text-[13px] font-semibold ${
-                  index === 0 ? "bg-primary text-on-primary" : "bg-surface text-ink shadow-[inset_0_0_0_1.5px_var(--color-ink)]"
-                }`}
-              >
-                {index + 1}
-              </span>
-              <div>
-                <b className="block text-[15px] font-bold text-ink">{session.title}</b>
-                <span className="mt-0.5 block text-[11px] font-bold uppercase leading-snug tracking-[0.08em] text-ink-muted">
-                  {session.when}
-                </span>
-                <p className="mt-1 text-small leading-snug text-ink-secondary">{session.body}</p>
-              </div>
-            </li>
-          ))}
-        </ol>
-        {targets.length > 0 && (
-          <div className="flex flex-wrap justify-between gap-x-2.5 gap-y-1.5 border-t border-line pt-2.5 text-[13px] text-ink-muted">
-            <span>Saved to your account when you continue</span>
-            <b className="font-bold text-ink tabular-nums">{targets.join(" · ")}</b>
-          </div>
-        )}
-      </div>
-    </section>
   );
 }
 

@@ -15,7 +15,8 @@ import { trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webFunnelAnalytics
 type State = { status: "loading" } | { status: "ready"; plan: LeadPlan } | { status: "missing" } | { status: "error" };
 
 /**
- * The plan saved at the quiz's email gate, from the token in the email's
+ * The plan a quiz visitor asked us to email ("Email me my plan" on the cart,
+ * PRE-439, or the quiz's old email gate, PRE-327), from the token in the email's
  * link (`POST /web-leads/plan`). Nothing here is editable; "Start my free 7
  * days" goes to the bridge, where they sign in and the app finishes setup.
  */

@@ -20,8 +20,10 @@ export function trackAppStoreClick(source: string) {
 }
 
 /**
- * Meta's standard Lead event, when the quiz's email gate saves a plan. It
- * carries nothing: no answer, email or step goes to Meta.
+ * Meta's standard Lead event: when the quiz hands off to the cart (PRE-446,
+ * where the old email gate sent it) and when "Email me my plan" on the cart
+ * saves a plan (PRE-439). It carries nothing: no answer, email or step goes
+ * to Meta.
  */
 export function trackQuizLead() {
   if (typeof window === "undefined" || typeof window.fbq !== "function") {

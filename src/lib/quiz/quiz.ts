@@ -4,8 +4,10 @@
  * React and browser APIs (and of runtime imports) so it can be tested on its
  * own; the screens themselves are src/app/quiz.
  *
- * Answers stay in this browser until the visitor signs in on the bridge
- * (PRE-323). Only the email gate sends them earlier, to `POST /web-leads`.
+ * Answers stay in this browser until the visitor signs in on the cart
+ * (PRE-323, PRE-437). The quiz ends at the loader and hands off to the cart
+ * (PRE-446); only the cart's "Email me my plan" (PRE-439) sends them earlier,
+ * to `POST /web-leads`.
  */
 import type { WebSignupAnswer, WebSignupSettings, WebSignupUser } from "../funnel/webSignupProfile";
 import type { StartingPointId } from "../funnel/bridgeHandoff";
@@ -52,10 +54,7 @@ export type ScreenId =
   | "echo-plans"
   | "style"
   | "week"
-  | "loader"
-  | "email"
-  | "name"
-  | "result";
+  | "loader";
 
 type Screen = { id: ScreenId; section: number; branch?: boolean };
 
@@ -87,9 +86,6 @@ export const SCREENS: readonly Screen[] = [
   { id: "style", section: 2 },
   { id: "week", section: 3 },
   { id: "loader", section: 3 },
-  { id: "email", section: 3 },
-  { id: "name", section: 3 },
-  { id: "result", section: 3 },
 ];
 
 /**
@@ -143,9 +139,6 @@ export type QuizAnswers = {
   /** The loader's two questions. */
   skipsBreakfast?: "Yes" | "No";
   eveningSnacks?: "Yes" | "No";
-  email: string;
-  marketingConsent: boolean;
-  firstName: string;
 };
 
 /** US first (PRE-322): feet and pounds, month before day. */
@@ -167,9 +160,6 @@ export function emptyAnswers(): QuizAnswers {
     goalWeightText: "",
     intolerances: [],
     rules: [],
-    email: "",
-    marketingConsent: false,
-    firstName: "",
   };
 }
 
@@ -513,8 +503,6 @@ export function canContinue(id: ScreenId, a: QuizAnswers, today = new Date()): b
       return a.goalWeightKg !== undefined && a.goalWeightKg >= 20 && a.goalWeightKg <= 400 && goalWeightProblem(a) === null;
     case "diet":
       return Boolean(a.diet);
-    case "email":
-      return isEmail(a.email);
     default:
       return true;
   }
@@ -748,12 +736,6 @@ export function savedPlanHeadline(goalValue: string | null | undefined, firstNam
   return `${name ? `${name}, your` : "Your"} ${noun} plan`;
 }
 
-export function resultHeadline(a: QuizAnswers): string {
-  const noun = GOAL_NOUNS[a.goal ?? ""] ?? "personalised";
-  const name = a.firstName.trim();
-  return `${name ? `${name}, your` : "Your"} ${noun} plan is ready`;
-}
-
 export function resultTags(a: QuizAnswers): string[] {
   const blockerTags = a.blockers.slice(0, 2).map((v) => BLOCKER_OPTIONS.find((o) => o.value === v)?.tag ?? v);
   const diet = a.diet && a.diet !== "eat everything" ? ALL_DIET_OPTIONS.find((o) => o.value === a.diet)?.label ?? "" : "";
@@ -940,7 +922,7 @@ const ANSWER_QUESTIONS: { id: string; text: string; read: (a: QuizAnswers) => We
   { id: "evening_snacks", text: "Are evenings when you snack most?", read: (a) => a.eveningSnacks },
 ];
 
-/** What the bridge and the email gate send: answers, account fields and settings. */
+/** What the cart sends at sign-in (and with "Email me my plan"): answers, account fields and settings. */
 export function buildQuizProfile(
   a: QuizAnswers,
   targets?: Targets | null,
@@ -950,9 +932,7 @@ export function buildQuizProfile(
     const answer = question.read(a);
     if (answer !== undefined) answers.push({ questionId: question.id, questionText: question.text, answer });
   }
-  const firstName = a.firstName.trim();
   const user: WebSignupUser = {
-    ...(firstName ? { firstName } : {}),
     dob: dobIso(a),
     gender: a.gender,
     height: heightCm(a) ?? undefined,
