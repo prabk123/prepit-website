@@ -11,7 +11,10 @@ export const START_LABEL = "Start my free 7 days";
 
 type LandingCtaProps = {
   market: WebMarket;
-  /** Where the button sits, for analytics: hero, week, plans, pricing, closing, sticky. */
+  /**
+   * Where the button sits, for analytics: hero, plans, pricing, closing,
+   * sticky. Also set as `data-cta="<placement>_start_trial"` on the button.
+   */
   placement: string;
   /** Stretch to the container, as in the price card. */
   fullWidth?: boolean;
@@ -37,7 +40,7 @@ function Arrow() {
 export default function LandingCta({ market, placement, fullWidth, small, className }: LandingCtaProps) {
   if (market === "app-store") {
     return (
-      <div className={className}>
+      <div className={className} data-cta={`${placement}_start_trial`}>
         <AppStoreButton trackingSource={`landing-${placement}`} label={START_LABEL} />
       </div>
     );
@@ -49,6 +52,7 @@ export default function LandingCta({ market, placement, fullWidth, small, classN
     <Link
       href={market === "web" ? landingBridgeHref() : "/waitlist"}
       className={`${PILL_BUTTON_CLASS} ${size} ${width} ${className ?? ""}`}
+      data-cta={`${placement}_start_trial`}
       onClick={() => trackLandingEvent(LANDING_EVENTS.ctaClick, market, { placement, funnel_id: LANDING_FUNNEL_ID })}
     >
       {market === "web" ? START_LABEL : "Join the waitlist"}
