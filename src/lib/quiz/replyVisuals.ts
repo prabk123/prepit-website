@@ -1,3 +1,4 @@
+import type { Prices } from "@/lib/pricing";
 /**
  * The quiz's reply visuals (PRE-441, v9.2): real app cut-outs on frosted
  * glass, built card by card, with an object still as an accent on a few.
@@ -42,13 +43,14 @@ const TODAY_SNACK = "In today's plan: snack at 3:30 pm, apple with peanut butter
 const WEEK_RINGS = "Analysis, last 7 days: Energy 82, Satiety 79, Mood 78.";
 const RINGS = "Today's scores: Energy 84, Satiety 96, Mood 87.";
 const TODAY_ROWS = "Today's plan: snack at 3:30 pm, apple with peanut butter; dinner at 7:00 pm, Korean beef rice bowl, 440 kcal, each with Log it.";
-const WEEKLY = "Weekly pattern: change a day and we spread the difference across the others, so your weekly total stays the same.";
+const WEEKLY_WEEKEND = "Weekly calorie pattern: Saturdays and Sundays 1,740 kcal, 170 more; Monday to Friday about 1,500 kcal, 60 to 70 less.";
 const MSG_DIP = "Nutritionist: Last week it was toast and jam, and that's when the 3pm dip showed up. Keep doing what you're doing!";
 const ROW_OATS = "Breakfast, 7:45 am: protein overnight oats with apple and cinnamon, Energy up 35, Satiety up 8, Mood up 12.";
 const ROW_SALMON = "Dinner, 6:45 pm: Mediterranean salmon bowl with quinoa, Energy up 15, Satiety up 9, Mood up 19.";
 const ROW_YOGURT = "Snack, 3:45 pm: Greek yogurt with raspberries, 168 kcal, Satiety up 9.";
 const PLAN_HEAD = "A planned week: 17 Oct to 23 Oct, 21 meals.";
-const PLAN_COST = "Estimated cost at typical supermarket prices, per week and per meal.";
+const PLAN_COST = "Estimated cost at typical supermarket prices: £48 to £66 for the week, £2.29 to £3.14 a meal.";
+const PLAN_COST_USD = "Estimated cost at typical supermarket prices: $63 to $87 for the week, $3.00 to $4.14 a meal.";
 const GROCERY = "Grocery list, 30 ingredients.";
 const RING = (score: string, value: number): VisualCard => ({
   img: `ring-${score.toLowerCase()}`,
@@ -195,14 +197,12 @@ export const VISUALS = {
       },
     ],
   },
-  weekly: {
-    uses: ["weekly", "strip"],
-    cards: [
-      { img: "weekly-head", alt: WEEKLY, w: 100, wd: 94 },
-      { img: "week-strip", alt: "A planned week: Saturday 17 to Friday 23.", w: 80, wd: 72, right: true, ov: 12 },
-    ],
+  // Weekends: a real pattern giving Saturday and Sunday more room (PRE-436, capture E3).
+  // On its own: with the rule card above it, the reply ran under Continue on a phone.
+  weekend: {
+    uses: ["weekend"],
+    cards: [{ img: "weekly-weekend", alt: WEEKLY_WEEKEND, w: 92, wd: 84, right: true }],
   },
-  weekly2: { uses: ["weekly"], cards: [{ img: "weekly-head", alt: WEEKLY, w: 100, wd: 94 }] },
   social: {
     uses: ["social"],
     still: { img: "still-card6-menu", position: "50% 40%", desktopRatio: "5 / 4" },
@@ -464,9 +464,31 @@ export function visualFinePrint(picked: PickedVisual | undefined): string {
   return lines.join(" ");
 }
 
-/** The picked visual as drawn: a bare pick loses its still and the first card's overlap. */
-export function drawnVisual(picked: PickedVisual): Visual {
+/**
+ * Cut-outs captured once per checkout currency (PRE-436): the plan cost card
+ * shows dollars to visitors who pay in dollars, with its own alt text. The
+ * pound capture is the default, and every other cut-out is the same for
+ * everyone. A new image here also needs its size in ReplyVisual's SIZES.
+ */
+export const CURRENCY_CARDS: Record<string, Partial<Record<Prices["currency"], { img: string; alt: string }>>> = {
+  "plan-cost": { USD: { img: "plan-cost-usd", alt: PLAN_COST_USD } },
+};
+
+/** The card to draw for a visitor paying in [currency]. */
+export function cardForCurrency(card: VisualCard, currency: string | undefined): VisualCard {
+  const variant = currency ? CURRENCY_CARDS[card.img]?.[currency as Prices["currency"]] : undefined;
+  return variant ? { ...card, ...variant } : card;
+}
+
+/**
+ * The picked visual as drawn: a bare pick loses its still and the first
+ * card's overlap, and cost cards use the visitor's checkout currency.
+ */
+export function drawnVisual(picked: PickedVisual, currency?: string): Visual {
   const visual: Visual = VISUALS[picked.key];
-  if (!picked.bare) return visual;
-  return { ...visual, still: undefined, cards: visual.cards.map((card, i) => (i ? card : { ...card, ov: 0, ovd: 0 })) };
+  const cards = visual.cards.map((card, i) => {
+    const drawn = cardForCurrency(card, currency);
+    return picked.bare && i === 0 ? { ...drawn, ov: 0, ovd: 0 } : drawn;
+  });
+  return picked.bare ? { ...visual, still: undefined, cards } : { ...visual, cards };
 }
