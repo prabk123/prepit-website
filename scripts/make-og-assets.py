@@ -4,8 +4,8 @@
 The preview renderer (Satori, behind next/og) draws only PNG and JPEG and
 cannot read variable fonts, so this writes:
 
-- src/assets/og/hero-cafe.jpg: the homepage hero photo (the cafe table and the
-  phone with the protein chart), cropped to the 1200 x 630 card at 2x.
+- src/assets/og/hero-v9.jpg: the homepage hero still (Landing v9's wide film
+  poster, PRE-444), cropped to the card's shape at its full 1600 px width.
 - src/assets/og/thumbs/<name>.jpg: each card thumbnail from public/app/thumbs
   (make-card-thumbs.py), as JPEG, for the feature and guide cards.
 - src/assets/og/phones/<feature>.jpg: the phone screen from each feature's
@@ -30,13 +30,12 @@ CARD_W, CARD_H = 2400, 1260
 
 
 def hero() -> None:
-    im = Image.open("public/lifestyle/hero-cafe@2x.webp").convert("RGB")
-    # 2048 x 1152 is wider than tall by less than the card, so scale to the
-    # card's width and keep the middle band: the phone and the table survive.
-    scale = CARD_W / im.width
-    im = im.resize((CARD_W, round(im.height * scale)), Image.LANCZOS)
-    top = (im.height - CARD_H) // 2
-    im.crop((0, top, CARD_W, top + CARD_H)).save(f"{OUT}/hero-cafe.jpg", quality=82, optimize=True, progressive=True)
+    im = Image.open("public/landing/v9/hero-poster-wide-1600.webp").convert("RGB")
+    # 1600 x 900 is the widest still there is, under the card's 2x, so keep its
+    # width and the middle band at the card's shape: the plate and fork survive.
+    height = round(im.width * CARD_H / CARD_W)
+    top = (im.height - height) // 2
+    im.crop((0, top, im.width, top + height)).save(f"{OUT}/hero-v9.jpg", quality=84, optimize=True, progressive=True)
 
 
 def thumbs() -> None:

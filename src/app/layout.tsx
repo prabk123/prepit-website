@@ -13,6 +13,7 @@ import AttributionCapture from "@/components/funnel/AttributionCapture";
 import MarketCapture from "@/components/funnel/MarketCapture";
 import { PREPIT_ANALYTICS_CONSENT_COOKIE, PREPIT_GEO_COOKIE } from "@/lib/cookies";
 import { APP_STORE_ID } from "@/lib/appStore";
+import { HOME_SHARE_DESCRIPTION, HOME_TITLE } from "@/lib/homeMetadata";
 import "./globals.css";
 
 const dmSans = DM_Sans({
@@ -66,15 +67,13 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: baseUrl,
     siteName: "PrepIt",
-    title: "PrepIt | The nutritionist that notices",
-    description:
-      "An AI nutritionist that learns how you eat, speaks up when something slips, and shows how your food will make you feel.",
+    title: HOME_TITLE,
+    description: HOME_SHARE_DESCRIPTION,
   },
   twitter: {
     card: "summary_large_image",
-    title: "PrepIt | The nutritionist that notices",
-    description:
-      "An AI nutritionist that learns how you eat, speaks up when something slips, and shows how your food will make you feel.",
+    title: HOME_TITLE,
+    description: HOME_SHARE_DESCRIPTION,
   },
   alternates: {
     canonical: baseUrl,

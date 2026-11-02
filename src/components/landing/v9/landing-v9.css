@@ -10,9 +10,18 @@
  */
 /* The cream tokens live in src/app/v9-cream.css, shared with the quiz (PRE-441). */
 
-/* /try ends with the landing's own short footer (V9Footer, PRE-433). */
-body:has(.landing-v9) [data-site-footer] {
+/* /try ends with the landing's own short footer (V9Footer, PRE-433). The
+   homepage keeps the full site footer (PRE-444). */
+body:has([data-v9-footer]) [data-site-footer] {
   display: none;
+}
+
+/* On phones the sticky "Start free" bar sits over the bottom of the page, so
+   the site footer's last line clears it (V9Footer has its own room). */
+@media (max-width: 760px) {
+  body:has([data-v9-sticky]) [data-site-footer] {
+    padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+  }
 }
 
 @layer components {

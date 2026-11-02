@@ -1,3 +1,5 @@
+import { RESEARCH_PAGE_HREF } from "@/lib/research";
+
 export type HomeSectionLink = {
   label: string;
   href: string;
@@ -20,4 +22,15 @@ export const HEADER_SECTION_LINKS: HomeSectionLink[] = [
 export const SITE_PAGE_LINKS: HomeSectionLink[] = [
   { label: "Guides", href: "/guides" },
   { label: "Contact", href: "/contact" },
+];
+
+/**
+ * Site pages in the header: the footer's Company pages plus Research, which
+ * the footer lists as "How it decides" (PRE-444: the homepage links to
+ * Features, Guides and Research).
+ */
+export const HEADER_PAGE_LINKS: HomeSectionLink[] = [
+  SITE_PAGE_LINKS[0],
+  { label: "Research", href: RESEARCH_PAGE_HREF },
+  ...SITE_PAGE_LINKS.slice(1),
 ];
