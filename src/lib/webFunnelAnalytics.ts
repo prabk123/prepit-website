@@ -17,6 +17,13 @@ export const WEB_FUNNEL_EVENTS = {
    * `has_quiz_answers`, `in_app_browser`. Named as the web funnel v9 plan names it, for its dashboard (PRE-443).
    */
   cartView: "cart_view",
+  /** "Not ready? Email me my plan" on the cart was opened (`entry`), PRE-439. */
+  leaverEmailOpen: "leaver_email_open",
+  /**
+   * The cart's "Email me my plan" form was sent (`saved`: false when the request failed, `marketing_consent`,
+   * `error_status`). Compare with `web_quiz_lead_saved`, the old email gate's capture (PRE-439).
+   */
+  leaverEmailSent: "leaver_email_sent",
   /** A sign-in button on the cart was pressed (`provider`, `from_sticky`). `web_signin_start` still fires too. */
   authStart: "auth_start",
   /** The Google or Apple popup came back signed in (`provider`, `from_sticky`), before the account is read. */

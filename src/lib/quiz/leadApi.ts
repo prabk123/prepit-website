@@ -56,14 +56,16 @@ export type LeadInput = {
   consentText: string;
   country: string;
   funnelId: string;
-  funnelVersion: string;
+  funnelVersion?: string;
+  /** Where the email was given: the cart's "Email me my plan" (PRE-439). Left out by the quiz's email gate. */
+  source?: "cart";
   answers: WebSignupAnswer[];
   user: WebSignupUser;
   settings: WebSignupSettings;
   attribution?: Attribution | null;
 };
 
-/** Saves (or updates, by session id) the email gate's lead. */
+/** Saves (or updates, by session id) the lead from the email gate or the cart's "Email me my plan". */
 export async function saveLead(input: LeadInput): Promise<void> {
   const { attribution, ...rest } = input;
   const strip = <T extends object>(value: T) =>
