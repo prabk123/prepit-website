@@ -10,12 +10,6 @@ import type { Prices } from "@/lib/pricing";
 import type { WebBillingSeller } from "@/lib/revenuecat/sellers";
 import type { StartingPointId } from "./bridgeHandoff";
 
-/**
- * The day-4 reminder email for web trials (PRE-326/352, proof in PRE-434).
- * Set to false to drop the reminder row and sentence everywhere on the cart.
- */
-export const REMINDER_EMAIL_LIVE = true;
-
 /** The "For…" line on the plan card's still, and the "You said…" line under it. */
 export const CART_WHO: Record<StartingPointId, { line: string; said: string }> = {
   dip: { line: "For the 3pm crash.", said: "You said your energy dips in the afternoon." },
@@ -24,12 +18,14 @@ export const CART_WHO: Record<StartingPointId, { line: string; said: string }> =
     said: "You said your energy dips in the afternoon and you often skip breakfast.",
   },
   low: { line: "For running on fumes.", said: "You said your energy is low most days." },
+  tired: { line: "For running on fumes.", said: "You said tiredness gets in the way." },
   weekend: {
     line: "For the weekend wobble.",
     said: "You said weekdays go to plan, and weekends and meals out are harder.",
   },
   evening: { line: "For the 9pm cupboard.", said: "You said hunger shows up between meals, mostly in the evening." },
   graze: { line: "For the snack drawer.", said: "You said hunger shows up between meals." },
+  cravings: { line: "For the snack drawer.", said: "You said snack cravings get in the way." },
   dinner: { line: "For “what’s for dinner?”", said: "You said deciding what to eat is the hard part." },
   going: { line: "For “I’ll start Monday.”", said: "You said keeping track takes too long or motivation fades." },
   none: { line: "For however you eat.", said: "You didn’t flag a sticking point, which is a good start." },
@@ -106,22 +102,41 @@ export function cartDates(today: Date) {
   };
 }
 
+/** One piece of the terms sentence; `strong` pieces are bold on the page, `agree` carries the two legal links. */
+export type CartTermsPart = { text: string; strong?: boolean; agree?: boolean };
+
 /**
- * The full terms sentence, in parts so the page can bold the amounts and the
- * charge date and link Terms and Subscription Policy.
+ * The dated terms sentence, per market, in pieces so the page can bold the
+ * amounts and the charge date and link Terms and Subscription Policy. The
+ * cart renders exactly these pieces; `cartTermsText` joins them for tests.
+ * `reminder` is `WEB_REMINDER_EMAIL_LIVE` (lib/pricing.ts).
  */
-export function cartTermsText(market: CartMarket, today: Date, reminder = REMINDER_EMAIL_LIVE): string {
+export function cartTermsParts(market: CartMarket, today: Date, reminder: boolean): CartTermsPart[] {
   const d = cartDates(today);
   const p = market.prices;
-  const parts = [
-    p
-      ? `${p.free} today. Free for 7 days, then ${p.annual} a year or ${p.monthly} a month, whichever you choose on the next step, first charged on ${d.chargeLong}, then renewing at that price until you cancel.`
-      : `Nothing to pay today. Free for 7 days, then the plan you choose on the next step, first charged on ${d.chargeLong}, then renewing until you cancel. You’ll see the price before you start.`,
-    reminder ? `We’ll email you a reminder on ${d.reminderLong}.` : null,
-    `Cancel online any time before ${d.chargeLong} and you pay nothing.`,
-    market.refundWindow ? "You can also cancel within 14 days of signing up for a full refund." : null,
-    p ? `Prices in ${p.currencyName}.` : null,
-    "By continuing you agree to the Terms and Subscription Policy.",
-  ];
-  return parts.filter(Boolean).join(" ");
+  const parts: CartTermsPart[] = p
+    ? [
+        { text: `${p.free} today. Free for 7 days, then ` },
+        { text: `${p.annual} a year or ${p.monthly} a month`, strong: true },
+        { text: ", whichever you choose on the next step, first charged on " },
+        { text: d.chargeLong, strong: true },
+        { text: ", then renewing at that price until you cancel." },
+      ]
+    : [
+        { text: "Nothing to pay today. Free for 7 days, then the plan you choose on the next step, first charged on " },
+        { text: d.chargeLong, strong: true },
+        { text: ", then renewing until you cancel. You’ll see the price before you start." },
+      ];
+  if (reminder) parts.push({ text: ` We’ll email you a reminder on ${d.reminderLong}.` });
+  parts.push({ text: ` Cancel online any time before ${d.chargeLong} and you pay nothing.` });
+  if (market.refundWindow) parts.push({ text: " You can also cancel within 14 days of signing up for a full refund." });
+  if (p) parts.push({ text: ` Prices in ${p.currencyName}.` });
+  parts.push({ text: " By continuing you agree to the Terms and Subscription Policy.", agree: true });
+  return parts;
+}
+
+export function cartTermsText(market: CartMarket, today: Date, reminder: boolean): string {
+  return cartTermsParts(market, today, reminder)
+    .map((part) => part.text)
+    .join("");
 }

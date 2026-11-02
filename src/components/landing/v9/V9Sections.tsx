@@ -6,7 +6,7 @@ import { V9Photo, V9Screen } from "@/components/landing/v9/V9Photo";
 import WhoItsFor from "@/components/landing/v9/WhoItsFor";
 import LoopVideo, { LoopVideoToggle, LoopVideoToggleScope } from "@/components/media/LoopVideo";
 import type { WebMarket } from "@/lib/markets";
-import { type Prices, TRIAL_DAYS } from "@/lib/pricing";
+import { type Prices, TRIAL_DAYS, WEB_REMINDER_EMAIL_LIVE } from "@/lib/pricing";
 
 /**
  * Landing v9 on /try, part 1 (PRE-432): Charlie's final page from the hero
@@ -189,7 +189,7 @@ export function V9Hero({ market, prices }: { market: WebMarket; prices: Prices }
           </div>
           <LandingCta market={market} placement="hero" className="w-fit max-[599px]:flex max-[599px]:w-full max-[599px]:justify-center" />
           <p className="text-[13px] leading-snug text-ink-secondary max-[899px]:pr-14">
-            {web ? "Reminder email on day 4. Cancel before day 8, pay nothing." : `${reassure.strong} ${reassure.rest}`}
+            {web ? `${WEB_REMINDER_EMAIL_LIVE ? "Reminder email on day 4. " : ""}Cancel before day 8, pay nothing.` : `${reassure.strong} ${reassure.rest}`}
           </p>
         </div>
       </div>

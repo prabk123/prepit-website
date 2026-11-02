@@ -2,7 +2,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { STARTING_POINT_IDS } from "../src/lib/funnel/bridgeHandoff.ts";
-import { buildCartMarket, CART_WHO, cartDates, cartTermsText, cartWho } from "../src/lib/funnel/cart.ts";
+import { buildCartMarket, CART_WHO, cartDates, cartTermsParts, cartTermsText, cartWho } from "../src/lib/funnel/cart.ts";
 import { WEB_PRICES } from "../src/lib/pricing.ts";
 import { emptyAnswers, startingPointId } from "../src/lib/quiz/quiz.ts";
 
@@ -21,7 +21,7 @@ test("US terms: dollars, no 14-day line", () => {
   const market = buildCartMarket({ country: "US", seller: "us", prices: WEB_PRICES.us, inEeaOrUk: false });
   assert.equal(market.refundWindow, false);
   assert.equal(
-    cartTermsText(market, TODAY),
+    cartTermsText(market, TODAY, true),
     "$0 today. Free for 7 days, then $99.99 a year or $14.99 a month, whichever you choose on the next step, first charged on November 2, 2026, then renewing at that price until you cancel. We’ll email you a reminder on October 29, 2026. Cancel online any time before November 2, 2026 and you pay nothing. Prices in US dollars. By continuing you agree to the Terms and Subscription Policy.",
   );
 });
@@ -29,7 +29,7 @@ test("US terms: dollars, no 14-day line", () => {
 test("UK and Ireland terms: pounds and the 14-day refund line", () => {
   for (const country of ["GB", "IE"]) {
     const market = buildCartMarket({ country, seller: "uk", prices: WEB_PRICES.uk, inEeaOrUk: true });
-    const text = cartTermsText(market, TODAY);
+    const text = cartTermsText(market, TODAY, true);
     assert.match(text, /£99\.99 a year or £14\.99 a month/);
     assert.match(text, /You can also cancel within 14 days of signing up for a full refund\. Prices in pounds sterling\./);
   }
@@ -40,10 +40,17 @@ test("UK and Ireland terms: pounds and the 14-day refund line", () => {
 
 test("no prices: the price-before-you-start fallback, no currency line", () => {
   const market = buildCartMarket({ country: "US", seller: "us", prices: null, inEeaOrUk: false });
-  const text = cartTermsText(market, TODAY);
+  const text = cartTermsText(market, TODAY, true);
   assert.match(text, /You’ll see the price before you start\./);
   assert.doesNotMatch(text, /\$|Prices in/);
   assert.doesNotMatch(text, /in your currency/);
+});
+
+test("the terms pieces bold the amounts and the charge date", () => {
+  const market = buildCartMarket({ country: "GB", seller: "uk", prices: WEB_PRICES.uk, inEeaOrUk: true });
+  const parts = cartTermsParts(market, TODAY, true);
+  assert.deepEqual(parts.filter((p) => p.strong).map((p) => p.text), ["£99.99 a year or £14.99 a month", "November 2, 2026"]);
+  assert.equal(parts.at(-1).agree, true);
 });
 
 test("without the day-4 email the reminder sentence drops", () => {
@@ -69,6 +76,10 @@ test("startingPointId follows the quiz's first sticking point", () => {
   assert.equal(startingPointId(a({ energy: "I dip mid-afternoon", skipsBreakfast: "Yes" })), "dip_breakfast");
   assert.equal(startingPointId(a({ energy: "I dip mid-afternoon" })), "dip");
   assert.equal(startingPointId(a({ energy: "Low most days" })), "low");
+  assert.equal(startingPointId(a({ blockers: ["I feel tired"] })), "tired");
+  assert.equal(startingPointId(a({ energy: "Low most days", blockers: ["I feel tired"] })), "low");
+  assert.equal(startingPointId(a({ blockers: ["I crave snacks"] })), "cravings");
+  assert.equal(startingPointId(a({ hunger: "Most days", blockers: ["I crave snacks"] })), "graze");
   assert.equal(startingPointId(a({ blockers: ["Weekends derail me"] })), "weekend");
   assert.equal(startingPointId(a({ eveningSnacks: "Yes" })), "evening");
   assert.equal(startingPointId(a({ hunger: "I graze all day" })), "graze");

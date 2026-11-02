@@ -1,4 +1,4 @@
-import { PRICES, type Prices, TRIAL_DAYS } from "@/lib/pricing";
+import { PRICES, type Prices, TRIAL_DAYS, WEB_REMINDER_EMAIL_LIVE } from "@/lib/pricing";
 import { RESEARCH_PAGE_HREF } from "@/lib/research";
 
 export type FaqItem = {
@@ -147,7 +147,7 @@ export const landingWebFaqItems = (prices: Prices): FaqItem[] =>
     trial: {
       id: "landing-web-trial",
       question: "How does the free trial work?",
-      answer: `${TRIAL_DAYS} days, everything included. ${prices.free} today, and a reminder email on day 4. Keep PrepIt and you pay from day 8: ${prices.annual} a year (${prices.annualPerMonth} a month) or ${prices.monthly} a month. Cancel before day 8 and you pay nothing.`,
+      answer: `${TRIAL_DAYS} days, everything included. ${prices.free} today${WEB_REMINDER_EMAIL_LIVE ? ", and a reminder email on day 4" : ""}. Keep PrepIt and you pay from day 8: ${prices.annual} a year (${prices.annualPerMonth} a month) or ${prices.monthly} a month. Cancel before day 8 and you pay nothing.`,
     },
     cancel: {
       id: "landing-web-cancel",

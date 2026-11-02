@@ -841,12 +841,12 @@ export function startingPoint(a: QuizAnswers): StartingPoint {
 export function startingPointId(a: QuizAnswers): StartingPointId {
   const b = a.blockers;
   if (a.energy === "I dip mid-afternoon") return a.skipsBreakfast === "Yes" ? "dip_breakfast" : "dip";
-  if (a.energy === "Low most days" || b.includes("I feel tired")) return "low";
+  if (a.energy === "Low most days") return "low";
+  if (b.includes("I feel tired")) return "tired";
   if (b.includes("Weekends derail me") || b.includes("I eat out or socialise a lot")) return "weekend";
   if (a.eveningSnacks === "Yes") return "evening";
-  if (b.includes("I crave snacks") || b.includes("I get hungry") || a.hunger === "Most days" || a.hunger === "I graze all day") {
-    return "graze";
-  }
+  if (b.includes("I get hungry") || a.hunger === "Most days" || a.hunger === "I graze all day") return "graze";
+  if (b.includes("I crave snacks")) return "cravings";
   if (b.includes("I don't know what to eat")) return "dinner";
   if (b.includes("Logging takes too long") || b.includes("I lose motivation")) return "going";
   return "none";

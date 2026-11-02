@@ -12,9 +12,10 @@ import { PRIMARY_BUTTON_CLASS } from "@/components/ui/buttons";
 import { isAppleSignInEnabled } from "@/lib/firebase/config";
 import { isInAppBrowser } from "@/lib/firebase/auth";
 import type { BridgeHandoff } from "@/lib/funnel/bridgeHandoff";
-import { cartDates, cartWho, REMINDER_EMAIL_LIVE, type CartMarket } from "@/lib/funnel/cart";
+import { cartDates, cartTermsParts, cartWho, type CartMarket } from "@/lib/funnel/cart";
 import type { BridgeSource } from "@/lib/funnel/params";
 import type { ExistingProvider } from "@/lib/prepitApi";
+import { WEB_REMINDER_EMAIL_LIVE } from "@/lib/pricing";
 import { WEB_BILLING_SELLER_NAMES } from "@/lib/revenuecat/sellers";
 import { trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webFunnelAnalytics";
 
@@ -89,7 +90,7 @@ function ZeroToday({ zero, dates }: { zero: string; dates: ReturnType<typeof car
         <span className="mt-2 font-sans text-[12px] font-bold uppercase leading-none tracking-[0.12em]">today</span>
       </p>
       <div className="flex flex-col gap-2.5 border-l border-line pl-5 text-[13px] leading-snug text-ink-muted">
-        {REMINDER_EMAIL_LIVE && (
+        {WEB_REMINDER_EMAIL_LIVE && (
           <span>
             <b className="block text-small font-bold text-ink">Reminder email</b>
             {dates.reminderShort}
@@ -214,49 +215,43 @@ function NextStep({ market }: { market: CartMarket }) {
 
 const LEGAL_LINK = "underline underline-offset-4 hover:text-ink";
 
-/** The dated terms sentence, per market (the text is `cartTermsText` in lib/funnel/cart.ts, kept in step). */
-function Terms({ market, dates }: { market: CartMarket; dates: ReturnType<typeof cartDates> }) {
-  const p = market.prices;
+/** The dated terms sentence, per market: the pieces from `cartTermsParts` (lib/funnel/cart.ts, tested there). */
+function Terms({ market, today }: { market: CartMarket; today: Date }) {
   return (
     <p className="mt-1.5 text-[13px] leading-snug text-ink-muted">
-      {p ? (
-        <>
-          {p.free} today. Free for 7 days, then{" "}
-          <b className="font-bold text-ink">
-            {p.annual} a year or {p.monthly} a month
+      {cartTermsParts(market, today, WEB_REMINDER_EMAIL_LIVE).map((part, index) =>
+        part.agree ? (
+          <span key={index}>
+            {" "}
+            By continuing you agree to the{" "}
+            <Link href="/terms-and-conditions" className={LEGAL_LINK}>
+              Terms
+            </Link>{" "}
+            and{" "}
+            <Link href="/subscription-policy" className={LEGAL_LINK}>
+              Subscription Policy
+            </Link>
+            .
+          </span>
+        ) : part.strong ? (
+          <b key={index} className="font-bold text-ink">
+            {part.text}
           </b>
-          , whichever you choose on the next step, first charged on <b className="font-bold text-ink">{dates.chargeLong}</b>, then
-          renewing at that price until you cancel.
-        </>
-      ) : (
-        <>
-          Nothing to pay today. Free for 7 days, then the plan you choose on the next step, first charged on{" "}
-          <b className="font-bold text-ink">{dates.chargeLong}</b>, then renewing until you cancel. You’ll see the price before you
-          start.
-        </>
+        ) : (
+          <span key={index}>{part.text}</span>
+        ),
       )}
-      {REMINDER_EMAIL_LIVE && ` We’ll email you a reminder on ${dates.reminderLong}.`} Cancel online any time before{" "}
-      {dates.chargeLong} and you pay nothing.
-      {market.refundWindow && " You can also cancel within 14 days of signing up for a full refund."}
-      {p && ` Prices in ${p.currencyName}.`} By continuing you agree to the{" "}
-      <Link href="/terms-and-conditions" className={LEGAL_LINK}>
-        Terms
-      </Link>{" "}
-      and{" "}
-      <Link href="/subscription-policy" className={LEGAL_LINK}>
-        Subscription Policy
-      </Link>
-      .
     </p>
   );
 }
 
 /** The four risk reducers, the renewal line and the full terms behind a tap. */
-function RiskReducers({ market, dates }: { market: CartMarket; dates: ReturnType<typeof cartDates> }) {
+function RiskReducers({ market, today }: { market: CartMarket; today: Date }) {
+  const dates = cartDates(today);
   const p = market.prices;
   const rows = [
     { icon: ICONS.zero, title: `${p?.free ?? "Nothing"} today`, body: "Your free 7 days start now. Nothing is charged today." },
-    REMINDER_EMAIL_LIVE
+    WEB_REMINDER_EMAIL_LIVE
       ? { icon: ICONS.mail, title: "A reminder before you pay", body: `We email you on ${dates.reminderShort}, 4 days before any charge.` }
       : null,
     { icon: ICONS.cancel, title: "Cancel any time", body: `Online, in a few taps. Cancel before ${dates.chargeShort} and you pay nothing.` },
@@ -281,7 +276,7 @@ function RiskReducers({ market, dates }: { market: CartMarket; dates: ReturnType
           : `Then the plan you choose, from ${dates.chargeMonthDay}, renewing until you cancel. `}
         <details className="inline [&[open]]:block">
           <summary className="inline cursor-pointer font-medium text-ink underline underline-offset-4">Full subscription terms</summary>
-          <Terms market={market} dates={dates} />
+          <Terms market={market} today={today} />
         </details>
       </div>
     </div>
@@ -290,7 +285,7 @@ function RiskReducers({ market, dates }: { market: CartMarket; dates: ReturnType
 
 function faqItems(from: BridgeSource, market: CartMarket, dates: ReturnType<typeof cartDates>) {
   const p = market.prices;
-  const reminder = REMINDER_EMAIL_LIVE ? ` We email you a reminder on ${dates.reminderShort}.` : "";
+  const reminder = WEB_REMINDER_EMAIL_LIVE ? ` We email you a reminder on ${dates.reminderShort}.` : "";
   const price = p ? `: ${p.annual} for a year or ${p.monthly} for a month, the plan you choose next` : ", for the plan you choose next";
   return [
     {
@@ -301,7 +296,7 @@ function faqItems(from: BridgeSource, market: CartMarket, dates: ReturnType<type
     {
       id: "bridge-cancel",
       question: "How do I cancel?",
-      answer: `Online, any time: in the app under Profile, then Account & Subscription, then Manage, or at tryprepit.app/account. Cancel before ${dates.chargeShort} and you pay nothing.`,
+      answer: `Online, any time, at tryprepit.app/account, or in the app under Profile, then Account & Subscription, then Manage. Cancel before ${dates.chargeShort} and you pay nothing.`,
     },
     {
       id: "bridge-get-app",
@@ -453,7 +448,7 @@ export default function Cart({ from, context, handoff, market, today, saving, em
               )}
             </div>
           </section>
-          <RiskReducers market={market} dates={dates} />
+          <RiskReducers market={market} today={today} />
         </aside>
 
         <div className={`flex flex-col gap-2 text-small text-ink-secondary ${left}`}>

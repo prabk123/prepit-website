@@ -31,7 +31,7 @@ import { appVideo } from "@/lib/captures";
 import { readAttribution } from "@/lib/funnel/attributionStore";
 import { writeBridgeHandoff } from "@/lib/funnel/bridgeHandoff";
 import type { WebMarket } from "@/lib/markets";
-import type { Prices } from "@/lib/pricing";
+import { type Prices, WEB_REMINDER_EMAIL_LIVE } from "@/lib/pricing";
 import { trackQuizLead } from "@/lib/metaPixel";
 import { fetchTargets, LeadApiError, saveLead } from "@/lib/quiz/leadApi";
 import {
@@ -985,7 +985,7 @@ export default function Quiz({ country, market, prices }: { country: string; mar
         <>
           <QuizStartCta market={market} className={QUIZ_BUTTON_CLASS} trackingSource="quiz-result" onStart={startTrial} />
           {market === "web" && (
-            <p className="mt-1.5 text-center text-[12.5px] text-ink-muted">{prices.free} today. Reminder email on day 4. Cancel any time.</p>
+            <p className="mt-1.5 text-center text-[12.5px] text-ink-muted">{prices.free} today.{WEB_REMINDER_EMAIL_LIVE ? " Reminder email on day 4." : ""} Cancel any time.</p>
           )}
         </>
       );
