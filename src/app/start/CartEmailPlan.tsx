@@ -80,7 +80,8 @@ export default function CartEmailPlan({
       ...(errorStatus !== undefined ? { error_status: errorStatus } : {}),
     });
     if (saved) {
-      // The same Meta Lead the email gate sent, with nothing in it.
+      // The same empty Meta Lead the email gate sent. Kept even when the gate already sent one in this
+      // browser: a second Lead is a real second request, and Meta data is never reduced.
       trackQuizLead();
       setState("sent");
       return;
@@ -107,7 +108,7 @@ export default function CartEmailPlan({
           Your plan is on its way.
         </h2>
         <p role="status" className="text-small text-ink-secondary">
-          We’ve emailed it to <b className="font-bold text-ink">{email.trim()}</b>. Your free week is here when you’re ready.
+          Look out for an email at <b className="font-bold text-ink">{email.trim()}</b>. Already have PrepIt? Just sign in to see it.
         </p>
       </section>
     );
