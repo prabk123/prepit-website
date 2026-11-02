@@ -68,6 +68,10 @@ export default async function LandingPage() {
       <OfferSection market={market} prices={prices} />
       <LandingFaq market={market} prices={prices} />
       <ClosingSection market={market} prices={prices} />
+      {/* The handoff footer's media note, until PRE-433 rebuilds the footer. */}
+      <p className="mx-auto w-full max-w-content px-gutter pb-2 pt-8 text-[13px] leading-snug text-ink-muted">
+        App screens are real, from an example account. Photos are illustrative, and some are AI-generated.
+      </p>
       <StickyCta market={market} prices={prices} />
     </div>
   );

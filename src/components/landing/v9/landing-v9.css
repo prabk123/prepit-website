@@ -23,18 +23,6 @@ body:has(.landing-v9) {
   --shadow-v9-card: 0 24px 48px -26px rgb(40 30 20 / 0.42), 0 4px 14px -6px rgb(40 30 20 / 0.14);
 }
 
-/* Dark bands inside the page keep their dark values. */
-body:has(.landing-v9) .theme-dark {
-  --color-page: #18181b;
-  --color-surface: #202024;
-  --color-surface-raised: #27272a;
-  --color-line: #2e2e33;
-  --color-line-strong: #3f3f46;
-  --color-ink-muted: #a6a6ac;
-  --color-ink-faint: #9898a0;
-  --color-accent-text: #ff8a78;
-}
-
 @layer components {
   .v9-band {
     background: var(--color-v9-band);
@@ -54,8 +42,9 @@ body:has(.landing-v9) .theme-dark {
     object-position: center;
   }
 
-  .v9-hero-film .loop-video__toggle {
-    z-index: 3;
+  /* The film's pause button, drawn outside the film layer (V9Hero). */
+  .v9-hero-toggle .loop-video__toggle--outside {
+    margin: 0;
   }
 
   .v9-hero-scrim {
@@ -115,7 +104,10 @@ body:has(.landing-v9) .theme-dark {
     animation: v9-ticker 60s linear infinite;
   }
 
-  .v9-ticker-wrap:hover .v9-ticker {
+  /* Stopped by its pause button, and while hovered or focused. */
+  .v9-ticker-wrap[data-paused="true"] .v9-ticker,
+  .v9-ticker-wrap:hover .v9-ticker,
+  .v9-ticker-wrap:focus-within .v9-ticker {
     animation-play-state: paused;
   }
 
@@ -151,6 +143,12 @@ body:has(.landing-v9) .theme-dark {
 
     .v9-ticker {
       animation: none;
+    }
+
+    /* The second copy only exists to loop the line. */
+    .v9-ticker > [aria-hidden="true"],
+    .v9-ticker-toggle {
+      display: none;
     }
 
     .v9-ticker-wrap {
