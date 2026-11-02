@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import SectionViewTracker from "@/components/analytics/SectionViewTracker";
 import LandingViewTracker from "@/components/landing/LandingViewTracker";
 import StickyCta from "@/components/landing/StickyCta";
+import "@/app/v9-cream.css";
 import "@/components/landing/v9/landing-v9.css";
 import { ClosingSection, FaqSection, OfferSection, TrustSection, V9Footer } from "@/components/landing/v9/V9LowerSections";
 import {

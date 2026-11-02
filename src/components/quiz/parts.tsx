@@ -1,11 +1,12 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
-import type { MediaKey, Option } from "@/lib/quiz/quiz";
+import type { Option } from "@/lib/quiz/quiz";
 
 /**
- * The quiz's building blocks (PRE-322), drawn with the site's tokens: the
- * app's 56 px answer buttons with 16 px corners, white cards on the page
- * grey, and real app screens with their captions.
+ * The quiz's building blocks (PRE-322; v9.2 cream ground, PRE-441), drawn
+ * with the site's tokens: the app's 56 px answer buttons with 16 px corners,
+ * light cards on the page, the nutritionist's notes under the AI label, and
+ * real app screens.
  */
 
 export const REAL_SCREENS = "Real app screens from an example account.";
@@ -27,7 +28,7 @@ export function Question({ children, id }: { children: ReactNode; id?: string })
       id={id}
       tabIndex={-1}
       data-quiz-heading=""
-      className="font-display text-[28px] font-medium leading-[1.15] tracking-[-0.01em] text-balance text-ink [word-spacing:var(--word-spacing-display)] outline-none"
+      className="font-display text-[30px] font-medium leading-[1.1] tracking-[-0.015em] text-balance min-[900px]:text-[40px] text-ink [word-spacing:var(--word-spacing-display)] outline-none"
     >
       {children}
     </h1>
@@ -62,7 +63,7 @@ export function OptionButton({
       aria-pressed={selected}
       onClick={onClick}
       className={`flex min-h-14 w-full items-center gap-3 rounded-button border px-4 py-3.5 text-left text-[16px] font-medium leading-[1.3] text-ink transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus ${
-        selected ? "border-primary bg-[#e9e9ea]" : "border-line-strong bg-surface hover:border-ink-faint"
+        selected ? "border-primary bg-surface-raised" : "border-line-strong bg-surface hover:border-ink-faint"
       }`}
     >
       <span className="min-w-0">
@@ -105,17 +106,49 @@ export function Chip({ selected, onClick, children }: { selected: boolean; onCli
   );
 }
 
-/** The nutritionist's reply to an answer: a card with the accent dot. Announced when it changes. */
-export function ReplyCard({ children }: { children: ReactNode }) {
+/** A plain eyebrow that mirrors the answer, e.g. "You said · Lose fat". */
+export function Said({ children }: { children: ReactNode }) {
+  return <p className="-mb-2 text-[12px] font-bold uppercase leading-[1.2] tracking-[0.12em] text-ink-muted">{children}</p>;
+}
+
+/** The AI label: the brand gradient is kept for the nutritionist alone. */
+export function AiLabel({ children = "Your AI nutritionist" }: { children?: ReactNode }) {
   return (
-    <div
-      role="status"
-      className="flex gap-2.5 rounded-button border border-line bg-surface px-3.5 py-3 text-[15px] leading-[1.45] text-ink"
-    >
-      <span aria-hidden className="mt-[7px] size-2 flex-none rounded-full bg-accent shadow-[0_0_0_4px_rgb(255_100_79/0.18)]" />
-      <div className="min-w-0">{children}</div>
+    <p className="text-[12px] font-bold uppercase leading-[1.2] tracking-[0.12em]">
+      <span className="text-gradient-brand">{children}</span>
+    </p>
+  );
+}
+
+/** The nutritionist's line on a reply, in the first person, with an optional study behind "Source". */
+export function Note({ say, source }: { say: string; source?: string }) {
+  return (
+    <div className="flex flex-col gap-2 rounded-[20px] border border-line bg-surface px-[18px] py-4">
+      <AiLabel />
+      <p className="text-[17px] leading-[1.5] text-pretty text-ink">{say}</p>
+      {source && (
+        <details className="text-[13px] text-ink-muted">
+          <summary className="w-fit cursor-pointer list-none underline underline-offset-[3px] [&::-webkit-details-marker]:hidden">Source</summary>
+          <p className="mt-1.5 leading-[1.45]">{source}</p>
+        </details>
+      )}
     </div>
   );
+}
+
+/** A short line from the nutritionist inside a question screen (metabolism, Mostly sitting, safety, goal weight). */
+export function InlineReply({ children, ai = true }: { children: ReactNode; ai?: boolean }) {
+  return (
+    <div className="quiz-fade flex flex-col gap-1 rounded-[14px] border border-line bg-surface px-3.5 py-3">
+      {ai && <AiLabel />}
+      <p className="text-[14px] leading-[1.45] text-ink">{children}</p>
+    </div>
+  );
+}
+
+/** The one fine-print line under Continue on a reply. */
+export function FinePrint({ children }: { children: ReactNode }) {
+  return <p className="mt-2 text-center text-[11.5px] leading-[1.4] text-ink-muted min-[900px]:max-w-[520px] min-[900px]:text-left">{children}</p>;
 }
 
 export function Caption({ children, className = "" }: { children: ReactNode; className?: string }) {
@@ -142,88 +175,6 @@ export function Tag({ children }: { children: ReactNode }) {
   );
 }
 
-/** The cut-out app screens in public/quiz, from the design's capture set. */
-export const MEDIA: Record<MediaKey, { src: string; width: number; height: number; caption: string; alt: string; tag?: boolean; estimate?: boolean; position?: string; phone?: boolean }> = {
-  protein: {
-    width: 640,
-    height: 474,
-    src: "/quiz/protein.webp",
-    tag: true,
-    caption: "Most of the gap is at dinner",
-    alt: "PrepIt message: protein has been a little low over the past few weeks, mostly at dinner, with two easy fixes",
-  },
-  chart: {
-    width: 640,
-    height: 876,
-    src: "/quiz/chart.webp",
-    caption: "Your protein, day by day, when you ask",
-    alt: "Chat: asked for last week's protein, the nutritionist shows a daily chart and says breakfast is the easiest place to add some",
-  },
-  planHead: {
-    width: 640,
-    height: 588,
-    src: "/quiz/plan-head.webp",
-    caption: "Your week planned, with one grocery list",
-    alt: "A week planned: 21 meals, a grocery list of 30 ingredients and the daily target",
-  },
-  swap: {
-    width: 640,
-    height: 748,
-    src: "/quiz/swap.webp",
-    caption: "Change any meal by asking",
-    position: "50% 100%",
-    alt: "Chat about a planned dinner: asked for alternatives, the nutritionist offers options to choose from",
-  },
-  signals: {
-    width: 640,
-    height: 711,
-    src: "/quiz/signals.webp",
-    caption: "Every meal, with the reasons",
-    estimate: true,
-    alt: "How one breakfast moved Energy (+34), Satiety (+4) and Mood (+11), each with a reason",
-  },
-  satiety: {
-    width: 640,
-    height: 394,
-    src: "/quiz/satiety.webp",
-    caption: "What shaped your Satiety",
-    estimate: true,
-    alt: "How Satiety was shaped: protein was the largest lift",
-  },
-  rings: {
-    width: 640,
-    height: 298,
-    src: "/quiz/rings.webp",
-    caption: "Today's Energy, Satiety and Mood",
-    estimate: true,
-    alt: "Three rings on Home: Energy 84, Satiety 96, Mood 87",
-  },
-  weekly: {
-    width: 640,
-    height: 963,
-    src: "/quiz/weekly.webp",
-    tag: true,
-    caption: "Busier days get more room, the week stays on track",
-    alt: "PrepIt message: Tuesdays and Wednesdays run over, which is completely normal; a weekly calorie pattern to confirm",
-  },
-  voice: {
-    width: 640,
-    height: 825,
-    src: "/quiz/voice.webp",
-    caption: "A voice note, ready to log",
-    alt: "A voice note describing a chicken burrito bowl, and the nutritionist's reply with a Log it card",
-  },
-  home: {
-    width: 1206,
-    height: 2622,
-    src: "/app/01-home-light@2x.webp",
-    phone: true,
-    caption: "The three scores on PrepIt's Home screen",
-    estimate: true,
-    alt: "PrepIt Home with Energy, Satiety and Mood",
-  },
-};
-
 /** A small phone around a full app capture, for strips and single screens. */
 export function MiniPhone({ name, alt, className = "" }: { name: string; alt: string; className?: string }) {
   return (
@@ -240,44 +191,6 @@ export function MiniPhone({ name, alt, className = "" }: { name: string; alt: st
           className="block aspect-[402/874] w-full rounded-[25px] bg-surface object-cover object-top"
         />
       </picture>
-    </div>
-  );
-}
-
-/** One reply page's app screen with its caption and the real-screens line. */
-export function ReplyMedia({ media }: { media: MediaKey }) {
-  const m = MEDIA[media];
-  const foot = `${REAL_SCREENS}${m.estimate ? ` ${ESTIMATES}` : ""}`;
-  if (m.phone) {
-    return (
-      <div className="flex flex-col items-center gap-2">
-        <MiniPhone name="01-home" alt={m.alt} className="w-3/5 max-w-[236px]" />
-        <Caption>
-          {m.caption}. {foot}
-        </Caption>
-      </div>
-    );
-  }
-  return (
-    <div className="flex flex-col gap-2">
-      <figure className="flex min-w-0 flex-col overflow-hidden rounded-[20px] border border-line bg-surface pt-3">
-        {m.tag && (
-          <span className="mb-2 ml-3 self-start">
-            <Tag>{NUDGE_TAG}</Tag>
-          </span>
-        )}
-        <Image
-          src={m.src}
-          alt={m.alt}
-          width={m.width}
-          height={m.height}
-          sizes="(min-width: 520px) 456px, calc(100vw - 64px)"
-          style={m.position ? { objectPosition: m.position } : undefined}
-          className="mx-3 block max-h-[400px] w-[calc(100%-24px)] rounded-xl bg-surface object-cover object-top shadow-[0_14px_28px_-18px_rgb(26_26_46/0.45)]"
-        />
-        <figcaption className="px-3.5 pb-3 pt-2.5 text-small font-semibold leading-[1.35] text-ink">{m.caption}</figcaption>
-      </figure>
-      <Caption>{foot}</Caption>
     </div>
   );
 }

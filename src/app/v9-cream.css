@@ -1,0 +1,25 @@
+/*
+ * Charlie's cream "gallery wall" ground for Landing v9 (/try, PRE-432) and
+ * the v9.2 quiz (PRE-441): the fork photo's own colour, under the site's own
+ * tokens. Scoped to pages that render <div class="landing-v9"> or
+ * <div class="quiz-v9">, so nothing else on the site changes. The accent
+ * stays the app's calories orange.
+ *
+ * Contrast on cream (#efe8e1): ink 13:1, ink-secondary 6.6:1, ink-muted
+ * (#5e5a57) 5.6:1, accent-text (#9a3a2c) 6.0:1.
+ */
+body:has(.landing-v9),
+body:has(.quiz-v9) {
+  --color-page: #efe8e1;
+  --color-surface: #f8f4f0;
+  --color-surface-raised: #e7dfd7;
+  --color-line: rgb(22 22 29 / 0.1);
+  --color-line-strong: rgb(22 22 29 / 0.2);
+  --color-ink-muted: #5e5a57;
+  --color-ink-faint: #5e5a57;
+  --color-accent-text: #9a3a2c;
+  /* The darker cream behind bands that set themselves apart (the fork photo's ground). */
+  --color-v9-band: #e4dad2;
+  /* Floating app captures: soft, warm shadow. */
+  --shadow-v9-card: 0 24px 48px -26px rgb(40 30 20 / 0.42), 0 4px 14px -6px rgb(40 30 20 / 0.14);
+}

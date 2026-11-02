@@ -73,16 +73,18 @@ test("every starting point has a line", () => {
 
 test("startingPointId follows the quiz's first sticking point", () => {
   const a = (patch) => ({ ...emptyAnswers(), ...patch });
-  assert.equal(startingPointId(a({ energy: "I dip mid-afternoon", skipsBreakfast: "Yes" })), "dip_breakfast");
-  assert.equal(startingPointId(a({ energy: "I dip mid-afternoon" })), "dip");
-  assert.equal(startingPointId(a({ energy: "Low most days" })), "low");
+  assert.equal(startingPointId(a({ dayPatterns: ["dip"], skipsBreakfast: "Yes" })), "dip_breakfast");
+  assert.equal(startingPointId(a({ dayPatterns: ["dip"] })), "dip");
+  assert.equal(startingPointId(a({ dayPatterns: ["low"] })), "low");
+  assert.equal(startingPointId(a({ dayPatterns: ["dip", "low"] })), "dip");
   assert.equal(startingPointId(a({ blockers: ["I feel tired"] })), "tired");
-  assert.equal(startingPointId(a({ energy: "Low most days", blockers: ["I feel tired"] })), "low");
+  assert.equal(startingPointId(a({ dayPatterns: ["low"], blockers: ["I feel tired"] })), "low");
   assert.equal(startingPointId(a({ blockers: ["I crave snacks"] })), "cravings");
-  assert.equal(startingPointId(a({ hunger: "Most days", blockers: ["I crave snacks"] })), "graze");
+  assert.equal(startingPointId(a({ dayPatterns: ["hungry"], blockers: ["I crave snacks"] })), "graze");
   assert.equal(startingPointId(a({ blockers: ["Weekends derail me"] })), "weekend");
   assert.equal(startingPointId(a({ eveningSnacks: "Yes" })), "evening");
-  assert.equal(startingPointId(a({ hunger: "I graze all day" })), "graze");
+  assert.equal(startingPointId(a({ dayPatterns: ["hungry"] })), "graze");
+  assert.equal(startingPointId(a({ dayPatterns: ["none"] })), "none");
   assert.equal(startingPointId(a({ blockers: ["I don't know what to eat"] })), "dinner");
   assert.equal(startingPointId(a({ blockers: ["I lose motivation"] })), "going");
   assert.equal(startingPointId(a({})), "none");
