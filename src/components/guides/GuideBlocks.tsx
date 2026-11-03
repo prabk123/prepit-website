@@ -1,6 +1,6 @@
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import Link from "next/link";
-import ScreenCard from "@/components/guides/ScreenCard";
+import GuideScreen from "@/components/guides/GuideScreen";
 import { BentoTile } from "@/components/ui/Bento";
 import {
   appCapture,
@@ -29,7 +29,7 @@ function Figure({ caption, children, className }: { caption?: string; children: 
   );
 }
 
-/** A still or a screen recording from public/app, as ScreenCard and DeviceFrame take it. */
+/** A still or a screen recording from public/app, as GuideScreen and DeviceFrame take it. */
 export function guideMedia(name: string, alt: string) {
   if (isAppClip(name)) return { video: appVideo(name, alt) };
   if (isAppStill(name)) return { capture: appCapture(name, alt) };
@@ -40,7 +40,7 @@ export function guideMedia(name: string, alt: string) {
 export function Shot({ name, alt, caption }: { name: string; alt: string; caption?: string }) {
   return (
     <Figure caption={caption} className="w-[min(100%,300px)] min-[560px]:w-[310px]">
-      <ScreenCard className="w-full" {...guideMedia(name, alt)} />
+      <GuideScreen {...guideMedia(name, alt)} />
     </Figure>
   );
 }

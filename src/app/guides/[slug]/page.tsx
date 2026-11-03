@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import PreloadImage from "@/components/media/PreloadImage";
 import GuideCard from "@/components/guides/GuideCard";
 import GuidesClosingSection from "@/components/guides/GuidesClosingSection";
-import ScreenCard from "@/components/guides/ScreenCard";
+import GuideScreen from "@/components/guides/GuideScreen";
 import { HideSiteFinalCta } from "@/components/pricing/SiteFinalCta";
 import FeatureSplit from "@/components/ui/FeatureSplit";
 import Section from "@/components/ui/Section";
@@ -117,7 +117,7 @@ export default async function GuidePage({ params }: Props) {
         <FeatureSplit
           emphasis="text"
           mediaClassName="max-lg:hidden"
-          media={<ScreenCard className="mx-auto w-[300px]" {...heroMedia} />}
+          media={<GuideScreen width={300} {...heroMedia} />}
         >
           <nav aria-label="Breadcrumb">
             <Link
