@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 import SectionViewTracker from "@/components/analytics/SectionViewTracker";
 import { LandingSurfaceProvider } from "@/components/landing/LandingSurface";
 import StickyCta from "@/components/landing/StickyCta";
@@ -19,9 +18,7 @@ import {
 } from "@/components/landing/v9/V9Sections";
 import { HideSiteFinalCta } from "@/components/pricing/SiteFinalCta";
 import { HOME_DESCRIPTION, HOME_SHARE_DESCRIPTION, HOME_TITLE } from "@/lib/homeMetadata";
-import { COUNTRY_HEADER, webMarketFor } from "@/lib/markets";
-import { PRICES, WEB_PRICES } from "@/lib/pricing";
-import { webBillingSellerFor } from "@/lib/revenuecat/sellers";
+import { visitorOffer } from "@/lib/visitorOffer";
 
 const SITE_URL = "https://www.tryprepit.app";
 
@@ -59,9 +56,7 @@ export const metadata: Metadata = {
  * Like /try, the country the proxy passes picks the market and the currency.
  */
 export default async function Home() {
-  const country = (await headers()).get(COUNTRY_HEADER);
-  const market = webMarketFor(country);
-  const prices = market === "web" ? WEB_PRICES[webBillingSellerFor(country)] : PRICES;
+  const { market, prices } = await visitorOffer();
 
   return (
     <LandingSurfaceProvider surface="home">
