@@ -98,14 +98,24 @@ export function TypedField({ text }: { text: string }) {
 }
 
 /** A nutritionist message with its numbered reply options, drawn the way the chat shows them. */
-export function MessageCard({ text, options }: { text: string; options: string[] }) {
+export function MessageCard({ text, options, selected }: { text: string; options: string[]; /** The reply shown as tapped, by index. */ selected?: number }) {
   return (
     <div className="px-3.5 pb-3.5 pt-4">
       <p className="text-[15px] leading-normal text-ink">{text}</p>
       <ol className="mt-3 flex flex-col gap-[7px]" aria-label="Replies to choose from">
         {options.map((option, index) => (
-          <li key={option} className="flex items-center gap-2.5 rounded-xl border border-line px-3 py-2 text-[13.5px] text-ink">
-            <span aria-hidden className="inline-grid h-5 w-5 flex-none place-items-center rounded-full border border-line-strong text-[11px]">
+          <li
+            key={option}
+            className={`flex items-center gap-2.5 rounded-xl border px-3 py-2 text-[13.5px] ${
+              index === selected ? "border-primary bg-primary text-on-primary" : "border-line text-ink"
+            }`}
+          >
+            <span
+              aria-hidden
+              className={`inline-grid h-5 w-5 flex-none place-items-center rounded-full border text-[11px] ${
+                index === selected ? "border-white/50" : "border-line-strong"
+              }`}
+            >
               {index + 1}
             </span>
             {option}
