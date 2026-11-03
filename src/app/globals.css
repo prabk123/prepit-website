@@ -599,9 +599,10 @@
     display: none;
   }
 
-  /* While RevenueCat's paywall is on the page (<Checkout>, PRE-375), the page is white like the paywall, so it reads as one page, not a box. */
+  /* While RevenueCat's paywall is on the page (<Checkout>, PRE-375), the page is white like the paywall, so it reads as one page, not a box. The paywall's own white is set in RevenueCat, so this stays white on the cream site (PRE-449). */
   body:has([data-paywall-page]) {
-    --color-page: var(--color-surface);
+    --color-page: var(--color-paywall);
+    --color-surface: var(--color-paywall);
   }
 
   /*
@@ -682,5 +683,51 @@ body {
 @media (prefers-reduced-motion: no-preference) {
   .plan-part-in {
     animation: plan-part-in 420ms var(--ease-calm) both;
+  }
+}
+
+/*
+ * The homepage header (PRE-447): clear over the hero film while the page is at
+ * the top and the mobile menu is closed, then the usual solid bar. The
+ * attributes on <html> come from src/lib/homeNav.ts. Unlayered, so it wins
+ * over the bar's bg-page and border-line utilities. The colours over the film
+ * are the .theme-dark values (tokens.css); links are a touch brighter so they
+ * hold on light frames, and underline on hover because a colour change alone
+ * barely shows there.
+ */
+html:not([data-nav-solid]) .home-nav:not([data-menu-open]) {
+  --color-ink: #f4f4f5;
+  --color-ink-muted: rgb(255 255 255 / 0.86);
+  --color-focus: #f4f4f5;
+  --color-primary: #ffffff;
+  --color-on-primary: #000000;
+  background-color: transparent;
+  border-bottom-color: transparent;
+}
+
+.home-nav__shade {
+  opacity: 0;
+}
+
+html:not([data-nav-solid]) .home-nav:not([data-menu-open]) .home-nav__shade {
+  opacity: 1;
+}
+
+html:not([data-nav-solid]) .home-nav:not([data-menu-open]) .text-ink-muted:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 6px;
+}
+
+/* Only the visitor's own scrolling fades it, and never under reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-nav-anim] .home-nav,
+  html[data-nav-anim] .home-nav__shade,
+  html[data-nav-anim] .home-nav svg,
+  html[data-nav-anim] .home-nav button,
+  html[data-nav-anim] .home-nav .bg-primary {
+    transition-property: background-color, border-color, color, opacity;
+    transition-duration: 300ms;
+    transition-timing-function: var(--ease-calm);
   }
 }

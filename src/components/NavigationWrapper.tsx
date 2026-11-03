@@ -19,6 +19,8 @@ const pillClass =
  * The site header: solid light bar (no text reads through it), section links
  * and "Start my free 7 days", which goes to web checkout (PRE-448; not on
  * pages for people who already have PrepIt, see lib/memberPages).
+ * On the homepage it starts clear over the hero film and turns solid once the page scrolls or
+ * the mobile menu opens (PRE-447): `.home-nav` in globals.css, driven by src/lib/homeNav.ts.
  */
 export default function NavigationWrapper() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -27,7 +29,9 @@ export default function NavigationWrapper() {
   const toggleRef = useRef<HTMLButtonElement>(null);
   // The ad landing page: its header button follows the visitor's market and
   // the desktop section links (which lead away to the homepage) are dropped.
-  const onLanding = usePathname() === LANDING_PATH;
+  const pathname = usePathname();
+  const onLanding = pathname === LANDING_PATH;
+  const onHome = pathname === "/";
 
   // While the mobile menu is open, Escape closes it and Tab cycles through the
   // header and the menu only, not the page behind the backdrop.
@@ -79,8 +83,16 @@ export default function NavigationWrapper() {
       <nav
         ref={navRef}
         aria-label="Main"
-        className="fixed left-0 right-0 top-0 z-50 border-b border-line bg-page"
+        data-menu-open={mobileMenuOpen ? "" : undefined}
+        className={`fixed left-0 right-0 top-0 z-50 border-b border-line bg-page${onHome ? " home-nav" : ""}`}
       >
+        {/* Homepage: a soft shade behind the clear header, so its type reads on any frame of the film. */}
+        {onHome && (
+          <div
+            aria-hidden
+            className="home-nav__shade pointer-events-none absolute inset-x-0 top-0 -z-10 h-32 bg-gradient-to-b from-black/55 via-black/20 to-transparent"
+          />
+        )}
         <div className="mx-auto flex h-16 w-full max-w-content items-center justify-between px-gutter">
           <Link
             href="/"
