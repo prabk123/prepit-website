@@ -1,4 +1,5 @@
 import { CapturePicture } from "@/components/features/PhotoStage";
+import ScreenCard from "@/components/features/ScreenCard";
 import { Chip, DotTag, Eyebrow, Glass, Head, NutritionistSaid, Split, V9Section, YouSaid } from "@/components/landing/v9/V9Sections";
 import { missedBreakfast, proteinShort, weeklyPattern } from "@/content/nutritionistMessages";
 import { appCapture } from "@/lib/captures";
@@ -28,11 +29,7 @@ const LIMITS = [
   "It's an AI nutritionist, and it always says so.",
 ];
 
-const chart = {
-  ...appCapture("02-chat-chart", "The chat: protein per day for the last week as a bar chart, against a 158 g target"),
-  width: 804,
-  height: 1748,
-};
+const chart = appCapture("02-chat-chart", "The chat: protein per day for the last week as a bar chart, against a 158 g target");
 
 /**
  * /features/ai-nutritionist (PRE-451, Charlie's site pages handoff,
@@ -135,9 +132,7 @@ export default function NutritionistFeature() {
             </>
           }
           media={
-            <div className="mx-auto w-[min(300px,78%)] overflow-hidden rounded-[30px] bg-white shadow-[var(--shadow-v9-card)] ring-1 ring-black/5">
-              <CapturePicture capture={chart} />
-            </div>
+            <ScreenCard capture={chart} ring />
           }
         />
       </V9Section>
