@@ -30,7 +30,8 @@ function thenPrices(prices: Prices) {
 
 // ---------------------------------------------------------------- 10. why you can trust it
 
-function StepNumber({ n }: { n: number }) {
+/** The numbered step marker, also on /research's "One meal, traced" (PRE-456). */
+export function StepNumber({ n }: { n: number }) {
   return (
     <span aria-hidden className="grid h-6 w-6 flex-none place-items-center rounded-full bg-primary text-[12px] font-bold text-on-primary">
       {n}
