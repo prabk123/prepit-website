@@ -3,9 +3,12 @@ import type { widgetCapture } from "@/lib/captures";
 /** A Home Screen widget render (not a phone screen), with the widget's corner radius and shadow. */
 export default function WidgetImage({
   capture,
+  shadow = "phone",
   className,
 }: {
   capture: ReturnType<typeof widgetCapture>;
+  /** `phone` lifts it like a phone screen; `card` matches the v9 cards beside it on cream. */
+  shadow?: "phone" | "card";
   className?: string;
 }) {
   return (
@@ -19,7 +22,7 @@ export default function WidgetImage({
         height={capture.height}
         loading="lazy"
         decoding="async"
-        className={`h-auto w-full rounded-widget shadow-phone ${className ?? ""}`}
+        className={`h-auto w-full rounded-widget ${shadow === "card" ? "shadow-[var(--shadow-v9-card)]" : "shadow-phone"} ${className ?? ""}`}
       />
     </picture>
   );

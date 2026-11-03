@@ -1,24 +1,8 @@
-import type { DeviceCapture } from "@/components/device/DeviceFrame";
 import WidgetImage from "@/components/device/WidgetImage";
+import ScreenCard from "@/components/features/ScreenCard";
 import { Chip, Split, V9Section } from "@/components/landing/v9/V9Sections";
 import SwipeRow from "@/components/ui/SwipeRow";
 import { appCapture, widgetCapture } from "@/lib/captures";
-
-/**
- * A real phone screen floating on the page as a card, without a phone frame
- * around it (Charlie's site pages handoff, PRE-455).
- */
-function ScreenCard({ capture, className }: { capture: DeviceCapture; className?: string }) {
-  return (
-    <div className={`mx-auto overflow-hidden rounded-[30px] bg-surface shadow-[var(--shadow-v9-card)] ${className ?? ""}`}>
-      <picture>
-        {capture.avif && <source srcSet={capture.avif} type="image/avif" />}
-        {capture.webp && <source srcSet={capture.webp} type="image/webp" />}
-        <img src={capture.src} alt={capture.alt} width={804} height={1748} loading="lazy" decoding="async" className="block h-auto w-full" />
-      </picture>
-    </div>
-  );
-}
 
 /** Where Log a meal can live, each with its real screen and one line. */
 const ONE_PRESS = [
@@ -71,7 +55,7 @@ export default function WidgetsFeature() {
           media={
             <div className="mx-auto flex w-full max-w-[360px] flex-col gap-5">
               <WidgetImage
-                className="shadow-[var(--shadow-v9-card)]"
+                shadow="card"
                 capture={widgetCapture(
                   "15-widget-today-plan-large",
                   "Today's plan widget with Log it and Skip on each meal",
@@ -80,7 +64,7 @@ export default function WidgetsFeature() {
                 )}
               />
               <WidgetImage
-                className="shadow-[var(--shadow-v9-card)]"
+                shadow="card"
                 capture={widgetCapture("15-widget-water-medium", "The water widget with one-tap amounts", 1014, 474)}
               />
             </div>
@@ -103,7 +87,6 @@ export default function WidgetsFeature() {
           }
           media={
             <ScreenCard
-              className="w-[min(300px,78%)]"
               capture={appCapture("22-action-button-siri", "What did you eat? asked over the Lock Screen")}
             />
           }
@@ -124,7 +107,7 @@ export default function WidgetsFeature() {
           <SwipeRow label="Places to put Log a meal" itemClassName="w-[72%] max-w-[300px] lg:flex-1">
             {ONE_PRESS.map((place) => (
               <div key={place.title} className="flex w-full flex-col gap-3">
-                <ScreenCard className="w-full" capture={place.capture} />
+                <ScreenCard width="fill" capture={place.capture} />
                 <p className="pl-1 text-[13.5px] text-ink-muted">
                   <b className="font-semibold text-ink">{place.title}</b> {place.line}
                 </p>
