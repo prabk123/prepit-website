@@ -8,8 +8,8 @@ export const contentType = "image/png";
 export default async function Image() {
   return renderOgCard({
     eyebrow: "Features",
-    title: "Everything your nutritionist does.",
-    summary: "It learns how you eat, speaks up when something slips, plans your week and keeps logging quick.",
+    title: "You say what you ate. It does the rest.",
+    summary: "It logs the meal, tells you how it will make you feel, spots the pattern you'd miss and plans your week.",
     phone: "ai-nutritionist",
   });
 }

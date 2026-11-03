@@ -9,7 +9,7 @@ cannot read variable fonts, so this writes:
 - src/assets/og/thumbs/<name>.jpg: each card thumbnail from public/app/thumbs
   (make-card-thumbs.py), as JPEG, for the feature and guide cards.
 - src/assets/og/phones/<feature>.jpg: the phone screen from each feature's
-  hero (src/lib/featureHeroMedia.ts: the light still, or a clip's poster),
+  phone before PRE-450 (the light still, or a clip's poster),
   for the feature cards and the shared meal plan card.
 - src/app/fonts/ClashDisplay-Medium.ttf: a static weight-500 instance of the
   site's Clash Display, the calmer headline weight the light site uses.
@@ -48,7 +48,8 @@ def thumbs() -> None:
         im.save(f"{OUT}/thumbs/{name}.jpg", quality=85, optimize=True, progressive=True)
 
 
-# Keep in step with FEATURE_HERO_MEDIA in src/lib/featureHeroMedia.ts.
+# The phones the feature pages showed before PRE-450 swapped them for stills;
+# the feature link previews still use them.
 PHONES = {
     "ai-nutritionist": "08-chat-ask-poster.webp",
     "nutrition-signals": "06-signal-energy-light@2x.webp",

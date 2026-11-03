@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 import SectionViewTracker from "@/components/analytics/SectionViewTracker";
 import LandingViewTracker from "@/components/landing/LandingViewTracker";
 import StickyCta from "@/components/landing/StickyCta";
@@ -18,9 +17,8 @@ import {
   WhoItsForSection,
 } from "@/components/landing/v9/V9Sections";
 import { HideSiteFinalCta } from "@/components/pricing/SiteFinalCta";
-import { COUNTRY_HEADER, webMarketFor } from "@/lib/markets";
-import { PRICES, TRIAL_DAYS, WEB_PRICES } from "@/lib/pricing";
-import { webBillingSellerFor } from "@/lib/revenuecat/sellers";
+import { TRIAL_DAYS } from "@/lib/pricing";
+import { visitorOffer } from "@/lib/visitorOffer";
 
 const TITLE = "PrepIt | The nutritionist for everyone";
 const DESCRIPTION = `Your AI nutritionist learns your meals, spots the pattern and plans your week. ${TRIAL_DAYS} days free, with a nutrition consultation.`;
@@ -47,9 +45,7 @@ export const metadata: Metadata = {
  * waitlist (PRE-373).
  */
 export default async function LandingPage() {
-  const country = (await headers()).get(COUNTRY_HEADER);
-  const market = webMarketFor(country);
-  const prices = market === "web" ? WEB_PRICES[webBillingSellerFor(country)] : PRICES;
+  const { market, prices } = await visitorOffer();
 
   return (
     <div className="landing-v9 bg-page text-ink">

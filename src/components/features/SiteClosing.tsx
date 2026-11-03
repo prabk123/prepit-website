@@ -18,11 +18,14 @@ export default function SiteClosing({ market, prices, placement }: { market: Web
       <ClosingSection
         market={market}
         prices={prices}
+        // A waitlist visitor gets ClosingSection's own "Join the waitlist" button.
         cta={
-          <StartTrialLink placement={placement} className={`${PILL_BUTTON_CLASS} max-[599px]:w-full max-[599px]:justify-center`}>
-            {START_LABEL}
-            <StartArrow />
-          </StartTrialLink>
+          market === "web" ? (
+            <StartTrialLink placement={placement} className={`${PILL_BUTTON_CLASS} max-[599px]:w-full max-[599px]:justify-center`}>
+              {START_LABEL}
+              <StartArrow />
+            </StartTrialLink>
+          ) : undefined
         }
       />
       {/* The site footer below carries the copyright. */}
