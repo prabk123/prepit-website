@@ -28,7 +28,7 @@ export default function GuidesClosingSection({ placement, id = "download" }: { p
             Try your nutritionist free for {TRIAL_DAYS} days.
             <FreeToday />
           </p>
-          <StartTrialCta placement={placement} note={null} />
+          <StartTrialCta placement={placement} />
           <p className="max-w-[30em] text-small text-ink-muted text-pretty">
             Start here, then download PrepIt and sign in with the same Apple or Google account. Your free week is
             already there.

@@ -5,7 +5,6 @@ import PreloadImage from "@/components/media/PreloadImage";
 import GuideCard from "@/components/guides/GuideCard";
 import GuidesClosingSection from "@/components/guides/GuidesClosingSection";
 import ScreenCard from "@/components/guides/ScreenCard";
-import { V9Section } from "@/components/landing/v9/V9Sections";
 import { HideSiteFinalCta } from "@/components/pricing/SiteFinalCta";
 import FeatureSplit from "@/components/ui/FeatureSplit";
 import Section from "@/components/ui/Section";
@@ -141,10 +140,13 @@ export default async function GuidePage({ params }: Props) {
         </FeatureSplit>
       </Section>
 
-      {/* The article on the darker cream band, as in Charlie's site pages handoff (PRE-457). */}
-      <V9Section id="guide" name="guide-article" labelledBy="guide-heading" band className="max-lg:[&>div]:pt-stack">
-        <article className="max-w-[720px]">{content}</article>
-      </V9Section>
+      {/* The article on the darker cream band, as in Charlie's site pages handoff (PRE-457). A plain block, not a
+          second landmark named by the h1. */}
+      <div className="v9-band w-full text-ink">
+        <div className="mx-auto w-full max-w-content px-gutter py-section max-lg:pt-stack">
+          <article className="max-w-[720px]">{content}</article>
+        </div>
+      </div>
 
       <Section labelledBy="more-guides-heading">
         <div className="flex flex-col gap-8">

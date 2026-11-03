@@ -45,7 +45,7 @@ export function Shot({ name, alt, caption }: { name: string; alt: string; captio
   );
 }
 
-/** One or two <Shot>s (or <Widget>s), side by side from 560 px, inside the reading column. */
+/** One or two <Shot>s (or <Widget>s), side by side once the reading column fits two 310 px cards (about 690 px wide). */
 export function Shots({ children }: { children: ReactNode }) {
   return (
     <div className="my-12 flex max-w-[720px] flex-wrap items-start gap-x-5 gap-y-10">
