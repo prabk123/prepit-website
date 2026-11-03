@@ -68,10 +68,10 @@ export const FEATURES: Record<FeatureSlug, FeatureMeta> = {
     name: "Your nutritionist",
     title: "An AI nutritionist that knows you and speaks up",
     description:
-      "PrepIt's nutritionist learns how you eat, agrees one thing to change first, and messages you when it spots a pattern. Ask it anything, any time.",
+      "PrepIt's nutritionist learns how you eat, agrees one thing to work on, and messages you when it spots a pattern. Ask it anything, any time.",
     summary: "It learns how you eat, and speaks up before you slip.",
-    heading: "A nutritionist that knows you and speaks up.",
-    lead: "It learns how you eat, agrees one thing to change first, and messages you when it spots something. You don't have to remember to ask.",
+    heading: "A nutritionist that knows you, and speaks up first.",
+    lead: "It learns how you eat, agrees one thing to work on, and messages you when it spots something. You don't have to remember to ask.",
     tile: {
       photo: { name: "consult-cups", widths: STILL_WIDTHS, position: "50% 88%" },
       title: "It speaks up first.",
