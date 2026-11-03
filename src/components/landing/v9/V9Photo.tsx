@@ -53,12 +53,15 @@ export function V9Screen({
   height,
   alt,
   className,
+  priority,
 }: {
   name: string;
   width: number;
   height: number;
   alt: string;
   className?: string;
+  /** Load with the page instead of lazily, for a card over a hero still. */
+  priority?: boolean;
 }) {
   return (
     // eslint-disable-next-line @next/next/no-img-element -- a capture already exported at its display size
@@ -67,7 +70,7 @@ export function V9Screen({
       alt={alt}
       width={width}
       height={height}
-      loading="lazy"
+      loading={priority ? "eager" : "lazy"}
       decoding="async"
       className={`block h-auto w-full ${className ?? ""}`}
     />

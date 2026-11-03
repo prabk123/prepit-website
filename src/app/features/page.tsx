@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import FeatureTiles from "@/components/features/FeatureTiles";
-import { Lift, MessageCard, PhotoStage, TypedField } from "@/components/features/PhotoStage";
+import { heroPhoto } from "@/components/features/FeatureHeroStage";
+import { CapturePicture, Lift, PhotoStage, TypedField } from "@/components/features/PhotoStage";
 import SiteClosing from "@/components/features/SiteClosing";
 import { V9Screen } from "@/components/landing/v9/V9Photo";
 import { Chip, Eyebrow, Split, V9Section } from "@/components/landing/v9/V9Sections";
 import { HideSiteFinalCta } from "@/components/pricing/SiteFinalCta";
 import StartTrialCta from "@/components/ui/StartTrialCta";
 import TextLink from "@/components/ui/TextLink";
-import { FEATURE_SLUGS, FEATURES, featureHref, type FeatureSlug } from "@/lib/features";
+import { missedBreakfast } from "@/content/nutritionistMessages";
+import { FEATURE_SLUGS, FEATURES, STILL_WIDTHS, featureHref, type FeatureSlug } from "@/lib/features";
 import { TRIAL_DAYS, WEB_REMINDER_EMAIL_LIVE } from "@/lib/pricing";
 import { visitorOffer } from "@/lib/visitorOffer";
 
@@ -25,8 +27,6 @@ export const metadata: Metadata = {
   openGraph: { type: "website", url, title: `${title} | PrepIt`, description, siteName: "PrepIt", locale: "en_US" },
   twitter: { card: "summary_large_image", title: `${title} | PrepIt`, description },
 };
-
-const STILL_WIDTHS = [560, 880, 1200];
 
 type FeatureSection = {
   slug: FeatureSlug;
@@ -52,10 +52,7 @@ const SECTIONS: FeatureSection[] = [
         photo={{ name: "one-change", widths: [560, 880], alt: "Seven plates of toast in rows, and only the last one has an egg on it" }}
       >
         <Lift tag="Breakfast time" style={{ right: 0, top: "34%", width: "68%" }}>
-          <MessageCard
-            text="I can't see any breakfast log today. Drop me a quick voice note if you had something, or let me know if you skipped it :)"
-            options={["I skipped it", "I'll log it now"]}
-          />
+          <CapturePicture capture={missedBreakfast.capture} />
         </Lift>
       </PhotoStage>
     ),
@@ -69,11 +66,7 @@ const SECTIONS: FeatureSection[] = [
     stage: (flip) => (
       <PhotoStage
         flip={flip}
-        photo={{
-          name: "work-lunch",
-          widths: STILL_WIDTHS,
-          alt: "A chicken, sweet potato and chickpea bowl a third eaten at a desk, beside a glass of water and a laptop",
-        }}
+        photo={heroPhoto("nutrition-signals")}
       >
         <Lift style={{ left: 0, top: "16%", width: "72%" }}>
           <V9Screen name="see-rings" width={741} height={337} alt="Energy 84, Satiety 96 and Mood 87" />
@@ -93,11 +86,7 @@ const SECTIONS: FeatureSection[] = [
     stage: (flip) => (
       <PhotoStage
         flip={flip}
-        photo={{
-          name: "weekly-shop",
-          widths: STILL_WIDTHS,
-          alt: "A weekly shop laid out: a paper bag, eggs, salmon, spinach, lemons, tomatoes, feta, sourdough and bananas",
-        }}
+        photo={heroPhoto("meal-plans")}
       >
         <Lift style={{ right: 0, top: "22%", width: "50%" }}>
           <V9Screen name="ui-grocery" width={764} height={951} alt="A grocery list grouped by aisle: bakery, dairy and alternatives, fresh produce" />
@@ -114,7 +103,7 @@ const SECTIONS: FeatureSection[] = [
     stage: (flip) => (
       <PhotoStage
         flip={flip}
-        photo={{ name: "wrap-plate", widths: STILL_WIDTHS, alt: "A chicken wrap cut in half with a pot of hummus on a white plate" }}
+        photo={heroPhoto("logging")}
       >
         <Lift style={{ left: 0, top: "20%", width: "74%" }}>
           <TypedField text="chicken wrap with hummus and salad" />
@@ -134,11 +123,7 @@ const SECTIONS: FeatureSection[] = [
     stage: (flip) => (
       <PhotoStage
         flip={flip}
-        photo={{
-          name: "out-the-door",
-          widths: STILL_WIDTHS,
-          alt: "On the way out: a takeaway coffee, a wrapped sandwich, a banana, keys and a tote bag",
-        }}
+        photo={heroPhoto("widgets-and-siri")}
       >
         <Lift style={{ right: 0, top: "28%", width: "44%" }}>
           <V9Screen name="widget-signals-light" width={474} height={474} alt="The Energy, Satiety and Mood widget" />
@@ -207,6 +192,7 @@ export default async function FeaturesPage() {
                 </Lift>
                 <Lift style={{ right: "-2%", top: "40%", width: "62%" }} className="min-[900px]:!-right-[3%]">
                   <V9Screen
+                    priority
                     name="say-row-wrap"
                     width={626}
                     height={247}
@@ -214,7 +200,7 @@ export default async function FeaturesPage() {
                   />
                 </Lift>
                 <Lift style={{ left: "4%", bottom: "6%", width: "58%" }}>
-                  <V9Screen name="see-rings" width={741} height={337} alt="Energy 84, Satiety 96 and Mood 87, all green" />
+                  <V9Screen name="see-rings" width={741} height={337} priority alt="Energy 84, Satiety 96 and Mood 87, all green" />
                 </Lift>
               </PhotoStage>
             }
