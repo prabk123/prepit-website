@@ -128,8 +128,8 @@ export const FEATURES: Record<FeatureSlug, FeatureMeta> = {
     description:
       "Log a meal with Siri, the Action button or Control Centre, and add water, tick supplements or log a planned meal from a widget without opening PrepIt.",
     summary: "Log a meal or tick something off without opening the app.",
-    heading: "PrepIt, without opening PrepIt.",
-    lead: "The less effort logging takes, the better your nutritionist's advice gets. Press the Action button, ask Siri or tap a widget, and it's done.",
+    heading: "Log lunch without opening the app.",
+    lead: "Say “Hey Siri, log a meal in PrepIt”, press the Action button or tap a widget. The less effort logging takes, the better your nutritionist's advice gets.",
     overviewLink: "How widgets and Siri work",
     tile: {
       photo: { name: "out-the-door", widths: STILL_WIDTHS, alt: "" },
