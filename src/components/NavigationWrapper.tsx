@@ -9,21 +9,15 @@ import { LANDING_PATH } from "@/lib/funnel/landing";
 import LongLogo from "@/components/ui/LongLogo";
 import { HEADER_PAGE_LINKS, HEADER_SECTION_LINKS } from "@/lib/homeSections";
 
-// Colour changes animate as the homepage header turns solid; under reduced
-// motion they switch at once.
-const fade = "duration-300 ease-calm motion-reduce:transition-none";
 const linkClass =
-  `text-small font-medium text-ink-muted transition-colors ${fade} hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus`;
+  "text-small font-medium text-ink-muted transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus";
 const pillClass =
-  `inline-flex h-11 items-center whitespace-nowrap rounded-button bg-primary px-4 text-small font-bold text-on-primary transition-[opacity,background-color,color] ${fade} hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus`;
-
-/** How far the page scrolls before the homepage header turns solid. */
-const SOLID_AFTER_PX = 8;
+  "inline-flex h-11 items-center whitespace-nowrap rounded-button bg-primary px-4 text-small font-bold text-on-primary transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus";
 
 /**
  * The site header: solid light bar (no text reads through it), section links and "Get the app".
- * On the homepage it starts clear over the hero film (light type, the dark-band tokens) and
- * turns into the solid bar once the page scrolls or the mobile menu opens (PRE-447).
+ * On the homepage it starts clear over the hero film and turns solid once the page scrolls or
+ * the mobile menu opens (PRE-447): `.home-nav` in globals.css, driven by src/lib/homeNav.ts.
  */
 export default function NavigationWrapper() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -35,17 +29,6 @@ export default function NavigationWrapper() {
   const pathname = usePathname();
   const onLanding = pathname === LANDING_PATH;
   const onHome = pathname === "/";
-  const [scrolled, setScrolled] = useState(false);
-  const overHero = onHome && !scrolled && !mobileMenuOpen;
-
-  // Homepage only: the header is clear while the page is at the top.
-  useEffect(() => {
-    if (!onHome) return;
-    const update = () => setScrolled(window.scrollY > SOLID_AFTER_PX);
-    update();
-    window.addEventListener("scroll", update, { passive: true });
-    return () => window.removeEventListener("scroll", update);
-  }, [onHome]);
 
   // While the mobile menu is open, Escape closes it and Tab cycles through the
   // header and the menu only, not the page behind the backdrop.
@@ -97,27 +80,22 @@ export default function NavigationWrapper() {
       <nav
         ref={navRef}
         aria-label="Main"
-        data-over-hero={overHero ? "" : undefined}
-        className={`fixed left-0 right-0 top-0 z-50 border-b transition-[background-color,border-color] ${fade} ${
-          overHero
-            ? // Dark-band tokens; links use the brighter secondary ink so they hold on light frames.
-              "theme-dark border-transparent bg-transparent [--color-ink-muted:var(--color-ink-secondary)]"
-            : "border-line bg-page"
-        }`}
+        data-menu-open={mobileMenuOpen ? "" : undefined}
+        className={`fixed left-0 right-0 top-0 z-50 border-b border-line bg-page${onHome ? " home-nav" : ""}`}
       >
-        {/* A soft shade behind the clear header, so its type reads on any frame of the film. */}
-        <div
-          aria-hidden
-          className={`pointer-events-none absolute inset-x-0 top-0 -z-10 h-32 bg-gradient-to-b from-black/55 via-black/20 to-transparent transition-opacity ${fade} ${
-            overHero ? "opacity-100" : "opacity-0"
-          }`}
-        />
+        {/* Homepage: a soft shade behind the clear header, so its type reads on any frame of the film. */}
+        {onHome && (
+          <div
+            aria-hidden
+            className="home-nav__shade pointer-events-none absolute inset-x-0 top-0 -z-10 h-32 bg-gradient-to-b from-black/55 via-black/20 to-transparent"
+          />
+        )}
         <div className="mx-auto flex h-16 w-full max-w-content items-center justify-between px-gutter">
           <Link
             href="/"
             className="flex h-11 items-center text-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus"
           >
-            <LongLogo className={`h-7 w-auto text-primary transition-colors ${fade} lg:h-8`} />
+            <LongLogo className="h-7 w-auto text-primary lg:h-8" />
           </Link>
 
           {/* Desktop */}
@@ -149,7 +127,7 @@ export default function NavigationWrapper() {
             <button
               ref={toggleRef}
               type="button"
-              className={`flex h-11 w-11 items-center justify-center text-ink transition-colors ${fade} focus-visible:outline-2 focus-visible:outline-focus`}
+              className="flex h-11 w-11 items-center justify-center text-ink focus-visible:outline-2 focus-visible:outline-focus"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
               aria-expanded={mobileMenuOpen}
