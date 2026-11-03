@@ -599,9 +599,9 @@
     display: none;
   }
 
-  /* While RevenueCat's paywall is on the page (<Checkout>, PRE-375), the page is white like the paywall, so it reads as one page, not a box. */
+  /* While RevenueCat's paywall is on the page (<Checkout>, PRE-375), the page is white like the paywall, so it reads as one page, not a box. The paywall's own white is set in RevenueCat, so this stays white on the cream site (PRE-449). */
   body:has([data-paywall-page]) {
-    --color-page: var(--color-surface);
+    --color-page: var(--color-paywall);
   }
 
   /*

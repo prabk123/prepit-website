@@ -17,21 +17,21 @@
  */
 
 @theme static {
-  /* Surfaces: the app's light grey page and white cards. */
-  --color-page: #f4f4f5;
-  --color-surface: #ffffff;
-  /* A card or chip inside a white card. */
-  --color-surface-raised: #f4f4f5;
-  --color-line: #e4e4e7;
-  --color-line-strong: #d4d4d8;
+  /* Surfaces: Landing v9's warm cream ground (the fork photo's own colour,
+     PRE-432) on every page since PRE-449, with lighter cream cards. */
+  --color-page: #efe8e1;
+  --color-surface: #f8f4f0;
+  /* A card or chip inside a card. */
+  --color-surface-raised: #e7dfd7;
+  --color-line: rgb(22 22 29 / 0.1);
+  --color-line-strong: rgb(22 22 29 / 0.2);
 
-  /* Text. Ink 15.5:1 on page; secondary (body) 7.6:1; muted 6.0:1;
-     faint is the lowest tone that still passes AA: 5.0:1 on page,
-     5.5:1 on white. */
+  /* Text. Ink 14:1 on page; secondary (body) 6.9:1; muted and faint 5.6:1
+     on page, 5.2:1 on surface-raised. */
   --color-ink: #1a1a2e;
   --color-ink-secondary: #4d4d59;
-  --color-ink-muted: #5c5c68;
-  --color-ink-faint: #686872;
+  --color-ink-muted: #5e5a57;
+  --color-ink-faint: #5e5a57;
 
   /* Primary buttons and selected controls, as the app's primary button:
      black with white text on light, white with black text on dark. */
@@ -42,8 +42,8 @@
      highlights), never a primary action. Never as small text on light; use
      accent-text. */
   --color-accent: #ff644f;
-  /* Orange text and link underlines on light: 5.5:1 on white, 5.0:1 on page. */
-  --color-accent-text: #b24637;
+  /* Orange text and link underlines on light: 5.7:1 on page, 6.4:1 on surface. */
+  --color-accent-text: #9a3a2c;
   /* Black on accent fills (7.3:1): the landing page's tick marks, pills and
      yearly saving (PRE-302). */
   --color-on-accent: #000000;
@@ -52,6 +52,10 @@
   /* The app's light chat background, behind real chat captures (PRE-283).
      Matches the captures' own pixels and stays light in every band. */
   --color-app-chat: #f4f4f5;
+
+  /* RevenueCat's paywall is white (set in RevenueCat), so the checkout page
+     behind it is too (globals.css, data-paywall-page). */
+  --color-paywall: #ffffff;
 
   /* QR codes stay dark on white in every band, so every camera reads them. */
   --color-qr-bg: #ffffff;
@@ -63,12 +67,12 @@
   --color-satiety: #f38c61;
   --color-mood: #809ff9;
 
-  /* Form errors: 6.6:1 on white. Text only, with the field. */
+  /* Form errors: 5.4:1 on page, 6.0:1 on surface. Text only, with the field. */
   --color-error: #b42318;
 
   /* Brand gradient stops (eyebrows, the trial line; never body text). The
-     light-page stops are darker shades of the app gradient, each 5:1 or more
-     on page; theme-dark puts the app's own pastel stops back. */
+     light-page stops are darker shades of the app gradient, each 4.5:1 or
+     more on page; theme-dark puts the app's own pastel stops back. */
   --color-brand-blue: #3d5bd9;
   --color-brand-purple: #9b3fa8;
   --color-brand-orange: #b24637;
