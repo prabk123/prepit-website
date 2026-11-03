@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { HOME_FUNNEL_ID, LANDING_FUNNEL_ID, LANDING_PATH, SITE_FUNNEL_ID, landingBridgeHref } from "@/lib/funnel/landing";
 import { LANDING_EVENTS, trackLandingEvent, visitorCountry } from "@/lib/landingAnalytics";
 import { webMarketFor } from "@/lib/markets";
+import { isMemberPage } from "@/lib/memberPages";
 
 type StartTrialLinkProps = Omit<ComponentProps<typeof Link>, "href"> & {
   /**
@@ -30,9 +31,12 @@ function funnelFor(pathname: string | null): string {
  * landing page's buttons. Every visitor starts on the website now; the site
  * has no App Store links before a purchase. A Quebec visitor is sent on to
  * the waitlist by the proxy, so the link doesn't need to know the market.
+ * Renders nothing on pages for people who already have PrepIt (lib/memberPages).
  */
 export default function StartTrialLink({ placement, onClick, ...props }: StartTrialLinkProps) {
-  const funnel = funnelFor(usePathname());
+  const pathname = usePathname();
+  if (isMemberPage(pathname)) return null;
+  const funnel = funnelFor(pathname);
   return (
     <Link
       href={landingBridgeHref(funnel)}

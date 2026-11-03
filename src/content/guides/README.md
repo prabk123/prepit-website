@@ -26,4 +26,4 @@ Plain Markdown, plus these (see `src/components/guides/GuideBlocks.tsx`). An unk
 - `<Examples>` holds `<Example title vague vagueNote specific specificNote />`.
 - `<Note>` for an aside, such as an iOS version requirement.
 
-Every guide ends with the download section, and its App Store taps are sent as `guide-<slug>`.
+Every guide ends with the closing section, and its "Start my free 7 days" taps are sent as `web_landing_cta_click` with placement `guide-<slug>`.

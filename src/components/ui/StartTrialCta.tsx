@@ -1,20 +1,10 @@
 import StartTrialLink from "@/components/StartTrialLink";
 import { PILL_BUTTON_CLASS } from "@/components/ui/buttons";
+import { START_LABEL, StartArrow } from "@/components/ui/startCta";
 import { TRIAL_DAYS } from "@/lib/pricing";
-
-/** The same label as the landing page's buttons (LandingCta). */
-const START_LABEL = `Start my free ${TRIAL_DAYS} days`;
 
 /** The trial line under the button. The landing sections say the same. */
 export const WEB_TRIAL_NOTE = `Cancel before day ${TRIAL_DAYS + 1} and you pay nothing.`;
-
-function Arrow() {
-  return (
-    <svg viewBox="0 0 16 16" className="h-4 w-4 shrink-0" aria-hidden>
-      <path d="M3 8h10M9 4l4 4-4 4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
 
 /**
  * The site's call to action outside the landing sections (PRE-448): the
@@ -25,19 +15,22 @@ function Arrow() {
 export default function StartTrialCta({
   placement,
   note = WEB_TRIAL_NOTE,
+  align = "start",
   className,
 }: {
   /** Sent as `placement` with `web_landing_cta_click`, e.g. "final-cta". */
   placement: string;
   /** Line under the button; null for none. */
   note?: string | null;
+  /** "center" in the closing band, which centres everything. */
+  align?: "start" | "center";
   className?: string;
 }) {
   return (
-    <div className={`flex flex-col items-start gap-3 ${className ?? ""}`}>
+    <div className={`flex flex-col gap-3 ${align === "center" ? "items-center text-center" : "items-start"} ${className ?? ""}`}>
       <StartTrialLink placement={placement} className={PILL_BUTTON_CLASS}>
         {START_LABEL}
-        <Arrow />
+        <StartArrow />
       </StartTrialLink>
       {note && <p className="text-small text-ink-muted">{note}</p>}
     </div>

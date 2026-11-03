@@ -78,7 +78,7 @@ export default async function FeaturePage({ params }: Props) {
       <FeatureHero feature={feature} media={FEATURE_HERO_MEDIA[slug]} />
       <Body />
       <RelatedFeatures slug={slug} />
-      {/* Feature pages end with their own download section, so App Store taps are counted per page. */}
+      {/* Feature pages end with their own download section, so start taps are counted per page (placement feature-<slug>). */}
       <FinalCta trackingSource={`feature-${slug}`} />
       <HideSiteFinalCta />
     </>

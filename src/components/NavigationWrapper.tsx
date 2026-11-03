@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import LandingHeaderCta from "@/components/landing/LandingHeaderCta";
 import StartTrialLink from "@/components/StartTrialLink";
+import { HeaderStartLabel } from "@/components/ui/startCta";
 import { LANDING_PATH } from "@/lib/funnel/landing";
 import LongLogo from "@/components/ui/LongLogo";
 import { HEADER_PAGE_LINKS, HEADER_SECTION_LINKS } from "@/lib/homeSections";
@@ -14,19 +15,10 @@ const linkClass =
 const pillClass =
   "inline-flex h-11 items-center whitespace-nowrap rounded-button bg-primary px-4 text-small font-bold text-on-primary transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus";
 
-/** The header button's label; the full one overlaps the logo on narrow phones. */
-function HeaderStartLabel() {
-  return (
-    <>
-      <span className="max-[419px]:hidden">Start my free 7 days</span>
-      <span className="min-[420px]:hidden">Start free</span>
-    </>
-  );
-}
-
 /**
  * The site header: solid light bar (no text reads through it), section links
- * and "Start my free 7 days", which goes to web checkout (PRE-448).
+ * and "Start my free 7 days", which goes to web checkout (PRE-448; not on
+ * pages for people who already have PrepIt, see lib/memberPages).
  */
 export default function NavigationWrapper() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

@@ -39,7 +39,7 @@ export default function FinalCta({
             Try your nutritionist free for {TRIAL_DAYS} days.
           </p>
         </div>
-        <StartTrialCta placement={trackingSource} className="items-center" />
+        <StartTrialCta placement={trackingSource} align="center" />
         {/* The phone is cropped by the section's bottom edge. */}
         <div className="relative -mb-section mt-4 h-[300px] w-full overflow-hidden sm:h-[380px] lg:h-[440px]">
           <Glow style={{ top: "70%" }} />

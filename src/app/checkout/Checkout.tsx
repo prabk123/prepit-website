@@ -431,7 +431,7 @@ export default function Checkout({
           size="title"
           align="center"
           title="Checkout isn't available right now"
-          lead="Please try again later, or get PrepIt from the App Store."
+          lead="Please try again in a few minutes."
         />
       </>
     );

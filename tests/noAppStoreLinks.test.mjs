@@ -44,3 +44,13 @@ test("only the pages after a purchase link to the App Store", () => {
     .filter((path) => APP_STORE_USE.test(readFileSync(join(ROOT, path), "utf8")));
   assert.deepEqual(offenders, []);
 });
+
+test("start buttons stay off pages for people who already have PrepIt", async () => {
+  const { isMemberPage } = await import("../src/lib/memberPages.ts");
+  for (const path of ["/account", "/account/cancel", "/open", "/withdraw", "/email-preferences", "/welcome"]) {
+    assert.equal(isMemberPage(path), true, path);
+  }
+  for (const path of ["/", "/try", "/features", "/guides/x", "/accounts", "/opened", null]) {
+    assert.equal(isMemberPage(path), false, String(path));
+  }
+});

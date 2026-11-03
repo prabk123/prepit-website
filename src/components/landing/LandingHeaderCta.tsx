@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { HeaderStartLabel } from "@/components/ui/startCta";
 import { landingBridgeHref, LANDING_FUNNEL_ID } from "@/lib/funnel/landing";
 import { LANDING_EVENTS, trackLandingEvent, visitorCountry } from "@/lib/landingAnalytics";
 import { webMarketFor, type WebMarket } from "@/lib/markets";
@@ -29,15 +30,7 @@ export default function LandingHeaderCta({ className }: { className: string }) {
       data-cta="header_start_trial"
       onClick={() => trackLandingEvent(LANDING_EVENTS.ctaClick, market, { placement: "header", funnel_id: LANDING_FUNNEL_ID })}
     >
-      {market === "web" ? (
-        <>
-          {/* The full label overlaps the logo on narrow phones. */}
-          <span className="max-[419px]:hidden">Start my free 7 days</span>
-          <span className="min-[420px]:hidden">Start free</span>
-        </>
-      ) : (
-        "Join the waitlist"
-      )}
+      {market === "web" ? <HeaderStartLabel /> : "Join the waitlist"}
     </Link>
   );
 }
