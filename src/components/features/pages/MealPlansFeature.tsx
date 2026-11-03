@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import ScreenCard from "@/components/features/ScreenCard";
 import { Chip, Split, V9Section } from "@/components/landing/v9/V9Sections";
-import { appCapture } from "@/lib/captures";
+import { type AppStill, appCapture } from "@/lib/captures";
 
 type PlanSection = {
   id: string;
@@ -9,7 +9,7 @@ type PlanSection = {
   lead: string;
   chips?: string[];
   note?: ReactNode;
-  screen: { name: string; alt: string };
+  screen: { name: AppStill; alt: string };
 };
 
 /**
