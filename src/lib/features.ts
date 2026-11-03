@@ -96,8 +96,8 @@ export const FEATURES: Record<FeatureSlug, FeatureMeta> = {
     description:
       "Ask your nutritionist for a week of meals. It plans around your goals, tastes and budget, swaps anything you don't fancy and builds one grocery list by aisle.",
     summary: "Ask for a week of meals. Get the plan and the shopping list.",
-    heading: "Your week, planned in one chat.",
-    lead: "Tell your nutritionist which days to cover and what you'd rather avoid. It plans the meals around your goals and builds the grocery list for you.",
+    heading: "Next week's meals, sorted in one chat.",
+    lead: "Tell your nutritionist which days, your budget and what you'd rather skip. It plans meals around your goals, then builds the shopping list.",
     overviewLink: "How meal plans work",
     tile: {
       photo: { name: "weekly-shop", widths: STILL_WIDTHS, alt: "" },
