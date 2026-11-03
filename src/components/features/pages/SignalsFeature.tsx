@@ -1,6 +1,8 @@
+import ScreenCard from "@/components/features/ScreenCard";
 import { V9Screen } from "@/components/landing/v9/V9Photo";
-import { Chip, DotTag, Glass, Split, V9Section } from "@/components/landing/v9/V9Sections";
+import { Chip, DotTag, Split, V9Section } from "@/components/landing/v9/V9Sections";
 import TextLink from "@/components/ui/TextLink";
+import { appCapture } from "@/lib/captures";
 
 /**
  * Each score as the question it answers, with the app's own plain-words
@@ -94,22 +96,11 @@ export default function SignalsFeature() {
           }
           media={
             // The capture ends at the top of the Energy card, above its "How it's shaped" rows.
-            <Glass className="mx-auto w-full max-w-[360px]">
-              <picture>
-                <source type="image/avif" srcSet="/app/05-meal-detail-light@1x.avif 402w, /app/05-meal-detail-light@2x.avif 804w" sizes="360px" />
-                <img
-                  src="/app/05-meal-detail-light@2x.webp"
-                  srcSet="/app/05-meal-detail-light@1x.webp 402w, /app/05-meal-detail-light@2x.webp 804w"
-                  sizes="360px"
-                  alt="Protein overnight oats: calories, macros, each ingredient, and its Energy card"
-                  width={804}
-                  height={1748}
-                  loading="lazy"
-                  decoding="async"
-                  className="block h-auto w-full"
-                />
-              </picture>
-            </Glass>
+<ScreenCard
+              width={340}
+              ring
+              capture={appCapture("05-meal-detail", "Protein overnight oats: calories, macros, each ingredient, and its Energy card")}
+            />
           }
         />
       </V9Section>
