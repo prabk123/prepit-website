@@ -1,48 +1,43 @@
-import type { ComponentProps } from "react";
-import DeviceFrame from "@/components/device/DeviceFrame";
-import PreloadImage from "@/components/media/PreloadImage";
+import Link from "next/link";
+import FeatureHeroStage from "@/components/features/FeatureHeroStage";
+import { Split } from "@/components/landing/v9/V9Sections";
 import StartTrialCta from "@/components/ui/StartTrialCta";
-import FeatureSplit from "@/components/ui/FeatureSplit";
-import Glow from "@/components/ui/Glow";
-import Section from "@/components/ui/Section";
-import SectionHeading from "@/components/ui/SectionHeading";
 import type { FeatureMeta } from "@/lib/features";
+import type { WebMarket } from "@/lib/markets";
+import { type Prices, TRIAL_DAYS } from "@/lib/pricing";
 
-type FeatureHeroProps = {
-  feature: FeatureMeta;
-  /** The phone: a still (`capture`) or a looping recording (`video`). */
-  media: Pick<ComponentProps<typeof DeviceFrame>, "capture" | "video">;
-};
-
-/** A feature page's header: h1, one line and the button into web checkout beside a phone. */
-export default function FeatureHero({ feature, media }: FeatureHeroProps) {
+/**
+ * A feature page's header (PRE-450): the path back to Features, the h1 and
+ * one line, the button into web checkout and the trial line, beside the
+ * feature's still with a real app card lifted over it.
+ */
+export default function FeatureHero({ feature, market, prices }: { feature: FeatureMeta; market: WebMarket; prices: Prices }) {
+  const trial = market === "web" ? `${TRIAL_DAYS} days free · ${prices.free} today · ` : "";
   return (
-    <Section labelledBy="feature-heading">
-      {/* A clip's poster is the LCP, but browsers fetch posters late and at low
-          priority. Preload it so the first screen paints as fast as a still. */}
-      {media.video && <PreloadImage href={media.video.poster} />}
-      <FeatureSplit
-        emphasis="text"
-        media={
-          <div className="relative py-4">
-            <Glow />
-            <DeviceFrame
-              className="[--device-w:260px] sm:[--device-w:300px] lg:[--device-w:340px]"
-              priority
-              {...media}
-            />
-          </div>
-        }
-      >
-        <SectionHeading
-          as="h1"
-          id="feature-heading"
-          size="section"
-          title={feature.heading}
-          lead={feature.lead}
+    <section aria-labelledby="feature-heading" className="w-full bg-page text-ink">
+      <div className="mx-auto w-full max-w-content px-gutter pb-section pt-[clamp(28px,4vw,56px)]">
+        <Split
+          text={
+            <>
+              <nav aria-label="Breadcrumb" className="text-[14px] text-ink-muted">
+                <Link href="/features" className="text-ink-secondary underline-offset-4 hover:underline">
+                  Features
+                </Link>{" "}
+                / {feature.name}
+              </nav>
+              <h1 id="feature-heading" className="font-display text-hero text-ink text-balance">
+                {feature.heading}
+              </h1>
+              <p className="max-w-[34em] text-lead text-ink-secondary text-pretty">{feature.lead}</p>
+              <StartTrialCta
+                placement={`feature-${feature.slug}-hero`}
+                note={`${trial}Cancel before day ${TRIAL_DAYS + 1}, pay nothing.`}
+              />
+            </>
+          }
+          media={<FeatureHeroStage slug={feature.slug} />}
         />
-        <StartTrialCta placement={`feature-${feature.slug}-hero`} />
-      </FeatureSplit>
-    </Section>
+      </div>
+    </section>
   );
 }

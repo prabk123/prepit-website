@@ -98,3 +98,17 @@ export const POSTHOG_MESSAGE_SELECTED_EVENT = "website_message_selected";
 export function trackMessageSelected(message: string) {
   withPostHog((posthog) => posthog.capture(POSTHOG_MESSAGE_SELECTED_EVENT, { message }));
 }
+
+/**
+ * Fired when a visitor taps one of the contact page's quick links (PRE-458):
+ * the support email, Manage or cancel (/account) or the FAQ. Only the link's
+ * fixed id and the page variant.
+ */
+export const POSTHOG_CONTACT_LINK_EVENT = "contact_link_clicked";
+
+export function trackContactLinkClicked(link: "email" | "account" | "faq", kind: "contact" | "feedback") {
+  // sendBeacon, as the link leaves the page (mail app, or a full load of /account or /).
+  withPostHogBeforeLeaving((posthog) =>
+    posthog.capture(POSTHOG_CONTACT_LINK_EVENT, { link, kind }, { transport: "sendBeacon" }),
+  );
+}

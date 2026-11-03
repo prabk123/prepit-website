@@ -8,14 +8,14 @@ import NutritionistFeature from "@/components/features/pages/NutritionistFeature
 import SignalsFeature from "@/components/features/pages/SignalsFeature";
 import WidgetsFeature from "@/components/features/pages/WidgetsFeature";
 import RelatedFeatures from "@/components/features/RelatedFeatures";
-import FinalCta from "@/components/pricing/FinalCta";
+import SiteClosing from "@/components/features/SiteClosing";
 import { HideSiteFinalCta } from "@/components/pricing/SiteFinalCta";
-import { FEATURE_HERO_MEDIA } from "@/lib/featureHeroMedia";
 import { FEATURES, FEATURE_SLUGS, featureHref, isFeatureSlug, type FeatureSlug } from "@/lib/features";
+import { visitorOffer } from "@/lib/visitorOffer";
 
 const baseUrl = "https://www.tryprepit.app";
 
-/** Each page's sections. The phone in its header is in FEATURE_HERO_MEDIA. */
+/** Each page's sections. The still and card in its header are in FeatureHeroStage. */
 const PAGES: Record<FeatureSlug, ComponentType> = {
   "ai-nutritionist": NutritionistFeature,
   "nutrition-signals": SignalsFeature,
@@ -60,6 +60,8 @@ export default async function FeaturePage({ params }: Props) {
   if (!isFeatureSlug(slug)) notFound();
   const feature = FEATURES[slug];
   const Body = PAGES[slug];
+  // The closing band's prices follow the visitor's market, as on the homepage.
+  const { market, prices } = await visitorOffer();
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -75,11 +77,11 @@ export default async function FeaturePage({ params }: Props) {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <FeatureHero feature={feature} media={FEATURE_HERO_MEDIA[slug]} />
+      <FeatureHero feature={feature} market={market} prices={prices} />
       <Body />
       <RelatedFeatures slug={slug} />
-      {/* Feature pages end with their own download section, so start taps are counted per page (placement feature-<slug>). */}
-      <FinalCta trackingSource={`feature-${slug}`} />
+      {/* Feature pages end with the homepage's close, so start taps are counted per page (placement feature-<slug>-closing). */}
+      <SiteClosing market={market} prices={prices} placement={`feature-${slug}-closing`} />
       <HideSiteFinalCta />
     </>
   );

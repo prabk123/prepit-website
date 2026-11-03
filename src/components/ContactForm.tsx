@@ -24,7 +24,7 @@ function validate(values: Record<Field, string>): FieldErrors {
 }
 
 const inputClass =
-  "w-full min-w-0 rounded-icon border bg-page px-4 text-body text-ink placeholder:text-ink-faint transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus";
+  "w-full min-w-0 rounded-icon border bg-white px-4 text-body text-ink placeholder:text-ink-faint transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus";
 
 function borderFor(error?: string) {
   return error ? "border-error" : "border-ink-faint hover:border-ink-muted";
@@ -116,7 +116,10 @@ export default function ContactForm({ kind }: { kind: ContactKind }) {
     }
   }
 
-  const card = "rounded-card border border-line bg-surface p-6 sm:p-10";
+  // The homepage's lifted cream card (v9 pricing and closing cards). The shadow
+  // is --shadow-v9-card, written out because that token is scoped to v9 pages.
+  const card =
+    "rounded-[26px] bg-surface p-5 shadow-[0_24px_48px_-26px_rgb(40_30_20/0.42),0_4px_14px_-6px_rgb(40_30_20/0.14)] ring-1 ring-black/5 sm:p-8";
 
   if (status === "sent") {
     return (

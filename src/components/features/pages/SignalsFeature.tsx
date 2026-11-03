@@ -1,141 +1,132 @@
-import DeviceFrame from "@/components/device/DeviceFrame";
-import DevicePair from "@/components/device/DevicePair";
-import FeatureBlock from "@/components/features/FeatureBlock";
-import CaptureRow from "@/components/ui/CaptureRow";
-import Glow from "@/components/ui/Glow";
-import PhotoBand from "@/components/ui/PhotoBand";
-import Section from "@/components/ui/Section";
-import SectionHeading from "@/components/ui/SectionHeading";
+import ScreenCard from "@/components/features/ScreenCard";
+import { V9Screen } from "@/components/landing/v9/V9Photo";
+import { Chip, DotTag, Split, V9Section } from "@/components/landing/v9/V9Sections";
 import TextLink from "@/components/ui/TextLink";
-import { lunchRings } from "@/content/lifestyle";
 import { appCapture } from "@/lib/captures";
 
-const PHONE = "[--device-w:260px] sm:[--device-w:300px] lg:[--device-w:clamp(260px,22vw,320px)]";
-
-// Each score under its own screen, so this isn't a text-only stretch on phones (PRE-285).
-const DRIVERS = [
+/**
+ * Each score as the question it answers, with the app's own plain-words
+ * reason card under it (PRE-452). The "What moves each score" factor lists
+ * are gone on purpose: no inputs, weights or thresholds are spelled out on
+ * the site.
+ */
+const QUESTIONS = [
   {
-    title: "Energy",
-    detail:
-      "Will you hit a slump mid-afternoon? It looks at how close you are to your calorie goal, protein in the morning, sugar against other carbs, glycaemic load and how you spread your meals.",
-    accent: "var(--color-energy)",
-    capture: appCapture("06-signal-energy", "Energy at 84, with how it's shaped: calorie fit and meal spread"),
+    tag: "Energy",
+    question: "Will you hit a slump mid-afternoon?",
+    screen: { name: "see-why-energy-oats", width: 740, height: 293 },
+    alt: "Energy +34: morning protein provides a steady power supply to your day",
   },
   {
-    title: "Satiety",
-    detail:
-      "Will you stay full until your next meal, or find yourself at the biscuit tin? It looks at protein, fibre and how processed your meals are.",
-    accent: "var(--color-satiety)",
-    capture: appCapture("06b-signal-satiety", "Satiety at 96, with how it's shaped: protein and fibre"),
+    tag: "Satiety",
+    question: "Will you stay full until your next meal?",
+    screen: { name: "see-why-satiety", width: 732, height: 295 },
+    alt: "Satiety, with the reason in plain words",
   },
   {
-    title: "Mood",
-    detail:
-      "Will today feel calm and steady? It reads yesterday's whole day, because that's the food that shapes how you feel this morning.",
-    accent: "var(--color-mood)",
-    capture: appCapture("06c-signal-mood", "Mood at 87, with how yesterday's log shaped it: no ultra-processed food"),
+    tag: "Mood",
+    question: "Will today feel calm and steady?",
+    screen: { name: "see-why-mood", width: 732, height: 337 },
+    alt: "Mood, with the reason in plain words",
   },
 ];
 
+/** "Nothing to wear or charge.": the same row as "What it won't do." on the Features overview. */
+const NOTHING_TO_WEAR = [
+  ["No ring.", "Everything starts from what you eat."],
+  ["No watch.", "Connect Apple Health and it can tell a hungry gym day from a hungry rest day."],
+  ["No glucose monitor.", "No sensors, no finger pricks, no extra kit."],
+  ["No guessing.", "When there isn't enough in your log to go on, it says so."],
+];
+
 /**
- * /features/nutrition-signals: standout 2, "how your food will make you
- * feel". The rings, a worked example of a reason and a next step, what moves
- * each score, the week view, and no wearable.
+ * /features/nutrition-signals (PRE-452, from Charlie's site pages handoff,
+ * docs/copy/03-signals.md): three questions with their reason cards, every
+ * number comes with a reason, and nothing to wear or charge. The hero, the
+ * related-feature tiles and the close are the shared parts from PRE-450.
  */
 export default function SignalsFeature() {
   return (
     <>
-      <PhotoBand
-        id="at-a-glance"
-        labelledBy="at-a-glance-heading"
-        // Home's three rings, which this band describes; the hero above already shows Energy's detail (PRE-288).
-        photo={lunchRings.desktop}
-        phonePhoto={lunchRings.mobile}
-        textSide={lunchRings.textSide}
-      >
-        <SectionHeading
-          id="at-a-glance-heading"
-          size="section"
-          title="One look tells you how today is going."
-          lead="Three rings on Home, each from 0 to 100. Green, amber or red shows how today is going while there's still time to change dinner."
-        />
-      </PhotoBand>
-
-      <Section id="drivers" labelledBy="drivers-heading">
-        <div className="flex flex-col gap-stack">
-          <SectionHeading
-            id="drivers-heading"
-            size="section"
-            title="What moves each score."
-            lead="Not just how much you ate, but what, and when."
-          />
-          <CaptureRow label="What moves each score" items={DRIVERS} />
+      <V9Section id="three-questions" name="three-questions" labelledBy="three-questions-heading" band>
+        <div className="flex flex-col gap-10">
+          <div className="flex flex-col gap-4">
+            <h2 id="three-questions-heading" className="font-display text-chapter text-ink text-balance">
+              Three questions, answered as you eat.
+            </h2>
+            <p className="max-w-[34em] text-lead text-ink-secondary text-pretty">
+              Each score runs from 0 to 100 and turns green, amber or red, while there&apos;s still time to change dinner.
+            </p>
+          </div>
+          <ul className="grid gap-6 min-[900px]:grid-cols-3">
+            {QUESTIONS.map((item) => (
+              <li key={item.tag} className="relative pt-3">
+                <span className="absolute left-3.5 top-0 z-[2]">
+                  <DotTag pill>{item.tag}</DotTag>
+                </span>
+                <div className="flex h-full flex-col gap-3 rounded-[18px] bg-white p-4 pt-6 shadow-[var(--shadow-v9-card)] ring-1 ring-black/5">
+                  <h3 className="font-display text-[22px] font-medium leading-tight text-ink text-balance">{item.question}</h3>
+                  <div className="mt-auto overflow-hidden rounded-xl">
+                    <V9Screen {...item.screen} alt={item.alt} />
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
         </div>
-      </Section>
+      </V9Section>
 
-      <FeatureBlock
-        id="every-meal"
-        tone="surface"
-        title="Every score comes with a reason."
-        lead="Tap a ring to see what moved it, like a breakfast light on protein. Open any meal to see what it did to each score."
-        media={
-          <div className="relative">
-            <Glow />
-            <DeviceFrame
-              className={PHONE}
-              capture={appCapture(
-                "05b-meal-detail-scrolled",
-                "A logged breakfast's Energy +34, Satiety +4 and Mood +11 cards, each with a line on why, like morning protein giving a steady power supply",
-              )}
+      <V9Section id="every-reason" name="every-reason" labelledBy="every-reason-heading">
+        <Split
+          reverse
+          text={
+            <>
+              <h2 id="every-reason-heading" className="font-display text-chapter text-ink text-balance">
+                Every number comes with a reason.
+              </h2>
+              <p className="max-w-[34em] text-lead text-ink-secondary text-pretty">
+                Tap a ring and it tells you what moved it, in plain words. Open any meal to see what it did to each
+                score, with a tip for next time.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <Chip>Tap a ring for the why</Chip>
+                <Chip>Each meal shows its effect</Chip>
+              </div>
+            </>
+          }
+          media={
+            // The capture ends at the top of the Energy card, above its "How it's shaped" rows.
+<ScreenCard
+              width={340}
+              ring
+              capture={appCapture("05-meal-detail", "Protein overnight oats: calories, macros, each ingredient, and its Energy card")}
             />
-          </div>
-        }
-      >
-        <TextLink href="/guides/energy-satiety-and-mood">Guide: read your Energy, Satiety and Mood</TextLink>
-      </FeatureBlock>
+          }
+        />
+      </V9Section>
 
-      <FeatureBlock
-        id="your-week"
-        layout="peek"
-        title="See what helped your week."
-        lead="On Progress, What your food did shows the last 7 days of each score and what pushed it up or down, like protein at breakfast helping, or fibre slipping."
-        media={
-          <div className="relative">
-            <Glow />
-            <DevicePair className={PHONE}>
-              <DeviceFrame
-                capture={appCapture(
-                  "07-food-analysis",
-                  "What your food did: the last 7 days of Energy, Satiety and Mood, and what changed",
-                )}
-              />
-              <DeviceFrame
-                className="hidden sm:block"
-                capture={appCapture(
-                  "06b-signal-satiety",
-                  "Satiety's detail for the day, with what shaped the score",
-                )}
-              />
-            </DevicePair>
-          </div>
-        }
-      />
-
-      <Section id="no-wearable" tone="surface" labelledBy="no-wearable-heading">
-        <div className="flex flex-col gap-stack">
-          <SectionHeading
-            id="no-wearable-heading"
-            size="section"
-            title="No ring. No watch. No glucose monitor."
-            lead="Everything starts from what you eat, so there's nothing to wear or charge. Connect Apple Health and it can tell a hungry gym day from a hungry rest day."
-          />
-          <p className="max-w-[60ch] text-body text-ink-muted text-pretty">
-            The scores are built on published nutrition research. They&apos;re estimates to guide your next meal,
-            not a medical measurement, and when there isn&apos;t enough to go on, PrepIt says so.
+      <V9Section id="nothing-to-wear" name="nothing-to-wear" labelledBy="nothing-to-wear-heading" band>
+        <div className="flex flex-col gap-8">
+          <h2 id="nothing-to-wear-heading" className="font-display text-section text-ink text-balance">
+            Nothing to wear or charge.
+          </h2>
+          <ul className="grid border-t border-line-strong min-[521px]:grid-cols-2 min-[901px]:grid-cols-4">
+            {NOTHING_TO_WEAR.map(([heading, body]) => (
+              <li
+                key={heading}
+                className="border-b border-line py-5 pr-3.5 min-[901px]:border-b-0 min-[901px]:border-r min-[901px]:px-[22px] min-[901px]:pb-1.5 min-[901px]:first:pl-0 min-[901px]:last:border-r-0"
+              >
+                <h3 className="mb-2.5 font-display text-[22px] font-medium leading-tight text-ink">{heading}</h3>
+                <p className="text-[15.5px] text-ink-secondary">{body}</p>
+              </li>
+            ))}
+          </ul>
+          <p className="max-w-[60ch] text-small text-ink-muted text-pretty">
+            The scores are built on published nutrition research. They&apos;re estimates to guide your next meal, not a
+            medical measurement. <TextLink href="/research#scores">What they&apos;re built on</TextLink>
           </p>
-          <TextLink href="/research#scores">How the scores are built, with sources</TextLink>
         </div>
-      </Section>
+      </V9Section>
     </>
   );
 }

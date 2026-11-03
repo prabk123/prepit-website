@@ -422,7 +422,7 @@ export function ItNoticesSection({ aliases }: { aliases?: string[] } = {}) {
             <div className="flex flex-wrap gap-2">
               <Chip>1 focus each week</Chip>
               <Chip>Weekly Check-in</Chip>
-              <Chip>Max 1 message daily</Chip>
+              <Chip>A light touch</Chip>
             </div>
           </>
         }
@@ -509,7 +509,8 @@ export function ItPlansSection({ market, aliases }: { market: WebMarket; aliases
 
 // ---------------------------------------------------------------- 9. ask nutritionist
 
-function YouSaid({ children }: { children: ReactNode }) {
+/** The visitor's side of a chat, as a quote (also on the Your nutritionist page). */
+export function YouSaid({ children }: { children: ReactNode }) {
   return (
     <div className="flex max-w-[40rem] flex-col gap-2">
       <p className="text-[12px] font-bold uppercase tracking-[0.1em] text-ink-muted">You · typed</p>
@@ -518,9 +519,10 @@ function YouSaid({ children }: { children: ReactNode }) {
   );
 }
 
-function NutritionistSaid({ children }: { children: ReactNode }) {
+/** The nutritionist's reply, set in from the right. `className` replaces the default width and inset. */
+export function NutritionistSaid({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <div className="ml-auto flex w-[88%] max-w-[34rem] flex-col gap-2 min-[900px]:w-1/2">
+    <div className={`flex flex-col gap-2 ${className ?? "ml-auto w-[88%] max-w-[34rem] min-[900px]:w-1/2"}`}>
       <p className="text-[12px] font-bold uppercase tracking-[0.1em]">
         <span className="text-gradient-brand">Your nutritionist</span>
       </p>

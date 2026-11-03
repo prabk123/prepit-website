@@ -1,165 +1,160 @@
-import DeviceFrame from "@/components/device/DeviceFrame";
-import DevicePair from "@/components/device/DevicePair";
-import FeatureBlock from "@/components/features/FeatureBlock";
-import ChatCapture from "@/components/ui/ChatCapture";
-import Glow from "@/components/ui/Glow";
-import Section from "@/components/ui/Section";
-import SectionHeading from "@/components/ui/SectionHeading";
-import SwipeRow from "@/components/ui/SwipeRow";
-import TextLink from "@/components/ui/TextLink";
-import { missedBreakfast, proteinShort, weeklyPattern, weighIn } from "@/content/nutritionistMessages";
-import { appCapture, appVideo } from "@/lib/captures";
-import { RESEARCH_PAGE_HREF } from "@/lib/research";
+import { CapturePicture } from "@/components/features/PhotoStage";
+import ScreenCard from "@/components/features/ScreenCard";
+import { Chip, DotTag, Eyebrow, Glass, Head, NutritionistSaid, Split, V9Section, YouSaid } from "@/components/landing/v9/V9Sections";
+import { missedBreakfast, proteinShort, weeklyPattern } from "@/content/nutritionistMessages";
+import { appCapture } from "@/lib/captures";
 
-const PHONE = "[--device-w:260px] sm:[--device-w:300px] lg:[--device-w:clamp(260px,22vw,320px)]";
+/** The free consultation: the same three steps as the cart and the homepage offer. */
+const CONSULTATION = [
+  { when: "Today · about 5 minutes", title: "Getting to know you", body: "Your routine, your goal and what a normal day looks like." },
+  { when: "After 3 days of meals", title: "What I've noticed so far", body: "The patterns in your meals, and one focus you pick together." },
+  { when: "Around day 7", title: "Week-in-review", body: "A review of your week, and a plan for next week if you want one." },
+];
 
 /**
- * /features/ai-nutritionist: standout 1, "knows you and speaks up". It leads
- * with the messages it sends on its own, then how it gets to know you, then
- * what you can ask it. Voice calls are left out until they are on for
- * everyone (copy doc, 13 Oct).
+ * Real messages it sends on its own, as the app's own chat crops (PRE-283,
+ * shot on the test account with the seeds that send them), captioned by the
+ * moment rather than the rule that sends them. The protein message is the
+ * funnel pack's egg-cups message, left as drawn (open with Charlie).
+ */
+const MESSAGES = [
+  { tag: "Breakfast time", message: missedBreakfast, caption: "A gap in your day, the same morning." },
+  { tag: "After 3 weeks", message: proteinShort, caption: "A pattern it's seen for a while." },
+  { tag: "Every week", message: weeklyPattern, caption: "The same days, week after week." },
+];
+
+const LIMITS = [
+  "It won't diagnose anything or change a dose.",
+  "For anything medical, it points you to your GP, a pharmacist or a registered dietitian.",
+  "It's an AI nutritionist, and it always says so.",
+];
+
+const chart = appCapture("02-chat-chart", "The chat: protein per day for the last week as a bar chart, against a 158 g target");
+
+/**
+ * /features/ai-nutritionist (PRE-451, Charlie's site pages handoff,
+ * docs/copy/02-nutritionist.md): the template for the five feature pages.
+ * The hero still and its lifted focus picker are FeatureHeroStage; the
+ * related tiles and the close come from the feature page route. In between:
+ * the consultation, the messages it sends, Ask Nutritionist and its limits,
+ * on alternating band and cream.
  */
 export default function NutritionistFeature() {
   return (
     <>
-      <Section id="speaks-up" tone="surface" labelledBy="speaks-up-heading">
-        <div className="flex flex-col gap-stack">
-          <SectionHeading
-            id="speaks-up-heading"
-            size="section"
-            title="It speaks up before you slip."
-            lead="A good nutritionist doesn't wait for your next appointment to mention what they've noticed. Neither does yours. These are real messages it sends on its own."
+      <V9Section id="consultation" name="consultation" labelledBy="consultation-heading" band>
+        <div className="flex flex-col gap-10">
+          <Head
+            id="consultation-heading"
+            label="Your free consultation"
+            title="It starts with a 5-minute chat."
+            lead="Three short chats across your first week. By the end it knows your routine, your goal and the one change worth making first."
           />
-          {/*
-            Real messages cropped from the app's chat (PRE-283), one row you swipe on phones (PRE-285).
-            On desktop, two columns about as wide as the phone screen, so the chat text reads at the
-            app's own size; four in one row made it about 8 px (PRE-318).
-          */}
-          <SwipeRow
-            label="Messages your nutritionist sends on its own"
-            desktop="columns"
-            itemClassName="w-[82%] max-w-[340px]"
-            className="lg:max-w-[880px]"
-          >
-            {[missedBreakfast, proteinShort, weeklyPattern, weighIn].map((message) => (
-              <ChatCapture key={message.caption} {...message} />
+          <ol className="grid gap-4 min-[821px]:grid-cols-3">
+            {CONSULTATION.map((step, index) => (
+              <li key={step.title} className="flex flex-col gap-2 rounded-[22px] bg-surface p-[22px]">
+                <span
+                  aria-hidden
+                  className="mb-1.5 grid h-[30px] w-[30px] place-items-center rounded-full bg-primary text-[13px] font-bold text-on-primary"
+                >
+                  {index + 1}
+                </span>
+                <span className="text-[11.5px] font-bold uppercase tracking-[0.12em] text-ink-muted">{step.when}</span>
+                <h3 className="font-display text-[22px] leading-tight text-ink">
+                  <span className="sr-only">{index + 1}. </span>
+                  {step.title}
+                </h3>
+                <p className="text-[15.5px] text-ink-secondary">{step.body}</p>
+              </li>
             ))}
-          </SwipeRow>
-          <p className="text-small text-ink-faint">
-            It sends one of these at most once a day, and only when it&apos;s useful. Missed-log nudges, pattern
-            check-ins, weekly calorie pattern ideas and weigh-in reminders each have a switch in Settings.
+          </ol>
+        </div>
+      </V9Section>
+
+      <V9Section id="speaks-up" name="speaks-up" labelledBy="speaks-up-heading">
+        <div className="flex flex-col gap-10">
+          <div className="flex flex-col gap-4">
+            <h2 id="speaks-up-heading" className="font-display text-chapter text-ink text-balance">
+              Then it speaks up before you slip.
+            </h2>
+            <p className="max-w-[34em] text-lead text-ink-secondary text-pretty">
+              A good nutritionist doesn&apos;t wait for your next appointment to mention what they&apos;ve noticed. Neither
+              does yours. These are real messages it sends.
+            </p>
+          </div>
+          <ul className="grid max-w-[460px] items-start gap-[18px] min-[901px]:max-w-none min-[901px]:grid-cols-3">
+            {MESSAGES.map((message) => (
+              <li key={message.tag}>
+                <figure className="flex flex-col gap-3">
+                  <div className="relative pt-3">
+                    <span className="absolute left-3.5 top-0 z-[1]">
+                      <DotTag pill>{message.tag}</DotTag>
+                    </span>
+                    <Glass>
+                      <CapturePicture capture={message.message.capture} />
+                    </Glass>
+                  </div>
+                  <figcaption className="pl-1 text-[13.5px] text-ink-muted">{message.caption}</figcaption>
+                </figure>
+              </li>
+            ))}
+          </ul>
+          <p className="max-w-[60em] text-small text-ink-muted">
+            A light touch: it stays quiet before 8am and after 9pm, pattern notes come every few weeks at most, and each
+            kind of message has its own switch in Settings.
           </p>
         </div>
-      </Section>
+      </V9Section>
 
-      <FeatureBlock
-        id="consultation"
-        reverse
-        title="First, it gets to know you."
-        lead="It starts with a short consultation about how you eat now. After a few days of meals, it tells you what it noticed and agrees one thing to change first."
-        media={
-          <div className="relative">
-            <Glow />
-            <DevicePair className={PHONE}>
-              <DeviceFrame
-                capture={appCapture(
-                  "20-focus-picker",
-                  "Pick your focus: front-load protein at breakfast, even out the day, or make snacks work harder",
-                )}
-              />
-              <DeviceFrame
-                className="hidden sm:block"
-                capture={appCapture(
-                  "11-check-in-report",
-                  "A weekly check-in report headed Your steadiest week yet, with weight against a goal and calories by day",
-                )}
-              />
-            </DevicePair>
+      <V9Section id="ask-nutritionist" name="ask-nutritionist" labelledBy="ask-heading" band>
+        <Split
+          reverse
+          text={
+            <>
+              <Eyebrow>Ask Nutritionist</Eyebrow>
+              <h2 id="ask-heading" className="font-display text-chapter text-ink text-balance">
+                Talk it through, any hour.
+              </h2>
+              <div className="mt-2 flex flex-col gap-6">
+                <YouSaid>“Can you show me my protein for the last week?”</YouSaid>
+                <NutritionistSaid className="max-w-[30em] min-[480px]:ml-[clamp(0px,8vw,120px)]">
+                  <p>
+                    Here&apos;s your protein for the last 7 days. Lunch does most of the work, so breakfast is the easiest
+                    place to add a few grams.
+                  </p>
+                </NutritionistSaid>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Chip>Logs meals from chat</Chip>
+                <Chip>Voice notes</Chip>
+                <Chip>Every change waits for your yes</Chip>
+              </div>
+            </>
+          }
+          media={
+            <ScreenCard capture={chart} ring />
+          }
+        />
+      </V9Section>
+
+      <V9Section id="limits" name="limits" labelledBy="limits-heading">
+        <div className="grid gap-x-14 gap-y-7 rounded-[28px] bg-primary p-[clamp(28px,5vw,56px)] text-on-primary min-[821px]:grid-cols-2">
+          <div className="flex flex-col gap-4">
+            <p className="text-[12px] font-bold uppercase leading-none tracking-[0.12em] text-white/60">It knows its limits</p>
+            <h2 id="limits-heading" className="font-display text-section text-white text-balance">
+              A coach, not a doctor.
+            </h2>
           </div>
-        }
-      >
-        <p className="max-w-[56ch] text-body text-ink-muted text-pretty">
-          Every week after that, a check-in looks back at what you logged and picks one focus for the week ahead.
-          You can keep it, pick another or talk it through. It remembers your goals, your notes and what you told
-          it last week, so you never start from scratch.
-        </p>
-        <TextLink href="/guides/consultation-and-weekly-check-in">
-          Guide: your consultation and weekly check-in
-        </TextLink>
-      </FeatureBlock>
-
-      <FeatureBlock
-        id="charts"
-        tone="surface"
-        title="Ask it anything about your week."
-        lead="What to have for dinner, why you're hungry by 4pm, how to fit in a takeaway. It answers from what you actually ate, with a chart when that's quicker."
-        media={
-          <div className="relative">
-            <Glow />
-            <DeviceFrame
-              className={PHONE}
-              capture={appCapture(
-                "02-chat-chart",
-                "The nutritionist answering a question about protein with a chart of protein per day against a 158 g target",
-              )}
-            />
-          </div>
-        }
-      >
-        <TextLink href="/guides/ask-your-nutritionist">Guide: ask your nutritionist</TextLink>
-      </FeatureBlock>
-
-      <FeatureBlock
-        id="log-it"
-        reverse
-        title="Tell it what you had. It does the rest."
-        lead="Mention a meal and it prepares a Log it card with the calories and macros worked out. It can also move a meal, fix an amount or change your goals."
-        media={
-          <div className="relative">
-            <Glow />
-            <DeviceFrame
-              className={PHONE}
-              video={appVideo("09-chat-log-it", "Telling the nutritionist about a meal and logging it from the Log it card")}
-            />
-          </div>
-        }
-      >
-        <p className="max-w-[56ch] text-body text-ink-muted text-pretty">
-          Any log, plan or goal change it makes from chat shows up as a card first, and nothing is saved until you tap it.
-        </p>
-      </FeatureBlock>
-
-      <FeatureBlock
-        id="voice-notes"
-        layout="peek"
-        tone="surface"
-        title="Talk, and hear a reply."
-        lead="Tap the mic and talk for up to two minutes. Your nutritionist answers in its own voice, with the words written underneath."
-        media={
-          <div className="relative">
-            <Glow />
-            <DeviceFrame
-              className={PHONE}
-              capture={appCapture(
-                "10-voice-note",
-                "A voice note asking to log a chicken burrito bowl, a spoken reply and a Log it card for 674 kcal",
-              )}
-            />
-          </div>
-        }
-      />
-
-      <Section id="limits" labelledBy="limits-heading">
-        <div className="flex flex-col gap-6">
-          <SectionHeading
-            id="limits-heading"
-            size="title"
-            title="A nutritionist, not a doctor."
-            lead="It won't diagnose anything or suggest a dose beyond the public reference amount. For anything medical, it points you to your GP, a pharmacist or a registered dietitian."
-          />
-          <TextLink href={RESEARCH_PAGE_HREF}>How your nutritionist decides what to say</TextLink>
+          <ul>
+            {LIMITS.map((limit) => (
+              <li key={limit} className="flex gap-3 border-b border-white/12 py-1.5 text-body text-white/90 last:border-b-0">
+                <span aria-hidden className="mt-[0.62em] h-1.5 w-1.5 flex-none rounded-full bg-accent" />
+                {limit}
+              </li>
+            ))}
+          </ul>
         </div>
-      </Section>
+      </V9Section>
     </>
   );
 }
