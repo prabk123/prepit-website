@@ -141,21 +141,21 @@ export default async function ResearchPage() {
                   Before your nutritionist says anything, it has checked your meal against official food data, the research
                   behind each score and public health guidance. Here&apos;s what it stands on.
                 </p>
-                <dl className="grid border-t border-line-strong min-[681px]:grid-cols-3">
+                <ul className="grid border-t border-line-strong min-[681px]:grid-cols-3">
                   {FIGURES.map(([figure, label], index) => (
-                    <div
+                    <li
                       key={label}
-                      className={`grid grid-rows-[auto_1fr] content-start gap-1.5 pb-1 pt-5 min-[681px]:pr-5 ${
+                      className={`flex flex-col gap-1.5 pb-1 pt-5 min-[681px]:pr-5 ${
                         index > 0 ? "border-t border-line min-[681px]:border-l min-[681px]:border-t-0 min-[681px]:pl-5" : ""
                       }`}
                     >
-                      <dt className="row-start-2 max-w-[18em] text-[15px] text-ink-secondary">{label}</dt>
-                      <dd className="row-start-1 font-display text-[clamp(44px,36px+2vw,64px)] font-medium leading-none tracking-[-0.02em] tabular-nums text-ink">
+                      <b className="font-display text-[clamp(44px,36px+2vw,64px)] font-medium leading-none tracking-[-0.02em] tabular-nums text-ink">
                         {figure}
-                      </dd>
-                    </div>
+                      </b>
+                      <span className="max-w-[18em] text-[15px] text-ink-secondary">{label}</span>
+                    </li>
                   ))}
-                </dl>
+                </ul>
               </>
             }
             media={
