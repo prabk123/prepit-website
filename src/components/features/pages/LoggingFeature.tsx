@@ -1,130 +1,96 @@
-import DeviceFrame from "@/components/device/DeviceFrame";
-import FeatureBlock from "@/components/features/FeatureBlock";
-import Glow from "@/components/ui/Glow";
-import TextLink from "@/components/ui/TextLink";
-import { appCapture, appVideo } from "@/lib/captures";
-
-const PHONE = "[--device-w:260px] sm:[--device-w:300px] lg:[--device-w:clamp(260px,22vw,320px)]";
+import ScreenCard from "@/components/features/ScreenCard";
+import { Chip, Split, V9Section } from "@/components/landing/v9/V9Sections";
+import { appCapture } from "@/lib/captures";
 
 /**
- * /features/logging: the answer to "I've quit trackers before". Typing,
- * photo, Siri and the Action button, accuracy, offline. Typed, photo and Siri
- * meals go on the log straight away; only chat cards wait for a tap.
+ * A still, not the 04-log-photo clip: the clip goes on to a "When did you eat
+ * this?" sheet with a Confirm button, and typed or photo meals save straight
+ * away. Its poster is the result screen, so this is a frame from 9.5 s.
+ */
+const describe = appCapture("04b-log-photo-describe", "A plate photo on the Describe your meal sheet, with “homemade, about 400 g” typed under it");
+
+const detail = appCapture("05-meal-detail", "A logged breakfast broken into its ingredients, each with its own numbers");
+
+/** The live page's accuracy and offline points, as one row of four (docs/copy/05-logging.md, section 4). */
+const POINTS = [
+  ["Official figures first.", "Branded and restaurant food starts from the brand's own numbers."],
+  ["It asks when it's unsure.", "“Dinner at a restaurant” gets a quick question, so your day stays accurate."],
+  ["Easy to fix.", "Edit any item, or ask your nutritionist to change it."],
+  ["No signal? Log anyway.", "On a train or a flight, it saves on your phone and sends when you're back."],
+];
+
+/**
+ * /features/logging (PRE-454, from Charlie's site pages handoff): a few
+ * words get it closer, snap your plate, then the accuracy and offline points
+ * in one row. The header's still and lifted cards are in FeatureHeroStage.
+ * Typed, spoken and photo meals go on the log straight away and the numbers
+ * follow, so nothing here says you confirm before it saves. Siri and the
+ * Action button live on Widgets and Siri.
  */
 export default function LoggingFeature() {
   return (
     <>
-      <FeatureBlock
-        id="type-it"
-        tone="surface"
-        title="Type it like you'd text a friend."
-        lead="“Chicken wrap, an apple and a flat white” is enough. It's on your log straight away, and the calories and macros fill in a few seconds later."
-        media={
-          <div className="relative">
-            <Glow />
-            <DeviceFrame
-              className={PHONE}
-              capture={appCapture(
-                "01b-home-log",
-                "Today's log in PrepIt: protein overnight oats, coffee with milk and a chicken wrap with hummus, each with its calories and its effect on Energy, Satiety and Mood",
-              )}
-            />
-          </div>
-        }
-      >
-        <p className="max-w-[56ch] text-body text-ink-muted text-pretty">
-          There&apos;s no database to search and no barcode to find. A couple of extra words, like how much, how it
-          was cooked or the brand, get the numbers much closer to the truth. Rather talk? Tap the mic and say it.
-        </p>
-        <TextLink href="/guides/describe-meals-accurately">Guide: describe meals accurately</TextLink>
-      </FeatureBlock>
+      <V9Section id="describe-it" name="logging-describe" labelledBy="describe-it-heading" band aliases={["type-it"]}>
+        <Split
+          reverse
+          text={
+            <>
+              <h2 id="describe-it-heading" className="font-display text-chapter text-ink text-balance">
+                A few words get it closer.
+              </h2>
+              <p className="max-w-[34em] text-lead text-ink-secondary text-pretty">
+                There&apos;s no database to search and no barcode to find. Add how much, how it was cooked or the brand, and
+                the numbers get much closer to the truth.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <Chip>Every ingredient itemised</Chip>
+                <Chip>Edit any item</Chip>
+              </div>
+            </>
+          }
+          media={
+            <ScreenCard ring capture={detail} />
+          }
+        />
+      </V9Section>
 
-      <FeatureBlock
-        id="snap-it"
-        reverse
-        title="Or just snap your plate."
-        lead="Take a photo and PrepIt works out what's on the plate. Add a few words, like the restaurant or the portion, and it uses both."
-        media={
-          <div className="relative">
-            <Glow />
-            <DeviceFrame
-              className={PHONE}
-              video={appVideo("04-log-photo", "Logging a chicken burrito bowl from a photo of the plate, then the meal's 529 calories and the items PrepIt found")}
-            />
-          </div>
-        }
-      >
-        <TextLink href="/guides/log-a-meal-with-a-photo">Guide: log a meal with a photo</TextLink>
-      </FeatureBlock>
+      <V9Section id="snap-it" name="logging-photo" labelledBy="snap-it-heading">
+        <Split
+          text={
+            <>
+              <h2 id="snap-it-heading" className="font-display text-chapter text-ink text-balance">
+                Or just snap your plate.
+              </h2>
+              <p className="max-w-[34em] text-lead text-ink-secondary text-pretty">
+                Take a photo and PrepIt works out what&apos;s on it. Add a few words, like the restaurant or the portion, and it
+                uses both.
+              </p>
+            </>
+          }
+          media={
+            <ScreenCard ring capture={describe} />
+          }
+        />
+      </V9Section>
 
-      <FeatureBlock
-        id="accuracy"
-        tone="surface"
-        title="Close to the truth, and easy to fix."
-        lead="Branded and restaurant food starts from the official figures. Typed and photo meals show what PrepIt assumed."
-        media={
-          <div className="relative">
-            <Glow />
-            <DeviceFrame
-              className={PHONE}
-              capture={appCapture(
-                "05-meal-detail",
-                "Protein overnight oats with apple and cinnamon: 357 calories, 40 g carbs, 34 g protein and 7 g fat, with each item it assumed, like 51 calories of rolled oats, and edit at the top",
-              )}
-            />
-          </div>
-        }
-      >
-        <p className="max-w-[56ch] text-body text-ink-muted text-pretty">
-          When it&apos;s unsure, it asks. “Dinner at a restaurant” gets a quick question from your nutritionist, so
-          your day stays accurate. And if something looks off, you can edit any item or ask for it to be refined.
-        </p>
-      </FeatureBlock>
-
-      <FeatureBlock
-        id="siri"
-        reverse
-        title="Log it without opening the app."
-        lead="Say “Hey Siri, log a meal in PrepIt”. Siri asks what you ate and when, and it's on your log. There's nothing to set up."
-        media={
-          <div className="relative">
-            <Glow />
-            <DeviceFrame
-              className={PHONE}
-              capture={appCapture(
-                "22-action-button-siri",
-                "Siri asking “What did you eat?” after a press of the Action button, without opening PrepIt",
-              )}
-            />
-          </div>
-        }
-      >
-        <p className="max-w-[56ch] text-body text-ink-muted text-pretty">
-          Put the same action on the Action button and logging is one press and a sentence. You can also add a Log
-          a meal button to your Lock Screen or Control Centre (iOS 18 or later).
-        </p>
-        <TextLink href="/features/widgets-and-siri">More about widgets and Siri</TextLink>
-      </FeatureBlock>
-
-      <FeatureBlock
-        id="offline"
-        layout="peek"
-        tone="surface"
-        title="No signal? Log anyway."
-        lead="On a train or a flight, meals, water, supplements and weight save on your phone. They send on their own when you're back, and nothing is logged twice."
-        media={
-          <div className="relative">
-            <Glow />
-            <DeviceFrame
-              className={PHONE}
-              capture={appCapture(
-                "18b-offline-waiting-list",
-                "PrepIt offline: water and a weight waiting to send, with Try again now",
-              )}
-            />
-          </div>
-        }
-      />
+      <V9Section id="accuracy" name="logging-accuracy" labelledBy="accuracy-heading" band aliases={["offline"]}>
+        <div className="flex flex-col gap-8">
+          <h2 id="accuracy-heading" className="font-display text-section text-ink text-balance">
+            Close to the truth, and easy to fix.
+          </h2>
+          <ul className="grid border-t border-line-strong min-[521px]:grid-cols-2 min-[901px]:grid-cols-4">
+            {POINTS.map(([heading, body]) => (
+              <li
+                key={heading}
+                className="border-b border-line py-5 pr-3.5 min-[901px]:border-b-0 min-[901px]:border-r min-[901px]:px-[22px] min-[901px]:pb-1.5 min-[901px]:first:pl-0 min-[901px]:last:border-r-0"
+              >
+                <h3 className="mb-2.5 font-display text-[22px] font-medium leading-tight text-ink">{heading}</h3>
+                <p className="text-[15.5px] text-ink-secondary">{body}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </V9Section>
     </>
   );
 }

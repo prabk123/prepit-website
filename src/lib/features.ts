@@ -112,12 +112,12 @@ export const FEATURES: Record<FeatureSlug, FeatureMeta> = {
   logging: {
     slug: "logging",
     name: "Logging",
-    title: "Log meals in your own words, by photo or with Siri",
+    title: "Log meals in your own words, by voice or by photo",
     description:
-      "Type what you ate like a text, snap your plate or ask Siri. It's on your log straight away, checked against official brand and restaurant figures first.",
+      "Type what you ate like a text, say it or snap your plate. It's on your log straight away, checked against official brand and restaurant figures first.",
     summary: "Type it, snap it or say it. It's on your log straight away.",
-    heading: "Logging that doesn't feel like a chore.",
-    lead: "Logging is where most food apps lose people. Here you type “two eggs and buttered toast”, snap your plate or say it to Siri, and it's on your log straight away.",
+    heading: "Type it like you'd text a friend.",
+    lead: "“Chicken wrap, an apple and a flat white” is enough. Or say it, or snap your plate. It's on your log straight away, and the numbers fill in a few seconds later.",
     tile: {
       photo: { name: "wrap-plate", widths: STILL_WIDTHS },
       title: "Type it like a text.",
