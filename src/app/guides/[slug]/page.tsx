@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import DeviceFrame from "@/components/device/DeviceFrame";
 import PreloadImage from "@/components/media/PreloadImage";
 import GuideCard from "@/components/guides/GuideCard";
-import FinalCta from "@/components/pricing/FinalCta";
+import GuidesClosingSection from "@/components/guides/GuidesClosingSection";
+import ScreenCard from "@/components/guides/ScreenCard";
+import { V9Section } from "@/components/landing/v9/V9Sections";
 import { HideSiteFinalCta } from "@/components/pricing/SiteFinalCta";
 import FeatureSplit from "@/components/ui/FeatureSplit";
-import Glow from "@/components/ui/Glow";
 import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
 import {
@@ -96,7 +96,7 @@ export default async function GuidePage({ params }: Props) {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      {/* The header phone shows on desktop only, so it isn't eager (a hidden eager
+      {/* The header screen shows on desktop only, so it isn't eager (a hidden eager
           image still downloads on phones); preload it for desktop instead. */}
       {heroMedia.capture?.avif && (
         <PreloadImage
@@ -118,12 +118,7 @@ export default async function GuidePage({ params }: Props) {
         <FeatureSplit
           emphasis="text"
           mediaClassName="max-lg:hidden"
-          media={
-            <div className="relative py-4">
-              <Glow />
-              <DeviceFrame className="[--device-w:340px]" {...heroMedia} />
-            </div>
-          }
+          media={<ScreenCard className="mx-auto w-[300px]" {...heroMedia} />}
         >
           <nav aria-label="Breadcrumb">
             <Link
@@ -146,9 +141,10 @@ export default async function GuidePage({ params }: Props) {
         </FeatureSplit>
       </Section>
 
-      <Section tone="surface" className="max-lg:[&>div]:pt-stack">
+      {/* The article on the darker cream band, as in Charlie's site pages handoff (PRE-457). */}
+      <V9Section id="guide" name="guide-article" labelledBy="guide-heading" band className="max-lg:[&>div]:pt-stack">
         <article className="max-w-[720px]">{content}</article>
-      </Section>
+      </V9Section>
 
       <Section labelledBy="more-guides-heading">
         <div className="flex flex-col gap-8">
@@ -160,7 +156,7 @@ export default async function GuidePage({ params }: Props) {
               See all guides <span aria-hidden>→</span>
             </Link>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {more.map((g) => (
               <GuideCard key={g.slug} guide={g} />
             ))}
@@ -168,8 +164,8 @@ export default async function GuidePage({ params }: Props) {
         </div>
       </Section>
 
-      {/* Guides end with their own download section, so start taps are counted per guide. */}
-      <FinalCta trackingSource={`guide-${slug}`} />
+      {/* Guides end with their own cream close (PRE-457), so start taps are counted per guide. */}
+      <GuidesClosingSection placement={`guide-${slug}`} />
       <HideSiteFinalCta />
     </>
   );

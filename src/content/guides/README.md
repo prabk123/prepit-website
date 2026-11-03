@@ -21,7 +21,7 @@ All values are quoted strings except `order`.
 Plain Markdown, plus these (see `src/components/guides/GuideBlocks.tsx`). An unknown capture name fails the build.
 
 - Numbered lists render as steps.
-- `<Shots>` holds one to three `<Shot name="…" alt="…" caption="…" />` (a phone) or `<Widget name="15-widget-…" alt="…" caption="…" />`.
+- `<Shots>` holds one or two `<Shot name="…" alt="…" caption="…" />` (the screen as a lifted card, PRE-457) or `<Widget name="15-widget-…" alt="…" caption="…" />`.
 - `<Tips title="…">` holds `<Tip title="…">One line of text.</Tip>`. Keep each tip on one line, so MDX doesn't wrap it in a paragraph.
 - `<Examples>` holds `<Example title vague vagueNote specific specificNote />`.
 - `<Note>` for an aside, such as an iOS version requirement.

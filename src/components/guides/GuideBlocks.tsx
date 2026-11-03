@@ -1,6 +1,6 @@
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import Link from "next/link";
-import DeviceFrame from "@/components/device/DeviceFrame";
+import ScreenCard from "@/components/guides/ScreenCard";
 import { BentoTile } from "@/components/ui/Bento";
 import {
   appCapture,
@@ -16,9 +16,9 @@ import {
  * Media names must exist in `public/app`; an unknown name fails the build.
  */
 
-function Figure({ caption, children }: { caption?: string; children: ReactNode }) {
+function Figure({ caption, children, className }: { caption?: string; children: ReactNode; className?: string }) {
   return (
-    <figure className="flex flex-col items-center gap-4">
+    <figure className={`flex flex-col items-center gap-3 ${className ?? ""}`}>
       {children}
       {caption && (
         <figcaption className="max-w-[30ch] text-center text-small text-ink-muted text-pretty">
@@ -29,31 +29,26 @@ function Figure({ caption, children }: { caption?: string; children: ReactNode }
   );
 }
 
-/** One app screen in a phone, from a still or a screen recording. */
-export function Shot({ name, alt, caption }: { name: string; alt: string; caption?: string }) {
-  let media;
-  if (isAppClip(name)) media = { video: appVideo(name, alt) };
-  else if (isAppStill(name)) media = { capture: appCapture(name, alt) };
-  else throw new Error(`Guide capture "${name}" is not in public/app`);
+/** A still or a screen recording from public/app, as ScreenCard and DeviceFrame take it. */
+export function guideMedia(name: string, alt: string) {
+  if (isAppClip(name)) return { video: appVideo(name, alt) };
+  if (isAppStill(name)) return { capture: appCapture(name, alt) };
+  throw new Error(`Guide capture "${name}" is not in public/app`);
+}
 
+/** One app screen, a still or a screen recording, as a lifted card (PRE-457; it was a phone frame). */
+export function Shot({ name, alt, caption }: { name: string; alt: string; caption?: string }) {
   return (
-    <Figure caption={caption}>
-      {/* 400 px on desktop puts the app's 12 pt text at about 11 px, readable without zooming. */}
-      <DeviceFrame
-        className="[--device-w:260px] sm:[--device-w:340px] lg:[--device-w:400px]"
-        {...media}
-      />
+    <Figure caption={caption} className="w-[min(100%,300px)] min-[560px]:w-[310px]">
+      <ScreenCard className="w-full" {...guideMedia(name, alt)} />
     </Figure>
   );
 }
 
-/**
- * One to three <Shot>s. On desktop the row is wider than the 720 px reading
- * column, so two full-size phones still fit side by side.
- */
+/** One or two <Shot>s (or <Widget>s), side by side from 560 px, inside the reading column. */
 export function Shots({ children }: { children: ReactNode }) {
   return (
-    <div className="my-12 flex flex-wrap items-start justify-center gap-x-10 gap-y-12 lg:relative lg:left-1/2 lg:w-[min(960px,calc(100vw-2*var(--spacing-gutter)))] lg:-translate-x-1/2">
+    <div className="my-12 flex max-w-[720px] flex-wrap items-start gap-x-5 gap-y-10">
       {children}
     </div>
   );
@@ -157,7 +152,7 @@ export function Examples({ children }: { children: ReactNode }) {
 /** A short aside, for version requirements and the like. */
 export function Note({ children }: { children: ReactNode }) {
   return (
-    <p className="my-6 border-l-2 border-accent pl-4 text-body text-ink-muted [&_strong]:text-ink-secondary">
+    <p className="my-6 max-w-[640px] border-l-[3px] border-accent py-1 pl-4 text-body text-ink-secondary [&_strong]:text-ink">
       {children}
     </p>
   );
@@ -186,7 +181,7 @@ function Anchor({ href = "", children, ...props }: ComponentPropsWithoutRef<"a">
 
 /**
  * Markdown elements in the D3 type scale. Numbered lists are the guide's
- * steps, so they get orange step numbers.
+ * steps, so they get numbers in orange rings (PRE-457).
  */
 export const guideMdxComponents = {
   h2: (props: ComponentPropsWithoutRef<"h2">) => (
@@ -206,7 +201,7 @@ export const guideMdxComponents = {
   ),
   ol: (props: ComponentPropsWithoutRef<"ol">) => (
     <ol
-      className="my-8 flex flex-col gap-5 text-lead text-ink-secondary [counter-reset:step] [&>li]:relative [&>li]:min-h-9 [&>li]:pl-14 [&>li]:pt-1 [&>li]:[counter-increment:step] [&>li]:before:absolute [&>li]:before:left-0 [&>li]:before:top-0 [&>li]:before:flex [&>li]:before:size-9 [&>li]:before:items-center [&>li]:before:justify-center [&>li]:before:rounded-full [&>li]:before:border [&>li]:before:border-accent/50 [&>li]:before:font-display [&>li]:before:text-body [&>li]:before:text-accent-text [&>li]:before:content-[counter(step)]"
+      className="my-8 flex flex-col gap-5 text-lead text-ink-secondary [counter-reset:step] [&>li]:relative [&>li]:min-h-8 [&>li]:pl-12 [&>li]:pt-0.5 [&>li]:[counter-increment:step] [&>li]:before:absolute [&>li]:before:left-0 [&>li]:before:top-0 [&>li]:before:flex [&>li]:before:size-8 [&>li]:before:items-center [&>li]:before:justify-center [&>li]:before:rounded-full [&>li]:before:border-[1.5px] [&>li]:before:border-accent [&>li]:before:text-small [&>li]:before:font-bold [&>li]:before:text-accent-text [&>li]:before:content-[counter(step)]"
       {...props}
     />
   ),
