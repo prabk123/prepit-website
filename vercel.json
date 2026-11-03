@@ -24,6 +24,22 @@
     {
       "path": "/api/instagram/cron?run=6",
       "schedule": "32 0 * * *"
+    },
+    {
+      "path": "/api/tiktok/cron?run=1",
+      "schedule": "5 10 * * *"
+    },
+    {
+      "path": "/api/tiktok/cron?run=2",
+      "schedule": "5 13 * * *"
+    },
+    {
+      "path": "/api/tiktok/cron?run=3",
+      "schedule": "5 17 * * *"
+    },
+    {
+      "path": "/api/tiktok/cron?run=4",
+      "schedule": "5 23 * * *"
     }
   ]
 }
