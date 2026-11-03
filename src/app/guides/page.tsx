@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import GuideCard from "@/components/guides/GuideCard";
+import GuidesClosingSection from "@/components/guides/GuidesClosingSection";
+import { HideSiteFinalCta } from "@/components/pricing/SiteFinalCta";
 import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { GUIDE_SECTIONS, getGuides } from "@/lib/guides";
@@ -22,6 +24,7 @@ export default async function GuidesPage() {
   const guides = await getGuides();
 
   return (
+    <>
     <Section labelledBy="guides-heading">
       <div className="flex flex-col gap-stack">
         <SectionHeading
@@ -35,11 +38,11 @@ export default async function GuidesPage() {
           const inSection = guides.filter((guide) => guide.section === section.id);
           if (!inSection.length) return null;
           return (
-            <section key={section.id} aria-labelledby={`guides-${section.id}`} className="flex flex-col gap-6">
+            <section key={section.id} aria-labelledby={`guides-${section.id}`} className="flex flex-col gap-5">
               <h2 id={`guides-${section.id}`} className="font-display text-title text-ink">
                 {section.title}
               </h2>
-              <div className="grid gap-4 sm:grid-cols-2 lg:gap-5">
+              <div className="grid gap-4 sm:grid-cols-2">
                 {inSection.map((guide) => (
                   <GuideCard key={guide.slug} guide={guide} />
                 ))}
@@ -49,5 +52,9 @@ export default async function GuidesPage() {
         })}
       </div>
     </Section>
+    {/* The cream close (PRE-457) in place of the site's dark download band; same placement as that band. */}
+    <GuidesClosingSection placement="final-cta" />
+    <HideSiteFinalCta />
+    </>
   );
 }
