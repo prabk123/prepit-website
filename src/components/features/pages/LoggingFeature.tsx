@@ -1,19 +1,13 @@
-import type { ReactNode } from "react";
+import ScreenCard from "@/components/features/ScreenCard";
 import { Chip, Split, V9Section } from "@/components/landing/v9/V9Sections";
-import LoopVideo from "@/components/media/LoopVideo";
-import { appCapture, appVideo } from "@/lib/captures";
+import { appCapture } from "@/lib/captures";
 
 /**
- * A real app capture standing on the page as a card, not in a phone frame
- * (the handoff's `.screen-card`).
+ * A still, not the 04-log-photo clip: the clip goes on to a "When did you eat
+ * this?" sheet with a Confirm button, and typed or photo meals save straight
+ * away. Its poster is the result screen, so this is a frame from 9.5 s.
  */
-function ScreenCard({ children }: { children: ReactNode }) {
-  return (
-    <div className="mx-auto w-[min(300px,78%)] overflow-hidden rounded-[30px] bg-surface shadow-[var(--shadow-v9-card)] ring-1 ring-black/5">
-      {children}
-    </div>
-  );
-}
+const describe = appCapture("04b-log-photo-describe", "A plate photo on the Describe your meal sheet, with “homemade, about 400 g” typed under it");
 
 const detail = appCapture("05-meal-detail", "A logged breakfast broken into its ingredients, each with its own numbers");
 
@@ -36,7 +30,7 @@ const POINTS = [
 export default function LoggingFeature() {
   return (
     <>
-      <V9Section id="describe-it" name="logging-describe" labelledBy="describe-it-heading" band>
+      <V9Section id="describe-it" name="logging-describe" labelledBy="describe-it-heading" band aliases={["type-it"]}>
         <Split
           reverse
           text={
@@ -55,13 +49,7 @@ export default function LoggingFeature() {
             </>
           }
           media={
-            <ScreenCard>
-              <picture>
-                <source type="image/avif" srcSet={detail.avif} />
-                <source type="image/webp" srcSet={detail.webp} />
-                <img src={detail.src} alt={detail.alt} width={804} height={1748} loading="lazy" decoding="async" className="block h-auto w-full" />
-              </picture>
-            </ScreenCard>
+            <ScreenCard ring capture={detail} />
           }
         />
       </V9Section>
@@ -80,18 +68,12 @@ export default function LoggingFeature() {
             </>
           }
           media={
-            <ScreenCard>
-              {/* The live page's clip: the plate photo, then what PrepIt found. Its poster alone shows only the result. */}
-              <LoopVideo
-                {...appVideo("04-log-photo", "Logging a chicken burrito bowl from a photo of the plate, then the meal's 529 calories and the items PrepIt found")}
-                className="block h-auto w-full"
-              />
-            </ScreenCard>
+            <ScreenCard ring capture={describe} />
           }
         />
       </V9Section>
 
-      <V9Section id="accuracy" name="logging-accuracy" labelledBy="accuracy-heading" band>
+      <V9Section id="accuracy" name="logging-accuracy" labelledBy="accuracy-heading" band aliases={["offline"]}>
         <div className="flex flex-col gap-8">
           <h2 id="accuracy-heading" className="font-display text-section text-ink text-balance">
             Close to the truth, and easy to fix.

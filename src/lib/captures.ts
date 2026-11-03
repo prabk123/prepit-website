@@ -10,6 +10,8 @@ export const APP_STILLS = [
   "01b-home-log",
   "01c-home-scrolled",
   "02-chat-chart",
+  // A frame of the 04-log-photo recording at 9.5 s: the plate photo on the Describe your meal sheet with "homemade, about 400 g" typed (PRE-454).
+  "04b-log-photo-describe",
   "05-meal-detail",
   "05b-meal-detail-scrolled",
   "06-signal-energy",
