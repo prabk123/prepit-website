@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import ContactForm, { type ContactKind } from "@/components/ContactForm";
+import ContactLinks from "@/components/ContactLinks";
 import { HideSiteFinalCta } from "@/components/pricing/SiteFinalCta";
 import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
-import TextLink from "@/components/ui/TextLink";
 
 const description =
   "Questions about PrepIt, your account or your subscription? Send us a message or email support@tryprepit.app and we'll get back to you.";
@@ -17,15 +17,15 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: "Contact us | PrepIt", description },
 };
 
-const SUPPORT_EMAIL = "support@tryprepit.app";
-
-const copy: Record<ContactKind, { title: string; lead: string }> = {
+const copy: Record<ContactKind, { eyebrow: string; title: string; lead: string }> = {
   contact: {
-    title: "Contact us",
+    eyebrow: "Contact",
+    title: "Get in touch.",
     lead: "Questions about PrepIt, your account or your subscription? Send us a message and we'll reply by email.",
   },
   feedback: {
-    title: "Share your feedback",
+    eyebrow: "Feedback",
+    title: "Share your feedback.",
     lead: "Tell us what's working, what isn't and what you'd like PrepIt to do next. We read every message.",
   },
 };
@@ -46,29 +46,18 @@ export default async function ContactPage({
     <div className="w-full bg-page pt-16 text-ink lg:pt-[72px]">
       {/* Mostly people who already have the app, with account or billing questions. */}
       <HideSiteFinalCta />
-      <Section labelledBy="contact-heading">
-        <div className="grid gap-stack lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:gap-16">
-          <div className="flex flex-col gap-8">
+      <Section labelledBy="contact-heading" className="[&>div]:pt-7 sm:[&>div]:pt-10 lg:[&>div]:pt-14">
+        <div className="grid items-start gap-stack min-[900px]:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] min-[900px]:gap-[clamp(32px,6vw,88px)]">
+          <div className="flex flex-col gap-[26px]">
             <SectionHeading
               as="h1"
               id="contact-heading"
-              size="section"
+              size="chapter"
+              eyebrow={copy[kind].eyebrow}
               title={copy[kind].title}
               lead={copy[kind].lead}
             />
-            <div className="flex flex-col gap-4 text-body text-ink-secondary">
-              <p>
-                Prefer email? Write to{" "}
-                <a
-                  href={`mailto:${SUPPORT_EMAIL}`}
-                  className="font-medium text-ink underline decoration-line-strong underline-offset-4 transition-colors hover:decoration-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus"
-                >
-                  {SUPPORT_EMAIL}
-                </a>
-                .
-              </p>
-              <TextLink href="/#faq">Read the FAQ</TextLink>
-            </div>
+            <ContactLinks kind={kind} />
           </div>
           <ContactForm kind={kind} />
         </div>
