@@ -13,6 +13,7 @@ import AttributionCapture from "@/components/funnel/AttributionCapture";
 import MarketCapture from "@/components/funnel/MarketCapture";
 import { PREPIT_ANALYTICS_CONSENT_COOKIE, PREPIT_GEO_COOKIE } from "@/lib/cookies";
 import { APP_STORE_ID } from "@/lib/appStore";
+import { HOME_NAV_SCRIPT } from "@/lib/homeNav";
 import { HOME_SHARE_DESCRIPTION, HOME_TITLE } from "@/lib/homeMetadata";
 import "./globals.css";
 
@@ -110,8 +111,11 @@ export default function RootLayout({
   const metaPixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID;
 
   return (
-    <html lang="en">
+    // suppressHydrationWarning: the head script below sets data-nav-* on <html> before hydration.
+    <html lang="en" suppressHydrationWarning>
       <head>
+        {/* Before the first paint, so the homepage header matches the scroll position (PRE-447). */}
+        <script dangerouslySetInnerHTML={{ __html: HOME_NAV_SCRIPT }} />
         <meta
           name="facebook-domain-verification"
           content="74mm9j52fbkke3xggwdjd5mutopg9v"
