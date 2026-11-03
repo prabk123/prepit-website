@@ -1,7 +1,8 @@
 /*
- * PrepIt website design tokens. Light-led since PRE-276 (16 Oct 2026), with
- * the app's own light palette (fresca_app lib/theme/prep_it_colors.dart) and
- * its calories orange as the one accent. Two sections are dark bands (the
+ * PrepIt website design tokens. Light-led since PRE-276 (16 Oct 2026). Since
+ * PRE-449 (3 Nov 2026) every page sits on Landing v9's warm cream ground,
+ * with the app's ink and text tones (fresca_app lib/theme/prep_it_colors.dart)
+ * and its calories orange as the one accent. Two sections are dark bands (the
  * research section and the closing download section): they add `theme-dark`
  * (see the end of this file), which swaps the same tokens for dark values.
  *
@@ -72,7 +73,7 @@
 
   /* Brand gradient stops (eyebrows, the trial line; never body text). The
      light-page stops are darker shades of the app gradient, each 4.5:1 or
-     more on page; theme-dark puts the app's own pastel stops back. */
+     more on page and surface (not on surface-raised, where orange is 4.2:1); theme-dark puts the app's own pastel stops back. */
   --color-brand-blue: #3d5bd9;
   --color-brand-purple: #9b3fa8;
   --color-brand-orange: #b24637;
