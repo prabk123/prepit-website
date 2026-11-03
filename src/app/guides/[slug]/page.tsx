@@ -168,7 +168,7 @@ export default async function GuidePage({ params }: Props) {
         </div>
       </Section>
 
-      {/* Guides end with their own download section, so App Store taps are counted per guide. */}
+      {/* Guides end with their own download section, so start taps are counted per guide. */}
       <FinalCta trackingSource={`guide-${slug}`} />
       <HideSiteFinalCta />
     </>

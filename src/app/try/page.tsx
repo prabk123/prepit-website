@@ -41,9 +41,10 @@ export const metadata: Metadata = {
  * the close and the landing's own footer (PRE-433). No quiz link yet.
  * Visitors start their free week on the website (sign in, pay $0, then
  * download the app). That is every country for now; a country listed in
- * lib/markets.ts goes to the App Store or the waitlist instead (PRE-331).
- * The proxy passes the country, which also picks the currency of the prices:
- * the one checkout charges, or US dollars for the App Store (PRE-373).
+ * lib/markets.ts goes to the waitlist instead (PRE-331); none goes to the
+ * App Store (PRE-448). The proxy passes the country, which also picks the
+ * currency of the prices: the one checkout charges, or US dollars on the
+ * waitlist (PRE-373).
  */
 export default async function LandingPage() {
   const country = (await headers()).get(COUNTRY_HEADER);

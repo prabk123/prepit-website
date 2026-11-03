@@ -4,7 +4,6 @@ import {
   COOKIE_MAX_AGE_ONE_YEAR,
   PREPIT_GEO_COOKIE,
 } from "@/lib/cookies";
-import { LANDING_PATH } from "@/lib/funnel/landing";
 import { isEuCountry, resolveCountryCode, resolveRegionCode } from "@/lib/geo";
 import {
   COUNTRY_COOKIE,
@@ -21,7 +20,7 @@ import {
  * Pages that sell on the web (PRE-331): the bridge, the sign-in step before
  * paying, and checkout. Every country buys on the web for now, so this only
  * sends a country or region (Quebec, PRE-354) that lib/markets.ts lists for
- * the App Store or the waitlist back to the landing page or the waitlist.
+ * the waitlist to the waitlist.
  */
 const WEB_CHECKOUT_PATHS = ["/checkout", "/start", "/signin"];
 
@@ -43,10 +42,10 @@ export function proxy(request: NextRequest) {
   let response: NextResponse;
   if (sellsHere && market !== "web") {
     const target = request.nextUrl.clone();
-    target.pathname = market === "waitlist" ? "/waitlist" : LANDING_PATH;
+    target.pathname = "/waitlist";
     target.search = "";
     const blockedRegion = waitlistRegionFor(country, region);
-    if (market === "waitlist" && blockedRegion) target.searchParams.set("region", blockedRegion);
+    if (blockedRegion) target.searchParams.set("region", blockedRegion);
     response = NextResponse.redirect(target);
   } else {
     const headers = new Headers(request.headers);

@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import AppStoreLink from "@/components/AppStoreLink";
 import LandingHeaderCta from "@/components/landing/LandingHeaderCta";
+import StartTrialLink from "@/components/StartTrialLink";
+import { HeaderStartLabel } from "@/components/ui/startCta";
 import { LANDING_PATH } from "@/lib/funnel/landing";
 import LongLogo from "@/components/ui/LongLogo";
 import { HEADER_PAGE_LINKS, HEADER_SECTION_LINKS } from "@/lib/homeSections";
@@ -15,7 +16,9 @@ const pillClass =
   "inline-flex h-11 items-center whitespace-nowrap rounded-button bg-primary px-4 text-small font-bold text-on-primary transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus";
 
 /**
- * The site header: solid light bar (no text reads through it), section links and "Get the app".
+ * The site header: solid light bar (no text reads through it), section links
+ * and "Start my free 7 days", which goes to web checkout (PRE-448; not on
+ * pages for people who already have PrepIt, see lib/memberPages).
  * On the homepage it starts clear over the hero film and turns solid once the page scrolls or
  * the mobile menu opens (PRE-447): `.home-nav` in globals.css, driven by src/lib/homeNav.ts.
  */
@@ -107,22 +110,22 @@ export default function NavigationWrapper() {
                 </Link>
               ))}
             {onLanding ? (
-              <LandingHeaderCta trackingSource="header-desktop" className={pillClass} />
+              <LandingHeaderCta className={pillClass} />
             ) : (
-              <AppStoreLink trackingSource="header-desktop" className={pillClass}>
-                Get the app
-              </AppStoreLink>
+              <StartTrialLink placement="header-desktop" className={pillClass}>
+                <HeaderStartLabel />
+              </StartTrialLink>
             )}
           </div>
 
-          {/* Mobile: Get the app + menu */}
+          {/* Mobile: Start free + menu */}
           <div className="flex items-center gap-2 lg:hidden">
             {onLanding ? (
-              <LandingHeaderCta trackingSource="header-mobile" className={pillClass} />
+              <LandingHeaderCta className={pillClass} />
             ) : (
-              <AppStoreLink trackingSource="header-mobile" className={pillClass}>
-                Get the app
-              </AppStoreLink>
+              <StartTrialLink placement="header-mobile" className={pillClass}>
+                <HeaderStartLabel />
+              </StartTrialLink>
             )}
             <button
               ref={toggleRef}

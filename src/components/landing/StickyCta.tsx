@@ -33,7 +33,6 @@ export default function StickyCta({ market, prices }: { market: WebMarket; price
   }, [placementPrefix]);
 
   if (market === "waitlist") return null;
-  const web = market === "web";
   return (
     <div
       data-v9-sticky=""
@@ -42,7 +41,7 @@ export default function StickyCta({ market, prices }: { market: WebMarket; price
       className={`fixed inset-x-0 bottom-0 z-50 flex items-center justify-between gap-3 border-t border-line bg-surface/90 px-4 pb-[calc(10px+env(safe-area-inset-bottom,0px))] pt-2.5 backdrop-blur-md transition-transform duration-300 motion-reduce:transition-none min-[761px]:hidden ${show ? "translate-y-0" : "translate-y-[110%]"}`}
     >
       <p className="text-small font-bold leading-tight text-ink">
-        {web ? `${TRIAL_DAYS} days free · ${prices.free} today` : `${TRIAL_DAYS} days free`}
+        {`${TRIAL_DAYS} days free · ${prices.free} today`}
       </p>
       <LandingCta market={market} placement="sticky" small label="Start free" />
     </div>

@@ -1,16 +1,14 @@
 /**
  * Where the web funnel sells (PRE-331). Since 2026-10-21 every country buys
  * on the website (landing page, quiz, bridge, checkout), in US dollars or
- * pounds depending on the company that sells (lib/pricing.ts). The App Store and waitlist markets stay so a
- * country can be taken off web checkout again with a one-line change here;
- * both lists are empty for now. Which company bills each country, and so
+ * pounds depending on the company that sells (lib/pricing.ts). The waitlist
+ * market stays so a country or region can be taken off web checkout with a
+ * one-line change here. There is no App Store market any more (PRE-448):
+ * every visitor who can buy, buys on the website. Which company bills each country, and so
  * which Web Billing app and currency checkout uses, is lib/revenuecat/sellers.ts
  * (PRE-355).
  */
-export type WebMarket = "web" | "app-store" | "waitlist";
-
-/** Countries sent to the App Store instead of web checkout (ISO 3166-1 alpha-2). None for now. */
-export const APP_STORE_COUNTRIES: ReadonlySet<string> = new Set<string>();
+export type WebMarket = "web" | "waitlist";
 
 /** Countries that get the waitlist page instead of web checkout. None for now. */
 export const WAITLIST_COUNTRIES: ReadonlySet<string> = new Set<string>();
@@ -69,7 +67,6 @@ export function waitlistRegionFor(country: string | null | undefined, region: st
  */
 export function webMarketFor(country: string | null | undefined, region?: string | null): WebMarket {
   const code = parseCountryCode(country);
-  if (code && APP_STORE_COUNTRIES.has(code)) return "app-store";
   if (code && WAITLIST_COUNTRIES.has(code)) return "waitlist";
   if (waitlistRegionFor(code, region)) return "waitlist";
   return "web";

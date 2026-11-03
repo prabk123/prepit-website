@@ -1,14 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import AppStoreButton from "@/components/ui/AppStoreButton";
 import { PILL_BUTTON_CLASS } from "@/components/ui/buttons";
+import { START_LABEL, StartArrow } from "@/components/ui/startCta";
 import { useLandingSurface } from "@/components/landing/LandingSurface";
 import { landingBridgeHref } from "@/lib/funnel/landing";
 import { LANDING_EVENTS, trackLandingEvent } from "@/lib/landingAnalytics";
 import type { WebMarket } from "@/lib/markets";
 
-export const START_LABEL = "Start my free 7 days";
+export { START_LABEL } from "@/components/ui/startCta";
 
 type LandingCtaProps = {
   market: WebMarket;
@@ -27,31 +27,15 @@ type LandingCtaProps = {
   className?: string;
 };
 
-function Arrow() {
-  return (
-    <svg viewBox="0 0 16 16" className="h-4 w-4 shrink-0" aria-hidden>
-      <path d="M3 8h10M9 4l4 4-4 4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
 /**
  * "Start my free 7 days" on the landing page (PRE-302, PRE-331). Where the
  * website sells (every country for now) it opens the shared bridge (sign
- * in, choose a plan, pay $0); in a country listed for the App Store it is
- * the App Store button; in a waitlist country it goes to the waitlist.
+ * in, choose a plan, pay $0); in a waitlist country or region it goes to the
+ * waitlist. There is no App Store button (PRE-448).
  */
 export default function LandingCta({ market, placement: where, fullWidth, small, label, className }: LandingCtaProps) {
   const surface = useLandingSurface();
   const placement = `${surface.placementPrefix}${where}`;
-  if (market === "app-store") {
-    return (
-      <div className={className} data-cta={`${placement}_start_trial`}>
-        <AppStoreButton trackingSource={`${surface.trackingPrefix}-${where}`} label={START_LABEL} />
-      </div>
-    );
-  }
-
   const size = small ? "!h-11 !px-4 !text-small" : "";
   const width = fullWidth ? "w-full justify-center" : "";
   return (
@@ -62,7 +46,7 @@ export default function LandingCta({ market, placement: where, fullWidth, small,
       onClick={() => trackLandingEvent(LANDING_EVENTS.ctaClick, market, { placement, funnel_id: surface.funnelId })}
     >
       {market === "web" ? (label ?? START_LABEL) : "Join the waitlist"}
-      {!small && <Arrow />}
+      {!small && <StartArrow />}
     </Link>
   );
 }

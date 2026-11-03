@@ -48,9 +48,9 @@ export const metadata: Metadata = {
 /**
  * The homepage (PRE-444): Landing v9, the same sections as /try (PRE-432,
  * PRE-433), with what an ad page leaves out. The site header (Features,
- * Guides, Research and "Get the app"), a direct App Store link in the hero,
- * and the full site footer instead of the landing's short one (its small
- * print stays, above the site footer). Buttons report
+ * Guides, Research and "Start my free 7 days") and the full site footer
+ * instead of the landing's short one (its small print stays, above the
+ * site footer). Buttons report
  * with a `home_` placement and start in the `home` funnel (LandingSurface).
  * The old homepage's anchors still land on the matching section: #nutritionist,
  * #consultation, #signals, #how-it-decides, #plans and #questions (#hero,

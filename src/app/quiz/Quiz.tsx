@@ -27,10 +27,9 @@ import ReplyVisual from "@/components/quiz/ReplyVisual";
 import LongLogo from "@/components/ui/LongLogo";
 import { writeBridgeHandoff } from "@/lib/funnel/bridgeHandoff";
 import { bridgePath } from "@/lib/funnel/params";
-import { APP_STORE_URL } from "@/lib/appStore";
 import type { WebMarket } from "@/lib/markets";
 import type { Prices } from "@/lib/pricing";
-import { trackAppStoreClick, trackQuizLead } from "@/lib/metaPixel";
+import { trackQuizLead } from "@/lib/metaPixel";
 import { fetchTargets } from "@/lib/quiz/leadApi";
 import {
   ACTIVITY_OPTIONS,
@@ -399,13 +398,7 @@ export default function Quiz({ country, market, prices }: { country: string; mar
       // Meta's empty Lead, where the email gate used to send it (the gate had no skip).
       trackQuizLead();
     }
-    if (market === "app-store") {
-      trackAppStoreClick("quiz-loader");
-      // Give the pixel's requests a moment before the page goes.
-      window.setTimeout(() => window.location.assign(APP_STORE_URL), 300);
-    } else {
-      router.push(market === "waitlist" ? "/waitlist" : bridgePath({ from: "quiz", funnel: QUIZ_FUNNEL_ID }));
-    }
+    router.push(market === "waitlist" ? "/waitlist" : bridgePath({ from: "quiz", funnel: QUIZ_FUNNEL_ID }));
     // handoff reads the latest answers and targets.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [answers, targets, market, prices.currency, router]);

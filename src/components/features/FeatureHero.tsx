@@ -1,13 +1,12 @@
 import type { ComponentProps } from "react";
 import DeviceFrame from "@/components/device/DeviceFrame";
 import PreloadImage from "@/components/media/PreloadImage";
-import AppStoreCta from "@/components/ui/AppStoreCta";
+import StartTrialCta from "@/components/ui/StartTrialCta";
 import FeatureSplit from "@/components/ui/FeatureSplit";
 import Glow from "@/components/ui/Glow";
 import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
 import type { FeatureMeta } from "@/lib/features";
-import { TRIAL_DAYS } from "@/lib/pricing";
 
 type FeatureHeroProps = {
   feature: FeatureMeta;
@@ -15,7 +14,7 @@ type FeatureHeroProps = {
   media: Pick<ComponentProps<typeof DeviceFrame>, "capture" | "video">;
 };
 
-/** A feature page's header: h1, one line and the App Store button beside a phone. */
+/** A feature page's header: h1, one line and the button into web checkout beside a phone. */
 export default function FeatureHero({ feature, media }: FeatureHeroProps) {
   return (
     <Section labelledBy="feature-heading">
@@ -42,10 +41,7 @@ export default function FeatureHero({ feature, media }: FeatureHeroProps) {
           title={feature.heading}
           lead={feature.lead}
         />
-        <AppStoreCta
-          trackingSource={`feature-${feature.slug}-hero`}
-          note={`${TRIAL_DAYS} days free. Cancel anytime.`}
-        />
+        <StartTrialCta placement={`feature-${feature.slug}-hero`} />
       </FeatureSplit>
     </Section>
   );

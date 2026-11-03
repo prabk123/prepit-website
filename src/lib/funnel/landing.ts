@@ -14,6 +14,13 @@ export const LANDING_FUNNEL_ID = DEFAULT_FUNNEL_ID;
 export const HOME_FUNNEL_ID = "home";
 
 /**
+ * Sign-ups that start from a button elsewhere on the site (the header, the
+ * footer, feature pages, guides, shared meal plans, the 404), which offered
+ * the App Store until PRE-448.
+ */
+export const SITE_FUNNEL_ID = "site";
+
+/**
  * Where "Start my free 7 days" goes where the website sells (every country
  * for now): the cart on `/start` (PRE-437), which signs people in and then
  * shows RevenueCat's paywall. No plan is passed: it's picked on the paywall.

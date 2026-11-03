@@ -12,7 +12,6 @@ import VercelMetrics from "@/components/VercelMetrics";
 import AttributionCapture from "@/components/funnel/AttributionCapture";
 import MarketCapture from "@/components/funnel/MarketCapture";
 import { PREPIT_ANALYTICS_CONSENT_COOKIE, PREPIT_GEO_COOKIE } from "@/lib/cookies";
-import { APP_STORE_ID } from "@/lib/appStore";
 import { HOME_NAV_SCRIPT } from "@/lib/homeNav";
 import { HOME_SHARE_DESCRIPTION, HOME_TITLE } from "@/lib/homeMetadata";
 import "./globals.css";
@@ -95,12 +94,8 @@ export const metadata: Metadata = {
     apple: "/logo.png",
   },
   manifest: "/manifest.json",
-  // Safari's Smart App Banner. It must be in the server HTML: Safari reads it
-  // on load and ignores a tag added later by JavaScript. Legal pages turn it
-  // off with `itunes: null`.
-  itunes: {
-    appId: APP_STORE_ID,
-  },
+  // No Safari Smart App Banner: it offered the App Store at the top of every
+  // page, and every visitor now starts on the website (PRE-448).
 };
 
 export default function RootLayout({
