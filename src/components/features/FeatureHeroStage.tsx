@@ -1,6 +1,7 @@
-import { Lift, PhotoStage, type StagePhoto, TypedField } from "@/components/features/PhotoStage";
+import { CapturePicture, Lift, PhotoStage, TypedField } from "@/components/features/PhotoStage";
 import { V9Screen } from "@/components/landing/v9/V9Photo";
-import { FEATURES, type FeatureSlug } from "@/lib/features";
+import { widgetCapture } from "@/lib/captures";
+import { FEATURES, type FeatureSlug, type StagePhoto } from "@/lib/features";
 
 /** The hero still's alt text per page; the tiles show the same stills without one. */
 const HERO_ALT: Record<FeatureSlug, string> = {
@@ -11,7 +12,8 @@ const HERO_ALT: Record<FeatureSlug, string> = {
   "widgets-and-siri": "On the way out: a takeaway coffee, a wrapped sandwich, a banana, keys and a tote bag",
 };
 
-function heroPhoto(slug: FeatureSlug): StagePhoto {
+/** A feature's still with its alt text, for its hero and its section on the Features overview. */
+export function heroPhoto(slug: FeatureSlug): StagePhoto {
   return { ...FEATURES[slug].tile.photo, alt: HERO_ALT[slug] };
 }
 
@@ -27,7 +29,7 @@ export default function FeatureHeroStage({ slug }: { slug: FeatureSlug }) {
       return (
         <PhotoStage photo={photo} priority>
           <Lift tag="Session 2" style={{ right: "-3%", bottom: "12%", width: "70%" }}>
-            <V9Screen name="focus-pick" width={736} height={136} alt="Pick your focus: choose one, or two. Your first pick is your main focus." />
+            <V9Screen name="focus-pick" width={736} height={136} priority alt="Pick your focus: choose one, or two. Your first pick is your main focus." />
           </Lift>
         </PhotoStage>
       );
@@ -35,7 +37,7 @@ export default function FeatureHeroStage({ slug }: { slug: FeatureSlug }) {
       return (
         <PhotoStage photo={photo} priority>
           <Lift tag="Today" style={{ left: "-3%", bottom: "14%", width: "74%" }}>
-            <V9Screen name="see-rings" width={741} height={337} alt="Energy 84, Satiety 96 and Mood 87, all green" />
+            <V9Screen name="see-rings" width={741} height={337} priority alt="Energy 84, Satiety 96 and Mood 87, all green" />
           </Lift>
         </PhotoStage>
       );
@@ -43,7 +45,7 @@ export default function FeatureHeroStage({ slug }: { slug: FeatureSlug }) {
       return (
         <PhotoStage photo={photo} priority>
           <Lift style={{ right: 0, top: "24%", width: "50%" }}>
-            <V9Screen name="ui-grocery" width={764} height={951} alt="A grocery list grouped by aisle" />
+            <V9Screen name="ui-grocery" width={764} height={951} priority alt="A grocery list grouped by aisle" />
           </Lift>
         </PhotoStage>
       );
@@ -54,7 +56,7 @@ export default function FeatureHeroStage({ slug }: { slug: FeatureSlug }) {
             <TypedField text="chicken wrap with hummus and salad" />
           </Lift>
           <Lift style={{ right: "3%", top: "42%", width: "70%" }}>
-            <V9Screen name="say-row-wrap" width={626} height={247} alt="The wrap on the log with its numbers" />
+            <V9Screen name="say-row-wrap" width={626} height={247} priority alt="The wrap on the log with its numbers" />
           </Lift>
         </PhotoStage>
       );
@@ -62,15 +64,9 @@ export default function FeatureHeroStage({ slug }: { slug: FeatureSlug }) {
       return (
         <PhotoStage photo={photo} priority>
           <Lift style={{ left: "-2%", top: "30%", width: "66%" }}>
-            {/* eslint-disable-next-line @next/next/no-img-element -- a capture already exported at its display size */}
-            <img
-              src="/app/15-widget-signals-medium-light@2x.webp"
-              alt="The Energy, Satiety and Mood widget"
-              width={1014}
-              height={474}
-              loading="lazy"
-              decoding="async"
-              className="block h-auto w-full"
+            <CapturePicture
+              priority
+              capture={widgetCapture("15-widget-signals-medium", "The Energy, Satiety and Mood widget", 1014, 474)}
             />
           </Lift>
         </PhotoStage>

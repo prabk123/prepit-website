@@ -1,5 +1,6 @@
-import { MessageCard } from "@/components/features/PhotoStage";
+import { CapturePicture } from "@/components/features/PhotoStage";
 import { Chip, DotTag, Eyebrow, Glass, Head, NutritionistSaid, Split, V9Section, YouSaid } from "@/components/landing/v9/V9Sections";
+import { missedBreakfast, proteinShort, weeklyPattern } from "@/content/nutritionistMessages";
 import { appCapture } from "@/lib/captures";
 
 /** The free consultation: the same three steps as the cart and the homepage offer. */
@@ -10,32 +11,15 @@ const CONSULTATION = [
 ];
 
 /**
- * Real messages it sends on its own (fresca_backend proactiveNudges.ts, as on
- * the seeded test account), captioned by the moment rather than the rule that
- * sends them. The protein message is the funnel pack's egg-cups message, left
- * as drawn (open with Charlie).
+ * Real messages it sends on its own, as the app's own chat crops (PRE-283,
+ * shot on the test account with the seeds that send them), captioned by the
+ * moment rather than the rule that sends them. The protein message is the
+ * funnel pack's egg-cups message, left as drawn (open with Charlie).
  */
-const MESSAGES: { tag: string; text: string; options: string[]; selected?: number; caption: string }[] = [
-  {
-    tag: "Breakfast time",
-    text: "I can't see any breakfast log today. Drop me a quick voice note when you get the chance if you had something, or let me know if you skipped it :)",
-    options: ["I skipped it", "I'll log it now"],
-    caption: "A gap in your day, the same morning.",
-  },
-  {
-    tag: "After 3 weeks",
-    text: "Over the past few weeks protein has been a little low: under your target on 18 of 21 logged days. Most of the gap is at dinner. Two easy fixes that don't change what you cook: a bigger portion of the protein you already have, or a pot of Greek yogurt after dinner. Want to try one?",
-    options: ["Bigger protein at dinner", "Greek yogurt after dinner"],
-    selected: 0,
-    caption: "A pattern it's seen for a while.",
-  },
-  {
-    tag: "Every week",
-    text: "Tuesdays and Wednesdays have run about 520 kcal over your goal in most of the last four weeks, while the rest of the week sits close to it. Want to give those days more room and take a little off the others? Your week would add up to the same total.",
-    options: ["Use this pattern", "Not for me"],
-    selected: 0,
-    caption: "The same days, week after week.",
-  },
+const MESSAGES = [
+  { tag: "Breakfast time", message: missedBreakfast, caption: "A gap in your day, the same morning." },
+  { tag: "After 3 weeks", message: proteinShort, caption: "A pattern it's seen for a while." },
+  { tag: "Every week", message: weeklyPattern, caption: "The same days, week after week." },
 ];
 
 const LIMITS = [
@@ -44,7 +28,11 @@ const LIMITS = [
   "It's an AI nutritionist, and it always says so.",
 ];
 
-const chart = appCapture("02-chat-chart", "The chat: protein per day for the last week as a bar chart, against a 158 g target");
+const chart = {
+  ...appCapture("02-chat-chart", "The chat: protein per day for the last week as a bar chart, against a 158 g target"),
+  width: 804,
+  height: 1748,
+};
 
 /**
  * /features/ai-nutritionist (PRE-451, Charlie's site pages handoff,
@@ -106,7 +94,7 @@ export default function NutritionistFeature() {
                       <DotTag pill>{message.tag}</DotTag>
                     </span>
                     <Glass>
-                      <MessageCard text={message.text} options={message.options} selected={message.selected} />
+                      <CapturePicture capture={message.message.capture} />
                     </Glass>
                   </div>
                   <figcaption className="pl-1 text-[13.5px] text-ink-muted">{message.caption}</figcaption>
@@ -148,11 +136,7 @@ export default function NutritionistFeature() {
           }
           media={
             <div className="mx-auto w-[min(300px,78%)] overflow-hidden rounded-[30px] bg-white shadow-[var(--shadow-v9-card)] ring-1 ring-black/5">
-              <picture>
-                <source srcSet={chart.avif} type="image/avif" />
-                <source srcSet={chart.webp} type="image/webp" />
-                <img src={chart.src} alt={chart.alt} width={804} height={1748} loading="lazy" decoding="async" className="block h-auto w-full" />
-              </picture>
+              <CapturePicture capture={chart} />
             </div>
           }
         />

@@ -1,16 +1,9 @@
 import type { CSSProperties, ReactNode } from "react";
 import { V9Photo } from "@/components/landing/v9/V9Photo";
 import { DotTag, Glass } from "@/components/landing/v9/V9Sections";
+import type { StagePhoto } from "@/lib/features";
 
-/** A 4:5 still from public/landing/v9 (Charlie's site pages handoff, PRE-450). */
-export type StagePhoto = {
-  name: string;
-  /** Exported widths; the largest is the intrinsic size. */
-  widths: number[];
-  alt: string;
-  /** CSS object-position, where the handoff crops the still. */
-  position?: string;
-};
+export type { StagePhoto };
 
 /** Height of each 4:5 still at its largest exported width. */
 const HEIGHT_PER_WIDTH = 1490 / 1200;
@@ -97,35 +90,31 @@ export function TypedField({ text }: { text: string }) {
   );
 }
 
-/** A nutritionist message with its numbered reply options, drawn the way the chat shows them. */
-export function MessageCard({ text, options, selected }: { text: string; options: string[]; /** The reply shown as tapped, by index. */ selected?: number }) {
+/**
+ * A real app capture from public/app (lib/captures: chatCrop, appWidget,
+ * widgetCapture), as AVIF and WebP at 1x and 2x. `priority` loads it with
+ * the hero still instead of lazily.
+ */
+export function CapturePicture({
+  capture,
+  priority,
+}: {
+  capture: { src: string; avif?: string; webp: string; alt: string; width: number; height: number };
+  priority?: boolean;
+}) {
   return (
-    <div className="px-3.5 pb-3.5 pt-4">
-      <p className="text-[15px] leading-normal text-ink">{text}</p>
-      <ol className="mt-3 flex flex-col gap-[7px]" aria-label="Replies to choose from">
-        {options.map((option, index) => (
-          <li
-            key={option}
-            className={`flex items-center gap-2.5 rounded-xl border px-3 py-2 text-[13.5px] ${
-              index === selected ? "border-primary bg-primary text-on-primary" : "border-line text-ink"
-            }`}
-          >
-            <span
-              aria-hidden
-              className={`inline-grid h-5 w-5 flex-none place-items-center rounded-full border text-[11px] ${
-                index === selected ? "border-white/50" : "border-line-strong"
-              }`}
-            >
-              {index + 1}
-            </span>
-            {option}
-            {index === selected && <span className="sr-only">, chosen</span>}
-            <span aria-hidden className="ml-auto opacity-50">
-              ›
-            </span>
-          </li>
-        ))}
-      </ol>
-    </div>
+    <picture>
+      {capture.avif && <source srcSet={capture.avif} type="image/avif" />}
+      <source srcSet={capture.webp} type="image/webp" />
+      <img
+        src={capture.src}
+        alt={capture.alt}
+        width={capture.width}
+        height={capture.height}
+        loading={priority ? "eager" : "lazy"}
+        decoding="async"
+        className="block h-auto w-full"
+      />
+    </picture>
   );
 }
