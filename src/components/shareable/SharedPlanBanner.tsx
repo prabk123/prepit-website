@@ -1,10 +1,9 @@
 import Image from "next/image";
-import AppStoreCta from "@/components/ui/AppStoreCta";
-import { TRIAL_NOTE } from "@/lib/pricing";
+import StartTrialCta from "@/components/ui/StartTrialCta";
 
 /**
  * The top banner on a shared plan: who made it (PrepIt, never the person who
- * shared it) and the App Store button.
+ * shared it) and the button into web checkout (PRE-448).
  */
 export default function SharedPlanBanner() {
   return (
@@ -21,7 +20,7 @@ export default function SharedPlanBanner() {
           </p>
         </div>
       </div>
-      <AppStoreCta trackingSource="shared-meal-plan-banner" note={TRIAL_NOTE} className="shrink-0" />
+      <StartTrialCta placement="shared-meal-plan-banner" className="shrink-0" />
     </aside>
   );
 }

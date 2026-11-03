@@ -1,9 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import AppStoreLink from "@/components/AppStoreLink";
 import { START_LABEL } from "@/components/landing/LandingCta";
-import { AppleLogo } from "@/components/ui/AppStoreButton";
 import { bridgePath } from "@/lib/funnel/params";
 import type { WebMarket } from "@/lib/markets";
 import { QUIZ_FUNNEL_ID } from "@/lib/quiz/quiz";
@@ -13,31 +11,20 @@ import { QUIZ_FUNNEL_ID } from "@/lib/quiz/quiz";
  * hands off on its own once its loader ends (PRE-446).
  * Like the landing page's button (LandingCta), it follows the visitor's
  * market (PRE-331): the bridge (/start) where the website sells (every
- * country for now), the App Store or the waitlist for a country listed in
- * lib/markets.ts. The proxy sends those countries away from /start, so the
- * quiz must not link there for them.
+ * country for now), the waitlist for a country or region listed in
+ * lib/markets.ts. The proxy sends those away from /start, so the quiz must
+ * not link there for them. There is no App Store button (PRE-448).
  */
 export default function QuizStartCta({
   market,
   className,
-  trackingSource,
   onStart,
 }: {
   market: WebMarket;
   className: string;
-  /** Sent with the `app_store_click` event, e.g. "quiz-result". */
-  trackingSource: string;
   /** Runs on tap, before the page changes. */
   onStart?: () => void;
 }) {
-  if (market === "app-store") {
-    return (
-      <AppStoreLink trackingSource={trackingSource} className={className} onClick={onStart}>
-        <AppleLogo />
-        {START_LABEL}
-      </AppStoreLink>
-    );
-  }
   if (market === "waitlist") {
     return (
       <Link href="/waitlist" className={className} onClick={onStart}>

@@ -1,10 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import AppStoreButton from "@/components/ui/AppStoreButton";
+import StartTrialCta from "@/components/ui/StartTrialCta";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { PILL_CLASS } from "@/components/ui/pill";
-import { TRIAL_NOTE } from "@/lib/pricing";
 
 /**
  * The plan could not be loaded (the server logs the failure with the plan id).
@@ -28,7 +27,7 @@ export default function MealPlanError({ reset }: { error: Error; reset: () => vo
           Go to the homepage
         </Link>
       </div>
-      <AppStoreButton trackingSource="shared-meal-plan-error" note={TRIAL_NOTE} />
+      <StartTrialCta placement="shared-meal-plan-error" />
     </div>
   );
 }

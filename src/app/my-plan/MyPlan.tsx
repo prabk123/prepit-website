@@ -125,7 +125,7 @@ export default function MyPlan({ market, prices }: { market: WebMarket; prices: 
         </Card>
       )}
 
-      <QuizStartCta market={market} className={PRIMARY_BUTTON_CLASS} trackingSource="my-plan" />
+      <QuizStartCta market={market} className={PRIMARY_BUTTON_CLASS} />
       <p className="-mt-2 text-center text-[12.5px] text-ink-muted">
         PrepIt is an iPhone app; Android is coming soon. PrepIt is a coach, not a doctor.
       </p>

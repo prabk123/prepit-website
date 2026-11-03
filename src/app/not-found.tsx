@@ -2,11 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import NotFoundTracker from "@/components/analytics/NotFoundTracker";
 import { HideSiteFinalCta } from "@/components/pricing/SiteFinalCta";
-import AppStoreCta from "@/components/ui/AppStoreCta";
+import StartTrialCta from "@/components/ui/StartTrialCta";
 import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { PILL_CLASS } from "@/components/ui/pill";
-import { TRIAL_NOTE } from "@/lib/pricing";
 
 export const metadata: Metadata = {
   title: "Page not found",
@@ -16,8 +15,8 @@ export const metadata: Metadata = {
 
 /**
  * Any URL with no page, including a mistyped feature or guide slug. The 404
- * carries its own App Store button and hides the site's closing download band
- * (SiteFinalCta), so there is one download button on every 404.
+ * carries its own "Start my free 7 days" button and hides the site's closing
+ * band (SiteFinalCta), so there is one start button on every 404.
  */
 export default function NotFound() {
   return (
@@ -45,7 +44,7 @@ export default function NotFound() {
               Guides
             </Link>
           </nav>
-          <AppStoreCta trackingSource="not-found" note={TRIAL_NOTE} />
+          <StartTrialCta placement="not-found" />
         </div>
       </Section>
     </div>

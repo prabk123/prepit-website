@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import AppStoreLink from "@/components/AppStoreLink";
 import LandingCta from "@/components/landing/LandingCta";
 import type { LandingSurfaceName } from "@/components/landing/LandingSurface";
 import { landingCopy } from "@/components/landing/LandingSections";
@@ -120,11 +119,9 @@ export function V9Section({
 // ---------------------------------------------------------------- 1. hero film
 
 /**
- * On the homepage (`home`, PRE-444) the hero also offers the App Store
- * straight away, for people who arrive already sold, where the website
- * sells (elsewhere the main button is already the App Store or the
- * waitlist); on /try every button goes to the cart. `surface` must match the
- * page's LandingSurfaceProvider.
+ * Every button goes to the cart, on the homepage as on /try: the homepage's
+ * "Download it from the App Store" link is gone (PRE-448). `surface` must
+ * match the page's LandingSurfaceProvider; it names the hero film.
  */
 export function V9Hero({ market, prices, surface = "try" }: { market: WebMarket; prices: Prices; surface?: LandingSurfaceName }) {
   const web = market === "web";
@@ -210,18 +207,6 @@ export function V9Hero({ market, prices, surface = "try" }: { market: WebMarket;
             </span>
           </div>
           <LandingCta market={market} placement="hero" className="w-fit max-[599px]:flex max-[599px]:w-full max-[599px]:justify-center" />
-          {surface === "home" && market === "web" && (
-            <p className="text-small text-ink-secondary">
-              Already sure?{" "}
-              <AppStoreLink
-                trackingSource="home-hero-app-store"
-                data-cta="home_hero_app_store"
-                className="font-medium text-ink underline underline-offset-4 hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-focus"
-              >
-                Download it from the App Store
-              </AppStoreLink>
-            </p>
-          )}
           <p className="text-[13px] leading-snug text-ink-secondary max-[899px]:pr-14">
             {web ? `${WEB_REMINDER_EMAIL_LIVE ? "Reminder email on day 4. " : ""}Cancel before day 8, pay nothing.` : `${reassure.strong} ${reassure.rest}`}
           </p>

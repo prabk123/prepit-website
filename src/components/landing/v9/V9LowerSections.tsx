@@ -8,7 +8,7 @@ import FaqAccordion from "@/components/pricing/FaqAccordion";
 import LongLogo from "@/components/ui/LongLogo";
 import { FooterWithdrawalLink } from "@/components/withdrawal/WithdrawalLink";
 import type { LandingSurfaceName } from "@/components/landing/LandingSurface";
-import { faqPageJsonLd, homeFaqItems, LANDING_APP_STORE_FAQ_ITEMS, landingWebFaqItems } from "@/lib/faq";
+import { faqPageJsonLd, homeFaqItems, landingWebFaqItems } from "@/lib/faq";
 import type { WebMarket } from "@/lib/markets";
 import { type Prices, TRIAL_DAYS, WEB_REMINDER_EMAIL_LIVE } from "@/lib/pricing";
 
@@ -175,9 +175,9 @@ const INCLUDED = [
 ];
 
 /**
- * `prices` are checkout's currency on the web, and the US App Store prices
- * otherwise (PRE-373). The day 4 reminder email is a web promise (PRE-352):
- * App Store trials don't get it, so their timeline leaves it out.
+ * `prices` are checkout's currency on the web, and US dollars on the
+ * waitlist (PRE-373). The day 4 reminder email and the $0 today are web
+ * promises (PRE-352), so a waitlist visitor's timeline leaves them out.
  */
 export function OfferSection({ market, prices, aliases }: { market: WebMarket; prices: Prices; aliases?: string[] }) {
   const web = market === "web";
@@ -234,7 +234,7 @@ export function OfferSection({ market, prices, aliases }: { market: WebMarket; p
           <p className="text-[13px] leading-normal text-ink-muted">
             {web
               ? `Renews automatically until you cancel. Cancel before day 8 and you pay nothing. Prices in ${prices.currencyName}. For iPhone.`
-              : `Renews automatically until you cancel. Prices in ${prices.currencyName}; the App Store shows the price for your country. For iPhone.`}
+              : `Renews automatically until you cancel. Prices in ${prices.currencyName}. For iPhone.`}
           </p>
         </Reveal>
       </div>
@@ -250,7 +250,6 @@ export function OfferSection({ market, prices, aliases }: { market: WebMarket; p
  * old homepage's support questions (homeFaqItems).
  */
 export function FaqSection({
-  market,
   prices,
   surface = "try",
   aliases,
@@ -260,7 +259,8 @@ export function FaqSection({
   surface?: LandingSurfaceName;
   aliases?: string[];
 }) {
-  const landingItems = market === "web" ? landingWebFaqItems(prices) : LANDING_APP_STORE_FAQ_ITEMS;
+  // Waitlist visitors get the web answers too: they will buy on the website once it opens to them.
+  const landingItems = landingWebFaqItems(prices);
   const items = surface === "home" ? homeFaqItems(landingItems) : landingItems;
   const trackingSource = surface === "home" ? "home-faq" : "landing-faq";
   return (
@@ -326,7 +326,7 @@ export function ClosingSection({ market, prices, showQuizLink = false }: { marke
         {showQuizLink && <LandingQuizLink market={market} />}
         <p className="max-w-[40em] text-[13px] leading-normal text-ink-muted">
           {thenPrices(prices)}
-          {web ? (WEB_REMINDER_EMAIL_LIVE ? " Reminder email on day 4." : "") : " The App Store shows the price for your country."} Prices in {prices.currencyName}.
+          {web && WEB_REMINDER_EMAIL_LIVE ? " Reminder email on day 4." : ""} Prices in {prices.currencyName}.
         </p>
       </div>
     </V9Section>

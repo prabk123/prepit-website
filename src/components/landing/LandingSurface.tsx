@@ -16,13 +16,11 @@ export type LandingSurface = {
   /** Put before every button's placement: "" on /try, "home_" on the homepage. */
   placementPrefix: string;
   funnelId: string;
-  /** Put before App Store `trackingSource`s: "landing" or "home". */
-  trackingPrefix: string;
 };
 
 const SURFACES: Record<LandingSurfaceName, LandingSurface> = {
-  try: { name: "try", placementPrefix: "", funnelId: LANDING_FUNNEL_ID, trackingPrefix: "landing" },
-  home: { name: "home", placementPrefix: "home_", funnelId: HOME_FUNNEL_ID, trackingPrefix: "home" },
+  try: { name: "try", placementPrefix: "", funnelId: LANDING_FUNNEL_ID },
+  home: { name: "home", placementPrefix: "home_", funnelId: HOME_FUNNEL_ID },
 };
 
 const LandingSurfaceContext = createContext<LandingSurface>(SURFACES.try);

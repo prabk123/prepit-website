@@ -162,27 +162,6 @@ export const landingWebFaqItems = (prices: Prices): FaqItem[] =>
     },
   });
 
-/** The same questions for visitors who start in the App Store (PRE-331). */
-export const LANDING_APP_STORE_FAQ_ITEMS: FaqItem[] = landingFaq({
-  trial: {
-    id: "landing-app-store-trial",
-    question: "How does the free trial work?",
-    answer: `${TRIAL_DAYS} days, everything included. Keep PrepIt and you pay when the free days end: ${PRICES.annual} a year (${PRICES.annualPerMonth} a month) or ${PRICES.monthly} a month in US dollars; the App Store shows the price for your country. Cancel at least 24 hours before the trial ends and you pay nothing.`,
-  },
-  cancel: {
-    id: "landing-app-store-cancel",
-    question: "How do I cancel?",
-    answer:
-      "Go to Settings on your iPhone, then your name, then Subscriptions, at least 24 hours before the trial ends, and you won't be charged.",
-  },
-  professional: "your GP",
-  phones: {
-    id: "landing-app-store-devices",
-    question: "Which phones does it work on?",
-    answer: "iPhone, from the App Store. Android isn't available yet.",
-  },
-});
-
 /** schema.org FAQPage for the same questions and answers. */
 /**
  * The support questions from the homepage before Landing v9 (PRE-444) that the

@@ -5,13 +5,13 @@ type CtaBandProps = {
   title: string;
   /** The final line, set in the brand gradient. */
   line?: string;
-  /** Usually <AppStoreCta qrCaption="Scan with your iPhone camera" />. */
+  /** Usually <StartTrialCta />. */
   cta: ReactNode;
   id?: string;
   className?: string;
 };
 
-/** The closing call to action: big headline, gradient line, App Store button and QR code. */
+/** The closing call to action: big headline, gradient line, and the button into web checkout. */
 export default function CtaBand({ title, line, cta, id, className }: CtaBandProps) {
   return (
     <div

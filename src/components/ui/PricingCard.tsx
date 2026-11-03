@@ -4,10 +4,10 @@ type PricingCardProps = {
   title: string;
   /** e.g. "Then $99.99 a year or $14.99 a month". */
   price: string;
-  /** e.g. "That's $1.92 a week. Cancel anytime in the App Store." */
+  /** e.g. "That's $1.92 a week. Cancel anytime." */
   priceNote?: string;
   features: string[];
-  /** Usually <AppStoreCta />. */
+  /** Usually <StartTrialCta />. */
   cta: ReactNode;
   /** Small print under the button, e.g. how prices vary by country. */
   finePrint?: string;

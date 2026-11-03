@@ -1,5 +1,5 @@
 import Link from "next/link";
-import AppStoreLink from "@/components/AppStoreLink";
+import StartTrialLink from "@/components/StartTrialLink";
 import LongLogo from "@/components/ui/LongLogo";
 import { FooterWithdrawalLink } from "@/components/withdrawal/WithdrawalLink";
 import { FEATURE_SLUGS, FEATURES, featureHref } from "@/lib/features";
@@ -45,9 +45,9 @@ export default function Footer() {
                   {link.label}
                 </Link>
               ))}
-              <AppStoreLink trackingSource="footer-explore" className={linkClass}>
-                Download the app
-              </AppStoreLink>
+              <StartTrialLink placement="footer-explore" className={linkClass}>
+                Start your free trial
+              </StartTrialLink>
             </Column>
             <Column title="Features">
               {FEATURE_SLUGS.map((slug) => (

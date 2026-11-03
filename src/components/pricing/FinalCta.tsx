@@ -1,5 +1,5 @@
 import DeviceFrame from "@/components/device/DeviceFrame";
-import AppStoreCta from "@/components/ui/AppStoreCta";
+import StartTrialCta from "@/components/ui/StartTrialCta";
 import BandPhoto from "@/components/ui/BandPhoto";
 import Glow from "@/components/ui/Glow";
 import Section from "@/components/ui/Section";
@@ -8,12 +8,14 @@ import { appCapture } from "@/lib/captures";
 import { TRIAL_DAYS } from "@/lib/pricing";
 
 /**
- * The site's one closing download section, one of its two dark bands: headline,
- * the trial line in the brand gradient, App Store button, a QR code on
- * desktop, and Home in a phone rising from the bottom edge.
+ * The site's one closing section, one of its two dark bands: headline, the
+ * trial line in the brand gradient, the "Start my free 7 days" button into
+ * web checkout (PRE-448; it was the App Store button and a QR code), and Home
+ * in a phone rising from the bottom edge.
  *
  * `trackingSource` lets a page that ends with its own copy (each guide) count
- * its App Store taps separately; the site-wide band uses "final-cta".
+ * its taps separately (`placement` on `web_landing_cta_click`); the
+ * site-wide band uses "final-cta".
  *
  * `id` keeps ids unique: the layout's band stays in the page (hidden) on pages
  * that end with their own, so it passes a different one.
@@ -37,11 +39,7 @@ export default function FinalCta({
             Try your nutritionist free for {TRIAL_DAYS} days.
           </p>
         </div>
-        <AppStoreCta
-          trackingSource={trackingSource}
-          qrCaption="Scan with your iPhone camera"
-          className="justify-center"
-        />
+        <StartTrialCta placement={trackingSource} className="items-center" />
         {/* The phone is cropped by the section's bottom edge. */}
         <div className="relative -mb-section mt-4 h-[300px] w-full overflow-hidden sm:h-[380px] lg:h-[440px]">
           <Glow style={{ top: "70%" }} />

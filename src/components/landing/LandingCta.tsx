@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import AppStoreButton from "@/components/ui/AppStoreButton";
 import { PILL_BUTTON_CLASS } from "@/components/ui/buttons";
 import { useLandingSurface } from "@/components/landing/LandingSurface";
 import { landingBridgeHref } from "@/lib/funnel/landing";
@@ -38,20 +37,12 @@ function Arrow() {
 /**
  * "Start my free 7 days" on the landing page (PRE-302, PRE-331). Where the
  * website sells (every country for now) it opens the shared bridge (sign
- * in, choose a plan, pay $0); in a country listed for the App Store it is
- * the App Store button; in a waitlist country it goes to the waitlist.
+ * in, choose a plan, pay $0); in a waitlist country or region it goes to the
+ * waitlist. There is no App Store button (PRE-448).
  */
 export default function LandingCta({ market, placement: where, fullWidth, small, label, className }: LandingCtaProps) {
   const surface = useLandingSurface();
   const placement = `${surface.placementPrefix}${where}`;
-  if (market === "app-store") {
-    return (
-      <div className={className} data-cta={`${placement}_start_trial`}>
-        <AppStoreButton trackingSource={`${surface.trackingPrefix}-${where}`} label={START_LABEL} />
-      </div>
-    );
-  }
-
   const size = small ? "!h-11 !px-4 !text-small" : "";
   const width = fullWidth ? "w-full justify-center" : "";
   return (

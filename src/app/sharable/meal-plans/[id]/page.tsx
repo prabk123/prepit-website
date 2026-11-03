@@ -9,7 +9,6 @@ import MakeYourOwnPlan from "@/components/shareable/MakeYourOwnPlan";
 import SharedPlanBanner from "@/components/shareable/SharedPlanBanner";
 import SharedPlanUnavailable from "@/components/shareable/SharedPlanUnavailable";
 import SharedPlanViewTracker from "@/components/shareable/SharedPlanViewTracker";
-import { APP_STORE_ID } from "@/lib/appStore";
 import { defaultUnitSystemForCountry } from "@/lib/unit-conversion";
 
 type Props = {
@@ -53,7 +52,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description,
     openGraph: { title, description, type: "website", siteName: "PrepIt" },
     twitter: { card: "summary_large_image", title, description },
-    itunes: { appId: APP_STORE_ID },
     robots: { index: false, follow: false },
   };
 }

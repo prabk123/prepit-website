@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import DeviceFrame, { type DeviceCapture } from "@/components/device/DeviceFrame";
 import DevicePair from "@/components/device/DevicePair";
-import AppStoreCta from "@/components/ui/AppStoreCta";
+import StartTrialCta from "@/components/ui/StartTrialCta";
 import { BentoGrid, BentoTile } from "@/components/ui/Bento";
 import CtaBand from "@/components/ui/CtaBand";
 import FeatureSplit from "@/components/ui/FeatureSplit";
@@ -16,7 +16,6 @@ import PricingCard from "@/components/ui/PricingCard";
 import QuoteCard from "@/components/ui/QuoteCard";
 import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
-import { TRIAL_NOTE } from "@/lib/pricing";
 
 export const metadata: Metadata = {
   title: "Component preview",
@@ -130,7 +129,7 @@ export default function ComponentPreviewPage() {
       </Section>
 
       <Section labelledBy="hero-sample">
-        <PreviewLabel>Hero (D3): headline first, supporting line and AppStoreCta beside it. The annotated cafe photo underneath comes with PRE-201</PreviewLabel>
+        <PreviewLabel>Hero (D3): headline first, supporting line and StartTrialCta beside it. The annotated cafe photo underneath comes with PRE-201</PreviewLabel>
         <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-end lg:gap-12">
           <SectionHeading
             eyebrow="Your AI nutritionist"
@@ -144,11 +143,7 @@ export default function ComponentPreviewPage() {
             <p className="text-lead text-ink-secondary text-pretty">
               Tell PrepIt what you ate in your own words. See how it will shape your energy, hunger and mood, and know what to eat next.
             </p>
-            <AppStoreCta
-              trackingSource="dev-preview-hero"
-              note={TRIAL_NOTE}
-              qrCaption="Scan to get PrepIt on your iPhone"
-            />
+            <StartTrialCta placement="dev-preview-hero" />
           </div>
         </div>
       </Section>
@@ -328,7 +323,7 @@ export default function ComponentPreviewPage() {
 
       <Section labelledBy="pricing-sample">
         <div className="flex flex-col items-center gap-stack">
-          <PreviewLabel>PricingCard with the dark AppStoreCta</PreviewLabel>
+          <PreviewLabel>PricingCard with StartTrialCta</PreviewLabel>
           <SectionHeading
             title="One plan. Everything included."
             align="center"
@@ -337,7 +332,7 @@ export default function ComponentPreviewPage() {
           <PricingCard
             title="7 days free"
             price="Then $99.99 a year or $14.99 a month"
-            priceNote="That's $1.92 a week. Cancel anytime in the App Store."
+            priceNote="That's $1.92 a week. Cancel anytime."
             features={[
               "Unlimited logging by text, photo and Siri",
               "Energy, Satiety and Mood every day",
@@ -346,10 +341,7 @@ export default function ComponentPreviewPage() {
               "Widgets and offline logging",
             ]}
             cta={
-              <AppStoreCta
-                trackingSource="dev-preview-pricing"
-                label="Start your free trial"
-              />
+              <StartTrialCta placement="dev-preview-pricing" note={null} />
             }
           />
         </div>
@@ -357,16 +349,13 @@ export default function ComponentPreviewPage() {
 
       <Section labelledBy="cta-sample">
         <div>
-          <PreviewLabel>CtaBand with AppStoreCta and QR (QR shows from 1024 px)</PreviewLabel>
+          <PreviewLabel>CtaBand with StartTrialCta</PreviewLabel>
           <CtaBand
             id="cta-sample"
             title="Start feeling the difference."
             line="Try your nutritionist free for 7 days."
             cta={
-              <AppStoreCta
-                trackingSource="dev-preview-final-cta"
-                qrCaption="Scan with your iPhone camera"
-              />
+              <StartTrialCta placement="dev-preview-final-cta" />
             }
           />
         </div>
