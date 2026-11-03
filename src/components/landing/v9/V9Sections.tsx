@@ -422,7 +422,7 @@ export function ItNoticesSection({ aliases }: { aliases?: string[] } = {}) {
             <div className="flex flex-wrap gap-2">
               <Chip>1 focus each week</Chip>
               <Chip>Weekly Check-in</Chip>
-              <Chip>Max 1 message daily</Chip>
+              <Chip>A light touch</Chip>
             </div>
           </>
         }

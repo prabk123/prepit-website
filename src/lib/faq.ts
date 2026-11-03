@@ -61,7 +61,7 @@ export const FAQ_ITEMS: FaqItem[] = [
     id: "messages",
     question: "Will it message me?",
     answer:
-      "Only when it's useful, and at most once a day: a breakfast you haven't logged, a pattern worth fixing or a weigh-in reminder. You can turn each kind off in Settings.",
+      "Only when it's useful, and with a light touch: a breakfast you haven't logged, a pattern worth fixing or a weigh-in reminder. You can turn each kind off in Settings.",
   },
   {
     id: "wearable",
