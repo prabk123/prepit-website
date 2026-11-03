@@ -289,7 +289,18 @@ export function FaqSection({
  * question, not a control. `showQuizLink` is the later test arm (decision D4):
  * off at launch, ready as `data-cta="closing_quiz"`.
  */
-export function ClosingSection({ market, prices, showQuizLink = false }: { market: WebMarket; prices: Prices; showQuizLink?: boolean }) {
+export function ClosingSection({
+  market,
+  prices,
+  showQuizLink = false,
+  cta,
+}: {
+  market: WebMarket;
+  prices: Prices;
+  showQuizLink?: boolean;
+  /** The button, where a page other than / and /try reuses this close (the site pages, PRE-450). */
+  cta?: ReactNode;
+}) {
   const web = market === "web";
   return (
     <V9Section id="start" name="closing" labelledBy="close-heading" band>
@@ -322,7 +333,7 @@ export function ClosingSection({ market, prices, showQuizLink = false }: { marke
           </div>
         </Reveal>
         <p className="text-lead text-ink-secondary">{web ? `${TRIAL_DAYS} days free · ${prices.free} today` : `${TRIAL_DAYS} days free`}</p>
-        <LandingCta market={market} placement="closing" className="max-[599px]:w-full max-[599px]:justify-center" />
+        {cta ?? <LandingCta market={market} placement="closing" className="max-[599px]:w-full max-[599px]:justify-center" />}
         {showQuizLink && <LandingQuizLink market={market} />}
         <p className="max-w-[40em] text-[13px] leading-normal text-ink-muted">
           {thenPrices(prices)}

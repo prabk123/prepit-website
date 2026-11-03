@@ -1,32 +1,17 @@
-import LinkCard from "@/components/ui/LinkCard";
-import Section from "@/components/ui/Section";
-import SectionHeading from "@/components/ui/SectionHeading";
-import { cardThumb } from "@/lib/captures";
-import { featureHref, relatedFeatures, type FeatureSlug } from "@/lib/features";
+import FeatureTiles from "@/components/features/FeatureTiles";
+import { V9Section } from "@/components/landing/v9/V9Sections";
+import { relatedFeatures, type FeatureSlug } from "@/lib/features";
 
-/**
- * "More of what PrepIt does": a card for each other feature page. On phones
- * each card is one short row, so the four take under a screen (PRE-318).
- */
+/** "More of what it does.": a photo tile for each other feature page (PRE-450). */
 export default function RelatedFeatures({ slug }: { slug: FeatureSlug }) {
   return (
-    <Section labelledBy="related-features-heading">
+    <V9Section id="related-features" name="related-features" labelledBy="related-features-heading" band>
       <div className="flex flex-col gap-8">
-        <SectionHeading id="related-features-heading" size="title" title="More of what PrepIt does" />
-        <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4 lg:gap-5">
-          {relatedFeatures(slug).map((feature) => (
-            <LinkCard
-              key={feature.slug}
-              href={featureHref(feature.slug)}
-              title={feature.name}
-              summary={feature.summary}
-              action="See how it works"
-              thumb={cardThumb(feature.thumb)}
-              compact
-            />
-          ))}
-        </div>
+        <h2 id="related-features-heading" className="font-display text-section text-ink text-balance">
+          More of what it does.
+        </h2>
+        <FeatureTiles slugs={relatedFeatures(slug).map((feature) => feature.slug)} layout="grid" />
       </div>
-    </Section>
+    </V9Section>
   );
 }

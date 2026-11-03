@@ -1,4 +1,4 @@
-import type { CardThumb } from "@/lib/captures";
+import type { StagePhoto } from "@/components/features/PhotoStage";
 
 /**
  * The feature pages (PRE-203): one page per major feature at
@@ -39,9 +39,15 @@ export type FeatureMeta = {
   lead: string;
   /** The link from this feature's hero on the Features overview (PRE-311). Names where it goes. */
   overviewLink: string;
-  /** The related-features card's thumbnail, a crop of this still (PRE-289). */
-  thumb: CardThumb;
+  /**
+   * The photo tile on the Features overview and in each page's related row
+   * (PRE-450): the still, a short headline and, on the overview, one line.
+   */
+  tile: { photo: StagePhoto; title: string; line: string };
 };
+
+/** The handoff's 4:5 stills (PRE-450), each at 560, 880 and 1200 px. */
+const STILL_WIDTHS = [560, 880, 1200];
 
 /*
  * Copy is in the lifecycle-email voice (PRE-279): the reader's day first,
@@ -60,7 +66,11 @@ export const FEATURES: Record<FeatureSlug, FeatureMeta> = {
     heading: "A nutritionist that knows you and speaks up.",
     lead: "It learns how you eat, agrees one thing to change first, and messages you when it spots something. You don't have to remember to ask.",
     overviewLink: "See what your nutritionist does",
-    thumb: "02-chat-chart",
+    tile: {
+      photo: { name: "consult-cups", widths: STILL_WIDTHS, alt: "", position: "50% 88%" },
+      title: "It speaks up first.",
+      line: "One focus at a time.",
+    },
   },
   "nutrition-signals": {
     slug: "nutrition-signals",
@@ -73,7 +83,11 @@ export const FEATURES: Record<FeatureSlug, FeatureMeta> = {
     heading: "Know how your food will make you feel.",
     lead: "Calories say what you ate. Energy, Satiety and Mood say whether you'll dip at 3pm, stay full until dinner and feel steady tomorrow, from your food alone.",
     overviewLink: "How Energy, Satiety and Mood work",
-    thumb: "06-signal-energy",
+    tile: {
+      photo: { name: "work-lunch", widths: STILL_WIDTHS, alt: "" },
+      title: "Know how a meal will feel.",
+      line: "Before the 3pm dip.",
+    },
   },
   "meal-plans": {
     slug: "meal-plans",
@@ -85,7 +99,11 @@ export const FEATURES: Record<FeatureSlug, FeatureMeta> = {
     heading: "Your week, planned in one chat.",
     lead: "Tell your nutritionist which days to cover and what you'd rather avoid. It plans the meals around your goals and builds the grocery list for you.",
     overviewLink: "How meal plans work",
-    thumb: "13-grocery-list",
+    tile: {
+      photo: { name: "weekly-shop", widths: STILL_WIDTHS, alt: "" },
+      title: "Next week, sorted.",
+      line: "Plus the shopping list.",
+    },
   },
   logging: {
     slug: "logging",
@@ -97,7 +115,11 @@ export const FEATURES: Record<FeatureSlug, FeatureMeta> = {
     heading: "Logging that doesn't feel like a chore.",
     lead: "Logging is where most food apps lose people. Here you type “two eggs and buttered toast”, snap your plate or say it to Siri, and it's on your log straight away.",
     overviewLink: "How logging works",
-    thumb: "01b-home-log",
+    tile: {
+      photo: { name: "wrap-plate", widths: STILL_WIDTHS, alt: "" },
+      title: "Type it like a text.",
+      line: "Or say it, or snap it.",
+    },
   },
   "widgets-and-siri": {
     slug: "widgets-and-siri",
@@ -109,7 +131,11 @@ export const FEATURES: Record<FeatureSlug, FeatureMeta> = {
     heading: "PrepIt, without opening PrepIt.",
     lead: "The less effort logging takes, the better your nutritionist's advice gets. Press the Action button, ask Siri or tap a widget, and it's done.",
     overviewLink: "How widgets and Siri work",
-    thumb: "23b-home-screen-widgets",
+    tile: {
+      photo: { name: "out-the-door", widths: STILL_WIDTHS, alt: "" },
+      title: "Log without opening it.",
+      line: "One press, from anywhere.",
+    },
   },
 };
 
