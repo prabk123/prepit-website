@@ -119,6 +119,7 @@ export function MessageCard({ text, options, selected }: { text: string; options
               {index + 1}
             </span>
             {option}
+            {index === selected && <span className="sr-only">, chosen</span>}
             <span aria-hidden className="ml-auto opacity-50">
               ›
             </span>
