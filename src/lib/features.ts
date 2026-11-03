@@ -77,11 +77,11 @@ export const FEATURES: Record<FeatureSlug, FeatureMeta> = {
     name: "Energy, Satiety and Mood",
     title: "Energy, Satiety and Mood: how your food will make you feel",
     description:
-      "Calories say what you ate. Energy, Satiety and Mood say whether you'll dip at 3pm, stay full until dinner and feel steady tomorrow, with the reason and what to try next.",
+      "Calories say what you ate. Energy, Satiety and Mood say whether you'll dip at 3pm, stay full until dinner and feel steady through the week, with the reason and what to try next.",
     summary: "Know how your food will make you feel, and why.",
     shareLine: "Whether you'll dip at 3pm or stay full until dinner, from your food alone.",
     heading: "Know how your food will make you feel.",
-    lead: "Calories say what you ate. Energy, Satiety and Mood say whether you'll dip at 3pm, stay full until dinner and feel steady tomorrow, from your food alone.",
+    lead: "Calories say what you ate. Energy, Satiety and Mood say whether you'll dip at 3pm, stay full until dinner and feel steady through the week.",
     overviewLink: "How Energy, Satiety and Mood work",
     tile: {
       photo: { name: "work-lunch", widths: STILL_WIDTHS, alt: "" },
