@@ -70,7 +70,14 @@ export default function StartBridge({
   const [rating, setRating] = useState<AppStoreRating | null>(null);
   useEffect(() => {
     let active = true;
-    ratingLookup?.then((value) => active && setRating(value)).catch(() => undefined);
+    if (!ratingLookup) return;
+    // A promise from the server arrives as React's thenable, whose `then` returns
+    // nothing, so it is wrapped in a real Promise before chaining.
+    Promise.resolve(ratingLookup)
+      .then((value) => {
+        if (active) setRating(value);
+      })
+      .catch(() => undefined);
     return () => {
       active = false;
     };

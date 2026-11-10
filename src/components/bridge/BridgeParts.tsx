@@ -148,7 +148,7 @@ export function BridgeHeader({ children }: { children?: ReactNode }) {
 /** `soldBy`: the company that bills this visitor (the cart, PRE-437). */
 export function BridgeFooter({ soldBy }: { soldBy?: string } = {}) {
   return (
-    <footer className="flex flex-col gap-2 border-t border-line pt-5 text-small text-ink-muted">
+    <footer data-bridge-footer className="flex flex-col gap-2 border-t border-line pt-5 text-small text-ink-muted">
       {soldBy && <span>Sold by {soldBy}.</span>}
       <span>
         Questions? <span className="select-all font-medium text-ink">{SUPPORT_EMAIL}</span>

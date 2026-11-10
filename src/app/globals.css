@@ -611,6 +611,11 @@
     --color-surface: var(--color-paywall-web);
   }
 
+  /* The web paywall ends with its own seller, support and legal links, so the bridge's footer would repeat them. */
+  body:has([data-paywall-page="web"]) [data-bridge-footer] {
+    display: none;
+  }
+
   /*
    * RevenueCat's paywall pins its logo row to the top of the screen, with no
    * background, so on a phone the logo slid over the text as the page
