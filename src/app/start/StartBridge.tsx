@@ -42,12 +42,12 @@ import { resetWebUser, trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webF
 export default function StartBridge({
   country,
   market,
-  rating = null,
+  rating: ratingLookup,
 }: {
   country: string | null;
   market: CartMarket;
   /** PrepIt's App Store rating in the visitor's storefront, for the web paywall's rating line (PRE-462). */
-  rating?: AppStoreRating | null;
+  rating?: Promise<AppStoreRating | null>;
 }) {
   const params = useSearchParams();
   const from = parseBridgeSource(params.get("from"));
@@ -66,6 +66,15 @@ export default function StartBridge({
   const [android] = useState(() => typeof navigator !== "undefined" && /Android/i.test(navigator.userAgent));
   const [androidContinue, setAndroidContinue] = useState(false);
   const [today] = useState(() => new Date());
+  // Long settled by the time they've signed in; until then the rating line stays hidden.
+  const [rating, setRating] = useState<AppStoreRating | null>(null);
+  useEffect(() => {
+    let active = true;
+    ratingLookup?.then((value) => active && setRating(value)).catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, [ratingLookup]);
   const viewTracked = useRef(false);
   const signInTracked = useRef<string | null>(null);
 
@@ -246,12 +255,12 @@ export default function StartBridge({
       */}
       <Checkout
         country={country}
+        refundWindow={market.refundWindow}
         header={false}
         bridge={{
           from,
           signedInTitle: save.accountCreated ? "Your plan is saved." : "You’re signed in.",
           handoff,
-          refundWindow: market.refundWindow,
           rating,
         }}
       />

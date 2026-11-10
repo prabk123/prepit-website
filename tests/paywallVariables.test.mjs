@@ -4,6 +4,8 @@ import { test } from "node:test";
 import {
   annualSaving,
   buildPaywallVariables,
+  isWebPaywallOffering,
+  paywallDateStyle,
   ratingLine,
   typedPaywallVariables,
 } from "../src/lib/funnel/paywallVariables.ts";
@@ -13,16 +15,16 @@ const GBP = (pounds) => ({ amountMicros: Math.round(pounds * 1_000_000), currenc
 
 const base = {
   today: TODAY,
-  seller: "uk",
+  dateStyle: "gb",
+  trial: true,
   sellerName: "DocWhizz Ltd",
   refundWindow: true,
   reminder: true,
   savedPlan: null,
   rating: null,
   signedInTitle: "Your plan is saved.",
-  prices: null,
   saving: "£79.89",
-  currency: "GBP",
+  currencyName: "pounds sterling",
 };
 
 test("rating line follows Charlie's rule", () => {
@@ -51,7 +53,7 @@ test("UK dates match the copy deck: reminder day 4, session 3 day 7, payment day
 });
 
 test("US dates and seller", () => {
-  const v = buildPaywallVariables({ ...base, seller: "us", sellerName: "DOCWHIZZ, LLC", refundWindow: false, currency: "USD" });
+  const v = buildPaywallVariables({ ...base, dateStyle: "us", sellerName: "DOCWHIZZ, LLC", refundWindow: false, currencyName: "US dollars" });
   assert.equal(v.date_today, "Mon, Nov 9");
   assert.equal(v.date_reminder, "Thu, Nov 12");
   assert.equal(v.date_first_payment, "Mon, Nov 16");
@@ -104,4 +106,37 @@ test("annual saving is 12 monthly payments minus the annual price", () => {
 test("typed variables match the SDK's CustomVariableValue shape", () => {
   const typed = typedPaywallVariables({ a: "x", b: true });
   assert.deepEqual(typed, { a: { type: "string", value: "x" }, b: { type: "boolean", value: true } });
+});
+
+test("no free week: renewals count from today and there is no reminder", () => {
+  const v = buildPaywallVariables({ ...base, trial: false });
+  assert.equal(v.renewal_monthly, "the 9th of each month");
+  assert.equal(v.renewal_annual, "9 Nov 2027");
+  assert.equal(v.show_reminder, false);
+});
+
+test("month ends and 29 February", () => {
+  const monthly = buildPaywallVariables({ ...base, trial: false, today: new Date(2026, 0, 31, 9) }).renewal_monthly;
+  assert.equal(monthly, "the 31st of each month, or the last day of shorter months");
+  const leap = buildPaywallVariables({ ...base, trial: false, today: new Date(2028, 1, 29, 9) });
+  assert.equal(leap.renewal_annual, "28 Feb 2029");
+});
+
+test("date style follows the country, not the seller", () => {
+  assert.equal(paywallDateStyle("US"), "us");
+  assert.equal(paywallDateStyle("ca"), "us");
+  assert.equal(paywallDateStyle("AU"), "gb");
+  assert.equal(paywallDateStyle("NZ"), "gb");
+  assert.equal(paywallDateStyle(null), "gb");
+});
+
+test("the web paywall is web_checkout or any offering marked surface web", () => {
+  assert.equal(isWebPaywallOffering({ identifier: "web_checkout", metadata: null }), true);
+  assert.equal(isWebPaywallOffering({ identifier: "web_checkout_b", metadata: { surface: "web" } }), true);
+  assert.equal(isWebPaywallOffering({ identifier: "annual_monthly_7_day", metadata: null }), false);
+  assert.equal(isWebPaywallOffering(null), false);
+});
+
+test("no currency note when the offering isn't in the seller's currency", () => {
+  assert.equal(buildPaywallVariables({ ...base, currencyName: null }).currency_note, "");
 });

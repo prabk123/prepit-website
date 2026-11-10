@@ -35,8 +35,9 @@ export default async function StartPage() {
     prices: WEB_PRICES[seller],
     inEeaOrUk: isEuCountry(country ?? undefined),
   });
-  // For the web paywall's rating line (PRE-462), cached for a day.
-  const rating = await appStoreRating(country);
+  // For the web paywall's rating line (PRE-462), cached for a day. Not awaited,
+  // so the page never waits on Apple; the bridge picks it up when it lands.
+  const rating = appStoreRating(country);
   return (
     <div className="flex w-full justify-center bg-page px-4 pb-section pt-4 text-ink lg:pt-8">
       <HideSiteChrome />
