@@ -299,7 +299,12 @@ export default function Quiz({ country, market, prices }: { country: string; mar
       firstScreen.current = false;
       return;
     }
-    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    try {
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    } catch {
+      // An older browser without "instant" rejects it with a TypeError; still go to the top.
+      window.scrollTo(0, 0);
+    }
     document.querySelector<HTMLElement>("[data-quiz-heading]")?.focus({ preventScroll: true });
   }, [screen, restored]);
 
