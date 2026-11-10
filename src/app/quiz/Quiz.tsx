@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import {
   AiLabel,
   Card,
@@ -274,7 +274,7 @@ export default function Quiz({ country, market, prices }: { country: string; mar
     if (restored) writeSaved({ answers, screen, history });
   }, [answers, screen, history, restored]);
 
-  // Each screen: one step event (its id only), back to the top, focus on the question.
+  // Each screen: one step event (its id only).
   // A stop screen sends no index either: where it falls would tell the two apart.
   useEffect(() => {
     if (!restored) return;
@@ -285,14 +285,22 @@ export default function Quiz({ country, market, prices }: { country: string; mar
       step_index: isStopScreen(screen) ? null : history.length,
     });
     if (isStopScreen(screen)) trackWebFunnelEvent(WEB_FUNNEL_EVENTS.quizEnded, { funnel_id: QUIZ_FUNNEL_ID, funnel_version: QUIZ_FUNNEL_VERSION });
+    // Only when the screen changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [screen, restored]);
+
+  // Each new screen (forward or Back) opens at the top, with focus on the question (PRE-463).
+  // Before paint and instant: the site's smooth scrolling (globals.css) turned this into a
+  // short animation from the old position, which a touch or a layout shift on a phone could
+  // stop part way, leaving the new question scrolled down. A jump needs no reduced-motion case.
+  useLayoutEffect(() => {
+    if (!restored) return;
     if (firstScreen.current) {
       firstScreen.current = false;
       return;
     }
-    window.scrollTo({ top: 0 });
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
     document.querySelector<HTMLElement>("[data-quiz-heading]")?.focus({ preventScroll: true });
-    // Only when the screen changes.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [screen, restored]);
 
   useEffect(() => () => {
