@@ -605,6 +605,12 @@
     --color-surface: var(--color-paywall);
   }
 
+  /* The web paywall (PRE-462) has Charlie's cream background, so the page matches it instead, in light and dark. */
+  body:has([data-paywall-page="web"]) {
+    --color-page: var(--color-paywall-web);
+    --color-surface: var(--color-paywall-web);
+  }
+
   /*
    * RevenueCat's paywall pins its logo row to the top of the screen, with no
    * background, so on a phone the logo slid over the text as the page

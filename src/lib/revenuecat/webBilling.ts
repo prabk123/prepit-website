@@ -6,6 +6,7 @@ import { COUNTRY_COOKIE } from "@/lib/markets";
 import { isProductionDeploy } from "@/lib/firebase/config";
 import { mayKeepAttribution, readAttribution } from "@/lib/funnel/attributionStore";
 import { classifyPurchasesError, type CheckoutFailure } from "@/lib/funnel/checkoutStates";
+import { WEB_PAYWALL_PLACEMENT } from "@/lib/funnel/paywallVariables";
 import { metaMatchingAttributes } from "@/lib/metaMatching";
 import type { PlanId } from "@/lib/pricing";
 import { webBillingKeyFor, webBillingSellerFor, type WebBillingSeller } from "@/lib/revenuecat/sellers";
@@ -228,10 +229,17 @@ export function offeringOffersTrial(offering: Offering): boolean {
   return offering.availablePackages.some(packageOffersTrial);
 }
 
-/** The current offering, whose RevenueCat paywall checkout shows. */
+/**
+ * The offering whose RevenueCat paywall checkout shows: RevenueCat's choice
+ * for the website's placement (PRE-462), so a targeting rule can serve the
+ * web-only `web_checkout` offering there and an experiment can test web
+ * paywalls without touching the app. Until a rule names the placement,
+ * RevenueCat answers with the current offering, exactly as before.
+ */
 export async function loadCheckoutOffering(uid: string, seller: WebBillingSeller): Promise<CheckoutOffering> {
   const purchases = await purchasesFor(uid, seller);
-  const offering = (await purchases.getOfferings()).current;
+  const offering =
+    (await purchases.getCurrentOfferingForPlacement(WEB_PAYWALL_PLACEMENT)) ?? (await purchases.getOfferings()).current;
   if (!offering) throw new Error("No current RevenueCat offering");
   if (!offering.hasPaywall) return { status: "no_paywall" };
   return { status: "ready", offering };

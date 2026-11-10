@@ -20,6 +20,7 @@ import { providerOf, signInAuthDomain, signOutOfWebsite } from "@/lib/firebase/a
 import { readBridgeHandoff, writeBridgeVisit, type BridgeHandoff } from "@/lib/funnel/bridgeHandoff";
 import { couldNotStart } from "@/lib/funnel/checkoutStates";
 import type { CartMarket } from "@/lib/funnel/cart";
+import type { AppStoreRating } from "@/lib/funnel/paywallVariables";
 import { parseBridgeSource, parseFunnelId } from "@/lib/funnel/params";
 import { parsePlanId } from "@/lib/pricing";
 import { identifyPixelUser, trackSignupRegistration } from "@/lib/metaPixel";
@@ -38,7 +39,16 @@ import { resetWebUser, trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webF
  * `country` picks the company that sells at checkout (PRE-355); `market` is
  * the cart's prices and terms for that company, read on the server (PRE-437).
  */
-export default function StartBridge({ country, market }: { country: string | null; market: CartMarket }) {
+export default function StartBridge({
+  country,
+  market,
+  rating = null,
+}: {
+  country: string | null;
+  market: CartMarket;
+  /** PrepIt's App Store rating in the visitor's storefront, for the web paywall's rating line (PRE-462). */
+  rating?: AppStoreRating | null;
+}) {
   const params = useSearchParams();
   const from = parseBridgeSource(params.get("from"));
   const funnelId = parseFunnelId(params.get("funnel"));
@@ -240,6 +250,9 @@ export default function StartBridge({ country, market }: { country: string | nul
         bridge={{
           from,
           signedInTitle: save.accountCreated ? "Your plan is saved." : "You’re signed in.",
+          handoff,
+          refundWindow: market.refundWindow,
+          rating,
         }}
       />
       <BridgeFooter />
