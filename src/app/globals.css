@@ -612,8 +612,9 @@
   }
 
   /* The web paywall ends with its own seller, support and legal links, so the bridge's footer would repeat them. */
+  /* !important: the footer's own `flex` utility sits in a later layer and would win otherwise. */
   body:has([data-paywall-page="web"]) [data-bridge-footer] {
-    display: none;
+    display: none !important;
   }
 
   /*
