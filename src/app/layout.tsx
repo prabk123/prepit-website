@@ -8,6 +8,7 @@ import SiteFinalCta from "@/components/pricing/SiteFinalCta";
 import Footer from "@/components/Footer";
 import SiteChrome from "@/components/SiteChrome";
 import CookieConsent from "@/components/CookieConsent";
+import InstantHistoryScroll from "@/components/InstantHistoryScroll";
 import VercelMetrics from "@/components/VercelMetrics";
 import AttributionCapture from "@/components/funnel/AttributionCapture";
 import MarketCapture from "@/components/funnel/MarketCapture";
@@ -203,6 +204,7 @@ export default function RootLayout({
         </a>
         {/* Straight after the skip link, so a keyboard reaches it before the page. */}
         <CookieConsent />
+        <InstantHistoryScroll />
         <AttributionCapture />
         <MarketCapture />
         <div className="flex min-h-screen flex-col items-center bg-page">
