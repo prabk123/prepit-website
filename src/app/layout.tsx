@@ -8,6 +8,7 @@ import SiteFinalCta from "@/components/pricing/SiteFinalCta";
 import Footer from "@/components/Footer";
 import SiteChrome from "@/components/SiteChrome";
 import CookieConsent from "@/components/CookieConsent";
+import InstantHistoryScroll from "@/components/InstantHistoryScroll";
 import VercelMetrics from "@/components/VercelMetrics";
 import AttributionCapture from "@/components/funnel/AttributionCapture";
 import MarketCapture from "@/components/funnel/MarketCapture";
@@ -107,7 +108,10 @@ export default function RootLayout({
 
   return (
     // suppressHydrationWarning: the head script below sets data-nav-* on <html> before hydration.
-    <html lang="en" suppressHydrationWarning>
+    // data-scroll-behavior="smooth": globals.css turns on smooth scrolling for in-page anchors, and this
+    // tells Next.js to switch it off while it scrolls a new page to the top, so a page change jumps
+    // straight to the top instead of animating (PRE-466).
+    <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
         {/* Before the first paint, so the homepage header matches the scroll position (PRE-447). */}
         <script dangerouslySetInnerHTML={{ __html: HOME_NAV_SCRIPT }} />
@@ -200,6 +204,7 @@ export default function RootLayout({
         </a>
         {/* Straight after the skip link, so a keyboard reaches it before the page. */}
         <CookieConsent />
+        <InstantHistoryScroll />
         <AttributionCapture />
         <MarketCapture />
         <div className="flex min-h-screen flex-col items-center bg-page">
