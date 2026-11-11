@@ -54,6 +54,13 @@ export const WEB_FUNNEL_EVENTS = {
    */
   paywallView: "web_paywall_view",
   /**
+   * RevenueCat's paywall is drawn, with its fonts and icons, and the loading skeleton fades into it (PRE-464).
+   * Both this and `web_paywall_view` carry `load_<step>_ms` for each step after sign-in (account, signup_saved,
+   * rc_ready, customer_info, offering, paywall_start, paywall_drawn; null when it didn't happen), plus here
+   * `fonts_ready`, `images_ready` and `timed_out` (nothing mounted within 10 s; the skeleton was removed anyway).
+   */
+  paywallDrawn: "web_paywall_drawn",
+  /**
    * The Welcome back step before the paywall (PRE-438): RevenueCat offers no free trial on this account, so they pay
    * today (`trial_expected`: whether PrepIt's record thought they'd get one, `has_prices`).
    */

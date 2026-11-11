@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { useWebSession } from "@/components/account/useWebSession";
+import { useWebSession, type WebSessionState } from "@/components/account/useWebSession";
 import { Assurances, BridgeAlert, BridgeHead, BridgeHeader, BridgeProgress, SUPPORT_EMAIL } from "@/components/bridge/BridgeParts";
+import PaywallSkeleton from "@/components/bridge/PaywallSkeleton";
 import SignedInChip from "@/components/bridge/SignedInChip";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { PRIMARY_BUTTON_CLASS } from "@/components/ui/buttons";
@@ -21,6 +22,7 @@ import {
   welcomeBackTerms,
   type CheckoutFailure,
 } from "@/lib/funnel/checkoutStates";
+import { checkoutTimer } from "@/lib/funnel/checkoutTimings";
 import { bridgePath, parseFunnelId, type BridgeSource } from "@/lib/funnel/params";
 import type { BridgeHandoff } from "@/lib/funnel/bridgeHandoff";
 import {
@@ -32,12 +34,13 @@ import {
   type AppStoreRating,
 } from "@/lib/funnel/paywallVariables";
 import { parsePlanId, WEB_PRICES, WEB_REMINDER_EMAIL_LIVE, type PlanId } from "@/lib/pricing";
+import { prefetchCheckout } from "@/lib/revenuecat/checkoutPrefetch";
+import { paywallFontCount, waitForPaywallDrawn } from "@/lib/revenuecat/paywallWarmup";
 import {
   checkoutValueFor,
   ensurePrivateCheckoutRoot,
   hadPremium,
   hasPremium,
-  loadCheckoutOffering,
   offeringOffersTrial,
   packageOffersTrial,
   planIdOf,
@@ -64,6 +67,9 @@ import { resetWebUser, trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webF
 function trialProperties(hasTrial: boolean, trialExpected: boolean) {
   return { has_trial: hasTrial, trial_expected: trialExpected, trial_mismatch: hasTrial && !trialExpected };
 }
+
+/** How long the skeleton takes to fade out over the drawn paywall. */
+const SKELETON_FADE_MS = 350;
 
 type Plans =
   | { status: "loading" }
@@ -121,18 +127,25 @@ export default function Checkout({
   refundWindow,
   header = true,
   bridge = null,
+  webSession = null,
 }: {
   country: string | null;
   /** The cart's rule (`buildCartMarket`): the UK company, in the UK, the EEA or an unknown country. */
   refundWindow: boolean;
   header?: boolean;
   bridge?: CheckoutBridge | null;
+  /**
+   * The page's own session, when it already has one (/start): Checkout then
+   * uses it instead of reading the account a second time (PRE-464).
+   */
+  webSession?: WebSessionState | null;
 }) {
   const params = useSearchParams();
   const router = useRouter();
   const funnelId = parseFunnelId(params.get("funnel"));
   const requestedPlan = parsePlanId(params.get("plan"));
-  const { session, reloadAccount } = useWebSession();
+  const ownSession = useWebSession({ enabled: webSession === null });
+  const { session, reloadAccount } = webSession ?? ownSession;
   const seller = webBillingSellerFor(country);
   const billing = webBillingKey(seller);
   const keyProblem = webBillingKeyProblem(seller);
@@ -154,6 +167,11 @@ export default function Checkout({
   const [presentKey, setPresentKey] = useState(0);
   const paywallTracked = useRef(false);
   const paywallHost = useRef<HTMLDivElement>(null);
+  // The showing (offering and presentKey) whose paywall is drawn, and whose skeleton has
+  // finished fading out (PRE-464). Any other showing still has its skeleton up.
+  const [drawnFor, setDrawnFor] = useState<string | null>(null);
+  const [skeletonGoneFor, setSkeletonGoneFor] = useState<string | null>(null);
+  const drawnTracked = useRef(false);
 
   const uid = session.status === "signedIn" ? session.user.uid : null;
   const account = session.status === "signedIn" ? session.account : null;
@@ -163,6 +181,16 @@ export default function Checkout({
     () => (plansState && plansState.key === plansKey ? plansState.plans : { status: "loading" }),
     [plansState, plansKey],
   );
+
+  // RevenueCat starts as soon as they're signed in, alongside the PrepIt account (PRE-464).
+  // On /start the bridge has usually started it already, and this picks up the same answer.
+  useEffect(() => {
+    if (!uid || keyProblem) return;
+    prefetchCheckout(uid, seller);
+  }, [uid, seller, keyProblem]);
+  useEffect(() => {
+    if (uid && summary) checkoutTimer.mark(uid, "account");
+  }, [uid, summary]);
 
   // Signed out: sign in first, then come back here with the same plan.
   useEffect(() => {
@@ -187,12 +215,15 @@ export default function Checkout({
     }
     (async () => {
       try {
+        // The customer info and the offering were fetched at the same time (PRE-464),
+        // usually while the PrepIt account loaded. Try again fetches afresh.
+        const prefetched = prefetchCheckout(uid, seller, { generation: reloadKey, take: true });
         // Premium from any store (an App Store subscription, or a web
-        // purchase made before the account existed) means no checkout.
-        const purchases = await purchasesFor(uid, seller);
-        const customerInfo = await purchases.getCustomerInfo();
+        // purchase made before the account existed) means no checkout, even if
+        // the offering failed.
+        const customerInfo = await prefetched.customerInfo;
         if (hasPremium(customerInfo)) return done({ status: "already_subscribed" });
-        const loaded = await loadCheckoutOffering(uid, seller);
+        const loaded = await prefetched.offering;
         // A trial before (PrepIt's record, or premium at any time in RevenueCat)
         // means no second one; RevenueCat's trial eligibility enforces it.
         const hadTrial = summary.hasUsedTrial || hadPremium(customerInfo);
@@ -204,7 +235,7 @@ export default function Checkout({
     return () => {
       cancelled = true;
     };
-  }, [uid, summary, plansKey, keyProblem, seller]);
+  }, [uid, summary, plansKey, keyProblem, seller, reloadKey]);
 
   const offering = plans.status === "ready" ? plans.offering : null;
   const trialExpected = plans.status === "ready" ? plans.trialExpected : false;
@@ -265,11 +296,13 @@ export default function Checkout({
         // The visitor's system is dark, so the light paywall was forced (PRE-375).
         system_dark_mode: systemPrefersDark(),
         ...trialProperties(offeringOffersTrial(plans.offering), plans.trialExpected),
+        // How long each step took after sign-in (PRE-464); the drawn time is on web_paywall_drawn.
+        ...(uid ? checkoutTimer.properties(uid) : {}),
       });
       if (session.status === "signedIn") identifyPixelUser(session.user.uid, session.user.email);
       trackCheckoutInitiated(checkoutValueFor(plans.offering, requestedPlan));
     }
-  }, [plans, keyProblem, context, requestedPlan, session, showPaywall]);
+  }, [plans, keyProblem, context, requestedPlan, session, showPaywall, uid]);
 
   const provider = session.status === "signedIn" ? providerOf(session.user) : null;
   const email = session.status === "signedIn" ? session.user.email : null;
@@ -368,11 +401,30 @@ export default function Checkout({
     let plan: PlanId | null = null;
     let trial: ReturnType<typeof trialProperties> | null = null;
     let purchaseStarted = false;
+    // The paywall couldn't be shown, so there's nothing to wait for.
+    let loadFailed = false;
     const releaseLight = forceLightPaywall();
+    // When RevenueCat has drawn it, with its fonts and icons, the skeleton fades into it (PRE-464).
+    const showing = `${offering.identifier}:${presentKey}`;
+    let fadeTimer: ReturnType<typeof setTimeout> | undefined;
+    void waitForPaywallDrawn(target, {
+      fontCount: paywallFontCount(offering),
+      fontsBefore: document.fonts.size,
+      cancelled: () => !active || loadFailed,
+    }).then((drawn) => {
+      if (!drawn || !active || loadFailed) return;
+      checkoutTimer.mark(uid, "paywall_drawn");
+      setDrawnFor(showing);
+      fadeTimer = setTimeout(() => setSkeletonGoneFor(showing), SKELETON_FADE_MS);
+      if (drawnTracked.current) return;
+      drawnTracked.current = true;
+      trackWebFunnelEvent(WEB_FUNNEL_EVENTS.paywallDrawn, { ...context, ...drawn, ...checkoutTimer.properties(uid) });
+    });
     (async () => {
       try {
         const purchases = await purchasesFor(uid, seller);
         ensurePrivateCheckoutRoot();
+        checkoutTimer.mark(uid, "paywall_start");
         const result = await purchases.presentPaywall({
           offering,
           htmlTarget: target,
@@ -451,6 +503,7 @@ export default function Checkout({
             reason: "paywall_load_failed",
             rc_error_code: rcErrorCode,
           });
+          loadFailed = true;
           setPaywallFailed(true);
           return;
         }
@@ -466,6 +519,7 @@ export default function Checkout({
     })();
     return () => {
       active = false;
+      clearTimeout(fadeTimer);
       releaseLight();
       host.replaceChildren();
     };
@@ -507,7 +561,9 @@ export default function Checkout({
     return (
       <>
         {top}
-        <p className="text-center text-body text-ink-secondary">Loading your plans…</p>
+        {/* The web paywall's cream, with its shape in bones, until it is drawn (PRE-464). */}
+        <span hidden data-paywall-page="web" />
+        <PaywallSkeleton />
       </>
     );
   }
@@ -530,7 +586,9 @@ export default function Checkout({
                 setPresentKey((key) => key + 1);
                 return;
               }
-              reloadAccount();
+              // /start's own session is never reloaded from here: that would take the page
+              // back to the cart. Its account errors are the bridge's to show.
+              if (!webSession) reloadAccount();
               setReloadKey((key) => key + 1);
             }}
           >
@@ -599,6 +657,8 @@ export default function Checkout({
     );
   }
 
+  const showingId = offering ? `${offering.identifier}:${presentKey}` : null;
+  const drawn = showingId !== null && drawnFor === showingId;
   const message = failure ? CHECKOUT_FAILURE_MESSAGES[failure] : null;
   const starting = startingLine(confirmingTrial);
   let intro: ReactNode = null;
@@ -632,7 +692,32 @@ export default function Checkout({
         <>
           {/* Turns the page white like the paywall (globals.css). */}
           <span hidden data-paywall-page={webPaywall ? "web" : ""} />
-          <div ref={paywallHost} className="ph-no-capture w-full" data-paywall-host="" data-testid="revenuecat-paywall" />
+          {/*
+            RevenueCat draws the paywall under its skeleton, invisible, and it fades in
+            over the skeleton once drawn (PRE-464), so there's no blank flash or jump.
+          */}
+          <div className="relative w-full">
+            {skeletonGoneFor !== showingId && (
+              <PaywallSkeleton
+                className={
+                  drawn
+                    ? "pointer-events-none absolute inset-x-0 top-0 opacity-0 transition-opacity duration-300 ease-out motion-reduce:transition-none"
+                    : ""
+                }
+              />
+            )}
+            <div
+              ref={paywallHost}
+              inert={!drawn}
+              aria-hidden={drawn ? undefined : true}
+              className={`ph-no-capture w-full transition-opacity duration-300 ease-out motion-reduce:transition-none ${
+                drawn ? "opacity-100" : "pointer-events-none absolute inset-x-0 top-0 opacity-0"
+              }`}
+              data-paywall-host=""
+              data-paywall-drawn={drawn ? "" : undefined}
+              data-testid="revenuecat-paywall"
+            />
+          </div>
         </>
       )}
       {failure && paying === "idle" && (
