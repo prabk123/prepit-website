@@ -34,7 +34,13 @@ export const CHECKOUT_APPEARANCE: Partial<BrandingAppearance> = {
   /**
    * RevenueCat's "pill" corners: 12px card fields (the most of any option; Stripe
    * only takes them from here) and fully round buttons, which globals.css then
-   * brings back to the site's 16px (--radius-button).
+   * brings back to the site's 16px (--radius-button). Stripe gives the sheet's
+   * Apple Pay button the same 12px.
+   *
+   * The paywall's own Apple Pay button never sees this override: purchases-js
+   * draws it with each Web Billing app's dashboard Appearance (PRE-468). Keep
+   * the shape there on Pill in both apps (UK and US) so the two Apple Pay
+   * buttons have the same corners. If this value changes, change those too.
    */
   shapes: "pill",
 };
