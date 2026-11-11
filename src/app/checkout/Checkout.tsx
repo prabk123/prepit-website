@@ -354,8 +354,6 @@ export default function Checkout({
       }),
     );
   }, [offering, webPaywall, today, country, seller, refundWindow, bridgeFrom, bridgeHandoff, bridgeRating, signedInTitle]);
-  // Where RevenueCat's card form opens on the web paywall: in the page under it, not a pop-up.
-  const cardHost = useRef<HTMLDivElement>(null);
 
   // Shows RevenueCat's paywall in the page. It runs the purchase itself (with
   // 3-D Secure and its own retryable errors); this waits for the result.
@@ -367,10 +365,6 @@ export default function Checkout({
     // A fresh element per showing, so a second showing never stacks on the first.
     const target = document.createElement("div");
     host.replaceChildren(target);
-    // The card form gets a fresh element too, so a failed try never leaves a stale form behind.
-    const cardHostElement = webPaywall ? cardHost.current : null;
-    const cardTarget = cardHostElement ? document.createElement("div") : null;
-    if (cardHostElement && cardTarget) cardHostElement.replaceChildren(cardTarget);
     let plan: PlanId | null = null;
     let trial: ReturnType<typeof trialProperties> | null = null;
     let purchaseStarted = false;
@@ -386,7 +380,9 @@ export default function Checkout({
           metadata: { funnel_id: funnelId },
           hideBackButtons: true,
           ...(paywallVariables ? { customVariables: paywallVariables } : {}),
-          ...(cardTarget ? { purchaseHtmlTarget: cardTarget } : {}),
+          // No purchaseHtmlTarget: RevenueCat opens its checkout as a sheet over
+          // the page, in #rcb-ui-root (PRE-465). A card form mounted in the page
+          // under the paywall loaded out of sight, below the FAQ and footer.
           listener: {
             onPurchaseStarted: (rcPackage) => {
               purchaseStarted = true;
@@ -398,7 +394,6 @@ export default function Checkout({
               trial = trialProperties(packageOffersTrial(rcPackage), trialExpected);
               setFailure(null);
               setDeclined(false);
-              if (webPaywall) cardHost.current?.scrollIntoView({ behavior: "smooth", block: "start" });
               trackWebFunnelEvent(WEB_FUNNEL_EVENTS.checkoutStart, { ...context, plan, ...trial });
             },
             onPurchaseError: (error) => {
@@ -473,7 +468,6 @@ export default function Checkout({
       active = false;
       releaseLight();
       host.replaceChildren();
-      cardHostElement?.replaceChildren();
     };
     // welcomePath and context only change with the session and URL already in the deps.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -639,7 +633,6 @@ export default function Checkout({
           {/* Turns the page white like the paywall (globals.css). */}
           <span hidden data-paywall-page={webPaywall ? "web" : ""} />
           <div ref={paywallHost} className="ph-no-capture w-full" data-paywall-host="" data-testid="revenuecat-paywall" />
-          {webPaywall && <div ref={cardHost} className="ph-no-capture w-full scroll-mt-4" data-testid="revenuecat-card-form" />}
         </>
       )}
       {failure && paying === "idle" && (
