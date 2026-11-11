@@ -12,21 +12,33 @@ import { loadCheckoutOffering, purchasesFor, type CheckoutOffering } from "@/lib
  * (PRE-464), started as soon as the visitor is signed in instead of after the
  * PrepIt account has loaded and been saved. The customer info (the "already
  * subscribed?" check) and the offering are fetched at the same time, not one
- * after the other.
+ * after the other, but come back as two promises so checkout can still read
+ * the customer info first: a member never sees "couldn't start" because the
+ * offering failed.
  *
- * The answer is kept for this uid, seller and `generation` (Checkout's Try
- * again count) for two minutes, so /start can start it on sign-in and Checkout
- * picks the same answer up when it mounts. A failure is never kept.
+ * A prefetch is kept for this uid, seller and `generation` (Checkout's Try
+ * again count) until Checkout takes it (`take: true`), for at most two
+ * minutes, so /start can start it on sign-in and Checkout picks the same one
+ * up when it mounts. Taken once: a later checkout (Back after a purchase, for
+ * example) fetches afresh. A failure is never kept.
  */
-export type CheckoutPrefetch = { customerInfo: CustomerInfo; offering: CheckoutOffering };
+export type CheckoutPrefetch = { customerInfo: Promise<CustomerInfo>; offering: Promise<CheckoutOffering> };
 
 const KEEP_MS = 2 * 60_000;
 
-let cached: { key: string; at: number; promise: Promise<CheckoutPrefetch> } | null = null;
+let cached: { key: string; at: number; prefetch: CheckoutPrefetch } | null = null;
 
-export function prefetchCheckout(uid: string, seller: WebBillingSeller, generation = 0): Promise<CheckoutPrefetch> {
+export function prefetchCheckout(
+  uid: string,
+  seller: WebBillingSeller,
+  { generation = 0, take = false }: { generation?: number; take?: boolean } = {},
+): CheckoutPrefetch {
   const key = `${uid}:${seller}:${generation}`;
-  if (cached && cached.key === key && Date.now() - cached.at < KEEP_MS) return cached.promise;
+  if (cached && cached.key === key && Date.now() - cached.at < KEEP_MS) {
+    const { prefetch } = cached;
+    if (take) cached = null;
+    return prefetch;
+  }
   checkoutTimer.start(uid);
   preconnectToPaywall();
   const purchases = purchasesFor(uid, seller);
@@ -46,13 +58,16 @@ export function prefetchCheckout(uid: string, seller: WebBillingSeller, generati
     if (loaded.status === "ready") preloadPaywallFonts(paywallFontUrls(loaded.offering));
     return loaded;
   });
-  const promise = Promise.all([customerInfo, offering]).then(([info, loaded]) => ({ customerInfo: info, offering: loaded }));
-  const entry = { key, at: Date.now(), promise };
-  cached = entry;
-  promise.catch(() => {
-    if (cached === entry) cached = null;
-  });
-  return promise;
+  const prefetch = { customerInfo, offering };
+  const entry = take ? null : { key, at: Date.now(), prefetch };
+  if (entry) cached = entry;
+  // A failure is never kept, and is never an unhandled rejection: the caller awaits the one it needs.
+  const forget = () => {
+    if (entry && cached === entry) cached = null;
+  };
+  customerInfo.catch(forget);
+  offering.catch(forget);
+  return prefetch;
 }
 
 /**

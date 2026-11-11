@@ -35,7 +35,7 @@ import {
 } from "@/lib/funnel/paywallVariables";
 import { parsePlanId, WEB_PRICES, WEB_REMINDER_EMAIL_LIVE, type PlanId } from "@/lib/pricing";
 import { prefetchCheckout } from "@/lib/revenuecat/checkoutPrefetch";
-import { paywallFontUrls, waitForPaywallDrawn } from "@/lib/revenuecat/paywallWarmup";
+import { paywallFontCount, waitForPaywallDrawn } from "@/lib/revenuecat/paywallWarmup";
 import {
   checkoutValueFor,
   ensurePrivateCheckoutRoot,
@@ -186,7 +186,7 @@ export default function Checkout({
   // On /start the bridge has usually started it already, and this picks up the same answer.
   useEffect(() => {
     if (!uid || keyProblem) return;
-    prefetchCheckout(uid, seller).catch(() => undefined);
+    prefetchCheckout(uid, seller);
   }, [uid, seller, keyProblem]);
   useEffect(() => {
     if (uid && summary) checkoutTimer.mark(uid, "account");
@@ -215,12 +215,15 @@ export default function Checkout({
     }
     (async () => {
       try {
-        // The customer info and the offering come back together (PRE-464), usually
-        // already fetched while the PrepIt account loaded. Try again fetches afresh.
-        const { customerInfo, offering: loaded } = await prefetchCheckout(uid, seller, reloadKey);
+        // The customer info and the offering were fetched at the same time (PRE-464),
+        // usually while the PrepIt account loaded. Try again fetches afresh.
+        const prefetched = prefetchCheckout(uid, seller, { generation: reloadKey, take: true });
         // Premium from any store (an App Store subscription, or a web
-        // purchase made before the account existed) means no checkout.
+        // purchase made before the account existed) means no checkout, even if
+        // the offering failed.
+        const customerInfo = await prefetched.customerInfo;
         if (hasPremium(customerInfo)) return done({ status: "already_subscribed" });
+        const loaded = await prefetched.offering;
         // A trial before (PrepIt's record, or premium at any time in RevenueCat)
         // means no second one; RevenueCat's trial eligibility enforces it.
         const hadTrial = summary.hasUsedTrial || hadPremium(customerInfo);
@@ -411,11 +414,11 @@ export default function Checkout({
     const showing = `${offering.identifier}:${presentKey}`;
     let fadeTimer: ReturnType<typeof setTimeout> | undefined;
     void waitForPaywallDrawn(target, {
-      fontCount: paywallFontUrls(offering).length,
+      fontCount: paywallFontCount(offering),
       fontsBefore: document.fonts.size,
       cancelled: () => !active || loadFailed,
     }).then((drawn) => {
-      if (!active) return;
+      if (!drawn || !active || loadFailed) return;
       checkoutTimer.mark(uid, "paywall_drawn");
       setDrawnFor(showing);
       fadeTimer = setTimeout(() => setSkeletonGoneFor(showing), SKELETON_FADE_MS);
@@ -589,7 +592,9 @@ export default function Checkout({
                 setPresentKey((key) => key + 1);
                 return;
               }
-              reloadAccount();
+              // /start's own session is never reloaded from here: that would take the page
+              // back to the cart. Its account errors are the bridge's to show.
+              if (!webSession) reloadAccount();
               setReloadKey((key) => key + 1);
             }}
           >

@@ -113,7 +113,7 @@ export default function StartBridge({
     if (!uid) return;
     checkoutTimer.start(uid);
     if (webBillingKeyProblem(seller)) return;
-    prefetchCheckout(uid, seller).catch(() => undefined);
+    prefetchCheckout(uid, seller);
   }, [uid, seller]);
   useEffect(() => {
     if (uid && summary) checkoutTimer.mark(uid, "account");

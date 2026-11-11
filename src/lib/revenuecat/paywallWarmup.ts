@@ -23,19 +23,30 @@ export const PAYWALL_ORIGINS = {
 } as const;
 
 /**
- * The https font files an offering's paywall uses. The offering's `uiConfig`
- * isn't in purchases-js's public types, so it is read defensively: anything
- * unexpected gives no URLs, never an error.
+ * The paywall fonts the SDK registers: each `ui_config` font whose web entry
+ * has both a URL and a family (purchases-js 1.69 skips any other). The
+ * offering's `uiConfig` isn't in purchases-js's public types, so it is read
+ * defensively: anything unexpected gives none, never an error.
  */
-export function paywallFontUrls(offering: unknown): string[] {
+function registeredFonts(offering: unknown): string[] {
   const fonts = (offering as { uiConfig?: { app?: { fonts?: unknown } } } | null | undefined)?.uiConfig?.app?.fonts;
   if (!fonts || typeof fonts !== "object") return [];
-  const urls = new Set<string>();
+  const urls: string[] = [];
   for (const font of Object.values(fonts as Record<string, unknown>)) {
-    const url = (font as { web?: { url?: unknown } } | null)?.web?.url;
-    if (typeof url === "string" && url.startsWith("https://")) urls.add(url);
+    const web = (font as { web?: { url?: unknown; family?: unknown } } | null)?.web;
+    if (typeof web?.url === "string" && web.url && typeof web.family === "string" && web.family) urls.push(web.url);
   }
-  return [...urls];
+  return urls;
+}
+
+/** The https font files an offering's paywall loads, once each, for preloading. */
+export function paywallFontUrls(offering: unknown): string[] {
+  return [...new Set(registeredFonts(offering).filter((url) => url.startsWith("https://")))];
+}
+
+/** How many fonts the SDK adds to `document.fonts` for this paywall (one per font entry, repeats included). */
+export function paywallFontCount(offering: unknown): number {
+  return registeredFonts(offering).length;
 }
 
 const preloaded = new Set<string>();
@@ -64,18 +75,19 @@ export type PaywallDrawn = {
   fonts_ready: boolean;
   /** Every image in the paywall had loaded (or failed) before the cap. */
   images_ready: boolean;
-  /** Nothing was mounted before the overall cap: the skeleton was taken away anyway. */
+  /** Mounting took longer than 10 s (the skeleton stayed up until it did). */
   timed_out: boolean;
 };
 
-const MOUNT_CAP_MS = 10_000;
+/** A mount slower than this is reported as `timed_out`. */
+const MOUNT_SLOW_MS = 10_000;
 const FONTS_CAP_MS = 2_500;
 const IMAGES_CAP_MS = 2_000;
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const nextFrame = () => new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
 
-/** Resolves true when `check` is true (polled every 50 ms), false after `capMs`. */
+/** Resolves true when `check` is true (polled every 50 ms), false after `capMs` or once cancelled. */
 async function until(check: () => boolean, capMs: number, cancelled: () => boolean): Promise<boolean> {
   const deadline = Date.now() + capMs;
   while (!cancelled()) {
@@ -90,19 +102,23 @@ async function until(check: () => boolean, capMs: number, cancelled: () => boole
  * Waits for RevenueCat's paywall to be drawn in `target`: something mounted
  * with a height, then `fontCount` more fonts registered in `document.fonts`
  * than `fontsBefore` (the SDK registers each paywall font once it has loaded),
- * then the images inside it, then two frames for the paint. Each wait has a
- * cap, so a font or icon that never arrives can't keep the skeleton up.
+ * then the images inside it, then two frames for the paint. The mount has no
+ * cap (the skeleton stays until there is a paywall to show; a paywall that
+ * fails to load ends in the page's own error), but the fonts and images do,
+ * so one that never arrives can't keep the skeleton up. Null when cancelled.
  */
 export async function waitForPaywallDrawn(
   target: HTMLElement,
   { fontCount, fontsBefore, cancelled }: { fontCount: number; fontsBefore: number; cancelled: () => boolean },
-): Promise<PaywallDrawn> {
+): Promise<PaywallDrawn | null> {
+  const started = Date.now();
   const mounted = await until(
     () => target.childElementCount > 0 && target.getBoundingClientRect().height > 0,
-    MOUNT_CAP_MS,
+    Number.POSITIVE_INFINITY,
     cancelled,
   );
-  if (!mounted) return { fonts_ready: false, images_ready: false, timed_out: true };
+  if (!mounted || cancelled()) return null;
+  const timedOut = Date.now() - started > MOUNT_SLOW_MS;
   const fontsReady =
     fontCount === 0 || (await until(() => document.fonts.size >= fontsBefore + fontCount, FONTS_CAP_MS, cancelled));
   const imagesReady = await until(
@@ -112,5 +128,6 @@ export async function waitForPaywallDrawn(
   );
   await nextFrame();
   await nextFrame();
-  return { fonts_ready: fontsReady, images_ready: imagesReady, timed_out: false };
+  if (cancelled()) return null;
+  return { fonts_ready: fontsReady, images_ready: imagesReady, timed_out: timedOut };
 }

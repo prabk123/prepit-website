@@ -2,7 +2,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { CHECKOUT_STEPS, createCheckoutTimer } from "../src/lib/funnel/checkoutTimings.ts";
-import { paywallFontUrls } from "../src/lib/revenuecat/paywallWarmup.ts";
+import { paywallFontCount, paywallFontUrls } from "../src/lib/revenuecat/paywallWarmup.ts";
 
 function clock() {
   let now = 1000;
@@ -67,15 +67,19 @@ test("the paywall's font files come from the offering's ui_config", () => {
           "RCFM:d:NameOnly": { web: { type: "name" } },
           "RCFM:e:Plain": { web: { url: "http://example.com/x.ttf" } },
           "RCFM:f:Broken": null,
+          "RCFM:g:NoFamily": { web: { url: "https://fonts.pawwalls.com/g.ttf" } },
         },
       },
     },
   };
   assert.deepEqual(paywallFontUrls(offering), ["https://fonts.pawwalls.com/a.ttf", "https://fonts.pawwalls.com/b.ttf"]);
+  // The SDK registers one font per entry with a URL and a family, repeats included, none without a family.
+  assert.equal(paywallFontCount(offering), 3);
 });
 
 test("an offering without ui_config fonts gives no font files", () => {
   assert.deepEqual(paywallFontUrls(null), []);
   assert.deepEqual(paywallFontUrls({}), []);
   assert.deepEqual(paywallFontUrls({ uiConfig: { app: { fonts: "nope" } } }), []);
+  assert.equal(paywallFontCount(null), 0);
 });
