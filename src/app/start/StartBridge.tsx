@@ -61,7 +61,8 @@ export default function StartBridge({
   const plan = parsePlanId(params.get("plan"));
   const context = useMemo(() => ({ funnel_id: funnelId, plan, from }), [funnelId, plan, from]);
 
-  const { session, reloadAccount } = useWebSession();
+  const webSession = useWebSession();
+  const { session, reloadAccount } = webSession;
   const save = useSaveWebSignup(session, funnelId, reloadAccount);
   // The quiz's answers live in this browser. useSearchParams keeps this page
   // out of the server render, so reading storage here can't mismatch.
@@ -291,6 +292,7 @@ export default function StartBridge({
         country={country}
         refundWindow={market.refundWindow}
         header={false}
+        webSession={webSession}
         bridge={{
           from,
           signedInTitle: save.accountCreated ? "Your plan is saved." : "You’re signed in.",

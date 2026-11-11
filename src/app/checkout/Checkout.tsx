@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { useWebSession } from "@/components/account/useWebSession";
+import { useWebSession, type WebSessionState } from "@/components/account/useWebSession";
 import { Assurances, BridgeAlert, BridgeHead, BridgeHeader, BridgeProgress, SUPPORT_EMAIL } from "@/components/bridge/BridgeParts";
 import PaywallSkeleton from "@/components/bridge/PaywallSkeleton";
 import SignedInChip from "@/components/bridge/SignedInChip";
@@ -127,18 +127,25 @@ export default function Checkout({
   refundWindow,
   header = true,
   bridge = null,
+  webSession = null,
 }: {
   country: string | null;
   /** The cart's rule (`buildCartMarket`): the UK company, in the UK, the EEA or an unknown country. */
   refundWindow: boolean;
   header?: boolean;
   bridge?: CheckoutBridge | null;
+  /**
+   * The page's own session, when it already has one (/start): Checkout then
+   * uses it instead of reading the account a second time (PRE-464).
+   */
+  webSession?: WebSessionState | null;
 }) {
   const params = useSearchParams();
   const router = useRouter();
   const funnelId = parseFunnelId(params.get("funnel"));
   const requestedPlan = parsePlanId(params.get("plan"));
-  const { session, reloadAccount } = useWebSession();
+  const ownSession = useWebSession({ enabled: webSession === null });
+  const { session, reloadAccount } = webSession ?? ownSession;
   const seller = webBillingSellerFor(country);
   const billing = webBillingKey(seller);
   const keyProblem = webBillingKeyProblem(seller);
