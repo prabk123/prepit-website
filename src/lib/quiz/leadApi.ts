@@ -8,6 +8,7 @@
 import type { Attribution } from "@/lib/funnel/attribution";
 import type { WebSignupAnswer, WebSignupSettings, WebSignupUser } from "@/lib/funnel/webSignupProfile";
 import { parseTargets, type Targets } from "./quiz";
+import { keepServerWebSessionId } from "@/lib/funnel/bridgeHandoff";
 
 export class LeadApiError extends Error {
   /** `details` is the backend's reason, e.g. "Invalid email." on a 400. */
@@ -65,17 +66,22 @@ export type LeadInput = {
   attribution?: Attribution | null;
 };
 
-/** Saves (or updates, by session id) the lead from the email gate or the cart's "Email me my plan". */
+/**
+ * Saves (or updates, by session id) the lead from the email gate or the
+ * cart's "Email me my plan", then keeps the signed session id the backend
+ * returns for the next save and the sign-in (PRE-398).
+ */
 export async function saveLead(input: LeadInput): Promise<void> {
   const { attribution, ...rest } = input;
   const strip = <T extends object>(value: T) =>
     Object.fromEntries(Object.entries(value).filter(([, v]) => v !== undefined && !(Array.isArray(v) && v.length === 0)));
-  await post("/web-leads", {
+  const saved = await post<unknown>("/web-leads", {
     ...rest,
     user: strip(input.user),
     settings: strip(input.settings),
     ...(attribution && Object.keys(attribution).length > 0 ? { attribution } : {}),
   });
+  keepServerWebSessionId(saved);
 }
 
 /** What the "copy of your plan" email's page shows. */
