@@ -22,7 +22,16 @@ import {
   type CheckoutFailure,
 } from "@/lib/funnel/checkoutStates";
 import { bridgePath, parseFunnelId, type BridgeSource } from "@/lib/funnel/params";
-import { parsePlanId, type PlanId } from "@/lib/pricing";
+import type { BridgeHandoff } from "@/lib/funnel/bridgeHandoff";
+import {
+  annualSaving,
+  buildPaywallVariables,
+  isWebPaywallOffering,
+  paywallDateStyle,
+  typedPaywallVariables,
+  type AppStoreRating,
+} from "@/lib/funnel/paywallVariables";
+import { parsePlanId, WEB_PRICES, WEB_REMINDER_EMAIL_LIVE, type PlanId } from "@/lib/pricing";
 import {
   checkoutValueFor,
   ensurePrivateCheckoutRoot,
@@ -40,7 +49,8 @@ import {
   webBillingKeyProblem,
 } from "@/lib/revenuecat/webBilling";
 import { forceLightPaywall, systemPrefersDark } from "@/lib/revenuecat/lightPaywall";
-import { webBillingSellerFor } from "@/lib/revenuecat/sellers";
+import { WEB_BILLING_SELLER_NAMES, webBillingSellerFor } from "@/lib/revenuecat/sellers";
+import { cartWho } from "@/lib/funnel/cart";
 import type { Offering } from "@revenuecat/purchases-js";
 import { identifyPixelUser, trackCheckoutInitiated } from "@/lib/metaPixel";
 import { resetWebUser, trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webFunnelAnalytics";
@@ -95,14 +105,26 @@ type Plans =
  * draws the assurances under the paywall, for the free week or not as
  * RevenueCat offers it.
  */
-export type CheckoutBridge = { from: BridgeSource; signedInTitle: string };
+export type CheckoutBridge = {
+  from: BridgeSource;
+  signedInTitle: string;
+  /**
+   * For the web paywall (PRE-462): the quiz's saved plan and the App Store
+   * rating, passed to the paywall as custom variables.
+   */
+  handoff?: BridgeHandoff | null;
+  rating?: AppStoreRating | null;
+};
 
 export default function Checkout({
   country,
+  refundWindow,
   header = true,
   bridge = null,
 }: {
   country: string | null;
+  /** The cart's rule (`buildCartMarket`): the UK company, in the UK, the EEA or an unknown country. */
+  refundWindow: boolean;
   header?: boolean;
   bridge?: CheckoutBridge | null;
 }) {
@@ -191,7 +213,11 @@ export default function Checkout({
   // Before the offering loads, PrepIt's own record is the best guess (for the progress bar).
   const offersTrial = offering ? offeringOffersTrial(offering) : !summary?.hasUsedTrial;
   const welcomeBack = offering !== null && !offersTrial;
-  const showPaywall = offering !== null && (!welcomeBack || continued);
+  // The web paywall (PRE-462, Charlie's design in RevenueCat on the `web_checkout`
+  // offering) carries its own welcome back, signed-in line, terms and
+  // reassurances, so this page leaves those to it.
+  const webPaywall = isWebPaywallOffering(offering);
+  const showPaywall = offering !== null && (!welcomeBack || continued || webPaywall);
   // RevenueCat's own prices for this visitor, so Welcome back always matches the payment form.
   const prices = useMemo(() => {
     if (!offering) return null;
@@ -202,20 +228,22 @@ export default function Checkout({
 
   // `billing_seller`: whose Web Billing app this checkout sells on;
   // `billing_seller_fallback`: that seller's own key isn't set, so this is on the shared pre-PRE-355 key.
+  // `offering_id`: which offering's paywall, so every checkout event splits by paywall (PRE-462).
+  const offeringId = offering?.identifier ?? null;
   const context = useMemo(
-    () => ({ funnel_id: funnelId, billing_seller: seller, billing_seller_fallback: billing.fellBack }),
-    [funnelId, seller, billing.fellBack],
+    () => ({ funnel_id: funnelId, billing_seller: seller, billing_seller_fallback: billing.fellBack, offering_id: offeringId }),
+    [funnelId, seller, billing.fellBack, offeringId],
   );
 
   useEffect(() => {
-    if (!welcomeBack || continued || welcomeBackTracked.current) return;
+    if (!welcomeBack || continued || webPaywall || welcomeBackTracked.current) return;
     welcomeBackTracked.current = true;
     trackWebFunnelEvent(WEB_FUNNEL_EVENTS.welcomeBackView, {
       ...context,
       trial_expected: trialExpected,
       has_prices: prices !== null,
     });
-  }, [welcomeBack, continued, context, trialExpected, prices]);
+  }, [welcomeBack, continued, webPaywall, context, trialExpected, prices]);
 
   useEffect(() => {
     if (paywallTracked.current) return;
@@ -293,6 +321,42 @@ export default function Checkout({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [plans.status]);
 
+  // The web paywall's custom variables (PRE-462): dates from today, prices and
+  // seller from this offering, the quiz's plan and the live rating rule.
+  const [today] = useState(() => new Date());
+  const bridgeFrom = bridge?.from;
+  const bridgeHandoff = bridge?.handoff ?? null;
+  const bridgeRating = bridge?.rating ?? null;
+  const signedInTitle = bridge?.signedInTitle ?? "You’re signed in.";
+  const paywallVariables = useMemo(() => {
+    if (!offering || !webPaywall) return undefined;
+    const priceOf = (plan: PlanId) =>
+      offering.availablePackages.find((candidate) => planIdOf(candidate) === plan)?.webBillingProduct.price;
+    const annual = priceOf("annual");
+    const monthly = priceOf("monthly");
+    const listed = WEB_PRICES[seller];
+    return typedPaywallVariables(
+      buildPaywallVariables({
+        today,
+        dateStyle: paywallDateStyle(country),
+        trial: offeringOffersTrial(offering),
+        refundWindow,
+        reminder: WEB_REMINDER_EMAIL_LIVE,
+        sellerName: WEB_BILLING_SELLER_NAMES[seller],
+        savedPlan:
+          bridgeFrom === "quiz" && bridgeHandoff
+            ? { forLine: cartWho("quiz", bridgeHandoff.startingPoint).line, ...bridgeHandoff.planSummary }
+            : null,
+        rating: bridgeRating,
+        signedInTitle,
+        saving: annualSaving(annual, monthly),
+        currencyName: listed && annual?.currency === listed.currency ? listed.currencyName : null,
+      }),
+    );
+  }, [offering, webPaywall, today, country, seller, refundWindow, bridgeFrom, bridgeHandoff, bridgeRating, signedInTitle]);
+  // Where RevenueCat's card form opens on the web paywall: in the page under it, not a pop-up.
+  const cardHost = useRef<HTMLDivElement>(null);
+
   // Shows RevenueCat's paywall in the page. It runs the purchase itself (with
   // 3-D Secure and its own retryable errors); this waits for the result.
 
@@ -303,6 +367,10 @@ export default function Checkout({
     // A fresh element per showing, so a second showing never stacks on the first.
     const target = document.createElement("div");
     host.replaceChildren(target);
+    // The card form gets a fresh element too, so a failed try never leaves a stale form behind.
+    const cardHostElement = webPaywall ? cardHost.current : null;
+    const cardTarget = cardHostElement ? document.createElement("div") : null;
+    if (cardHostElement && cardTarget) cardHostElement.replaceChildren(cardTarget);
     let plan: PlanId | null = null;
     let trial: ReturnType<typeof trialProperties> | null = null;
     let purchaseStarted = false;
@@ -317,6 +385,8 @@ export default function Checkout({
           customerEmail: email ?? undefined,
           metadata: { funnel_id: funnelId },
           hideBackButtons: true,
+          ...(paywallVariables ? { customVariables: paywallVariables } : {}),
+          ...(cardTarget ? { purchaseHtmlTarget: cardTarget } : {}),
           listener: {
             onPurchaseStarted: (rcPackage) => {
               purchaseStarted = true;
@@ -328,6 +398,7 @@ export default function Checkout({
               trial = trialProperties(packageOffersTrial(rcPackage), trialExpected);
               setFailure(null);
               setDeclined(false);
+              if (webPaywall) cardHost.current?.scrollIntoView({ behavior: "smooth", block: "start" });
               trackWebFunnelEvent(WEB_FUNNEL_EVENTS.checkoutStart, { ...context, plan, ...trial });
             },
             onPurchaseError: (error) => {
@@ -402,6 +473,7 @@ export default function Checkout({
       active = false;
       releaseLight();
       host.replaceChildren();
+      cardHostElement?.replaceChildren();
     };
     // welcomePath and context only change with the session and URL already in the deps.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -481,7 +553,7 @@ export default function Checkout({
   // Welcome back (PRE-438): this account has had its free week, so before
   // RevenueCat's paywall, today's price and "Continue to payment", with no
   // "free" or "trial" words.
-  if (welcomeBack && !continued) {
+  if (welcomeBack && !continued && !webPaywall) {
     return (
       <>
         {top}
@@ -536,7 +608,7 @@ export default function Checkout({
   const message = failure ? CHECKOUT_FAILURE_MESSAGES[failure] : null;
   const starting = startingLine(confirmingTrial);
   let intro: ReactNode = null;
-  if (bridge && paying === "idle") {
+  if (bridge && paying === "idle" && !webPaywall) {
     intro = welcomeBack ? (
       <p className="text-small text-ink-secondary">
         <b className="font-bold text-ink">Your plan starts today.</b> Pick annual or monthly below.
@@ -565,8 +637,9 @@ export default function Checkout({
       ) : (
         <>
           {/* Turns the page white like the paywall (globals.css). */}
-          <span hidden data-paywall-page="" />
+          <span hidden data-paywall-page={webPaywall ? "web" : ""} />
           <div ref={paywallHost} className="ph-no-capture w-full" data-paywall-host="" data-testid="revenuecat-paywall" />
+          {webPaywall && <div ref={cardHost} className="ph-no-capture w-full scroll-mt-4" data-testid="revenuecat-card-form" />}
         </>
       )}
       {failure && paying === "idle" && (
@@ -596,6 +669,7 @@ export default function Checkout({
           </button>
         </div>
       )}
+      {!webPaywall && (
       <p className="text-center text-small text-ink-muted">
         Renews automatically until you cancel. Cancel any time at tryprepit.app/account. See our{" "}
         <Link href="/terms-and-conditions" className="underline underline-offset-4 hover:text-ink">
@@ -611,7 +685,8 @@ export default function Checkout({
         </Link>
         .
       </p>
-      {bridge && paying === "idle" && <Assurances trial={offersTrial} />}
+      )}
+      {bridge && paying === "idle" && !webPaywall && <Assurances trial={offersTrial} />}
     </>
   );
 }

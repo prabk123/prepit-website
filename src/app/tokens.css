@@ -57,6 +57,8 @@
   /* RevenueCat's paywall is white (set in RevenueCat), so the checkout page
      behind it is too (globals.css, data-paywall-page). */
   --color-paywall: #ffffff;
+  /* The web paywall on the `web_checkout` offering (PRE-462) is Charlie's cream page, set in RevenueCat. */
+  --color-paywall-web: #efe8e1;
 
   /* QR codes stay dark on white in every band, so every camera reads them. */
   --color-qr-bg: #ffffff;

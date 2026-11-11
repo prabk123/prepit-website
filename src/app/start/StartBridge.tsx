@@ -20,6 +20,7 @@ import { providerOf, signInAuthDomain, signOutOfWebsite } from "@/lib/firebase/a
 import { readBridgeHandoff, writeBridgeVisit, type BridgeHandoff } from "@/lib/funnel/bridgeHandoff";
 import { couldNotStart } from "@/lib/funnel/checkoutStates";
 import type { CartMarket } from "@/lib/funnel/cart";
+import type { AppStoreRating } from "@/lib/funnel/paywallVariables";
 import { parseBridgeSource, parseFunnelId } from "@/lib/funnel/params";
 import { parsePlanId } from "@/lib/pricing";
 import { identifyPixelUser, trackSignupRegistration } from "@/lib/metaPixel";
@@ -38,7 +39,16 @@ import { resetWebUser, trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webF
  * `country` picks the company that sells at checkout (PRE-355); `market` is
  * the cart's prices and terms for that company, read on the server (PRE-437).
  */
-export default function StartBridge({ country, market }: { country: string | null; market: CartMarket }) {
+export default function StartBridge({
+  country,
+  market,
+  rating: ratingLookup,
+}: {
+  country: string | null;
+  market: CartMarket;
+  /** PrepIt's App Store rating in the visitor's storefront, for the web paywall's rating line (PRE-462). */
+  rating?: Promise<AppStoreRating | null>;
+}) {
   const params = useSearchParams();
   const from = parseBridgeSource(params.get("from"));
   const funnelId = parseFunnelId(params.get("funnel"));
@@ -56,6 +66,22 @@ export default function StartBridge({ country, market }: { country: string | nul
   const [android] = useState(() => typeof navigator !== "undefined" && /Android/i.test(navigator.userAgent));
   const [androidContinue, setAndroidContinue] = useState(false);
   const [today] = useState(() => new Date());
+  // Long settled by the time they've signed in; until then the rating line stays hidden.
+  const [rating, setRating] = useState<AppStoreRating | null>(null);
+  useEffect(() => {
+    let active = true;
+    if (!ratingLookup) return;
+    // A promise from the server arrives as React's thenable, whose `then` returns
+    // nothing, so it is wrapped in a real Promise before chaining.
+    Promise.resolve(ratingLookup)
+      .then((value) => {
+        if (active) setRating(value);
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, [ratingLookup]);
   const viewTracked = useRef(false);
   const signInTracked = useRef<string | null>(null);
 
@@ -236,10 +262,13 @@ export default function StartBridge({ country, market }: { country: string | nul
       */}
       <Checkout
         country={country}
+        refundWindow={market.refundWindow}
         header={false}
         bridge={{
           from,
           signedInTitle: save.accountCreated ? "Your plan is saved." : "You’re signed in.",
+          handoff,
+          rating,
         }}
       />
       <BridgeFooter />

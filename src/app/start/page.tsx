@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { Suspense } from "react";
 import { HideSiteFinalCta } from "@/components/pricing/SiteFinalCta";
 import { HideSiteChrome } from "@/components/SiteChrome";
+import { appStoreRating } from "@/lib/appStoreRating";
 import { isEuCountry } from "@/lib/euCountries";
 import { buildCartMarket } from "@/lib/funnel/cart";
 import { COUNTRY_HEADER, parseCountryCode } from "@/lib/markets";
@@ -34,13 +35,16 @@ export default async function StartPage() {
     prices: WEB_PRICES[seller],
     inEeaOrUk: isEuCountry(country ?? undefined),
   });
+  // For the web paywall's rating line (PRE-462), cached for a day. Not awaited,
+  // so the page never waits on Apple; the bridge picks it up when it lands.
+  const rating = appStoreRating(country);
   return (
     <div className="flex w-full justify-center bg-page px-4 pb-section pt-4 text-ink lg:pt-8">
       <HideSiteChrome />
       <HideSiteFinalCta />
       <div className="flex w-full max-w-[1040px] flex-col gap-6">
         <Suspense fallback={<p className="text-body text-ink-secondary">Loading…</p>}>
-          <StartBridge country={country} market={market} />
+          <StartBridge country={country} market={market} rating={rating} />
         </Suspense>
       </div>
     </div>
