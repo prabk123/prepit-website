@@ -37,3 +37,9 @@ test("keepServerWebSessionId replaces the browser's id and survives blocked stor
     delete globalThis.window;
   }
 });
+
+test("a signed id longer than 128 characters still passes", () => {
+  const long = `ws1.${"a".repeat(100)}.${"b".repeat(43)}`;
+  assert.equal(serverWebSessionId({ webSessionId: long }), long);
+  assert.equal(serverWebSessionId({ webSessionId: `ws1.${"a".repeat(100)}.short` }), undefined);
+});
