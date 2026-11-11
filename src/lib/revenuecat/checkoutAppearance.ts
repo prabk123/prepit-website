@@ -5,7 +5,7 @@ import type { BrandingAppearance } from "@revenuecat/purchases-js";
  * web paywall's "Start my free week" and "Pay with card" buttons. Out of the
  * box it is RevenueCat's pale blue with a blue-grey button. These are the
  * website's colours instead (tokens.css): the cream page the paywall sits on,
- * a white form, a black button and the orange accent.
+ * a white form, a black button, and the site's dark focus ring.
  *
  * It is passed to `presentPaywall` in code rather than set in each Web Billing
  * app's Appearance editor, so the UK and US sellers always match and a change
@@ -27,10 +27,14 @@ export const CHECKOUT_APPEARANCE: Partial<BrandingAppearance> = {
   /** The paywall's black button with white text. */
   color_buttons_primary: "#000000",
   color_buttons_primary_text: "#ffffff",
-  /** Focus rings and highlights (--color-accent). */
-  color_accent: "#ff644f",
+  /** The focused field's border and other highlights, like the site's form fields (--color-focus). */
+  color_accent: "#1a1a2e",
   /** --color-error. */
   color_error: "#b42318",
-  /** 8px buttons and 4px fields: RevenueCat's square-ish option. "pill" would make every button fully round. */
-  shapes: "rounded",
+  /**
+   * RevenueCat's "pill" corners: 12px card fields (the most of any option; Stripe
+   * only takes them from here) and fully round buttons, which globals.css then
+   * brings back to the site's 16px (--radius-button).
+   */
+  shapes: "pill",
 };

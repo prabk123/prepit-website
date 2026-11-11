@@ -12,7 +12,7 @@ test("uses the website's colours, not RevenueCat's blue", () => {
   assert.equal(CHECKOUT_APPEARANCE.color_page_bg, token("color-paywall-web"));
   assert.equal(CHECKOUT_APPEARANCE.color_product_info_bg, token("color-paywall-web"));
   assert.equal(CHECKOUT_APPEARANCE.color_form_bg, token("color-paywall"));
-  assert.equal(CHECKOUT_APPEARANCE.color_accent, token("color-accent"));
+  assert.equal(CHECKOUT_APPEARANCE.color_accent, token("color-focus"));
   assert.equal(CHECKOUT_APPEARANCE.color_error, token("color-error"));
   for (const value of Object.values(CHECKOUT_APPEARANCE).filter((v) => typeof v === "string" && v.startsWith("#"))) {
     assert.notEqual(value.toLowerCase(), "#576cdb", "RevenueCat's default button blue");
@@ -20,10 +20,14 @@ test("uses the website's colours, not RevenueCat's blue", () => {
   }
 });
 
-test("the button is black with white text, and corners are not pills", () => {
+test("the button is black with white text, and corners are the roundest card fields", () => {
   assert.equal(CHECKOUT_APPEARANCE.color_buttons_primary, "#000000");
   assert.equal(CHECKOUT_APPEARANCE.color_buttons_primary_text, "#ffffff");
-  assert.equal(CHECKOUT_APPEARANCE.shapes, "rounded");
+  assert.equal(CHECKOUT_APPEARANCE.shapes, "pill");
+  // globals.css takes RevenueCat's own buttons and fields back from pills to the site's corners.
+  const css = readFileSync(new URL("../src/app/globals.css", import.meta.url), "utf8");
+  assert.match(css, /--rc-shape-input-button-border-radius:\s*var\(--radius-button\)/);
+  assert.match(css, /--rc-shape-input-border-radius:\s*var\(--radius-button\)/);
 });
 
 test("only sets colours and corners, never the product description switch", () => {

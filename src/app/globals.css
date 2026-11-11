@@ -743,3 +743,41 @@ html:not([data-nav-solid]) .home-nav:not([data-menu-open]) .text-ink-muted:hover
     transition-timing-function: var(--ease-calm);
   }
 }
+
+/*
+ * RevenueCat's checkout sheet (PRE-467) mounts in #rcb-ui-root on the body and
+ * sets every line in the system font. This gives it the site's fonts: DM Sans
+ * for text and Clash Display for the plan headings ("Annual", "Try free for 1
+ * week"). It sits outside any @layer on purpose: RevenueCat's own styles are
+ * unlayered, and an unlayered rule beats any layered one, whatever its
+ * specificity. Sizes stay RevenueCat's; headings take the site's display
+ * weight and word spacing (.font-display). Stripe's card fields are in their own frame and keep the
+ * system font. If a later purchases-js renames these classes, the sheet just
+ * falls back to the system font. It names the next/font variables on <body>
+ * directly: --font-body and --font-display are resolved on :root (@theme
+ * inline in tokens.css), where those variables don't exist yet.
+ */
+#rcb-ui-root .rcb-ui-container,
+#rcb-ui-root .rcb-ui-container :is(.rcb-typography, button, input, select, textarea) {
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+}
+
+#rcb-ui-root .rcb-ui-container :is(.rcb-typography-heading-2xl, .rcb-typography-heading-xl, .rcb-typography-heading-lg, .rcb-typography-branded) {
+  font-family: var(--font-brand), system-ui, sans-serif;
+  font-weight: 500;
+  word-spacing: var(--word-spacing-display);
+}
+
+/*
+ * Corners: RevenueCat only offers fixed sets (checkoutAppearance.ts picks
+ * "pill" for 12px card fields). It sets these variables inline on several of
+ * its elements, so !important is the only way a stylesheet value wins: every
+ * element in the sheet gets the site's 16px corner for RevenueCat's own
+ * buttons and fields. Stripe's card fields are drawn in their own frame and
+ * keep 12px.
+ */
+#rcb-ui-root .rcb-ui-container,
+#rcb-ui-root .rcb-ui-container * {
+  --rc-shape-input-button-border-radius: var(--radius-button) !important;
+  --rc-shape-input-border-radius: var(--radius-button) !important;
+}
