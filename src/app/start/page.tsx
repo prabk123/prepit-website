@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { Suspense } from "react";
+import { preconnect } from "react-dom";
 import { HideSiteFinalCta } from "@/components/pricing/SiteFinalCta";
 import { HideSiteChrome } from "@/components/SiteChrome";
 import { appStoreRating } from "@/lib/appStoreRating";
@@ -8,6 +9,7 @@ import { isEuCountry } from "@/lib/euCountries";
 import { buildCartMarket } from "@/lib/funnel/cart";
 import { COUNTRY_HEADER, parseCountryCode } from "@/lib/markets";
 import { WEB_PRICES } from "@/lib/pricing";
+import { PAYWALL_ORIGINS } from "@/lib/revenuecat/paywallWarmup";
 import { webBillingSellerFor } from "@/lib/revenuecat/sellers";
 import StartBridge from "./StartBridge";
 
@@ -27,6 +29,10 @@ export const metadata: Metadata = {
  * the "You're in" page.
  */
 export default async function StartPage() {
+  // RevenueCat's paywall is the next thing this page shows (PRE-464): open its connections early.
+  preconnect(PAYWALL_ORIGINS.api);
+  preconnect(PAYWALL_ORIGINS.icons);
+  preconnect(PAYWALL_ORIGINS.fonts, { crossOrigin: "anonymous" });
   const country = parseCountryCode((await headers()).get(COUNTRY_HEADER));
   const seller = webBillingSellerFor(country);
   const market = buildCartMarket({

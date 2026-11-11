@@ -19,10 +19,14 @@ import { openAppUrl } from "@/lib/appStore";
 import { providerOf, signInAuthDomain, signOutOfWebsite } from "@/lib/firebase/auth";
 import { readBridgeHandoff, writeBridgeVisit, type BridgeHandoff } from "@/lib/funnel/bridgeHandoff";
 import { couldNotStart } from "@/lib/funnel/checkoutStates";
+import { checkoutTimer } from "@/lib/funnel/checkoutTimings";
 import type { CartMarket } from "@/lib/funnel/cart";
 import type { AppStoreRating } from "@/lib/funnel/paywallVariables";
 import { parseBridgeSource, parseFunnelId } from "@/lib/funnel/params";
 import { parsePlanId } from "@/lib/pricing";
+import { prefetchCheckout, warmPurchasesSdk } from "@/lib/revenuecat/checkoutPrefetch";
+import { webBillingSellerFor } from "@/lib/revenuecat/sellers";
+import { webBillingKeyProblem } from "@/lib/revenuecat/webBilling";
 import { identifyPixelUser, trackSignupRegistration } from "@/lib/metaPixel";
 import { resetWebUser, trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webFunnelAnalytics";
 
@@ -93,6 +97,29 @@ export default function StartBridge({
 
   const account = session.status === "signedIn" ? session.account : null;
   const summary = account?.status === "ready" ? account.summary : null;
+
+  // Faster paywall after sign-in (PRE-464). RevenueCat's SDK code loads in the
+  // background while they're on the cart, and once they're signed in its
+  // customer info and offering are fetched alongside the PrepIt account and the
+  // quiz save, instead of after them. Checkout picks the same answer up.
+  const uid = session.status === "signedIn" ? session.user.uid : null;
+  const seller = webBillingSellerFor(country);
+  useEffect(() => {
+    const timer = setTimeout(warmPurchasesSdk, 1_500);
+    return () => clearTimeout(timer);
+  }, []);
+  useEffect(() => {
+    if (!uid) return;
+    checkoutTimer.start(uid);
+    if (webBillingKeyProblem(seller)) return;
+    prefetchCheckout(uid, seller).catch(() => undefined);
+  }, [uid, seller]);
+  useEffect(() => {
+    if (uid && summary) checkoutTimer.mark(uid, "account");
+  }, [uid, summary]);
+  useEffect(() => {
+    if (uid && summary && save.status === "done") checkoutTimer.mark(uid, "signup_saved");
+  }, [uid, summary, save.status]);
 
   // One sign-up result per signed-in uid on this page.
   useEffect(() => {
