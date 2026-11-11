@@ -51,7 +51,8 @@ export type WebSignupInput = {
 
 const QUESTION_ID = /^[A-Za-z0-9_:-]{1,64}$/;
 const MAX_ANSWERS = 100;
-const WEB_SESSION_ID = /^[A-Za-z0-9_.:-]{8,128}$/;
+/** The backend's rule (PRE-398): a browser-made id, or the server's signed `ws1.<id>.<sig>`. Same in bridgeHandoff.ts and webSignupProfile.ts. */
+const WEB_SESSION_ID = /^(?:[A-Za-z0-9_.:-]{8,128}|ws1\.[A-Za-z0-9_.:-]{8,128}\.[A-Za-z0-9_-]{43})$/;
 
 // The values `pendingProfileUserSchema` / `pendingProfileSettingsSchema` accept
 // (fresca_backend services/pendingProfile.ts and the User / Settings models).

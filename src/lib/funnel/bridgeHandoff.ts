@@ -64,7 +64,8 @@ export const BRIDGE_HANDOFF_KEY = "prepit.bridgeHandoff";
 export const WEB_SESSION_ID_KEY = "prepit.webSessionId";
 /** Answers older than this are dropped rather than sent. */
 const HANDOFF_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
-const WEB_SESSION_ID = /^[A-Za-z0-9_.:-]{8,128}$/;
+/** The backend's rule (PRE-398): a browser-made id, or the server's signed `ws1.<id>.<sig>`. Same in bridgeHandoff.ts and webSignupProfile.ts. */
+const WEB_SESSION_ID = /^(?:[A-Za-z0-9_.:-]{8,128}|ws1\.[A-Za-z0-9_.:-]{8,128}\.[A-Za-z0-9_-]{43})$/;
 
 function storage(): Storage | null {
   try {
@@ -201,5 +202,26 @@ export function readBridgeVisit(): BridgeVisit | null {
     return typeof window === "undefined" ? null : parseBridgeVisit(window.sessionStorage.getItem(BRIDGE_VISIT_KEY));
   } catch {
     return null;
+  }
+}
+
+/** The signed id `POST /web-leads` returns (PRE-398), or undefined when the reply has none. Exported for tests. */
+export function serverWebSessionId(body: unknown): string | undefined {
+  const id = body && typeof body === "object" ? (body as { webSessionId?: unknown }).webSessionId : undefined;
+  return typeof id === "string" && /^ws1\.[A-Za-z0-9_.:-]{8,128}\.[A-Za-z0-9_-]{43}$/.test(id) ? id : undefined;
+}
+
+/**
+ * Keeps the id the backend issued in place of the one this browser made
+ * (PRE-398): the backend only lets its own signed id change a lead's email,
+ * or match the lead when this browser signs in.
+ */
+export function keepServerWebSessionId(body: unknown): void {
+  const id = serverWebSessionId(body);
+  if (!id) return;
+  try {
+    storage()?.setItem(WEB_SESSION_ID_KEY, id);
+  } catch {
+    // Storage blocked: the sign-in email still matches the lead.
   }
 }
