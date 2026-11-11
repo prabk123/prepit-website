@@ -35,6 +35,7 @@ import {
 } from "@/lib/funnel/paywallVariables";
 import { parsePlanId, WEB_PRICES, WEB_REMINDER_EMAIL_LIVE, type PlanId } from "@/lib/pricing";
 import { prefetchCheckout } from "@/lib/revenuecat/checkoutPrefetch";
+import { CHECKOUT_APPEARANCE } from "@/lib/revenuecat/checkoutAppearance";
 import { paywallFontCount, waitForPaywallDrawn } from "@/lib/revenuecat/paywallWarmup";
 import {
   checkoutValueFor,
@@ -431,6 +432,8 @@ export default function Checkout({
           customerEmail: email ?? undefined,
           metadata: { funnel_id: funnelId },
           hideBackButtons: true,
+          // The checkout sheet in the website's colours, not RevenueCat's blue (PRE-467).
+          brandingAppearanceOverride: CHECKOUT_APPEARANCE,
           ...(paywallVariables ? { customVariables: paywallVariables } : {}),
           // No purchaseHtmlTarget: RevenueCat opens its checkout as a sheet over
           // the page, in #rcb-ui-root (PRE-465). A card form mounted in the page
