@@ -24,6 +24,9 @@
  * subdomains (the API, analytics proxy, email link tracking) are not run from
  * here, and preloading can't be undone quickly.
  *
+ * The connector's consent page (`/connect`, PRE-507) carries its OAuth
+ * request id in the query, so it sends no referrer at all.
+ *
  * Kept free of Next imports: next.config.ts and the unit tests import it.
  */
 
@@ -66,6 +69,10 @@ export function securityHeaderRules(
         { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
         { key: "Strict-Transport-Security", value: "max-age=63072000" },
       ],
+    },
+    {
+      source: "/connect",
+      headers: [{ key: "Referrer-Policy", value: "no-referrer" }],
     },
     ...authHandlerSources.map((source) => ({
       source,
