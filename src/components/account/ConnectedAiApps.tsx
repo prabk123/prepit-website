@@ -78,7 +78,7 @@ export default function ConnectedAiApps({ uid }: { uid: string }) {
           const connected = formatDate(row.connectedAt);
           const lastUsed = row.lastUsedAt ? formatDate(row.lastUsedAt) : "";
           return (
-            <li key={row.id} className="flex flex-col gap-3 rounded-tile border border-line bg-surface-raised p-4">
+            <li key={row.id} className="flex flex-col gap-3 rounded-button border border-line bg-surface-raised p-4">
               <div className="flex flex-col gap-1">
                 <p className="text-body font-bold text-ink">{row.clientName}</p>
                 <p className="text-small text-ink-muted">

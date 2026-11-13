@@ -343,10 +343,10 @@ export default function ConnectConsent() {
           ))}
         </ul>
       </div>
-      <div className="w-full rounded-tile border border-line bg-surface-raised p-4 text-left text-small text-ink-secondary">
+      <div className="w-full rounded-button border border-line bg-surface-raised p-4 text-left text-small text-ink-secondary">
         <p>
-          <b className="font-bold text-ink">It can only read.</b> It can&apos;t log food, change your plans or goals, or
-          edit your account. What you share is handled under {req.clientName}&apos;s own privacy terms once it has it.
+          <b className="font-bold text-ink">It can only read.</b>{" "}
+          It can&apos;t log food, change your plans or goals, or edit your account. What you share is handled under {req.clientName}&apos;s own privacy terms once it has it.
         </p>
         <p className="mt-2">
           You can disconnect at any time on your{" "}
