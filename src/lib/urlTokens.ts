@@ -5,8 +5,9 @@
  * /account when opened from a subscription email (PRE-353). /auth/link is
  * where old sign-in emails pointed (`?oobCode=…&apiKey=…`); it now redirects
  * home with the query dropped (PRE-378), and stays here as a backstop.
+ * /connect carries the connector's OAuth request id (`?interaction=`, PRE-507).
  */
-const CREDENTIAL_PATHS = ["/auth/link", "/my-plan", "/email-preferences", "/account"];
+const CREDENTIAL_PATHS = ["/auth/link", "/my-plan", "/email-preferences", "/account", "/connect"];
 
 /** Query parameters that are credentials on any page. */
 const SECRET_PARAM_NAMES = ["token", "oobCode", "apiKey"];

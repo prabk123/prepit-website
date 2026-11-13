@@ -71,4 +71,7 @@ test("the connector's consent page sends no referrer and keeps the framing rules
   assert.equal(headers["Content-Security-Policy"], "frame-ancestors 'none'");
   assert.equal(headers["X-Frame-Options"], "DENY");
   assert.equal(headersFor("/account")["Referrer-Policy"], "strict-origin-when-cross-origin");
+  // Not even PostHog's heatmaps may frame the page where access is allowed.
+  assert.equal(headersFor("/connect", "https://us.posthog.com")["Content-Security-Policy"], "frame-ancestors 'none'");
+  assert.equal(headersFor("/account", "https://us.posthog.com")["Content-Security-Policy"], "frame-ancestors https://us.posthog.com");
 });

@@ -11,6 +11,7 @@ import {
   safeRedirect,
   toBlockedReason,
 } from "../src/lib/connector/connectParams.ts";
+import { withoutUrlSecrets } from "../src/lib/urlTokens.ts";
 
 test("parseInteractionUid takes only ids the OAuth server would accept", () => {
   assert.equal(parseInteractionUid("abcDEF123_-xyz"), "abcDEF123_-xyz");
@@ -65,4 +66,12 @@ test("displayClientName cleans the app's own name", () => {
   const long = displayClientName("x".repeat(200));
   assert.equal(long.length, 60);
   assert.ok(long.endsWith("…"));
+});
+
+test("analytics never keeps the consent page's request id", () => {
+  assert.equal(withoutUrlSecrets("https://www.tryprepit.app/connect?interaction=abcDEF123_-xyz"), "https://www.tryprepit.app/connect");
+  assert.equal(
+    withoutUrlSecrets("https://www.tryprepit.app/connect?interaction=abcDEF123_-xyz&utm_source=claude"),
+    "https://www.tryprepit.app/connect?utm_source=claude",
+  );
 });
