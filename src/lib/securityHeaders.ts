@@ -24,6 +24,10 @@
  * subdomains (the API, analytics proxy, email link tracking) are not run from
  * here, and preloading can't be undone quickly.
  *
+ * The connector's consent page (`/connect`, PRE-507) carries its OAuth
+ * request id in the query, so it sends no referrer at all, and no site may
+ * frame it, PostHog's heatmaps included: it is where a person allows access.
+ *
  * Kept free of Next imports: next.config.ts and the unit tests import it.
  */
 
@@ -65,6 +69,13 @@ export function securityHeaderRules(
         { key: "X-Content-Type-Options", value: "nosniff" },
         { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
         { key: "Strict-Transport-Security", value: "max-age=63072000" },
+      ],
+    },
+    {
+      source: "/connect",
+      headers: [
+        { key: "Referrer-Policy", value: "no-referrer" },
+        { key: "Content-Security-Policy", value: frameAncestors([]) },
       ],
     },
     ...authHandlerSources.map((source) => ({

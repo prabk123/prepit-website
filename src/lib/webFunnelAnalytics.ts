@@ -109,6 +109,16 @@ export const WEB_FUNNEL_EVENTS = {
   withdrawalConfirm: "web_contract_withdrawal_confirm",
   /** A withdraw-from-contract link was clicked (`placement`: footer or account). */
   withdrawalLinkClick: "web_contract_withdrawal_link_click",
+  /**
+   * The connector's consent page, `/connect` (PRE-507), once its state is known (`state`: sign_in, ready, expired,
+   * error, missing_request, or the reason it can't connect: flag_off, no_subscription, no_account, deleted, disabled;
+   * `client`: claude, chatgpt or other). The backend's `mcp_connect_*` events cover the OAuth side.
+   */
+  connectView: "web_connect_view",
+  /** Allow or Cancel on the consent page (`choice`: allow or cancel; `outcome`: redirected, blocked, expired or error; `client`). */
+  connectChoice: "web_connect_choice",
+  /** Disconnect under Connected AI apps on the account page (`outcome`: disconnected or error). The backend sends `mcp_disconnected` too. */
+  connectedAppDisconnect: "web_connected_app_disconnect",
 } as const;
 
 type WebFunnelEvent = (typeof WEB_FUNNEL_EVENTS)[keyof typeof WEB_FUNNEL_EVENTS];

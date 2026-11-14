@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import ConnectedAiApps from "@/components/account/ConnectedAiApps";
 import EmailInUseNotice from "@/components/account/EmailInUseNotice";
 import ManageFromEmailLink, {
   forgetManageLinkToken,
@@ -161,14 +162,18 @@ function ManageAfterSignIn({ linkExpired }: { linkExpired: boolean }) {
   }
 
   const provider = providerOf(session.user);
+  // Connected AI apps (PRE-507) sit above the sign-in line on every signed-in view.
   const signedInAs = (
-    <p className="ph-no-capture text-small text-ink-muted">
-      Signed in{provider ? ` with ${PROVIDER_NAMES[provider]}` : ""}
-      {session.user.email ? ` as ${session.user.email}` : ""}.{" "}
-      <button type="button" className={TEXT_BUTTON_CLASS} onClick={() => void signOut()}>
-        Sign out
-      </button>
-    </p>
+    <>
+      <ConnectedAiApps uid={session.user.uid} />
+      <p className="ph-no-capture text-small text-ink-muted">
+        Signed in{provider ? ` with ${PROVIDER_NAMES[provider]}` : ""}
+        {session.user.email ? ` as ${session.user.email}` : ""}.{" "}
+        <button type="button" className={TEXT_BUTTON_CLASS} onClick={() => void signOut()}>
+          Sign out
+        </button>
+      </p>
+    </>
   );
 
   if (account?.status === "error") {

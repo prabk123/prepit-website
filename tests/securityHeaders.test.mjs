@@ -16,7 +16,7 @@ function headersFor(path, posthogUiHost) {
 test("every path gets the security headers first, then the sign-in handler overrides", () => {
   const rules = securityHeaderRules(FIREBASE_AUTH_HANDLER_SOURCES);
   assert.equal(rules[0].source, "/:path*");
-  assert.deepEqual(rules.slice(1).map((rule) => rule.source), [...FIREBASE_AUTH_HANDLER_SOURCES]);
+  assert.deepEqual(rules.slice(1).map((rule) => rule.source), ["/connect", ...FIREBASE_AUTH_HANDLER_SOURCES]);
 });
 
 test("pages can't be framed at all without a PostHog UI host, including /withdraw", () => {
@@ -50,7 +50,9 @@ test("a UI host that isn't an https URL is ignored", () => {
 
 test("the CSP only sets frame-ancestors, so checkout, sign-in, images and analytics aren't limited", () => {
   for (const rule of securityHeaderRules(FIREBASE_AUTH_HANDLER_SOURCES, "https://us.posthog.com")) {
-    const directives = valuesOf(rule)["Content-Security-Policy"].split(";").map((d) => d.trim().split(/\s+/)[0]).filter(Boolean);
+    const csp = valuesOf(rule)["Content-Security-Policy"];
+    if (csp === undefined) continue;
+    const directives = csp.split(";").map((d) => d.trim().split(/\s+/)[0]).filter(Boolean);
     assert.deepEqual(directives, ["frame-ancestors"]);
   }
 });
@@ -61,4 +63,15 @@ test("nosniff, referrer policy and HSTS without subdomains or preload", () => {
   assert.equal(headers["Referrer-Policy"], "strict-origin-when-cross-origin");
   assert.match(headers["Strict-Transport-Security"], /^max-age=\d+$/);
   assert.ok(Number(headers["Strict-Transport-Security"].split("=")[1]) >= 31536000);
+});
+
+test("the connector's consent page sends no referrer and keeps the framing rules (PRE-507)", () => {
+  const headers = headersFor("/connect");
+  assert.equal(headers["Referrer-Policy"], "no-referrer");
+  assert.equal(headers["Content-Security-Policy"], "frame-ancestors 'none'");
+  assert.equal(headers["X-Frame-Options"], "DENY");
+  assert.equal(headersFor("/account")["Referrer-Policy"], "strict-origin-when-cross-origin");
+  // Not even PostHog's heatmaps may frame the page where access is allowed.
+  assert.equal(headersFor("/connect", "https://us.posthog.com")["Content-Security-Policy"], "frame-ancestors 'none'");
+  assert.equal(headersFor("/account", "https://us.posthog.com")["Content-Security-Policy"], "frame-ancestors https://us.posthog.com");
 });
