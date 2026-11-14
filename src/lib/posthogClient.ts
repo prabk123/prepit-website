@@ -1,6 +1,8 @@
 import type { CaptureResult, PostHog } from "posthog-js";
 import { isPostHogEnabled } from "@/lib/analytics";
+import { resolveMcpIssuer } from "@/lib/connector/connectParams";
 import { PREPIT_ANALYTICS_CONSENT_COOKIE, PREPIT_GEO_COOKIE, readCookie } from "@/lib/cookies";
+import { tracingHeaderHosts } from "@/lib/tracingHeaders";
 import { withoutUrlSecrets } from "@/lib/urlTokens";
 
 /**
@@ -39,6 +41,18 @@ function mayCapture(): boolean {
   return !needsConsent() || hasConsent();
 }
 
+/**
+ * The PrepIt API and connector hosts, whose calls carry PostHog's session
+ * headers so backend traces open from the session replay (PRE-521). Only
+ * while PostHog may capture: a visitor who turns analytics down sends none.
+ */
+function tracingHosts(): string[] {
+  return tracingHeaderHosts([
+    process.env.NEXT_PUBLIC_PREPIT_API_BASE_URL,
+    resolveMcpIssuer(process.env.NEXT_PUBLIC_MCP_OAUTH_ISSUER),
+  ]);
+}
+
 /** Takes link credentials (`?token=`, a sign-in `?oobCode=`) out of every URL an event carries. */
 function stripUrlSecrets(event: CaptureResult | null): CaptureResult | null {
   if (!event) return event;
@@ -63,6 +77,11 @@ function load(): Promise<PostHog> {
       before_send: stripUrlSecrets,
       session_recording: {
         maskAllInputs: true,
+      },
+      tracing_headers: tracingHosts(),
+      // A visitor PostHog remembers as opted out sends no session headers either.
+      loaded: (loaded) => {
+        if (loaded.has_opted_out_capturing()) loaded.set_config({ tracing_headers: [] });
       },
       debug: process.env.NODE_ENV === "development",
     });
@@ -141,10 +160,20 @@ export function grantAnalyticsConsent() {
   void load().then((posthog) => {
     posthog.opt_in_capturing();
     posthog.startSessionRecording();
+    // Back on after an earlier no in this tab (denyAnalyticsConsent).
+    if (!posthog.config.tracing_headers?.length) posthog.set_config({ tracing_headers: tracingHosts() });
   });
 }
 
-/** The visitor rejected analytics. PostHog is only touched if it already loaded. */
+/**
+ * The visitor rejected analytics. PostHog is only touched if it has loaded or
+ * is loading (then once it's ready, so a load already under way can't leave it on).
+ */
 export function denyAnalyticsConsent() {
-  instance?.opt_out_capturing();
+  void loading?.then((posthog) => {
+    posthog.opt_out_capturing();
+    // Opting out doesn't stop posthog-js adding its session headers to API
+    // calls, so turn them off too (PRE-521).
+    posthog.set_config({ tracing_headers: [] });
+  });
 }
