@@ -79,6 +79,10 @@ function load(): Promise<PostHog> {
         maskAllInputs: true,
       },
       tracing_headers: tracingHosts(),
+      // A visitor PostHog remembers as opted out sends no session headers either.
+      loaded: (loaded) => {
+        if (loaded.has_opted_out_capturing()) loaded.set_config({ tracing_headers: [] });
+      },
       debug: process.env.NODE_ENV === "development",
     });
     instance = posthog;
@@ -161,11 +165,15 @@ export function grantAnalyticsConsent() {
   });
 }
 
-/** The visitor rejected analytics. PostHog is only touched if it already loaded. */
+/**
+ * The visitor rejected analytics. PostHog is only touched if it has loaded or
+ * is loading (then once it's ready, so a load already under way can't leave it on).
+ */
 export function denyAnalyticsConsent() {
-  if (!instance) return;
-  instance.opt_out_capturing();
-  // Opting out doesn't stop posthog-js adding its session headers to API
-  // calls, so turn them off too (PRE-521).
-  instance.set_config({ tracing_headers: [] });
+  void loading?.then((posthog) => {
+    posthog.opt_out_capturing();
+    // Opting out doesn't stop posthog-js adding its session headers to API
+    // calls, so turn them off too (PRE-521).
+    posthog.set_config({ tracing_headers: [] });
+  });
 }
