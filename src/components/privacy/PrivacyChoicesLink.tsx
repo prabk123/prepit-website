@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import PrivacyOptionsIcon from "@/components/privacy/PrivacyOptionsIcon";
 import { useSyncExternalStore } from "react";
 import { visitorCountry } from "@/lib/landingAnalytics";
 import { PRIVACY_CHOICES_PATH } from "@/lib/privacyChoices";
@@ -25,7 +26,10 @@ export function FooterPrivacyChoicesLink({ className }: { className: string }) {
       className={className}
       onClick={() => trackWebFunnelEvent(WEB_FUNNEL_EVENTS.privacyChoicesLinkClick, { placement: "footer" })}
     >
-      Your Privacy Choices
+      <span className="inline-flex items-center gap-2">
+        Your Privacy Choices
+        <PrivacyOptionsIcon className="h-[14px] w-[30px] shrink-0" />
+      </span>
     </Link>
   );
 }

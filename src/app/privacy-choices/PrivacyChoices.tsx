@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useSyncExternalStore } from "react";
+import PrivacyOptionsIcon from "@/components/privacy/PrivacyOptionsIcon";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { PRIMARY_BUTTON_CLASS, SECONDARY_BUTTON_CLASS } from "@/components/ui/buttons";
 import {
@@ -79,7 +80,12 @@ export default function PrivacyChoices() {
         as="h1"
         size="title"
         align="center"
-        title="Your Privacy Choices"
+        title={
+          <span className="inline-flex flex-wrap items-center justify-center gap-3">
+            Your Privacy Choices
+            <PrivacyOptionsIcon className="h-[20px] w-[43px] shrink-0" />
+          </span>
+        }
         lead="We don't sell your personal data for money. On our website, the Meta Pixel and the details we pass on with a purchase help us see whether our ads work. California and some other US states call this “sharing” for advertising, and you can turn it off."
       />
 
