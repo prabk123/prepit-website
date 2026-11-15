@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { WebSession } from "@/components/account/useWebSession";
 import { clearBridgeHandoff, readBridgeHandoff, readWebSessionId } from "@/lib/funnel/bridgeHandoff";
 import { readAttribution } from "@/lib/funnel/attributionStore";
+import { clearPrivacyConsent, privacyConsentBody, readPrivacyConsent } from "@/lib/funnel/privacyConsent";
 import { PrepItApiError, saveWebSignupProfile } from "@/lib/prepitApi";
 import { trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webFunnelAnalytics";
 
@@ -23,6 +24,9 @@ export type WebSignupSave = {
  * Someone who already has an account only sends the quiz session id (so the
  * email gate's lead is matched and its follow-ups stop), without holding the
  * page. Their answers are dropped: the account they have wins.
+ *
+ * Either way, the cart's health and AI consent tick (PRE-533) goes with the
+ * save, so the backend records it on the account and the app asks nothing.
  *
  * `status` is "done" once there is nothing (more) to save, so a page can hold the
  * paywall until the account answer is final. A failed save never blocks
@@ -50,10 +54,14 @@ export function useSaveWebSignup(
       // Old answers must not reach the next person to sign in on this browser.
       clearBridgeHandoff();
       const webSessionId = readWebSessionId();
-      if (webSessionId) {
-        void saveWebSignupProfile({ funnelId, createAccount: false, webSessionId }).catch(() => {
-          // The lead stays unmatched; its follow-ups stop when it expires.
-        });
+      const privacyConsent = privacyConsentBody(readPrivacyConsent());
+      if (webSessionId || privacyConsent) {
+        void saveWebSignupProfile({ funnelId, createAccount: false, webSessionId, privacyConsent })
+          .then(() => clearPrivacyConsent())
+          .catch(() => {
+            // The lead stays unmatched; its follow-ups stop when it expires.
+            // Consent not recorded: the app asks once instead.
+          });
       }
       return;
     }
@@ -64,6 +72,7 @@ export function useSaveWebSignup(
     // when the sign-in has none (Apple sends a name only the first time).
     const firstName = session.user.displayName?.trim() ? undefined : handoff?.firstName;
     const user = handoff?.user || firstName ? { ...handoff?.user, ...(firstName ? { firstName } : {}) } : undefined;
+    const privacyConsent = privacyConsentBody(readPrivacyConsent());
     void saveWebSignupProfile({
       funnelId: handoff?.funnelId ?? funnelId,
       funnelVersion: handoff?.funnelVersion,
@@ -73,9 +82,12 @@ export function useSaveWebSignup(
       attribution: readAttribution(),
       createAccount: Boolean(handoff),
       webSessionId: readWebSessionId(),
+      privacyConsent,
     })
       .then((result) => {
         if (result.hasAccount) clearBridgeHandoff();
+        // Kept on the pending profile, or on the account once it exists.
+        clearPrivacyConsent();
         if (handoff) {
           trackWebFunnelEvent(WEB_FUNNEL_EVENTS.bridgeAnswersSaved, {
             funnel_id: handoff.funnelId,
@@ -108,6 +120,7 @@ export function useSaveWebSignup(
         // Not saved: the app asks the questions instead, and the answers
         // must not follow the next sign-in on this browser.
         clearBridgeHandoff();
+        clearPrivacyConsent();
       })
       .finally(() => setSavedFor(uid));
   }, [session, uid, summary, needsSave, hasAccount, funnelId, reloadAccount]);

@@ -14,7 +14,7 @@ export const WEB_FUNNEL_EVENTS = {
   bridgeView: "web_bridge_view",
   /**
    * The cart, `/start` before sign-in (PRE-437): `entry` (landing or quiz), `market` (the billing seller, us or uk),
-   * `has_quiz_answers`, `in_app_browser`. Named as the web funnel v9 plan names it, for its dashboard (PRE-443).
+   * `has_quiz_answers`, `in_app_browser`, `privacy_consent_version` (the consent box's wording, PRE-533). Named as the web funnel v9 plan names it, for its dashboard (PRE-443).
    */
   cartView: "cart_view",
   /** "Not ready? Email me my plan" on the cart was opened (`entry`), PRE-439. */
@@ -30,6 +30,15 @@ export const WEB_FUNNEL_EVENTS = {
   authSuccess: "auth_success",
   /** The popup was closed before signing in (`provider`, `from_sticky`). `web_signin_cancelled` still fires too. */
   authCancel: "auth_cancel",
+  /**
+   * The cart's health and AI consent box (PRE-533) was ticked or unticked (`ticked`, `version`). The backend sends
+   * `privacy_consent_given` with `source: web` once it is recorded on the account.
+   */
+  privacyConsentChange: "web_privacy_consent_change",
+  /** A sign-in button was pressed before the consent box was ticked (`provider`, `from_sticky`); nothing started. */
+  privacyConsentNeeded: "web_privacy_consent_needed",
+  /** The consent box's Learn more was opened (`version`). */
+  privacyConsentLearnMore: "web_privacy_consent_learn_more",
   /** Google or Apple sign-in started (`signup_method`, `auth_domain`: `prepit` when sign-in runs through tryprepit.app, `firebase` through firebaseapp.com, PRE-374). */
   signInStart: "web_signin_start",
   /** Signed in (`has_account`, `is_subscribed`…, and `auth_domain` as on `web_signin_start`). */

@@ -57,18 +57,22 @@ export function useSignIn({
   loginHint,
   cartEvents = false,
   fromSticky = false,
+  canStart,
 }: {
   context: Record<string, string | null>;
   onSignedIn?: (provider: SignInProvider) => void;
   loginHint?: string;
   cartEvents?: boolean;
   fromSticky?: boolean;
+  /** Asked before a sign-in starts (the cart's consent box, PRE-533); false stops it there. */
+  canStart?: (provider: SignInProvider) => boolean;
 }) {
   const [busy, setBusy] = useState<SignInProvider | null>(null);
   const [failure, setFailure] = useState<SignInFailure | null>(null);
   const [failedProvider, setFailedProvider] = useState<SignInProvider | null>(null);
 
   async function start(provider: SignInProvider) {
+    if (canStart && !canStart(provider)) return;
     setBusy(provider);
     setFailure(null);
     trackWebFunnelEvent(WEB_FUNNEL_EVENTS.signInStart, {
@@ -123,6 +127,7 @@ export default function SignInButtons({
   loginHint,
   cartEvents,
   savingLabel,
+  canStart,
 }: {
   context: Record<string, string | null>;
   onSignedIn?: (provider: SignInProvider) => void;
@@ -130,8 +135,9 @@ export default function SignInButtons({
   loginHint?: string;
   cartEvents?: boolean;
   savingLabel?: string | null;
+  canStart?: (provider: SignInProvider) => boolean;
 }) {
-  const { busy, failure, start, message } = useSignIn({ context, onSignedIn, loginHint, cartEvents });
+  const { busy, failure, start, message } = useSignIn({ context, onSignedIn, loginHint, cartEvents, canStart });
   const [inAppBrowser, setInAppBrowser] = useState(false);
   const [browserUrl, setBrowserUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
