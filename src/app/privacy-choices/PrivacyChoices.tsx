@@ -13,6 +13,7 @@ import {
 import { forgetAttribution } from "@/lib/funnel/attributionStore";
 import { sharingOptOut } from "@/lib/privacyChoices";
 import type { SharingOptOut } from "@/lib/privacySharing";
+import { registerVisitorMarket } from "@/lib/landingAnalytics";
 import { trackWebFunnelEvent, WEB_FUNNEL_EVENTS } from "@/lib/webFunnelAnalytics";
 
 /**
@@ -56,12 +57,20 @@ export default function PrivacyChoices() {
     trackWebFunnelEvent(WEB_FUNNEL_EVENTS.privacyChoiceChange, { choice: "opt_out" });
     stopSharingNow();
     choiceChanged();
+    registerVisitorMarket();
   }
 
   function optBackIn() {
     expireClientCookie(PREPIT_PRIVACY_OPT_OUT_COOKIE);
     trackWebFunnelEvent(WEB_FUNNEL_EVENTS.privacyChoiceChange, { choice: "opt_in" });
     choiceChanged();
+    registerVisitorMarket();
+    // Measurement comes back straight away, unless GPC still applies: a pixel
+    // revoked earlier on this page is granted again, otherwise it loads now.
+    if (sharingOptOut() === null) {
+      if (typeof window.fbq === "function") window.fbq("consent", "grant");
+      else window.prepitLoadMetaPixel?.();
+    }
   }
 
   return (
@@ -75,8 +84,8 @@ export default function PrivacyChoices() {
       />
 
       <p className="text-small text-ink-secondary text-pretty">
-        Opting out turns off the Meta Pixel and our ad measurement in this browser. We never share your food,
-        health or body data for advertising, with or without this choice.
+        Opting out turns off the Meta Pixel and the ad details we pass on with a purchase, in this browser. We
+        never share your food, health or body data for advertising, with or without this choice.
       </p>
 
       <div aria-live="polite" className="flex flex-col gap-4">

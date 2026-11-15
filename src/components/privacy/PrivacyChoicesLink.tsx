@@ -13,7 +13,8 @@ const noSubscribe = () => () => {};
  * "Your Privacy Choices" in the footer for US visitors (PRE-539), where the
  * Meta Pixel is on by default. UK and EEA visitors choose in the cookie
  * banner. Hidden while rendering on the server, so server HTML is the same
- * for everyone.
+ * for everyone. The CCPA rules pair this label with the official opt-out
+ * icon, so the icon sits beside it.
  */
 export function FooterPrivacyChoicesLink({ className }: { className: string }) {
   const isUs = useSyncExternalStore(noSubscribe, () => visitorCountry() === GPC_COUNTRY, () => false);
