@@ -22,12 +22,12 @@ export const PRIVACY_CONSENT_VERSION = "health-ai-v1";
 
 /** The box's sentence (`text` for health-ai-v1). */
 export const PRIVACY_CONSENT_TEXT =
-  "I agree PrepIt can use my health info, and share it with its AI providers, to coach me.";
+  "I agree PrepIt can use my health info, and share it with its AI and search providers, to coach me.";
 
 /** What Learn more shows, paragraph by paragraph (`learnMoreBody` for health-ai-v1). */
 export const PRIVACY_CONSENT_LEARN_MORE: readonly string[] = [
   "To estimate your nutrition and coach you, PrepIt uses what you tell it about your body, health, food and activity, and Apple Health data if you connect it. This is health data, which the law treats as sensitive.",
-  "To reply to you, read meal photos and voice notes and build your plans, PrepIt sends this information to AI providers that work for us: Anthropic, OpenAI and Google (through OpenRouter) and Deepgram.",
+  "To reply to you, read meal photos and voice notes and build your plans, PrepIt sends this information to AI providers that work for us (Anthropic, OpenAI and Google through OpenRouter, and Deepgram), and food names to search providers to look up nutrition.",
   "You can withdraw your consent at any time in Settings, Privacy. PrepIt can't coach you without it.",
 ];
 

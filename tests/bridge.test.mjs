@@ -74,7 +74,7 @@ test("privacy consent (PRE-533): a stored tick parses back and goes in the save 
     "../src/lib/funnel/privacyConsent.ts"
   );
   // The exact health-ai-v1 sentence the backend stores (fresca_backend privacyConsentWording.ts).
-  assert.equal(PRIVACY_CONSENT_TEXT, "I agree PrepIt can use my health info, and share it with its AI providers, to coach me.");
+  assert.equal(PRIVACY_CONSENT_TEXT, "I agree PrepIt can use my health info, and share it with its AI and search providers, to coach me.");
   const now = Date.parse("2026-11-15T20:00:00Z");
   const stored = parsePrivacyConsent(JSON.stringify({ version: PRIVACY_CONSENT_VERSION, givenAt: "2026-11-15T19:55:00Z" }), now);
   assert.deepEqual(stored, { version: "health-ai-v1", givenAt: "2026-11-15T19:55:00.000Z" });
