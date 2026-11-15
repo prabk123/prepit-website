@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { FooterPrivacyChoicesLink } from "@/components/privacy/PrivacyChoicesLink";
 import StartTrialLink from "@/components/StartTrialLink";
 import LongLogo from "@/components/ui/LongLogo";
 import { FooterWithdrawalLink } from "@/components/withdrawal/WithdrawalLink";
@@ -89,6 +90,7 @@ export default function Footer() {
                 Subscription Policy
               </Link>
               <FooterWithdrawalLink className={linkClass} />
+              <FooterPrivacyChoicesLink className={linkClass} />
             </Column>
           </div>
         </div>

@@ -119,6 +119,12 @@ export const WEB_FUNNEL_EVENTS = {
   connectChoice: "web_connect_choice",
   /** Disconnect under Connected AI apps on the account page (`outcome`: disconnected or error). The backend sends `mcp_disconnected` too. */
   connectedAppDisconnect: "web_connected_app_disconnect",
+  /** "Your Privacy Choices" in the footer was clicked (PRE-539; `placement`: footer). */
+  privacyChoicesLinkClick: "web_privacy_choices_link_click",
+  /** The Your Privacy Choices page (`opted_out`: none, choice or gpc). */
+  privacyChoicesView: "web_privacy_choices_view",
+  /** "Opt out of sharing" or "Turn sharing back on" was pressed (`choice`: opt_out or opt_in). No ids or cookies. */
+  privacyChoiceChange: "web_privacy_choice_change",
 } as const;
 
 type WebFunnelEvent = (typeof WEB_FUNNEL_EVENTS)[keyof typeof WEB_FUNNEL_EVENTS];
