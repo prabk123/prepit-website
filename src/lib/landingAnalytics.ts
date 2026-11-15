@@ -3,6 +3,7 @@ import { attributionEventProperties } from "@/lib/funnel/attribution";
 import { readAttribution } from "@/lib/funnel/attributionStore";
 import { COUNTRY_COOKIE, parseCountryCode, webMarketFor, type WebMarket } from "@/lib/markets";
 import { withPostHog, withPostHogBeforeLeaving } from "@/lib/posthogClient";
+import { sharingOptOut } from "@/lib/privacyChoices";
 
 /**
  * Direct-sale landing page events (PRE-302, PRE-331). Same rules as the other
@@ -28,12 +29,18 @@ export function visitorCountry(): string | null {
 
 /**
  * Registers `country` and `web_market` on every event this browser sends, so
- * the quiz, bridge and checkout events carry them too (PRE-331).
+ * the quiz, bridge and checkout events carry them too (PRE-331), and
+ * `sharing_opt_out` (none, choice or gpc), so the share of visitors the Meta
+ * Pixel no longer sees is visible (PRE-539).
  */
 export function registerVisitorMarket() {
+  const optOut = sharingOptOut() ?? "none";
   const country = visitorCountry();
-  if (!country) return;
-  withPostHog((posthog) => posthog.register({ country, web_market: webMarketFor(country) }));
+  withPostHog((posthog) =>
+    posthog.register(
+      country ? { country, web_market: webMarketFor(country), sharing_opt_out: optOut } : { sharing_opt_out: optOut },
+    ),
+  );
 }
 
 function landingProperties(market: WebMarket, properties: Record<string, string | number | boolean | null>) {

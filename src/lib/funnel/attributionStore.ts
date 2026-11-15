@@ -5,12 +5,19 @@
  * same visit still keeps it.
  */
 import { PREPIT_ANALYTICS_CONSENT_COOKIE, PREPIT_GEO_COOKIE, readCookie } from "@/lib/cookies";
+import { isOptedOutOfSharing } from "@/lib/privacyChoices";
 import { parseAttribution, QUERY_FIELDS, type Attribution } from "./attribution";
 
 const STORAGE_KEY = "prepit.attribution.v1";
 
-/** The same rule as PostHog: a known non-EU visitor, or one who accepted optional cookies. */
+/**
+ * The same rule as PostHog (a known non-EU visitor, or one who accepted
+ * optional cookies), unless this browser opted out of sharing on
+ * /privacy-choices or is a US browser sending Global Privacy Control
+ * (PRE-539). Also gates the Meta matching details given to RevenueCat.
+ */
 export function mayKeepAttribution(): boolean {
+  if (isOptedOutOfSharing()) return false;
   return readCookie(PREPIT_GEO_COOKIE) === "non-eu" || readCookie(PREPIT_ANALYTICS_CONSENT_COOKIE) === "granted";
 }
 
@@ -72,7 +79,7 @@ export function keepPendingAttribution() {
   }
 }
 
-/** "Reject optional cookies": nothing is kept or sent. */
+/** "Reject optional cookies" or "Opt out of sharing": nothing is kept or sent. */
 export function forgetAttribution() {
   pendingLanding = null;
   try {

@@ -12,7 +12,13 @@ import InstantHistoryScroll from "@/components/InstantHistoryScroll";
 import VercelMetrics from "@/components/VercelMetrics";
 import AttributionCapture from "@/components/funnel/AttributionCapture";
 import MarketCapture from "@/components/funnel/MarketCapture";
-import { PREPIT_ANALYTICS_CONSENT_COOKIE, PREPIT_GEO_COOKIE } from "@/lib/cookies";
+import {
+  PREPIT_ANALYTICS_CONSENT_COOKIE,
+  PREPIT_GEO_COOKIE,
+  PREPIT_PRIVACY_OPT_OUT_COOKIE,
+} from "@/lib/cookies";
+import { COUNTRY_COOKIE } from "@/lib/markets";
+import { GPC_COUNTRY } from "@/lib/privacySharing";
 import { HOME_NAV_SCRIPT } from "@/lib/homeNav";
 import { HOME_SHARE_DESCRIPTION, HOME_TITLE } from "@/lib/homeMetadata";
 import "./globals.css";
@@ -123,7 +129,10 @@ export default function RootLayout({
           <>
             {/* In the UK and EEA (or when the region is unknown) the pixel only
                 loads after "Accept optional cookies"; CookieConsent calls
-                prepitLoadMetaPixel then. Cookie names are in src/lib/cookies.ts. */}
+                prepitLoadMetaPixel then. It never loads for a browser that opted
+                out on /privacy-choices, or a US browser sending Global Privacy
+                Control (PRE-539, the rule in src/lib/privacySharing.ts).
+                Cookie names are in src/lib/cookies.ts. */}
             <Script id="meta-pixel" strategy="afterInteractive">
               {`
                 window.prepitLoadMetaPixel = function () {
@@ -134,6 +143,10 @@ export default function RootLayout({
                   var path = location.pathname;
                   if (path === '/my-plan' || path === '/email-preferences' || path.indexOf('/my-plan/') === 0 || path.indexOf('/email-preferences/') === 0) return;
                   if ((path === '/account' || path === '/account/') && /[?&]token=/.test(location.search)) return;
+                  /* "Your Privacy Choices" and Global Privacy Control for US visitors. */
+                  var optedOut = (document.cookie.match(/(?:^|; )${PREPIT_PRIVACY_OPT_OUT_COOKIE}=([^;]*)/) || [])[1] === '1';
+                  var country = ((document.cookie.match(/(?:^|; )${COUNTRY_COOKIE}=([^;]*)/) || [])[1] || '').toUpperCase();
+                  if (optedOut || (navigator.globalPrivacyControl === true && country === '${GPC_COUNTRY}')) return;
                   !function(f,b,e,v,n,t,s)
                   {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
                   n.callMethod.apply(n,arguments):n.queue.push(arguments)};

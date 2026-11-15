@@ -4,7 +4,7 @@ export const META_PIXEL_APP_STORE_EVENT = "AppStoreClick";
 declare global {
   interface Window {
     fbq?: (
-      command: "trackCustom" | "track" | "init",
+      command: "trackCustom" | "track" | "init" | "consent",
       eventNameOrPixelId: string,
       params?: Record<string, string | number | string[]>
     ) => void;
