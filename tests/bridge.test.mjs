@@ -97,6 +97,9 @@ test("privacy consent (PRE-533): stale, future, other-version or broken ticks ar
   assert.equal(parsePrivacyConsent("not json", now), null);
   assert.equal(parsePrivacyConsent(JSON.stringify({ version: "health-ai-v0", givenAt: "2026-11-15T19:55:00Z" }), now), null);
   assert.equal(parsePrivacyConsent(JSON.stringify({ version: "health-ai-v1", givenAt: "2026-09-01T00:00:00Z" }), now), null);
+  // Kept for an hour at most, so an abandoned tick never pre-ticks the box for the next visitor.
+  assert.notEqual(parsePrivacyConsent(JSON.stringify({ version: "health-ai-v1", givenAt: "2026-11-15T19:01:00Z" }), now), null);
+  assert.equal(parsePrivacyConsent(JSON.stringify({ version: "health-ai-v1", givenAt: "2026-11-15T18:59:00Z" }), now), null);
   assert.equal(parsePrivacyConsent(JSON.stringify({ version: "health-ai-v1", givenAt: "2026-11-16T20:00:00Z" }), now), null);
   assert.equal(parsePrivacyConsent(JSON.stringify({ version: "health-ai-v1" }), now), null);
   // The body builder only sends the version the box showed, with both purposes agreed.

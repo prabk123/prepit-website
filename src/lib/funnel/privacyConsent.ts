@@ -3,7 +3,9 @@
  * PRE-532. One unticked box above the sign-in buttons, kept apart from the
  * terms (UK GDPR Article 9 explicit consent can't be bundled with them).
  *
- * The tick is kept in this browser until the visitor signs in, then sent with
+ * The tick is kept in this tab (sessionStorage, for an hour at most) until the
+ * visitor signs in, so it survives the sign-in round trip but never pre-ticks
+ * the box for the next person on a shared browser. It is then sent with
  * `PATCH /web-signup/profile` as `privacyConsent`. The backend keeps it on the
  * pending profile and records it on the account (source `web`), so the app
  * doesn't ask again.
@@ -34,8 +36,8 @@ export const PRIVACY_CONSENT_NEEDED_MESSAGE = "Tick the box above to continue.";
 
 export const PRIVACY_CONSENT_KEY = "prepit.privacyConsent";
 
-/** Ticks older than this are dropped (the same window as the quiz's answers). */
-const MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
+/** Ticks older than this are dropped: long enough for a sign-in, short enough that an abandoned tick never stands in for someone else's. */
+export const PRIVACY_CONSENT_MAX_AGE_MS = 60 * 60 * 1000;
 
 export type StoredPrivacyConsent = { version: typeof PRIVACY_CONSENT_VERSION; givenAt: string };
 
@@ -54,7 +56,7 @@ export function parsePrivacyConsent(raw: string | null, now = Date.now()): Store
     const value = JSON.parse(raw) as Record<string, unknown>;
     if (value?.version !== PRIVACY_CONSENT_VERSION || typeof value.givenAt !== "string") return null;
     const time = Date.parse(value.givenAt);
-    if (!Number.isFinite(time) || time > now + 60_000 || now - time > MAX_AGE_MS) return null;
+    if (!Number.isFinite(time) || time > now + 60_000 || now - time > PRIVACY_CONSENT_MAX_AGE_MS) return null;
     return { version: PRIVACY_CONSENT_VERSION, givenAt: new Date(time).toISOString() };
   } catch {
     return null;
@@ -69,7 +71,7 @@ export function privacyConsentBody(stored: StoredPrivacyConsent | null): Privacy
 
 function storage(): Storage | null {
   try {
-    return typeof window === "undefined" ? null : window.localStorage;
+    return typeof window === "undefined" ? null : window.sessionStorage;
   } catch {
     return null;
   }
