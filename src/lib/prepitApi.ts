@@ -230,16 +230,26 @@ export async function saveWebSignupProfile(input: WebSignupInput): Promise<WebSi
   };
   const patch = (value: WebSignupInput) =>
     prepitFetch<SaveResponse>("/web-signup/profile", { method: "PATCH", body: JSON.stringify(buildWebSignupBody(value)) });
-  let body: SaveResponse;
-  try {
-    body = await patch(input);
-  } catch (error) {
-    // A backend from before PRE-327 refuses the unknown `webSessionId`; the
-    // save matters more than the lead match, so send it again without.
-    const refusedSessionId =
-      error instanceof PrepItApiError && error.status === 400 && Boolean(error.details?.includes("webSessionId"));
-    if (!(refusedSessionId && input.webSessionId)) throw error;
-    body = await patch({ ...input, webSessionId: undefined });
+  // A backend from before PRE-327 refuses the unknown `webSessionId`, and one
+  // from before PRE-532 the unknown `privacyConsent`; the save matters more
+  // than either, so it is sent again without the refused field (the app then
+  // asks for consent once).
+  const refused = (error: unknown, field: string) =>
+    error instanceof PrepItApiError && error.status === 400 && Boolean(error.details?.includes(field));
+  let value = input;
+  let body: SaveResponse | undefined;
+  for (let attempt = 0; body === undefined; attempt += 1) {
+    try {
+      body = await patch(value);
+    } catch (error) {
+      if (attempt < 2 && value.webSessionId && refused(error, "webSessionId")) {
+        value = { ...value, webSessionId: undefined };
+      } else if (attempt < 2 && value.privacyConsent && refused(error, "privacyConsent")) {
+        value = { ...value, privacyConsent: undefined };
+      } else {
+        throw error;
+      }
+    }
   }
   const reason = body.accountNotCreatedReason;
   return {

@@ -6,6 +6,7 @@ import EmailInUseNotice from "@/components/account/EmailInUseNotice";
 import SignInButtons, { useSignIn } from "@/components/account/SignInButtons";
 import { BridgeFooter, BridgeHeader, BridgeProgress } from "@/components/bridge/BridgeParts";
 import PlanCard from "@/components/bridge/PlanCard";
+import PrivacyConsentBox from "@/components/bridge/PrivacyConsentBox";
 import FaqAccordion from "@/components/pricing/FaqAccordion";
 import { AppleLogo } from "@/components/ui/AppStoreButton";
 import { PRIMARY_BUTTON_CLASS } from "@/components/ui/buttons";
@@ -15,6 +16,13 @@ import type { BridgeHandoff } from "@/lib/funnel/bridgeHandoff";
 import { cartDates, cartTermsParts, type CartMarket } from "@/lib/funnel/cart";
 import { isCartEmailPlanEnabled, showCartEmailPlan } from "@/lib/funnel/cartLead";
 import type { BridgeSource } from "@/lib/funnel/params";
+import {
+  clearPrivacyConsent,
+  PRIVACY_CONSENT_VERSION,
+  readPrivacyConsent,
+  writePrivacyConsent,
+} from "@/lib/funnel/privacyConsent";
+import type { SignInProvider } from "@/lib/firebase/auth";
 import type { ExistingProvider } from "@/lib/prepitApi";
 import { WEB_REMINDER_EMAIL_LIVE } from "@/lib/pricing";
 import { WEB_BILLING_SELLER_NAMES } from "@/lib/revenuecat/sellers";
@@ -31,6 +39,8 @@ import CartEmailPlan from "./CartEmailPlan";
  * same page (StartBridge renders Checkout), so there's no plan picker here.
  * On a wide screen the order sits in a sticky column on the right; on a phone
  * a sticky bar offers the first sign-in button once the in-page one scrolls away.
+ * Above the sign-in buttons sits the health and AI consent box (PRE-533): it
+ * must be ticked before either sign-in starts, and is sent with the sign-up.
  */
 
 type CartProps = {
@@ -254,14 +264,16 @@ function StickyBar({
   context,
   loginHint,
   inAppBrowser,
+  canStart,
 }: {
   visible: boolean;
   zero: string;
   context: Record<string, string | null>;
   loginHint?: string;
   inAppBrowser: boolean;
+  canStart: (provider: SignInProvider) => boolean;
 }) {
-  const { busy, start, message } = useSignIn({ context, loginHint, cartEvents: true, fromSticky: true });
+  const { busy, start, message } = useSignIn({ context, loginHint, cartEvents: true, fromSticky: true, canStart });
   const apple = isAppleSignInEnabled();
   const provider = apple ? "apple" : inAppBrowser ? null : "google";
   const label = provider === "apple" ? "Continue with Apple" : provider === "google" ? "Continue with Google" : "Start my free 7 days";
@@ -301,6 +313,29 @@ export default function Cart({ from, context, handoff, market, country = null, t
   const [stickyVisible, setStickyVisible] = useState(false);
   const [inAppBrowser] = useState(() => typeof navigator !== "undefined" && isInAppBrowser(navigator.userAgent));
   const viewTracked = useRef(false);
+  // The consent box (PRE-533): a tick kept from before a sign-in round trip shows ticked.
+  const [consent, setConsent] = useState(() => readPrivacyConsent() !== null);
+  const [consentNeeded, setConsentNeeded] = useState(false);
+  const consentRef = useRef<HTMLInputElement>(null);
+
+  function changeConsent(ticked: boolean) {
+    setConsent(ticked);
+    if (ticked) writePrivacyConsent();
+    else clearPrivacyConsent();
+    trackWebFunnelEvent(WEB_FUNNEL_EVENTS.privacyConsentChange, { ...context, ticked, version: PRIVACY_CONSENT_VERSION });
+  }
+
+  /** Sign-in only starts once the box is ticked; otherwise the box says so and takes focus. */
+  function consentGate(fromSticky: boolean) {
+    return (provider: SignInProvider) => {
+      if (consent) return true;
+      setConsentNeeded(true);
+      trackWebFunnelEvent(WEB_FUNNEL_EVENTS.privacyConsentNeeded, { ...context, provider, from_sticky: fromSticky });
+      consentRef.current?.scrollIntoView({ block: "center" });
+      consentRef.current?.focus({ preventScroll: true });
+      return false;
+    };
+  }
 
   useEffect(() => {
     if (viewTracked.current) return;
@@ -311,6 +346,8 @@ export default function Cart({ from, context, handoff, market, country = null, t
       market: market.seller,
       has_quiz_answers: handoff !== null,
       in_app_browser: inAppBrowser,
+      // The consent box is on every cart (PRE-533); which wording it showed.
+      privacy_consent_version: PRIVACY_CONSENT_VERSION,
     });
   }, [context, from, market.seller, handoff, inAppBrowser]);
 
@@ -376,12 +413,26 @@ export default function Cart({ from, context, handoff, market, country = null, t
                   onSignOut={emailInUse.onSignOut}
                 />
               ) : (
-                <SignInButtons
-                  context={context}
-                  loginHint={handoff?.email}
-                  cartEvents
-                  savingLabel={saving ? "Saving your plan…" : null}
-                />
+                <div className="flex flex-col gap-4">
+                  {!saving && (
+                    <PrivacyConsentBox
+                      ref={consentRef}
+                      checked={consent}
+                      onChange={changeConsent}
+                      needed={consentNeeded}
+                      onLearnMore={() =>
+                        trackWebFunnelEvent(WEB_FUNNEL_EVENTS.privacyConsentLearnMore, { ...context, version: PRIVACY_CONSENT_VERSION })
+                      }
+                    />
+                  )}
+                  <SignInButtons
+                    context={context}
+                    loginHint={handoff?.email}
+                    cartEvents
+                    savingLabel={saving ? "Saving your plan…" : null}
+                    canStart={consentGate(false)}
+                  />
+                </div>
               )}
             </div>
           </section>
@@ -424,6 +475,7 @@ export default function Cart({ from, context, handoff, market, country = null, t
         context={context}
         loginHint={handoff?.email}
         inAppBrowser={inAppBrowser}
+        canStart={consentGate(true)}
       />
     </div>
   );

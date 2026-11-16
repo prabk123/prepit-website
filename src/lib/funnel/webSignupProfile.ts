@@ -4,6 +4,7 @@
  * on its own; the request itself is `saveWebSignupProfile` in prepitApi.ts.
  */
 import type { Attribution } from "./attribution";
+import type { PrivacyConsentBody } from "./privacyConsent";
 
 /** One quiz answer as the backend stores it. */
 export type WebSignupAnswer = {
@@ -47,6 +48,8 @@ export type WebSignupInput = {
   createAccount?: boolean;
   /** The quiz session id the email gate saved a lead under (PRE-327). */
   webSessionId?: string;
+  /** The cart's health and AI consent box, ticked before sign-in (PRE-533). Never part of the terms. */
+  privacyConsent?: PrivacyConsentBody;
 };
 
 const QUESTION_ID = /^[A-Za-z0-9_:-]{1,64}$/;
@@ -69,6 +72,8 @@ const GOALS = [
 const DAILY_ACTIVITIES = ["mostly_sitting", "lightly_on_feet", "on_feet_most_of_day", "physically_demanding"];
 const EXERCISE_FREQUENCIES = ["none", "one_to_two", "three_to_five", "six_to_seven", "athlete"];
 // Flexitarian, halal and kosher are backend diets since PRE-328; the quiz only sends them behind its flag.
+// The consent wordings the backend knows (`PRIVACY_CONSENT_VERSIONS`); the cart shows the latest (privacyConsent.ts).
+const PRIVACY_CONSENT_VERSIONS = ["health-ai-v1"];
 const DIETS = ["eat everything", "flexitarian", "vegan", "vegetarian", "pescetarian", "halal", "kosher", "high protein", "low carb", "keto"];
 
 function cap(value: string, max: number): string {
@@ -183,5 +188,16 @@ export function buildWebSignupBody(input: WebSignupInput): Record<string, unknow
   if (input.attribution && Object.keys(input.attribution).length > 0) body.attribution = input.attribution;
   if (input.createAccount !== undefined) body.createAccount = input.createAccount;
   if (input.webSessionId && WEB_SESSION_ID.test(input.webSessionId)) body.webSessionId = input.webSessionId;
+  const consent = input.privacyConsent;
+  // Only the version whose wording the box showed, with both purposes agreed.
+  if (consent && PRIVACY_CONSENT_VERSIONS.includes(consent.version) && consent.healthData === true && consent.aiProviders === true) {
+    const givenAt = Date.parse(consent.givenAt);
+    body.privacyConsent = {
+      version: consent.version,
+      healthData: true,
+      aiProviders: true,
+      ...(Number.isFinite(givenAt) ? { givenAt: new Date(givenAt).toISOString() } : {}),
+    };
+  }
   return body;
 }
