@@ -26,13 +26,22 @@ export default function OpenAppLink({ provider }: { provider: "google" | "apple"
   const open = () => {
     trackWebFunnelEvent(WEB_FUNNEL_EVENTS.handoffOpenApp, { provider, link: "app_scheme" });
     setStillHere(false);
-    const timer = window.setTimeout(() => {
-      if (document.visibilityState === "visible") setStillHere(true);
-    }, 2000);
-    const onHide = () => {
-      if (document.visibilityState === "hidden") window.clearTimeout(timer);
+    // iOS's "Open in PrepIt?" prompt blurs the page and opening the app
+    // hides it; either means the tap did something, so no hint.
+    let timer = 0;
+    const cancel = () => {
+      window.clearTimeout(timer);
+      window.removeEventListener("blur", cancel);
+      window.removeEventListener("pagehide", cancel);
+      document.removeEventListener("visibilitychange", cancel);
     };
-    document.addEventListener("visibilitychange", onHide, { once: true });
+    timer = window.setTimeout(() => {
+      cancel();
+      if (document.visibilityState === "visible" && document.hasFocus()) setStillHere(true);
+    }, 2500);
+    window.addEventListener("blur", cancel);
+    window.addEventListener("pagehide", cancel);
+    document.addEventListener("visibilitychange", cancel);
   };
 
   return (
@@ -42,7 +51,7 @@ export default function OpenAppLink({ provider }: { provider: "google" | "apple"
       </a>
       <p role="status" className="text-small text-ink-muted">
         {stillHere
-          ? "Didn’t open? Download PrepIt first (step 1), then come back and tap Open PrepIt."
+          ? "Nothing happened? Download PrepIt first (step 1), then come back and tap Open PrepIt."
           : "Once it’s installed, come back here and tap this. Sign in opens for you."}
       </p>
     </div>
