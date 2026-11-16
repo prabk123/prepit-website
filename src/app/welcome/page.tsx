@@ -21,28 +21,28 @@ export const metadata: Metadata = {
  * with the same Google or Apple account. The QR code is for people who bought
  * on a laptop: it goes through /open, so a phone that already has PrepIt opens
  * it with their sign-in button first, and one without it gets the App Store.
+ * On an iPhone, step 2's Open PrepIt button does the same once it's installed
+ * (PRE-567).
  */
 export default async function WelcomePage({ searchParams }: { searchParams: Promise<{ provider?: string | string[] }> }) {
   const { provider: raw } = await searchParams;
   const provider = raw === "google" || raw === "apple" ? raw : null;
   const download = (
-    <div className="flex flex-col gap-3">
-      <AppStoreCta
-        trackingSource="web-handoff"
-        fullWidth
-        qrCaption="Point your iPhone camera at the code"
-        qrUrl={openAppUrl(provider)}
-      />
-      <OpenAppLink provider={provider} />
-    </div>
+    <AppStoreCta
+      trackingSource="web-handoff"
+      fullWidth
+      qrCaption="Point your iPhone camera at the code"
+      qrUrl={openAppUrl(provider)}
+    />
   );
+  const openApp = <OpenAppLink provider={provider} />;
   return (
     <div className="flex w-full justify-center bg-page px-4 pb-section pt-4 text-ink lg:pt-8">
       <HideSiteChrome />
       <HideSiteFinalCta />
       <div className="flex w-full max-w-[560px] flex-col gap-6">
         <Suspense fallback={null}>
-          <WelcomeDetails download={download} />
+          <WelcomeDetails download={download} openApp={openApp} />
         </Suspense>
         <p className="text-small text-ink-muted">
           Can’t sign in? Email <span className="select-all font-bold text-ink">{SUPPORT_EMAIL}</span> from any address

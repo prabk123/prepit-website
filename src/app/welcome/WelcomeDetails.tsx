@@ -29,10 +29,12 @@ function Step({ n, title, children }: { n: number; title: string; children?: Rea
  * "You're in" (PRE-325), from the bridge design: three numbered steps, the
  * exact button to tap in the app (Sign in, not Get Started), and the account
  * to use. `download` is the App Store button and, on desktop, the QR code.
+ * `openApp` is the iPhone-only Open PrepIt button, which opens the app with
+ * Sign in already up (PRE-567).
  * Under the steps, the recap of what they bought (PRE-438): due today, the
  * reminder email and the first payment, from what checkout left in this tab.
  */
-export default function WelcomeDetails({ download }: { download: ReactNode }) {
+export default function WelcomeDetails({ download, openApp }: { download: ReactNode; openApp?: ReactNode }) {
   const params = useSearchParams();
   const raw = params.get("provider");
   const provider = raw === "google" || raw === "apple" ? raw : null;
@@ -102,11 +104,12 @@ export default function WelcomeDetails({ download }: { download: ReactNode }) {
             {APP_LINK_EMAIL_LIVE && <EmailLinkButton email={account?.email ?? null} provider={provider} />}
           </Step>
           <Step n={2} title="Open it and tap Sign in">
+            {openApp}
             <span className="w-fit rounded-icon bg-surface-raised px-4 py-2.5 text-small text-ink-secondary">
               Already have an account? <b className="font-bold text-ink underline">Sign in</b>
             </span>
             <p className="rounded-icon border border-energy bg-energy/20 px-4 py-2.5 text-small text-ink-secondary">
-              Not Get Started. Get Started begins a new plan from scratch.
+              Don’t tap Get Started. You already have an account, and Get Started makes you answer every question again.
             </p>
           </Step>
           <Step n={3} title={providerName ? `Continue with ${providerName}` : "Continue with Google or Apple"}>
