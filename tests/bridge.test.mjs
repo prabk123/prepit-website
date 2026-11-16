@@ -68,3 +68,41 @@ test("parseBridgeVisit keeps a valid visit only", () => {
   assert.equal(parseBridgeVisit("{bad"), null);
   assert.equal(parseBridgeVisit(null), null);
 });
+
+test("privacy consent (PRE-533): a stored tick parses back and goes in the save body", async () => {
+  const { parsePrivacyConsent, privacyConsentBody, PRIVACY_CONSENT_VERSION, PRIVACY_CONSENT_TEXT } = await import(
+    "../src/lib/funnel/privacyConsent.ts"
+  );
+  // The exact health-ai-v1 sentence the backend stores (fresca_backend privacyConsentWording.ts).
+  assert.equal(PRIVACY_CONSENT_TEXT, "I agree PrepIt can use my health info, and share it with its AI and search providers, to coach me.");
+  const now = Date.parse("2026-11-15T20:00:00Z");
+  const stored = parsePrivacyConsent(JSON.stringify({ version: PRIVACY_CONSENT_VERSION, givenAt: "2026-11-15T19:55:00Z" }), now);
+  assert.deepEqual(stored, { version: "health-ai-v1", givenAt: "2026-11-15T19:55:00.000Z" });
+  assert.deepEqual(privacyConsentBody(stored), {
+    version: "health-ai-v1",
+    healthData: true,
+    aiProviders: true,
+    givenAt: "2026-11-15T19:55:00.000Z",
+  });
+  assert.equal(privacyConsentBody(null), undefined);
+  const body = buildWebSignupBody({ funnelId: "quiz", privacyConsent: privacyConsentBody(stored) });
+  assert.deepEqual(body.privacyConsent, { version: "health-ai-v1", healthData: true, aiProviders: true, givenAt: "2026-11-15T19:55:00.000Z" });
+  assert.equal(body.privacyConsent.source, undefined);
+});
+
+test("privacy consent (PRE-533): stale, future, other-version or broken ticks are dropped", async () => {
+  const { parsePrivacyConsent } = await import("../src/lib/funnel/privacyConsent.ts");
+  const now = Date.parse("2026-11-15T20:00:00Z");
+  assert.equal(parsePrivacyConsent(null, now), null);
+  assert.equal(parsePrivacyConsent("not json", now), null);
+  assert.equal(parsePrivacyConsent(JSON.stringify({ version: "health-ai-v0", givenAt: "2026-11-15T19:55:00Z" }), now), null);
+  assert.equal(parsePrivacyConsent(JSON.stringify({ version: "health-ai-v1", givenAt: "2026-09-01T00:00:00Z" }), now), null);
+  // Kept for an hour at most, so an abandoned tick never pre-ticks the box for the next visitor.
+  assert.notEqual(parsePrivacyConsent(JSON.stringify({ version: "health-ai-v1", givenAt: "2026-11-15T19:01:00Z" }), now), null);
+  assert.equal(parsePrivacyConsent(JSON.stringify({ version: "health-ai-v1", givenAt: "2026-11-15T18:59:00Z" }), now), null);
+  assert.equal(parsePrivacyConsent(JSON.stringify({ version: "health-ai-v1", givenAt: "2026-11-16T20:00:00Z" }), now), null);
+  assert.equal(parsePrivacyConsent(JSON.stringify({ version: "health-ai-v1" }), now), null);
+  // The body builder only sends the version the box showed, with both purposes agreed.
+  assert.equal(buildWebSignupBody({ privacyConsent: { version: "other", healthData: true, aiProviders: true, givenAt: "x" } }).privacyConsent, undefined);
+  assert.equal(buildWebSignupBody({}).privacyConsent, undefined);
+});

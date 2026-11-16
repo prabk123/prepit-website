@@ -4,6 +4,7 @@ import type { Auth, User } from "firebase/auth";
 import { authDomainKind } from "@/lib/firebase/authHandler";
 import { getFirebaseConfig, isProductionDeploy } from "@/lib/firebase/config";
 import { clearBridgeHandoff } from "@/lib/funnel/bridgeHandoff";
+import { clearPrivacyConsent } from "@/lib/funnel/privacyConsent";
 
 /**
  * Website sign-in with Google or Apple through Firebase Auth (PRE-264).
@@ -158,7 +159,10 @@ export async function getIdToken(): Promise<string | null> {
  * back in with Apple or Google).
  */
 export async function signOutOfWebsite({ keepQuizAnswers = false }: { keepQuizAnswers?: boolean } = {}): Promise<void> {
-  if (!keepQuizAnswers) clearBridgeHandoff();
+  if (!keepQuizAnswers) {
+    clearBridgeHandoff();
+    clearPrivacyConsent();
+  }
   if (!isSignInAvailable()) return;
   const auth = await loadAuth();
   const { signOut } = await import("firebase/auth");
