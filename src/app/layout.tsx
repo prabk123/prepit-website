@@ -156,6 +156,12 @@ export default function RootLayout({
                   t.src=v;s=b.getElementsByTagName(e)[0];
                   s.parentNode.insertBefore(t,s)}(window, document,'script',
                   'https://connect.facebook.net/en_US/fbevents.js');
+                  /* No automatic PageViews on page changes: MetaPageViews sends
+                     one per new page and skips token pages (PRE-568). Without
+                     allowDuplicatePageViews the pixel drops every PageView
+                     after the first on a page load. */
+                  fbq.disablePushState = true;
+                  fbq.allowDuplicatePageViews = true;
                   /* No automatic events: they send button text (quiz answers) to Meta. */
                   fbq('set', 'autoConfig', false, '${metaPixelId}');
                   fbq('init', '${metaPixelId}');

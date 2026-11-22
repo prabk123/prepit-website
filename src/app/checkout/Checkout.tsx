@@ -462,15 +462,17 @@ export default function Checkout({
               if (sheetCode === "declined") setDeclined(true);
               // Known at once, so closing the sheet right after doesn't count it again (PRE-568).
               lastSheetError = sheetCode;
-              void toCheckoutFailure(error).then(({ code, rcErrorCode }) =>
+              void toCheckoutFailure(error).then(({ code, rcErrorCode }) => {
+                // The reason actually reported, if it differs from the quick guess above.
+                if (lastSheetError !== null) lastSheetError = code;
                 trackWebFunnelEvent(WEB_FUNNEL_EVENTS.checkoutFailed, {
                   ...context,
                   plan,
                   reason: code,
                   rc_error_code: rcErrorCode,
                   retryable: true,
-                }),
-              );
+                });
+              });
             },
           },
         });
@@ -518,7 +520,11 @@ export default function Checkout({
           return;
         }
         // A decline already counted inside the sheet, then the sheet closed: one failure, not two (PRE-568).
-        if (!closingFailureAlreadyCounted(code, lastSheetError)) {
+        // presentPaywall rejects once per sheet, and every in-sheet failure (a retry's decline too)
+        // already went out from onPurchaseError, so only this closing rejection can repeat one.
+        const alreadyCounted = closingFailureAlreadyCounted(code, lastSheetError);
+        lastSheetError = null;
+        if (!alreadyCounted) {
           trackWebFunnelEvent(WEB_FUNNEL_EVENTS.checkoutFailed, { ...context, plan, reason: code, rc_error_code: rcErrorCode });
         }
         // Usually a retry after a first purchase that went through, so not `member`.

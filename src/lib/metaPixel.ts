@@ -3,11 +3,11 @@ export const META_PIXEL_APP_STORE_EVENT = "AppStoreClick";
 
 declare global {
   interface Window {
-    fbq?: (
+    fbq?: ((
       command: "trackCustom" | "track" | "init" | "consent",
       eventNameOrPixelId: string,
       params?: Record<string, string | number | string[]>
-    ) => void;
+    ) => void) & { disablePushState?: boolean; allowDuplicatePageViews?: boolean };
   }
 }
 
@@ -23,7 +23,8 @@ export function trackAppStoreClick(source: string) {
  * Meta's standard PageView for a page reached without a reload (PRE-568). The
  * pixel snippet in layout.tsx sends the first page's PageView itself. After
  * sign-in it carries the hashed email and uid from `identifyPixelUser`, like
- * every other event. Only the page address, which the pixel adds itself.
+ * every other event. It sends no custom data; the pixel adds the page address
+ * itself.
  */
 export function trackRoutePageView() {
   if (typeof window === "undefined" || typeof window.fbq !== "function") {
