@@ -14,6 +14,7 @@ import { readBridgeVisit, writeBridgeVisit } from "@/lib/funnel/bridgeHandoff";
 import {
   CHECKOUT_FAILURE_MESSAGES,
   classifyPurchasesError,
+  closingFailureAlreadyCounted,
   couldNotStart,
   DECLINED_LINE,
   offeringPrices,
@@ -402,6 +403,8 @@ export default function Checkout({
     let plan: PlanId | null = null;
     let trial: ReturnType<typeof trialProperties> | null = null;
     let purchaseStarted = false;
+    // The failure counted inside the sheet since the last purchase started (PRE-568).
+    let lastSheetError: CheckoutFailure | null = null;
     // The paywall couldn't be shown, so there's nothing to wait for.
     let loadFailed = false;
     const releaseLight = forceLightPaywall();
@@ -441,6 +444,7 @@ export default function Checkout({
           listener: {
             onPurchaseStarted: (rcPackage) => {
               purchaseStarted = true;
+              lastSheetError = null;
               if (!metaMatchingHadFbp.current) {
                 metaMatchingHadFbp.current = true;
                 sendMetaMatching(uid, email, "purchase_start");
@@ -454,7 +458,10 @@ export default function Checkout({
             onPurchaseError: (error) => {
               // RevenueCat keeps its sheet open with its own error; ours is there when it closes.
               const { errorCode, message } = error as { errorCode?: unknown; message?: string };
-              if (typeof errorCode === "number" && classifyPurchasesError(errorCode, message) === "declined") setDeclined(true);
+              const sheetCode = typeof errorCode === "number" ? classifyPurchasesError(errorCode, message) : "unknown";
+              if (sheetCode === "declined") setDeclined(true);
+              // Known at once, so closing the sheet right after doesn't count it again (PRE-568).
+              lastSheetError = sheetCode;
               void toCheckoutFailure(error).then(({ code, rcErrorCode }) =>
                 trackWebFunnelEvent(WEB_FUNNEL_EVENTS.checkoutFailed, {
                   ...context,
@@ -510,7 +517,10 @@ export default function Checkout({
           setPaywallFailed(true);
           return;
         }
-        trackWebFunnelEvent(WEB_FUNNEL_EVENTS.checkoutFailed, { ...context, plan, reason: code, rc_error_code: rcErrorCode });
+        // A decline already counted inside the sheet, then the sheet closed: one failure, not two (PRE-568).
+        if (!closingFailureAlreadyCounted(code, lastSheetError)) {
+          trackWebFunnelEvent(WEB_FUNNEL_EVENTS.checkoutFailed, { ...context, plan, reason: code, rc_error_code: rcErrorCode });
+        }
         // Usually a retry after a first purchase that went through, so not `member`.
         if (code === "already_purchased") {
           router.push(welcomePath(false));

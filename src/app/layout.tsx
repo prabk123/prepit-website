@@ -12,6 +12,7 @@ import InstantHistoryScroll from "@/components/InstantHistoryScroll";
 import VercelMetrics from "@/components/VercelMetrics";
 import AttributionCapture from "@/components/funnel/AttributionCapture";
 import MarketCapture from "@/components/funnel/MarketCapture";
+import MetaPageViews from "@/components/MetaPageViews";
 import {
   PREPIT_ANALYTICS_CONSENT_COOKIE,
   PREPIT_GEO_COOKIE,
@@ -220,6 +221,8 @@ export default function RootLayout({
         <InstantHistoryScroll />
         <AttributionCapture />
         <MarketCapture />
+        {/* A Meta PageView for each page reached without a reload (PRE-568). */}
+        {metaPixelId && <MetaPageViews />}
         <div className="flex min-h-screen flex-col items-center bg-page">
           <SiteChrome>
             <NavigationWrapper />
