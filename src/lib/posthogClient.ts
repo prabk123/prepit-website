@@ -2,7 +2,7 @@ import type { CaptureResult, PostHog } from "posthog-js";
 import { isPostHogEnabled } from "@/lib/analytics";
 import { resolveMcpIssuer } from "@/lib/connector/connectParams";
 import { PREPIT_ANALYTICS_CONSENT_COOKIE, PREPIT_GEO_COOKIE, readCookie } from "@/lib/cookies";
-import { replayInputText } from "@/lib/replayMasking";
+import { QUIZ_URL, replayInputText } from "@/lib/replayMasking";
 import { tracingHeaderHosts } from "@/lib/tracingHeaders";
 import { withoutUrlSecrets } from "@/lib/urlTokens";
 
@@ -76,8 +76,12 @@ function load(): Promise<PostHog> {
       capture_pageview: true,
       capture_pageleave: true,
       before_send: stripUrlSecrets,
+      // No autocapture or rage clicks on the quiz: an option's position and
+      // attributes in $elements_chain, with the step event before it, would
+      // give the answer away. Recordings still show the quiz (PRE-570).
+      autocapture: { url_ignorelist: [QUIZ_URL] },
       session_recording: {
-        // Typed text is masked, except on the quiz (PRE-570, see replayMasking).
+        // Typed text is masked, except inside the quiz (PRE-570, see replayMasking).
         maskAllInputs: true,
         maskInputFn: (text, element) => replayInputText(text, element),
         // Recordings keep each request's address, status and timing, never what
@@ -85,6 +89,7 @@ function load(): Promise<PostHog> {
         // health answers and an email). The PostHog project turns body capture
         // on for the app, so the website turns it off here (PRE-570).
         recordBody: false,
+        recordHeaders: false,
       },
       tracing_headers: tracingHosts(),
       // A visitor PostHog remembers as opted out sends no session headers either.

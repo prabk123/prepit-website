@@ -2,7 +2,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
-import { REPLAY_UNMASKED_ATTRIBUTE, replayInputText } from "../src/lib/replayMasking.ts";
+import { QUIZ_URL, REPLAY_UNMASKED_ATTRIBUTE, replayInputText } from "../src/lib/replayMasking.ts";
 
 /** A field that is (or isn't) inside the quiz. */
 function field(type, insideQuiz) {
@@ -33,12 +33,38 @@ test("a missing or unusual element is masked", () => {
 
 test("the quiz carries the unmasked marker and no longer blocks recordings", () => {
   const quiz = readFileSync(new URL("../src/app/quiz/Quiz.tsx", import.meta.url), "utf8");
-  assert.match(quiz, new RegExp(`${REPLAY_UNMASKED_ATTRIBUTE}=""[^>]*className="quiz-v9 ph-sensitive `));
+  assert.match(quiz, new RegExp(`${REPLAY_UNMASKED_ATTRIBUTE}=""[^>]*className="quiz-v9 ph-sensitive ph-no-deadclick `));
   assert.doesNotMatch(quiz, /ph-no-capture/);
 });
 
-test("the website never records request or response bodies", () => {
+test("the website never records request or response bodies or headers", () => {
   const client = readFileSync(new URL("../src/lib/posthogClient.ts", import.meta.url), "utf8");
   assert.match(client, /recordBody: false/);
+  assert.match(client, /recordHeaders: false/);
   assert.match(client, /maskAllInputs: true/);
+});
+
+test("autocapture stays off the quiz", () => {
+  const client = readFileSync(new URL("../src/lib/posthogClient.ts", import.meta.url), "utf8");
+  assert.match(client, /autocapture: \{ url_ignorelist: \[QUIZ_URL\] \}/);
+});
+
+test("QUIZ_URL matches the quiz page only", () => {
+  for (const url of [
+    "https://www.tryprepit.app/quiz",
+    "https://www.tryprepit.app/quiz?utm_source=meta",
+    "https://www.tryprepit.app/quiz/",
+    "https://www.tryprepit.app/quiz#step",
+    "http://localhost:3000/quiz",
+  ]) {
+    assert.ok(QUIZ_URL.test(url), url);
+  }
+  for (const url of [
+    "https://www.tryprepit.app/",
+    "https://www.tryprepit.app/quizzes",
+    "https://www.tryprepit.app/start?from=/quiz",
+    "https://www.tryprepit.app/start?utm_content=quiz",
+  ]) {
+    assert.ok(!QUIZ_URL.test(url), url);
+  }
 });

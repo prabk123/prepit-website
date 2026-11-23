@@ -17,3 +17,6 @@ export function replayInputText(text: string, element: InputLike): string {
     Boolean(element.closest(`[${REPLAY_UNMASKED_ATTRIBUTE}]`));
   return shown ? text : "*".repeat(text.length);
 }
+
+/** The quiz page (not just any URL containing "/quiz"), for PostHog's autocapture ignore list. */
+export const QUIZ_URL = /^https?:\/\/[^/]+\/quiz(?:[/?#]|$)/;

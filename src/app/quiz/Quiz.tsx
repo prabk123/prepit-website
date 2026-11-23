@@ -944,8 +944,9 @@ export default function Quiz({ country, market, prices }: { country: string; mar
 
   return (
     // Session recordings show the whole quiz, answers included (PRE-570, see
-    // replayMasking). ph-sensitive keeps the answers out of autocapture events.
-    <div data-replay-unmasked="" className="quiz-v9 ph-sensitive relative flex min-h-dvh w-full flex-col overflow-x-clip bg-page text-ink">
+    // replayMasking). Autocapture is off on /quiz (posthogClient); ph-sensitive
+    // and ph-no-deadclick keep answers out of any click event as a second guard.
+    <div data-replay-unmasked="" className="quiz-v9 ph-sensitive ph-no-deadclick relative flex min-h-dvh w-full flex-col overflow-x-clip bg-page text-ink">
       {layout === "hero" && (
         <div aria-hidden className="quiz-side-still pointer-events-none absolute top-0 left-[46%] right-0 hidden h-full max-h-[820px] min-[900px]:block">
           <Image src="/quiz/v9/side-fork.webp" alt="" fill sizes="54vw" className="object-cover object-[50%_45%]" />
