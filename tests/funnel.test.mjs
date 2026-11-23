@@ -1,7 +1,7 @@
 // Unit tests for funnel attribution and the web sign-up save body (PRE-266, PRE-302). Run with `yarn test`.
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { attributionEventProperties, cleanReferrer, landingPageFor, parseAttribution } from "../src/lib/funnel/attribution.ts";
+import { attributionEventProperties, cleanReferrer, isEntryLoad, landingPageFor, parseAttribution } from "../src/lib/funnel/attribution.ts";
 import { buildWebSignupBody } from "../src/lib/funnel/webSignupProfile.ts";
 
 const HOST = "www.tryprepit.app";
@@ -85,6 +85,21 @@ test("attributionEventProperties adds the ad and the tab's landing page (PRE-571
     landing_page: "/quiz",
     utm_source: "meta",
   });
+});
+
+test("isEntryLoad: only a load from outside is an entry (PRE-571)", () => {
+  assert.equal(isEntryLoad("", HOST), true);
+  assert.equal(isEntryLoad("https://l.facebook.com/", HOST), true);
+  assert.equal(isEntryLoad("https://www.tryprepit.app/try", HOST), false);
+  assert.equal(isEntryLoad("https://accounts.google.com/o/oauth2", HOST), false);
+  assert.equal(isEntryLoad("https://pay.rev.cat/abc", HOST), false);
+});
+
+test("attributionEventProperties sends ad names only as utm_content", () => {
+  assert.deepEqual(attributionEventProperties({ utmContent: "US+CA+AU+NZ | 06 Breakfast sheet | statics" }), {
+    utm_content: "US+CA+AU+NZ | 06 Breakfast sheet | statics",
+  });
+  assert.deepEqual(attributionEventProperties({ utmContent: "subscriber=Jane&id=123" }), {});
 });
 
 test("landingPageFor keeps only the first path segment", () => {

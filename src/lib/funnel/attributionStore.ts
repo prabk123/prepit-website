@@ -6,7 +6,14 @@
  */
 import { PREPIT_ANALYTICS_CONSENT_COOKIE, PREPIT_GEO_COOKIE, readCookie } from "@/lib/cookies";
 import { isOptedOutOfSharing } from "@/lib/privacyChoices";
-import { attributionEventProperties, landingPageFor, parseAttribution, QUERY_FIELDS, type Attribution } from "./attribution";
+import {
+  attributionEventProperties,
+  isEntryLoad,
+  landingPageFor,
+  parseAttribution,
+  QUERY_FIELDS,
+  type Attribution,
+} from "./attribution";
 
 const STORAGE_KEY = "prepit.attribution.v1";
 /** The first page of this tab ("/try", "/quiz"…), with or without a campaign (PRE-571). */
@@ -65,7 +72,10 @@ export function readAttribution(): Attribution | null {
  * Later pages, including a second campaign landing, leave it as it is.
  */
 export function captureAttribution(location: { search: string; pathname: string; host: string }, referrer: string) {
-  if (!pendingLandingPage) {
+  // Only a load from outside (no referrer, or another site) is an entry. A
+  // reload or a sign-in or checkout redirect before consent would otherwise
+  // be taken for the landing page.
+  if (!pendingLandingPage && isEntryLoad(referrer, location.host)) {
     pendingLandingPage = landingPageFor(location.pathname) ?? null;
     keepPendingLandingPage();
   }
@@ -90,8 +100,10 @@ export function readLandingPage(): string | null {
 function keepPendingLandingPage() {
   const store = storage();
   if (!pendingLandingPage || !store || !mayKeepAttribution() || readLandingPage()) return;
+  // A tab that kept a campaign landing before this key existed keeps that page.
+  const landed = landingPageFor(readAttribution()?.landingPath) ?? pendingLandingPage;
   try {
-    store.setItem(LANDING_KEY, pendingLandingPage);
+    store.setItem(LANDING_KEY, landed);
   } catch {
     // Storage full or blocked: events go without a landing page.
   }
@@ -118,10 +130,11 @@ export function keepPendingAttribution() {
 export function forgetAttribution() {
   pendingLanding = null;
   pendingLandingPage = null;
-  try {
-    storage()?.removeItem(STORAGE_KEY);
-    storage()?.removeItem(LANDING_KEY);
-  } catch {
-    // Nothing stored.
+  for (const key of [STORAGE_KEY, LANDING_KEY]) {
+    try {
+      storage()?.removeItem(key);
+    } catch {
+      // Nothing stored.
+    }
   }
 }

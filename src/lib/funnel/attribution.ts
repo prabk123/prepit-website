@@ -118,6 +118,20 @@ export function landingPageFor(pathname: string | null | undefined): string | un
 }
 
 /**
+ * Whether this page load is where the visitor came in: no referrer, or one
+ * from another site. A load referred by our own pages, or by a payment or
+ * sign-in page they come back from, is mid-funnel (a reload, a redirect), so
+ * it is not taken as the landing page (PRE-571).
+ */
+export function isEntryLoad(referrer: string | null | undefined, currentHost: string): boolean {
+  if (!referrer) return true;
+  return cleanReferrer(referrer, currentHost) !== undefined;
+}
+
+/** Ad names only: letters, digits and the separators ad tools use. Anything else (ids from email tools, odd text) is left out. */
+const AD_NAME = /^[A-Za-z0-9 _.\-|+%:#()]{1,200}$/;
+
+/**
  * Campaign properties for analytics events: campaign names, the ad
  * (`utm_content`, PRE-571) and the tab's landing page, never click ids.
  * `landingPage` is the tab's first page even without a campaign; the
@@ -134,6 +148,6 @@ export function attributionEventProperties(
   if (attribution.utmSource) properties.utm_source = attribution.utmSource;
   if (attribution.utmMedium) properties.utm_medium = attribution.utmMedium;
   if (attribution.utmCampaign) properties.utm_campaign = attribution.utmCampaign;
-  if (attribution.utmContent) properties.utm_content = attribution.utmContent;
+  if (attribution.utmContent && AD_NAME.test(attribution.utmContent)) properties.utm_content = attribution.utmContent;
   return properties;
 }
