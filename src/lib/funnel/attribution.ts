@@ -104,12 +104,36 @@ export function parseAttribution(
   return attribution;
 }
 
-/** Campaign properties for analytics events: campaign names only, never click ids. */
-export function attributionEventProperties(attribution: Attribution | null): Record<string, string> {
-  if (!attribution) return {};
+/**
+ * The page a visitor first landed on in this tab, reduced to its first path
+ * segment ("/try", "/quiz", "/" for the homepage), so a funnel can be split by
+ * entry page (PRE-571). Ids or tokens further down a path never leave it.
+ */
+export function landingPageFor(pathname: string | null | undefined): string | undefined {
+  if (typeof pathname !== "string" || !pathname.startsWith("/")) return undefined;
+  const segment = pathname.split(/[/?#]/)[1] ?? "";
+  if (!segment) return "/";
+  if (!/^[a-z0-9-]{1,60}$/i.test(segment)) return undefined;
+  return `/${segment.toLowerCase()}`;
+}
+
+/**
+ * Campaign properties for analytics events: campaign names, the ad
+ * (`utm_content`, PRE-571) and the tab's landing page, never click ids.
+ * `landingPage` is the tab's first page even without a campaign; the
+ * attribution's own landing path is the fallback.
+ */
+export function attributionEventProperties(
+  attribution: Attribution | null,
+  landingPage: string | null = null,
+): Record<string, string> {
   const properties: Record<string, string> = {};
+  const landing = landingPageFor(landingPage) ?? landingPageFor(attribution?.landingPath);
+  if (landing) properties.landing_page = landing;
+  if (!attribution) return properties;
   if (attribution.utmSource) properties.utm_source = attribution.utmSource;
   if (attribution.utmMedium) properties.utm_medium = attribution.utmMedium;
   if (attribution.utmCampaign) properties.utm_campaign = attribution.utmCampaign;
+  if (attribution.utmContent) properties.utm_content = attribution.utmContent;
   return properties;
 }

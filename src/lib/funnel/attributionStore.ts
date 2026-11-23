@@ -6,9 +6,11 @@
  */
 import { PREPIT_ANALYTICS_CONSENT_COOKIE, PREPIT_GEO_COOKIE, readCookie } from "@/lib/cookies";
 import { isOptedOutOfSharing } from "@/lib/privacyChoices";
-import { parseAttribution, QUERY_FIELDS, type Attribution } from "./attribution";
+import { attributionEventProperties, landingPageFor, parseAttribution, QUERY_FIELDS, type Attribution } from "./attribution";
 
 const STORAGE_KEY = "prepit.attribution.v1";
+/** The first page of this tab ("/try", "/quiz"…), with or without a campaign (PRE-571). */
+const LANDING_KEY = "prepit.landing.v1";
 
 /**
  * The same rule as PostHog (a known non-EU visitor, or one who accepted
@@ -23,6 +25,8 @@ export function mayKeepAttribution(): boolean {
 
 /** This visit's landing, held in memory until the visitor consents. */
 let pendingLanding: Attribution | null = null;
+/** This tab's first page, held in memory until the visitor consents. */
+let pendingLandingPage: string | null = null;
 
 function storage(): Storage | null {
   try {
@@ -61,6 +65,10 @@ export function readAttribution(): Attribution | null {
  * Later pages, including a second campaign landing, leave it as it is.
  */
 export function captureAttribution(location: { search: string; pathname: string; host: string }, referrer: string) {
+  if (!pendingLandingPage) {
+    pendingLandingPage = landingPageFor(location.pathname) ?? null;
+    keepPendingLandingPage();
+  }
   if (pendingLanding) return;
   const landed = parseAttribution(location.search, location.pathname, referrer, location.host);
   if (!landed) return;
@@ -68,8 +76,35 @@ export function captureAttribution(location: { search: string; pathname: string;
   keepPendingAttribution();
 }
 
+/** The tab's first page, or null (always null without consent). */
+export function readLandingPage(): string | null {
+  if (!mayKeepAttribution()) return null;
+  try {
+    return landingPageFor(storage()?.getItem(LANDING_KEY)) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/** Keeps the tab's first page; a reload of a later page leaves it as it is. */
+function keepPendingLandingPage() {
+  const store = storage();
+  if (!pendingLandingPage || !store || !mayKeepAttribution() || readLandingPage()) return;
+  try {
+    store.setItem(LANDING_KEY, pendingLandingPage);
+  } catch {
+    // Storage full or blocked: events go without a landing page.
+  }
+}
+
+/** Campaign and landing page properties for this tab's analytics events (PRE-571). */
+export function campaignEventProperties(): Record<string, string> {
+  return attributionEventProperties(readAttribution(), readLandingPage());
+}
+
 /** Stores the held landing once the visitor may be tracked. Called on landing and on "Accept optional cookies". */
 export function keepPendingAttribution() {
+  keepPendingLandingPage();
   const store = storage();
   if (!pendingLanding || !store || !mayKeepAttribution() || readAttribution()) return;
   try {
@@ -82,8 +117,10 @@ export function keepPendingAttribution() {
 /** "Reject optional cookies" or "Opt out of sharing": nothing is kept or sent. */
 export function forgetAttribution() {
   pendingLanding = null;
+  pendingLandingPage = null;
   try {
     storage()?.removeItem(STORAGE_KEY);
+    storage()?.removeItem(LANDING_KEY);
   } catch {
     // Nothing stored.
   }

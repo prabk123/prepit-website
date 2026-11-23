@@ -1,7 +1,7 @@
 // Unit tests for funnel attribution and the web sign-up save body (PRE-266, PRE-302). Run with `yarn test`.
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { attributionEventProperties, cleanReferrer, parseAttribution } from "../src/lib/funnel/attribution.ts";
+import { attributionEventProperties, cleanReferrer, landingPageFor, parseAttribution } from "../src/lib/funnel/attribution.ts";
 import { buildWebSignupBody } from "../src/lib/funnel/webSignupProfile.ts";
 
 const HOST = "www.tryprepit.app";
@@ -71,6 +71,31 @@ test("attributionEventProperties sends campaign names only, never click ids", ()
     { utm_source: "meta", utm_campaign: "oct" },
   );
   assert.deepEqual(attributionEventProperties(null), {});
+});
+
+test("attributionEventProperties adds the ad and the tab's landing page (PRE-571)", () => {
+  assert.deepEqual(
+    attributionEventProperties({ utmSource: "meta", utmContent: "video-1", fbclid: "x", landingPath: "/quiz" }, "/quiz"),
+    { landing_page: "/quiz", utm_source: "meta", utm_content: "video-1" },
+  );
+  // A direct visit has no campaign but still has a landing page.
+  assert.deepEqual(attributionEventProperties(null, "/try"), { landing_page: "/try" });
+  // Without the tab's page, the attribution's landing path is the fallback.
+  assert.deepEqual(attributionEventProperties({ utmSource: "meta", landingPath: "/quiz/" }), {
+    landing_page: "/quiz",
+    utm_source: "meta",
+  });
+});
+
+test("landingPageFor keeps only the first path segment", () => {
+  assert.equal(landingPageFor("/"), "/");
+  assert.equal(landingPageFor("/try"), "/try");
+  assert.equal(landingPageFor("/Quiz?utm_source=meta"), "/quiz");
+  assert.equal(landingPageFor("/guides/log-a-meal"), "/guides");
+  assert.equal(landingPageFor("/sharable/abc123"), "/sharable");
+  assert.equal(landingPageFor("/%E2%9C%93"), undefined);
+  assert.equal(landingPageFor("quiz"), undefined);
+  assert.equal(landingPageFor(null), undefined);
 });
 
 test("buildWebSignupBody drops bad answers, keeps the latest per question and caps at 100", () => {

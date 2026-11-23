@@ -1,6 +1,5 @@
 import { readCookie } from "@/lib/cookies";
-import { attributionEventProperties } from "@/lib/funnel/attribution";
-import { readAttribution } from "@/lib/funnel/attributionStore";
+import { campaignEventProperties } from "@/lib/funnel/attributionStore";
 import { COUNTRY_COOKIE, parseCountryCode, webMarketFor, type WebMarket } from "@/lib/markets";
 import { withPostHog, withPostHogBeforeLeaving } from "@/lib/posthogClient";
 import { sharingOptOut } from "@/lib/privacyChoices";
@@ -46,7 +45,7 @@ export function registerVisitorMarket() {
 function landingProperties(market: WebMarket, properties: Record<string, string | number | boolean | null>) {
   return {
     source: "website",
-    ...attributionEventProperties(readAttribution()),
+    ...campaignEventProperties(),
     country: visitorCountry(),
     web_market: market,
     ...properties,
