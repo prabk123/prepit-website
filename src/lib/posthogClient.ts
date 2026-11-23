@@ -2,6 +2,7 @@ import type { CaptureResult, PostHog } from "posthog-js";
 import { isPostHogEnabled } from "@/lib/analytics";
 import { resolveMcpIssuer } from "@/lib/connector/connectParams";
 import { PREPIT_ANALYTICS_CONSENT_COOKIE, PREPIT_GEO_COOKIE, readCookie } from "@/lib/cookies";
+import { replayInputText } from "@/lib/replayMasking";
 import { tracingHeaderHosts } from "@/lib/tracingHeaders";
 import { withoutUrlSecrets } from "@/lib/urlTokens";
 
@@ -76,7 +77,14 @@ function load(): Promise<PostHog> {
       capture_pageleave: true,
       before_send: stripUrlSecrets,
       session_recording: {
+        // Typed text is masked, except on the quiz (PRE-570, see replayMasking).
         maskAllInputs: true,
+        maskInputFn: (text, element) => replayInputText(text, element),
+        // Recordings keep each request's address, status and timing, never what
+        // is sent or returned (the quiz's targets and the lead save carry
+        // health answers and an email). The PostHog project turns body capture
+        // on for the app, so the website turns it off here (PRE-570).
+        recordBody: false,
       },
       tracing_headers: tracingHosts(),
       // A visitor PostHog remembers as opted out sends no session headers either.
