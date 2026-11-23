@@ -1,5 +1,8 @@
 import { attributionEventProperties } from "@/lib/funnel/attribution";
-import { readAttribution } from "@/lib/funnel/attributionStore";
+import { mayKeepAttribution, readAttribution } from "@/lib/funnel/attributionStore";
+import { metaFunnelEvent } from "@/lib/metaFunnelEvents";
+import { trackMetaFunnelStep } from "@/lib/metaPixel";
+import { metaPixelBlockedPage } from "@/lib/metaPixelRoutes";
 import { withPostHog } from "@/lib/posthogClient";
 
 /**
@@ -144,6 +147,22 @@ export function trackWebFunnelEvent(
 ) {
   const campaign = attributionEventProperties(readAttribution());
   withPostHog((posthog) => posthog.capture(event, { source: "website", ...campaign, ...properties }));
+  sendToMeta(event, properties);
+}
+
+/**
+ * The funnel steps also go to the Meta Pixel as custom events (PRE-569), with
+ * the same rules as the pixel: nothing without consent in the UK and EEA or
+ * after a US opt-out, nothing on pages with a token in the address, and only
+ * the allowed fixed codes from `metaFunnelEvent`. Without a loaded pixel
+ * nothing is sent.
+ */
+function sendToMeta(event: WebFunnelEvent, properties: Record<string, string | number | boolean | null>) {
+  if (typeof window === "undefined" || typeof window.fbq !== "function") return;
+  if (metaPixelBlockedPage(window.location.pathname, window.location.search)) return;
+  if (!mayKeepAttribution()) return;
+  const meta = metaFunnelEvent(event, properties, window.location.pathname);
+  if (meta) trackMetaFunnelStep(meta.name, meta.params);
 }
 
 /**

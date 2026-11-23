@@ -6,7 +6,7 @@ declare global {
     fbq?: ((
       command: "trackCustom" | "track" | "init" | "consent",
       eventNameOrPixelId: string,
-      params?: Record<string, string | number | string[]>
+      params?: Record<string, string | number | boolean | string[]>
     ) => void) & { disablePushState?: boolean; allowDuplicatePageViews?: boolean };
   }
 }
@@ -118,4 +118,17 @@ export function trackCheckoutInitiated(checkout: { value: number; currency: stri
     content_type: "product",
     num_items: 1,
   });
+}
+
+/**
+ * A web funnel step as a Meta custom event (PRE-569), named as in PostHog.
+ * Callers pass only the allowed fixed codes from `metaFunnelEvent`; the
+ * pixel's consent rule and blocked pages are checked by the caller.
+ */
+export function trackMetaFunnelStep(name: string, params: Record<string, string | number | boolean>) {
+  if (typeof window === "undefined" || typeof window.fbq !== "function") {
+    return;
+  }
+
+  window.fbq("trackCustom", name, params);
 }
