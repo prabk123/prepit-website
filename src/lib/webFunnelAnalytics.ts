@@ -1,5 +1,4 @@
-import { attributionEventProperties } from "@/lib/funnel/attribution";
-import { mayKeepAttribution, readAttribution } from "@/lib/funnel/attributionStore";
+import { campaignEventProperties, mayKeepAttribution } from "@/lib/funnel/attributionStore";
 import { metaFunnelEvent } from "@/lib/metaFunnelEvents";
 import { trackMetaFunnelStep } from "@/lib/metaPixel";
 import { metaPixelBlockedPage } from "@/lib/metaPixelRoutes";
@@ -11,7 +10,8 @@ import { withPostHog } from "@/lib/posthogClient";
  * emails or anything a visitor typed. The person is identified by their
  * Firebase uid, the same distinct id the app and backend use. Each event also
  * carries the campaign the visitor landed with (`utm_source`, `utm_medium`,
- * `utm_campaign`), never ad click ids.
+ * `utm_campaign`, `utm_content`) and the tab's first page (`landing_page`:
+ * /try, /quiz, /…, PRE-571), never ad click ids.
  */
 export const WEB_FUNNEL_EVENTS = {
   bridgeView: "web_bridge_view",
@@ -145,7 +145,7 @@ export function trackWebFunnelEvent(
   event: WebFunnelEvent,
   properties: Record<string, string | number | boolean | null> = {},
 ) {
-  const campaign = attributionEventProperties(readAttribution());
+  const campaign = campaignEventProperties();
   withPostHog((posthog) => posthog.capture(event, { source: "website", ...campaign, ...properties }));
   sendToMeta(event, properties);
 }
