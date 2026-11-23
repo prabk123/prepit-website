@@ -19,6 +19,13 @@
  * disorder answer), the health and AI consent box, internal events such as
  * `web_meta_matching_sent`, the plan and email preference pages (a token in
  * the address), account, withdrawal, connector and privacy choices pages.
+ * `auth_start` and `auth_cancel` always fire with `web_signin_start` and
+ * `web_signin_cancelled`, so Meta gets only the latter, one event per press.
+ *
+ * `web_quiz_step_view` goes to Meta only for the quiz's first screen (a quiz
+ * start). Which later screens someone sees, and where each falls, depends on
+ * their answers (the stop screens, the goal weight screen), so Meta never
+ * gets them.
  */
 export const META_FUNNEL_EVENTS: ReadonlySet<string> = new Set([
   "web_quiz_step_view",
@@ -26,9 +33,7 @@ export const META_FUNNEL_EVENTS: ReadonlySet<string> = new Set([
   "cart_view",
   "leaver_email_open",
   "leaver_email_sent",
-  "auth_start",
   "auth_success",
-  "auth_cancel",
   "web_signin_start",
   "web_signin_failed",
   "web_signin_cancelled",
@@ -58,7 +63,6 @@ export const META_FUNNEL_EVENTS: ReadonlySet<string> = new Set([
  */
 const META_FUNNEL_PARAMS: ReadonlySet<string> = new Set([
   "step_id",
-  "step_index",
   "funnel_version",
   "funnel_id",
   "entry",
@@ -87,17 +91,37 @@ const META_FUNNEL_PARAMS: ReadonlySet<string> = new Set([
   "member",
 ]);
 
+/** The quiz's first screen, the same for everyone: the only quiz step Meta sees. */
+const META_QUIZ_START_STEP = "goal";
+
+/**
+ * Pages whose events never go to Meta, whatever the event: sign-in buttons
+ * there send the same `web_signin_*` events as the cart, but these pages are
+ * about an existing account, not the ad funnel.
+ */
+const META_EXCLUDED_PAGES = ["/account", "/withdraw", "/connect", "/privacy-choices"];
+
+function onExcludedPage(pathname: string): boolean {
+  return META_EXCLUDED_PAGES.some((page) => pathname === page || pathname.startsWith(`${page}/`));
+}
+
 export type MetaCustomParams = Record<string, string | number | boolean>;
 
 /**
- * The Meta custom event for a web funnel event, or null when it isn't one
- * Meta gets. Null and empty properties are dropped.
+ * The Meta custom event for a web funnel event on `pathname`, or null when
+ * it isn't one Meta gets. Null and empty properties are dropped.
  */
 export function metaFunnelEvent(
   event: string,
   properties: Record<string, unknown>,
+  pathname: string,
 ): { name: string; params: MetaCustomParams } | null {
   if (!META_FUNNEL_EVENTS.has(event)) return null;
+  if (onExcludedPage(pathname)) return null;
+  if (event === "web_quiz_step_view") {
+    // No step_index: it isn't in the allowed list below.
+    if (properties.step_id !== META_QUIZ_START_STEP) return null;
+  }
   const params: MetaCustomParams = {};
   for (const [key, value] of Object.entries(properties)) {
     if (!META_FUNNEL_PARAMS.has(key)) continue;

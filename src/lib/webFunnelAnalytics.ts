@@ -161,7 +161,7 @@ function sendToMeta(event: WebFunnelEvent, properties: Record<string, string | n
   if (typeof window === "undefined" || typeof window.fbq !== "function") return;
   if (metaPixelBlockedPage(window.location.pathname, window.location.search)) return;
   if (!mayKeepAttribution()) return;
-  const meta = metaFunnelEvent(event, properties);
+  const meta = metaFunnelEvent(event, properties, window.location.pathname);
   if (meta) trackMetaFunnelStep(meta.name, meta.params);
 }
 
