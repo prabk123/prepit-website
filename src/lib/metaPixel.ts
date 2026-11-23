@@ -3,11 +3,11 @@ export const META_PIXEL_APP_STORE_EVENT = "AppStoreClick";
 
 declare global {
   interface Window {
-    fbq?: (
+    fbq?: ((
       command: "trackCustom" | "track" | "init" | "consent",
       eventNameOrPixelId: string,
       params?: Record<string, string | number | string[]>
-    ) => void;
+    ) => void) & { disablePushState?: boolean; allowDuplicatePageViews?: boolean };
   }
 }
 
@@ -17,6 +17,21 @@ export function trackAppStoreClick(source: string) {
   }
 
   window.fbq("trackCustom", META_PIXEL_APP_STORE_EVENT, { source });
+}
+
+/**
+ * Meta's standard PageView for a page reached without a reload (PRE-568). The
+ * pixel snippet in layout.tsx sends the first page's PageView itself. After
+ * sign-in it carries the hashed email and uid from `identifyPixelUser`, like
+ * every other event. It sends no custom data; the pixel adds the page address
+ * itself.
+ */
+export function trackRoutePageView() {
+  if (typeof window === "undefined" || typeof window.fbq !== "function") {
+    return;
+  }
+
+  window.fbq("track", "PageView");
 }
 
 /**
@@ -52,12 +67,20 @@ export function trackSignupRegistration(uid: string) {
   window.fbq("track", "CompleteRegistration");
 }
 
+/** The uid and email last given to the pixel on this page. */
+let identifiedAs: string | null = null;
+
 /**
  * Manual advanced matching once someone has signed in: re-initialising the
  * pixel with their email and Firebase uid (the RevenueCat app user id) adds
  * them, hashed by the pixel in the browser, to every later event on the page.
  * Only identity, never answers. Needs the pixel already loaded, so it follows
  * the pixel's own consent rule.
+ *
+ * A second `init` for the same pixel id does update the user data: checked
+ * against Meta's live fbevents.js 2.9.441 on 22 Nov 2026 (PRE-568), later
+ * events carried `ud[em]` and `ud[external_id]`, whether the call ran before
+ * or after the script loaded. The same identity is not re-sent on one page.
  */
 export function identifyPixelUser(uid: string, email: string | null) {
   const pixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID;
@@ -68,6 +91,9 @@ export function identifyPixelUser(uid: string, email: string | null) {
   const em = email?.trim().toLowerCase();
   if (em && em.includes("@")) userData.em = em;
 
+  const identity = `${uid}\n${userData.em ?? ""}`;
+  if (identifiedAs === identity) return;
+  identifiedAs = identity;
   window.fbq("init", pixelId, userData);
 }
 

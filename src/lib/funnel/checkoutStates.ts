@@ -73,6 +73,22 @@ export function classifyPurchasesError(errorCode: number, message: string | null
 }
 
 /**
+ * Whether the failure RevenueCat gives when its sheet closes was already
+ * counted (PRE-568). A card declined in the sheet sends `web_checkout_failed`
+ * from `onPurchaseError`; closing the sheet afterwards rejects with
+ * `cancelled` (or the same error again), which is the same failure, not a
+ * second one. `lastSheetError` is the error reported since the last purchase
+ * started, or null when there was none.
+ */
+export function closingFailureAlreadyCounted(
+  closing: CheckoutFailure,
+  lastSheetError: CheckoutFailure | null,
+): boolean {
+  if (lastSheetError === null) return false;
+  return closing === "cancelled" || closing === lastSheetError;
+}
+
+/**
  * Our line over RevenueCat's own error when the card is declined: it wasn't
  * added and nothing was charged. RevenueCat's sheet covers the page while
  * it's open, so this is what they see when it closes.

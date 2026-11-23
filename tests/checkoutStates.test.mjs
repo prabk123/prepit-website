@@ -5,6 +5,7 @@ import { parseBridgeVisit } from "../src/lib/funnel/bridgeHandoff.ts";
 import {
   CHECKOUT_FAILURE_MESSAGES,
   classifyPurchasesError,
+  closingFailureAlreadyCounted,
   couldNotStart,
   DECLINED_LINE,
   offeringPrices,
@@ -123,4 +124,15 @@ test("a stored visit keeps a valid purchase only", () => {
     from: "landing",
     trial: false,
   });
+});
+
+test("closing the sheet after a decline is the same failure, counted once (PRE-568)", () => {
+  assert.equal(closingFailureAlreadyCounted("cancelled", "declined"), true);
+  assert.equal(closingFailureAlreadyCounted("declined", "declined"), true);
+  assert.equal(closingFailureAlreadyCounted("cancelled", "network"), true);
+  // Nothing reported in the sheet since the purchase started: a real cancel or failure.
+  assert.equal(closingFailureAlreadyCounted("cancelled", null), false);
+  assert.equal(closingFailureAlreadyCounted("declined", null), false);
+  // A different failure on close still counts.
+  assert.equal(closingFailureAlreadyCounted("already_purchased", "declined"), false);
 });
